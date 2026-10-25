@@ -299,10 +299,48 @@
               Esta publicación no es un portal de predicción meteorológica ni un monitor en vivo. Su función es explicar
               <strong>qué ocurrió, cómo fue cada año y qué patrones muestra el registro</strong>.
             </p>
-            <a href="${idx.station.links.weathercloud}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width:100%">
+            <a href="${idx.station.links.weathercloud || 'https://app.weathercloud.net/d6619283754'}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width:100%">
               Abrir panel en tiempo real en WeatherCloud ↗
             </a>
           </aside>
+        </div>
+
+        <!-- Tarjeta de localización geográfica y mapa de Riotuerto -->
+        <div class="station-location-block" aria-label="Localización geográfica de Riotuerto">
+          <div class="station-location-info">
+            <h3 class="location-title">📍 Situación geográfica: ¿Dónde está Riotuerto y la estación?</h3>
+            <p class="location-desc">
+              El municipio de <strong>Riotuerto</strong> se sitúa en la comarca histórica de <strong>Trasmiera (Cantabria, norte de España)</strong>,
+              en el valle medio-alto de la cuenca del río Miera, entre la capital municipal (<strong>La Cavada</strong>) y las estribaciones
+              del <strong>puerto de Alisas (674 m s. n. m.)</strong>.
+            </p>
+            <p class="location-desc">
+              La estación meteorológica automática está instalada en una pradera abierta en la localidad de <strong>Barrio de Arriba</strong> (115 m s. n. m.),
+              un enclave caracterizado por un microclima de gran personalidad:
+            </p>
+            <ul class="location-highlights">
+              <li><strong>Retención orográfica Cantábrica:</strong> a solo 14 km del mar Cantábrico, las masas de aire húmedo del noroeste quedan retenidas contra la barrera montañosa, generando una elevada pluviosidad (1.600 a más de 2.100 mm anuales).</li>
+              <li><strong>Efecto Foehn («suradas»):</strong> cuando el viento sopla del sur desciende recalentado desde la divisoria de la cordillera, disparando bruscamente las temperaturas y hundiendo la humedad relativa.</li>
+              <li><strong>Distancias clave:</strong> a 5 km de Alisas, a 7 km de Liérganes, a 16 km del aeropuerto de Santander y a 23 km de la ciudad de Santander.</li>
+            </ul>
+            <div class="location-coord-badge mono">
+              <span>Coordenadas WGS84: <a href="https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670" target="_blank" rel="noopener noreferrer" style="text-decoration:underline"><strong>43.341° N, 3.670° W</strong></a> (43.341, -3.670)</span>
+              <span>Altitud: <strong>115 m s. n. m.</strong></span>
+            </div>
+          </div>
+          <div class="station-location-map-wrap">
+            <iframe
+              class="station-osm-map"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-3.770%2C43.295%2C-3.560%2C43.385&amp;layer=mapnik&amp;marker=43.341%2C-3.670"
+              title="Mapa de situación de Riotuerto y la estación meteorológica en Barrio de Arriba (Cantabria)"
+              loading="lazy">
+            </iframe>
+            <div class="map-link-bar">
+              <a href="https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670" target="_blank" rel="noopener noreferrer">
+                Explorar mapa en pantalla completa en OpenStreetMap ↗
+              </a>
+            </div>
+          </div>
         </div>
       </article>
 
@@ -2285,6 +2323,21 @@
             que provoca subidas térmicas abruptas y caídas bruscas de la humedad relativa al descender el aire recalentado
             desde la divisoria cantábrica.
           </p>
+
+          <div class="station-location-map-wrap" style="margin-top:14px">
+            <iframe
+              class="station-osm-map"
+              style="height:260px"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-3.770%2C43.295%2C-3.560%2C43.385&amp;layer=mapnik&amp;marker=43.341%2C-3.670"
+              title="Mapa topográfico de localización de Barrio de Arriba (Riotuerto, Cantabria)"
+              loading="lazy">
+            </iframe>
+            <div class="map-link-bar">
+              <a href="https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670" target="_blank" rel="noopener noreferrer">
+                Ver en OpenStreetMap con curvas de nivel ↗
+              </a>
+            </div>
+          </div>
         </div>
 
         <div class="chronicle-card">
