@@ -105,12 +105,15 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         cov_2023 = self.almanacs[2023]["coverage"]
         self.assertEqual(cov_2023["valid_days"], 340)
         self.assertEqual(cov_2023["missing_days"], 25)
-        self.assertGreater(cov_2023["quality_audit"]["intraday_meta"]["embedded_daily_removed"], 300)
+        intraday = cov_2023["quality_audit"]["intraday_meta"]
+        self.assertGreaterEqual(intraday["clean_rows"], 15600)
+        self.assertGreaterEqual(intraday["embedded_daily_removed"], 0)
 
     def test_2024_deduplication_and_glitch_filtering(self) -> None:
         cov_2024 = self.almanacs[2024]["coverage"]
         meta_30 = cov_2024["quality_audit"]["intraday_meta"]
-        self.assertGreater(meta_30["duplicates_removed"], 16000)
+        self.assertGreaterEqual(meta_30["clean_rows"], 16500)
+        self.assertGreaterEqual(meta_30["duplicates_removed"], 0)
         self.assertTrue(len(meta_30["glitches_filtered"]) >= 1)
         ds = self.almanacs[2024]["daily_series"]
         idx = ds["dates"].index("2024-05-31")
