@@ -291,6 +291,8 @@
             <p>
               Cada cifra publicada en este archivo procede directamente de los registros instrumentales validados,
               distinguiendo con rigor entre observaciones directas, indicadores derivados y contexto sinóptico.
+              El archivo ofrece <strong>comparaciones anuales muy útiles</strong> para examinar la variabilidad meteorológica reciente en Riotuerto,
+              pero <strong>todavía no permite establecer normales climatológicas de 30 años ni atribuir tendencias climáticas sólidas con garantías</strong>.
             </p>
           </div>
           <aside class="complement-box" aria-label="Nota sobre consulta en tiempo real">
@@ -1968,11 +1970,17 @@
         </p>
       </article>
 
-      <div class="callout callout-warning" style="margin-bottom:24px">
-        <strong>Nota metodológica sobre normales climatológicas y longitud de serie:</strong>
-        ${escapeHtml(ref.note)}
-        Promedio de los años completos (2022–2025): <strong>${fmtNum(ref.mean_annual_temp_c, 2)} °C</strong> y
-        <strong>${fmtNum(ref.mean_annual_rain_mm, 1)} mm/año</strong>.
+      <div class="callout callout-warning" style="margin-bottom:24px; border-left-width:5px; padding:18px 22px">
+        <h4 style="font-size:1rem; font-weight:700; margin-bottom:8px; color:var(--txt-primary)">
+          ⚖️ Alcance científico: Comparaciones anuales y representatividad climatológica
+        </h4>
+        <p style="margin-bottom:8px; line-height:1.55">
+          Este archivo proporciona <strong>comparaciones anuales muy útiles</strong> para examinar el comportamiento y la variabilidad meteorológica reciente en Barrio de Arriba.
+          Sin embargo, <strong>la serie todavía no permite establecer normales climatológicas estándar de 30 años ni atribuir tendencias climáticas sólidas con garantías estadísticas</strong>.
+        </p>
+        <p style="font-size:0.86rem; color:var(--txt-secondary); margin:0">
+          Según los estándares de la Organización Meteorológica Mundial (OMM), la definición de normales climatológicas requiere un mínimo de 30 años de registros homogéneos. Las anomalías mostradas a continuación se calculan exclusivamente respecto al promedio de los años completos disponibles en este archivo local (2022–2025: <strong>${fmtNum(ref.mean_annual_temp_c, 2)} °C</strong> y <strong>${fmtNum(ref.mean_annual_rain_mm, 1)} mm/año</strong>), con fines divulgativos y de comparación entre ejercicios recientes.
+        </p>
       </div>
 
       <div class="section-header">
@@ -2354,6 +2362,19 @@
             en el repositorio público de datos abiertos <a href="${st.links.data_repo}" target="_blank" rel="noopener">egofer/meteoriotuerto</a>.
           </p>
         </div>
+      </div>
+
+      <div class="callout callout-warning" style="margin-top:24px; margin-bottom:28px; border-left-width:5px; padding:18px 22px">
+        <h4 style="font-size:1rem; font-weight:700; margin-bottom:8px; color:var(--txt-primary)">
+          ⚠️ Representatividad climatológica y atribución de tendencias (Normativa OMM)
+        </h4>
+        <p style="margin-bottom:8px; line-height:1.55">
+          Este archivo proporciona <strong>comparaciones anuales muy útiles</strong> para documentar la meteorología observada y estudiar la variabilidad reciente del municipio de Riotuerto.
+          Sin embargo, con registros consolidados desde 2022, <strong>la web todavía no permite establecer normales climatológicas oficiales de 30 años ni atribuir tendencias climáticas sólidas con garantías estadísticas</strong>.
+        </p>
+        <p style="font-size:0.86rem; color:var(--txt-secondary); margin:0">
+          De acuerdo con los criterios de la Organización Meteorológica Mundial (OMM), las normales de referencia y la detección de señales climáticas a largo plazo exigen un periodo mínimo de 30 años de observaciones homogéneas. Las medias publicadas en este portal describen únicamente la línea base de la ventana temporal observada (2022–2025).
+        </p>
       </div>
 
       <!-- Tabla de auditoría de cobertura y calidad por año -->

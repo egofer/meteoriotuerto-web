@@ -84,3 +84,11 @@ Antes de generar los productos JSON, el motor de procesamiento (`scripts/build_d
 2. **Detección de paquetes de radiofrecuencia corruptos:**
    - En la auditoría de `riotuerto_2024_30min.csv` se identificó en la marca `2024-05-31 04:30:00` un paquete de telemetría espurio con $T_{\text{mín}} = -14,6\text{ °C}$, humedad mínima del $1\text{ \%}$ e irradiancia de $1.655,2\text{ W/m}^2$ en plena noche (mientras a las `04:00` y `05:00` la temperatura era de $10,4\text{ °C}$ y $11,1\text{ °C}$ con $99\text{ \%}$ de humedad). En el archivo diario oficial `riotuerto_2024_diario.csv` la temperatura mínima ya había sido corregida por el titular de la estación a $10,3\text{ °C}$. Nuestro pipeline aplica esa misma depuración sobre el registro intradiario y sobre la humedad/radiación de ese paquete, dejando constancia auditable en el bloque `quality_audit` del JSON anual.
    - Asimismo, lecturas aisladas de `UVI >= 13` en horario nocturno o con radiación nula se anulan en la serie validada, conservando el valor bruto en el campo `uvi_max_raw` a efectos de trazabilidad instrumental.
+
+---
+
+## 6. Longitud de serie, representatividad climatológica y tendencias
+
+1. **Utilidad de las comparaciones anuales:** Los almanaques anuales y las herramientas de comparativa interanual permiten contrastar de forma rigurosa la variabilidad meteorológica reciente en Barrio de Arriba (Riotuerto), identificar episodios extremos y conocer cómo se comportó cada ejercicio respecto a los demás años observados.
+2. **Limitación temporal según normativa OMM:** De acuerdo con las normas de la Organización Meteorológica Mundial (OMM), la fijación de «normales climatológicas estándar» exige series continuadas y homogéneas de al menos 30 años (e.g. 1991–2020).
+3. **No atribución de tendencias:** Con registros completos desde 2022, **la web todavía no permite establecer normales climatológicas oficiales ni atribuir tendencias climáticas sólidas con garantías estadísticas**. Las anomalías calculadas en la web toman como referencia exclusivamente la línea base de los años completos observados (2022–2025) a efectos meramente descriptivos.
