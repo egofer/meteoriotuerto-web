@@ -188,6 +188,18 @@ a:hover {
   opacity: 0.45;
 }
 
+.header-coord {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.4);
+  text-underline-offset: 2px;
+}
+
+.header-coord:hover {
+  color: #a7f3d0;
+  text-decoration-color: #a7f3d0;
+}
+
 .masthead-actions {
   display: flex;
   align-items: center;

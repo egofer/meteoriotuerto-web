@@ -299,8 +299,8 @@
               Esta publicación no es un portal de predicción meteorológica ni un monitor en vivo. Su función es explicar
               <strong>qué ocurrió, cómo fue cada año y qué patrones muestra el registro</strong>.
             </p>
-            <a href="${idx.station.links.ecowitt_live}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width:100%">
-              Abrir panel en tiempo real en Ecowitt ↗
+            <a href="${idx.station.links.weathercloud}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width:100%">
+              Abrir panel en tiempo real en WeatherCloud ↗
             </a>
           </aside>
         </div>
@@ -2274,7 +2274,7 @@
           <p style="margin-bottom:10px">
             La estación está situada en la localidad de <strong>${escapeHtml(st.location.locality)}</strong>,
             perteneciente al municipio de <strong>${escapeHtml(st.location.municipality)} (${escapeHtml(st.location.region)})</strong>,
-            en las coordenadas <code>43.341° N, -3.670° O</code> (sistema WGS84) y a una altitud de
+            en las coordenadas <a href="${idx.station.links.openstreetmap || 'https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670'}" target="_blank" rel="noopener noreferrer" title="Ver localización en OpenStreetMap"><code>43.341° N, 3.670° W</code></a> (WGS84: <code>43.341, -3.670</code>) y a una altitud de
             <strong>115 metros sobre el nivel del mar</strong>.
           </p>
           <p>

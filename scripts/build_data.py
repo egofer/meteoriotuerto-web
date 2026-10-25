@@ -45,6 +45,7 @@ STATION_META = {
         "longitude": -3.670,
         "altitude_msnm": 115,
         "crs": "WGS84 (EPSG:4326)",
+        "coordinates_display": "43.341° N, 3.670° W",
         "timezone": "Europe/Madrid",
         "distance_coast_km": 14,
         "distance_santander_airport_km": 16,
@@ -62,9 +63,9 @@ STATION_META = {
     },
     "links": {
         "data_repo": "https://github.com/egofer/meteoriotuerto/",
-        "ecowitt_live": "https://www.ecowitt.net/home/index?id=33161",
         "weathercloud": "https://app.weathercloud.net/d6619283754",
-        "openstreetmap": "https://www.openstreetmap.org/#map=14/43.34090/-3.67020&layers=VN",
+        "ecowitt_live": "https://www.ecowitt.net/home/index?id=33161",
+        "openstreetmap": "https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670",
     },
 }
 
