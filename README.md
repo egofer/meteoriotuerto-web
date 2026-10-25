@@ -58,9 +58,9 @@ python3 scripts/validate_data.py
 python3 -m unittest discover -s tests -v
 
 # 3. Servir la aplicación web localmente
-python3 -m http.server 8000
+python3 -m http.server 8085
 ```
-Abra `http://localhost:8000` en su navegador.
+Abra `http://localhost:8085` en su navegador.
 
 Consulte [`docs/METODOLOGIA.md`](./docs/METODOLOGIA.md) para el detalle de los criterios científicos y [`docs/GUIA_DESPLIEGUE.md`](./docs/GUIA_DESPLIEGUE.md) para las instrucciones paso a paso de publicación en GitHub Pages.
 

@@ -27,15 +27,15 @@ python3 -m unittest discover -s tests -v
 
 ### Paso 3. Levantar el servidor web local y abrir la aplicación
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 8085
 ```
 A continuación, abra en su navegador:
-- `http://localhost:8000/` (Portada)
-- `http://localhost:8000/#almanaque/2025` (Almanaque anual 2025)
-- `http://localhost:8000/#explorador` (Explorador de datos históricos)
-- `http://localhost:8000/#records` (Récords meteorológicos)
-- `http://localhost:8000/#comparativas` (Comparativas entre años)
-- `http://localhost:8000/#metodologia` (Metodología y calidad de los datos)
+- `http://localhost:8085/` (Portada)
+- `http://localhost:8085/#almanaque/2025` (Almanaque anual 2025)
+- `http://localhost:8085/#explorador` (Explorador de datos históricos)
+- `http://localhost:8085/#records` (Récords meteorológicos)
+- `http://localhost:8085/#comparativas` (Comparativas entre años)
+- `http://localhost:8085/#metodologia` (Metodología y calidad de los datos)
 
 ---
 
