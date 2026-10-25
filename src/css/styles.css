@@ -1507,3 +1507,209 @@ html[data-theme="dark"] .btn-primary {
     height: 270px;
   }
 }
+
+/* Cabecera exclusiva de impresión y botón de informe PDF (EVO-003) */
+.print-only-header {
+  display: none;
+}
+
+.btn-print {
+  border-color: var(--accent-forest);
+  color: var(--accent-forest);
+  font-weight: 700;
+}
+
+.btn-print:hover {
+  background: var(--accent-forest);
+  color: #ffffff;
+}
+
+/* Maquetación editorial para impresión y exportación PDF en A4 (EVO-003) */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 12mm;
+  }
+
+  html,
+  body,
+  html[data-theme="dark"] {
+    --bg-body: #ffffff !important;
+    --bg-surface: #ffffff !important;
+    --bg-elevated: #f8faf9 !important;
+    --bg-subtle: #f1f5f3 !important;
+    --txt-primary: #111827 !important;
+    --txt-secondary: #374151 !important;
+    --txt-muted: #6b7280 !important;
+    --border-color: #d1d5db !important;
+    --border-strong: #9ca3af !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-size: 11pt;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ocultar elementos de navegación e interactivos en el PDF */
+  .site-header,
+  .site-nav,
+  .year-switcher-bar,
+  .almanac-pager,
+  .site-footer,
+  .btn-group,
+  .btn,
+  .controls-toolbar,
+  .station-location-map-wrap,
+  .skip-link {
+    display: none !important;
+  }
+
+  .site-main {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .print-only-header {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid #1b4332;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+  }
+
+  .print-kicker {
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #1b4332;
+    text-transform: uppercase;
+  }
+
+  .print-title {
+    font-family: var(--font-serif);
+    font-size: 16pt;
+    color: #111827;
+    margin: 2px 0;
+  }
+
+  .print-sub {
+    font-size: 8.5pt;
+    color: #4b5563;
+  }
+
+  .print-stamp {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 8pt;
+    color: #374151;
+  }
+
+  .editorial-hero {
+    padding: 14px 16px !important;
+    margin-bottom: 14px !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  .editorial-title {
+    font-size: 13.5pt !important;
+  }
+
+  .editorial-lead {
+    font-size: 9.5pt !important;
+    margin-bottom: 0 !important;
+  }
+
+  .chronicle-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+    break-inside: avoid;
+  }
+
+  .chronicle-card {
+    padding: 10px 12px !important;
+    box-shadow: none !important;
+    font-size: 8.5pt !important;
+    break-inside: avoid;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+    break-inside: avoid;
+  }
+
+  .kpi-card {
+    padding: 10px 12px !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  .kpi-value {
+    font-size: 14pt !important;
+  }
+
+  .episodes-list {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .episode-item,
+  .callout,
+  .chart-panel {
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .charts-grid-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .chart-canvas-wrap {
+    height: 210px !important;
+  }
+
+  .stats-two-col {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .table-responsive,
+  .calendar-heatmap-wrap {
+    overflow: visible !important;
+    box-shadow: none !important;
+    padding-bottom: 0 !important;
+    break-inside: avoid;
+  }
+
+  .data-table {
+    font-size: 7.5pt !important;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 4px 6px !important;
+    white-space: normal !important;
+  }
+
+  .calendar-matrix {
+    min-width: 0 !important;
+    font-size: 6pt !important;
+  }
+
+  .cal-cell {
+    height: 16px !important;
+    min-width: 14px !important;
+    padding: 1px !important;
+  }
+}

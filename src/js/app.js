@@ -684,6 +684,19 @@
     }).join('');
 
     container.innerHTML = `
+      <!-- Cabecera exclusiva para edición impresa / PDF A4 (EVO-003) -->
+      <header class="print-only-header" aria-hidden="true">
+        <div>
+          <div class="print-kicker">ARCHIVO CLIMATOLÓGICO MUNICIPAL · NOTARIO DEL CLIMA DE RIOTUERTO</div>
+          <h1 class="print-title">MeteoRiotuerto — Almanaque meteorológico anual ${alm.year}</h1>
+          <div class="print-sub">Estación automática (${escapeHtml(idx.station.hardware.station_model)}) · Barrio de Arriba, Riotuerto (Cantabria) · 43.341° N, 3.670° W · 115 m s. n. m.</div>
+        </div>
+        <div class="print-stamp">
+          <div><strong>Año ${alm.year}</strong> (${alm.is_provisional ? 'Provisional' : 'Consolidado'})</div>
+          <div>Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)}%)</div>
+        </div>
+      </header>
+
       <!-- Selector de edición anual -->
       <div class="year-switcher-bar" role="navigation" aria-label="Selector de año del almanaque">
         <div>
@@ -698,6 +711,8 @@
           ${pillsHtml}
           <span class="year-pills-sep" aria-hidden="true"></span>
           ${nextBtnHtml}
+          <span class="year-pills-sep" aria-hidden="true"></span>
+          <button type="button" id="btn-print-almanac-top" class="btn btn-print" title="Imprimir o guardar como informe PDF en formato A4">🖨️ Imprimir / PDF</button>
         </div>
       </div>
 
@@ -891,6 +906,7 @@
             <p class="section-subtitle">Indicadores observados y conteo de umbrales térmicos, pluviométricos y eólicos</p>
           </div>
           <div class="btn-group">
+            <button type="button" id="btn-print-almanac" class="btn btn-print">🖨️ Imprimir ficha / Guardar PDF</button>
             <button type="button" id="btn-dl-year-csv" class="btn">⬇ Descargar serie diaria ${alm.year} (CSV)</button>
             <a href="./data/almanac_${alm.year}.json" download="meteoriotuerto_almanaque_${alm.year}.json" class="btn">⬇ Descargar JSON anual</a>
           </div>
@@ -1051,6 +1067,24 @@
     document.getElementById('btn-dl-year-csv')?.addEventListener('click', () => {
       downloadYearDailyCSV(alm);
     });
+    const triggerPrint = () => {
+      const wasDark = STATE.theme === 'dark';
+      if (wasDark) {
+        STATE.theme = 'light';
+        document.documentElement.setAttribute('data-theme', 'light');
+        renderAlmanacCharts(alm);
+      }
+      setTimeout(() => {
+        window.print();
+        if (wasDark) {
+          STATE.theme = 'dark';
+          document.documentElement.setAttribute('data-theme', 'dark');
+          renderAlmanacCharts(alm);
+        }
+      }, 180);
+    };
+    document.getElementById('btn-print-almanac-top')?.addEventListener('click', triggerPrint);
+    document.getElementById('btn-print-almanac')?.addEventListener('click', triggerPrint);
 
     // Renderizar gráficos del almanaque
     renderAlmanacCharts(alm);
