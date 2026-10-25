@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeteoRiotuerto — Almanaque meteorológico y climatológico digital de Riotuerto</title>
+  <meta name="description" content="Archivo histórico, anuario estadístico y notario del clima del municipio de Riotuerto (Barrio de Arriba, Cantabria, 115 msnm). Observaciones, almanaques anuales, récords, comparativas y metodología.">
+  <meta name="author" content="MeteoRiotuerto · Emilio Gómez Fernández">
+
+  <!-- Tipografías editoriales y técnicas -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Hoja de estilos principal -->
+  <link rel="stylesheet" href="./src/css/styles.css">
+
+  <!-- Aplicar tema guardado antes del pintado para evitar parpadeo -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('mr-theme');
+        if (saved === 'dark' || saved === 'light') {
+          document.documentElement.setAttribute('data-theme', saved);
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+  <!-- Barra superior institucional y de metadatos de estación -->
+  <div class="masthead-meta" role="region" aria-label="Ficha rápida de la estación">
+    <div class="container masthead-meta-inner">
+      <div class="masthead-coords">
+        <span class="meta-badge">ARCHIVO CLIMATOLÓGICO LOCAL</span>
+        <span>Barrio de Arriba, Riotuerto (Cantabria)</span>
+        <span class="meta-sep">·</span>
+        <span class="mono">43,3409° N, 3,6698° O</span>
+        <span class="meta-sep">·</span>
+        <span class="mono">115 m s. n. m.</span>
+        <span class="meta-sep hide-sm">·</span>
+        <span class="hide-sm">Valle del río Covadal</span>
+      </div>
+      <div class="masthead-actions">
+        <a href="https://www.ecowitt.net/home/index?id=33161" target="_blank" rel="noopener noreferrer" class="live-ext-link" title="Consultar datos instantáneos en directo en la plataforma Ecowitt">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>Tiempo actual en vivo (Ecowitt) ↗</span>
+        </a>
+        <button type="button" id="theme-toggle" class="btn-theme" aria-label="Alternar entre tema claro y oscuro">
+          <span id="theme-icon" aria-hidden="true">☾</span>
+          <span id="theme-label">Modo oscuro</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cabecera editorial principal y navegación -->
+  <header class="site-header">
+    <div class="container">
+      <div class="brand-row">
+        <a href="#portada" class="brand-link">
+          <div class="brand-emblem" aria-hidden="true">
+            <svg viewBox="0 0 48 48" width="42" height="42" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 36 L16 20 L24 30 L34 14 L42 36 Z" stroke-linejoin="round" fill="currentColor" fill-opacity="0.12"/>
+              <path d="M4 36 H44" stroke-linecap="round"/>
+              <circle cx="15" cy="12" r="4" fill="currentColor" fill-opacity="0.25"/>
+              <path d="M22 41 C26 39, 30 43, 36 41" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <span class="brand-kicker">PUBLICACIÓN DE OBSERVACIÓN Y MEMORIA ATMOSFÉRICA</span>
+            <h1 class="brand-title">MeteoRiotuerto</h1>
+            <p class="brand-subtitle">Almanaque meteorológico y climatológico digital del municipio de Riotuerto</p>
+          </div>
+        </a>
+        <div class="header-edition-box" id="header-edition-box">
+          <div class="edition-label">REGISTRO CONSOLIDADO</div>
+          <div class="edition-value mono" id="header-period-range">2022 — 2026</div>
+          <div class="edition-sub" id="header-total-days">Estación operativa desde nov. 2020</div>
+        </div>
+      </div>
+
+      <nav class="site-nav" aria-label="Navegación principal del almanaque">
+        <ul class="nav-list" id="main-nav">
+          <li><a href="#portada" data-route="portada" class="nav-link active">Portada</a></li>
+          <li><a href="#almanaque/2025" data-route="almanaque" class="nav-link">Almanaques anuales</a></li>
+          <li><a href="#explorador" data-route="explorador" class="nav-link">Explorador histórico</a></li>
+          <li><a href="#records" data-route="records" class="nav-link">Récords y efemérides</a></li>
+          <li><a href="#comparativas" data-route="comparativas" class="nav-link">Comparativas entre años</a></li>
+          <li><a href="#metodologia" data-route="metodologia" class="nav-link">Metodología y datos</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Contenedor principal dinámico de vistas -->
+  <main id="main-content" class="site-main container" tabindex="-1">
+    <div id="app-loading" class="loading-state" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Cargando archivo climatológico de MeteoRiotuerto…</p>
+    </div>
+    <div id="app-error" class="error-banner" hidden role="alert"></div>
+
+    <!-- VISTA 1: PORTADA -->
+    <section id="view-portada" class="view-section" hidden aria-labelledby="portada-heading">
+      <!-- Renderizado por src/js/app.js -->
+    </section>
+
+    <!-- VISTA 2: ALMANAQUE ANUAL -->
+    <section id="view-almanaque" class="view-section" hidden aria-labelledby="almanaque-heading">
+      <!-- Renderizado por src/js/app.js -->
+    </section>
+
+    <!-- VISTA 3: EXPLORADOR HISTÓRICO -->
+    <section id="view-explorador" class="view-section" hidden aria-labelledby="explorador-heading">
+      <!-- Renderizado por src/js/app.js -->
+    </section>
+
+    <!-- VISTA 4: RÉCORDS METEOROLÓGICOS -->
+    <section id="view-records" class="view-section" hidden aria-labelledby="records-heading">
+      <!-- Renderizado por src/js/app.js -->
+    </section>
+
+    <!-- VISTA 5: COMPARATIVAS ENTRE AÑOS -->
+    <section id="view-comparativas" class="view-section" hidden aria-labelledby="comparativas-heading">
+      <!-- Renderizado por src/js/app.js -->
+    </section>
+
+    <!-- VISTA 6: METODOLOGÍA Y CALIDAD DE LOS DATOS -->
+    <section id="view-metodologia" class="view-section" hidden aria-labelledby="metodologia-heading">
+      <!-- Renderizado por src/js/app.js -->
+    </section>
+  </main>
+
+  <!-- Pie de página editorial -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-col">
+        <h2 class="footer-title">MeteoRiotuerto</h2>
+        <p class="footer-text">
+          Archivo histórico y almanaque meteorológico de Barrio de Arriba, Riotuerto (Cantabria, España).
+          Creado para conservar, analizar y difundir de forma rigurosa y verificable la memoria climática local
+          del valle del río Covadal.
+        </p>
+        <p class="footer-meta mono">
+          Coordenadas: 43.341° N · -3.670° O · Altitud: 115 m s. n. m. · Zona horaria: Europe/Madrid
+        </p>
+      </div>
+      <div class="footer-col">
+        <h3 class="footer-subtitle">Secciones del archivo</h3>
+        <ul class="footer-links">
+          <li><a href="#portada">Portada del almanaque</a></li>
+          <li><a href="#almanaque/2025">Almanaque anual 2025</a></li>
+          <li><a href="#almanaque/2024">Almanaque anual 2024</a></li>
+          <li><a href="#almanaque/2023">Almanaque anual 2023</a></li>
+          <li><a href="#almanaque/2022">Almanaque anual 2022</a></li>
+          <li><a href="#explorador">Explorador de series históricas</a></li>
+          <li><a href="#records">Récords y efemérides</a></li>
+          <li><a href="#comparativas">Comparativas interanuales</a></li>
+          <li><a href="#metodologia">Metodología y control de calidad</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3 class="footer-subtitle">Fuentes primarias y datos abiertos</h3>
+        <ul class="footer-links">
+          <li><a href="https://github.com/egofer/meteoriotuerto/" target="_blank" rel="noopener noreferrer">Repositorio de datos abiertos (GitHub) ↗</a></li>
+          <li><a href="https://www.ecowitt.net/home/index?id=33161" target="_blank" rel="noopener noreferrer">Panel en tiempo real en Ecowitt ↗</a></li>
+          <li><a href="https://app.weathercloud.net/d6619283754" target="_blank" rel="noopener noreferrer">Perfil en WeatherCloud ↗</a></li>
+          <li><a href="https://www.openstreetmap.org/#map=14/43.34090/-3.67020&layers=VN" target="_blank" rel="noopener noreferrer">Cartografía en OpenStreetMap ↗</a></li>
+          <li><a href="./data/index.json" target="_blank" rel="noopener">Índice JSON del archivo (API estática)</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>Datos compartidos con fines divulgativos, educativos y científicos citando la fuente <strong>MeteoRiotuerto</strong>.</span>
+      <span id="footer-build-stamp" class="mono"></span>
+    </div>
+  </footer>
+
+  <!-- Chart.js (v4.4.4 CDN con fallback y carga diferida controlada) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+  <!-- Lógica principal de la aplicación -->
+  <script src="./src/js/app.js" defer></script>
+</body>
+</html>

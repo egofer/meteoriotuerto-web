@@ -1,0 +1,1233 @@
+{
+  "generated_at": "2026-10-25 13:01:11",
+  "period_covered": "2022-01-01 a 2026-10-25 (serie consolidada en repositorio; estación operativa desde 29/11/2020)",
+  "total_observed_days": 1726,
+  "methodological_disclaimer": "Todos los récords corresponden exclusivamente al periodo observado por la estación automática MeteoRiotuerto en Barrio de Arriba (115 msnm) y no deben extrapolarse sin matices a toda la historia climática secular del municipio de Riotuerto.",
+  "absolute_records": {
+    "temp_max": {
+      "label": "Temperatura máxima absoluta",
+      "value": 42.1,
+      "unit": "°C",
+      "date": "2024-08-11",
+      "time": "14:30",
+      "year": 2024,
+      "context": "Advección cálida sahariana con intenso efecto Foehn (viento sur) bajo aviso rojo en Cantabria."
+    },
+    "temp_min": {
+      "label": "Temperatura mínima absoluta",
+      "value": -3.1,
+      "unit": "°C",
+      "date": "2024-01-20",
+      "time": "09:00",
+      "year": 2024,
+      "context": "Madrugada anticiclónica invernal con fuerte inversión térmica en el fondo del valle del Covadal."
+    },
+    "max_daily_rain": {
+      "label": "Mayor precipitación en un día",
+      "value": 125.9,
+      "unit": "mm",
+      "date": "2023-01-16",
+      "year": 2023,
+      "context": "Temporal atlántico del noroeste asociado a la borrasca Fien en enero de 2023."
+    },
+    "max_wind_gust": {
+      "label": "Mayor racha de viento",
+      "value": 97.2,
+      "unit": "km/h",
+      "date": "2024-02-08",
+      "time": "16:00",
+      "year": 2024,
+      "context": "Vendaval de componente sur asociado al paso de la profunda borrasca Karlotta."
+    },
+    "max_thermal_amplitude": {
+      "label": "Mayor amplitud térmica diaria",
+      "value": 25.2,
+      "unit": "°C",
+      "date": "2026-07-06",
+      "year": 2026,
+      "context": "De 14.0 °C de mínima a 39.2 °C de máxima en una sola jornada."
+    },
+    "coldest_day_max": {
+      "label": "Día más frío (máxima más baja)",
+      "value": 5.1,
+      "unit": "°C",
+      "date": "2023-01-23",
+      "year": 2023,
+      "context": "Jornada invernal de advección fría polar en la que el termómetro no superó los 5,1 °C."
+    },
+    "warmest_night_min": {
+      "label": "Noche más cálida (mínima más alta)",
+      "value": 21.2,
+      "unit": "°C",
+      "date": "2026-08-13",
+      "year": 2026,
+      "context": "Noche tropical mantenida por viento sur persistente."
+    },
+    "max_rain_rate": {
+      "value": 145.2,
+      "unit": "mm/h",
+      "date": "2025-06-10",
+      "time": "20:30",
+      "year": 2025
+    },
+    "max_hourly_rain": {
+      "value": 44.2,
+      "unit": "mm",
+      "date": "2025-06-10",
+      "time": "20:30",
+      "year": 2025
+    },
+    "pressure_max": {
+      "label": "Presión atmosférica máxima",
+      "value": 1051.7,
+      "unit": "hPa",
+      "date": "2022-01-28",
+      "year": 2022,
+      "context": "Potente dorsal anticiclónica invernal sobre la península ibérica y el golfo de Vizcaya."
+    },
+    "pressure_min": {
+      "label": "Presión atmosférica mínima",
+      "value": 985.9,
+      "unit": "hPa",
+      "date": "2023-10-20",
+      "year": 2023,
+      "context": "Paso del centro depresionario de una borrasca atlántica profunda."
+    }
+  },
+  "rankings": {
+    "top_hottest_days": [
+      {
+        "rank": 1,
+        "date": "2024-08-11",
+        "year": 2024,
+        "value": 42.1,
+        "temp_max": 42.1,
+        "temp_min": 18.4,
+        "temp_mean": 26.8,
+        "rain_daily": 0.0,
+        "wind_gust": 21.9
+      },
+      {
+        "rank": 2,
+        "date": "2026-06-24",
+        "year": 2026,
+        "value": 41.3,
+        "temp_max": 41.3,
+        "temp_min": 18.3,
+        "temp_mean": 28.0,
+        "rain_daily": 0.0,
+        "wind_gust": 16.6
+      },
+      {
+        "rank": 3,
+        "date": "2023-08-23",
+        "year": 2023,
+        "value": 40.4,
+        "temp_max": 40.4,
+        "temp_min": 18.3,
+        "temp_mean": 26.3,
+        "rain_daily": 1.0,
+        "wind_gust": 14.8
+      },
+      {
+        "rank": 4,
+        "date": "2025-08-15",
+        "year": 2025,
+        "value": 40.2,
+        "temp_max": 40.2,
+        "temp_min": 18.9,
+        "temp_mean": 27.7,
+        "rain_daily": 0.0,
+        "wind_gust": 16.6
+      },
+      {
+        "rank": 5,
+        "date": "2026-06-23",
+        "year": 2026,
+        "value": 39.6,
+        "temp_max": 39.6,
+        "temp_min": 17.8,
+        "temp_mean": 27.2,
+        "rain_daily": 0.0,
+        "wind_gust": 11.1
+      },
+      {
+        "rank": 6,
+        "date": "2022-07-17",
+        "year": 2022,
+        "value": 39.4,
+        "temp_max": 39.4,
+        "temp_min": 17.7,
+        "temp_mean": 28.3,
+        "rain_daily": 0.0,
+        "wind_gust": 14.8
+      },
+      {
+        "rank": 7,
+        "date": "2026-07-06",
+        "year": 2026,
+        "value": 39.2,
+        "temp_max": 39.2,
+        "temp_min": 14.0,
+        "temp_mean": 25.3,
+        "rain_daily": 0.0,
+        "wind_gust": 9.3
+      },
+      {
+        "rank": 8,
+        "date": "2022-06-17",
+        "year": 2022,
+        "value": 39.0,
+        "temp_max": 39.0,
+        "temp_min": 18.2,
+        "temp_mean": 28.4,
+        "rain_daily": 0.0,
+        "wind_gust": 16.6
+      },
+      {
+        "rank": 9,
+        "date": "2022-09-11",
+        "year": 2022,
+        "value": 37.4,
+        "temp_max": 37.4,
+        "temp_min": 13.0,
+        "temp_mean": 22.3,
+        "rain_daily": 0.0,
+        "wind_gust": 21.9
+      },
+      {
+        "rank": 10,
+        "date": "2025-09-06",
+        "year": 2025,
+        "value": 37.4,
+        "temp_max": 37.4,
+        "temp_min": 13.8,
+        "temp_mean": 24.0,
+        "rain_daily": 0.0,
+        "wind_gust": 34.9
+      }
+    ],
+    "top_coldest_days": [
+      {
+        "rank": 1,
+        "date": "2024-01-20",
+        "year": 2024,
+        "value": -3.1,
+        "temp_max": 13.0,
+        "temp_min": -3.1,
+        "temp_mean": 2.9,
+        "rain_daily": 0.0,
+        "wind_gust": 11.1
+      },
+      {
+        "rank": 2,
+        "date": "2025-01-14",
+        "year": 2025,
+        "value": -2.2,
+        "temp_max": 11.9,
+        "temp_min": -2.2,
+        "temp_mean": 2.7,
+        "rain_daily": 0.3,
+        "wind_gust": 9.3
+      },
+      {
+        "rank": 3,
+        "date": "2022-01-23",
+        "year": 2022,
+        "value": -2.1,
+        "temp_max": 12.2,
+        "temp_min": -2.1,
+        "temp_mean": 2.9,
+        "rain_daily": 0.0,
+        "wind_gust": 7.2
+      },
+      {
+        "rank": 4,
+        "date": "2025-01-15",
+        "year": 2025,
+        "value": -2.1,
+        "temp_max": 12.8,
+        "temp_min": -2.1,
+        "temp_mean": 2.9,
+        "rain_daily": 0.5,
+        "wind_gust": 7.2
+      },
+      {
+        "rank": 5,
+        "date": "2022-01-29",
+        "year": 2022,
+        "value": -1.9,
+        "temp_max": 14.1,
+        "temp_min": -1.9,
+        "temp_mean": 4.1,
+        "rain_daily": 0.2,
+        "wind_gust": 13.0
+      },
+      {
+        "rank": 6,
+        "date": "2022-04-05",
+        "year": 2022,
+        "value": -1.9,
+        "temp_max": 13.8,
+        "temp_min": -1.9,
+        "temp_mean": 5.8,
+        "rain_daily": 0.2,
+        "wind_gust": 18.3
+      },
+      {
+        "rank": 7,
+        "date": "2023-02-11",
+        "year": 2023,
+        "value": -1.7,
+        "temp_max": 17.4,
+        "temp_min": -1.7,
+        "temp_mean": 5.9,
+        "rain_daily": 0.0,
+        "wind_gust": 11.1
+      },
+      {
+        "rank": 8,
+        "date": "2022-01-15",
+        "year": 2022,
+        "value": -1.6,
+        "temp_max": 13.1,
+        "temp_min": -1.6,
+        "temp_mean": 3.6,
+        "rain_daily": 0.0,
+        "wind_gust": 11.1
+      },
+      {
+        "rank": 9,
+        "date": "2023-04-05",
+        "year": 2023,
+        "value": -1.5,
+        "temp_max": 18.4,
+        "temp_min": -1.5,
+        "temp_mean": 7.9,
+        "rain_daily": 0.3,
+        "wind_gust": 11.1
+      },
+      {
+        "rank": 10,
+        "date": "2022-01-17",
+        "year": 2022,
+        "value": -1.4,
+        "temp_max": 13.0,
+        "temp_min": -1.4,
+        "temp_mean": 4.1,
+        "rain_daily": 0.0,
+        "wind_gust": 13.0
+      }
+    ],
+    "top_wettest_days": [
+      {
+        "rank": 1,
+        "date": "2023-01-16",
+        "year": 2023,
+        "value": 125.9,
+        "temp_max": 14.6,
+        "temp_min": 8.3,
+        "temp_mean": 9.8,
+        "rain_daily": 125.9,
+        "wind_gust": 43.9
+      },
+      {
+        "rank": 2,
+        "date": "2026-10-07",
+        "year": 2026,
+        "value": 83.8,
+        "temp_max": 20.1,
+        "temp_min": 14.7,
+        "temp_mean": 16.5,
+        "rain_daily": 83.8,
+        "wind_gust": 25.6
+      },
+      {
+        "rank": 3,
+        "date": "2026-02-16",
+        "year": 2026,
+        "value": 80.0,
+        "temp_max": 14.9,
+        "temp_min": 9.7,
+        "temp_mean": 11.1,
+        "rain_daily": 80.0,
+        "wind_gust": 23.8
+      },
+      {
+        "rank": 4,
+        "date": "2026-03-06",
+        "year": 2026,
+        "value": 74.2,
+        "temp_max": 10.2,
+        "temp_min": 9.0,
+        "temp_mean": 9.5,
+        "rain_daily": 74.2,
+        "wind_gust": 27.7
+      },
+      {
+        "rank": 5,
+        "date": "2023-01-17",
+        "year": 2023,
+        "value": 71.9,
+        "temp_max": 11.6,
+        "temp_min": 1.9,
+        "temp_mean": 6.1,
+        "rain_daily": 71.9,
+        "wind_gust": 51.5
+      },
+      {
+        "rank": 6,
+        "date": "2026-03-14",
+        "year": 2026,
+        "value": 69.7,
+        "temp_max": 9.3,
+        "temp_min": 6.5,
+        "temp_mean": 7.4,
+        "rain_daily": 69.7,
+        "wind_gust": 25.6
+      },
+      {
+        "rank": 7,
+        "date": "2025-11-24",
+        "year": 2025,
+        "value": 67.8,
+        "temp_max": 16.1,
+        "temp_min": 8.2,
+        "temp_mean": 11.5,
+        "rain_daily": 67.8,
+        "wind_gust": 34.9
+      },
+      {
+        "rank": 8,
+        "date": "2022-01-09",
+        "year": 2022,
+        "value": 67.1,
+        "temp_max": 14.0,
+        "temp_min": 10.6,
+        "temp_mean": 12.3,
+        "rain_daily": 67.1,
+        "wind_gust": 42.2
+      },
+      {
+        "rank": 9,
+        "date": "2023-11-21",
+        "year": 2023,
+        "value": 65.1,
+        "temp_max": 13.4,
+        "temp_min": 9.5,
+        "temp_mean": 10.4,
+        "rain_daily": 65.1,
+        "wind_gust": 21.9
+      },
+      {
+        "rank": 10,
+        "date": "2025-03-24",
+        "year": 2025,
+        "value": 64.5,
+        "temp_max": 11.2,
+        "temp_min": 9.2,
+        "temp_mean": 10.3,
+        "rain_daily": 64.5,
+        "wind_gust": 25.6
+      }
+    ],
+    "top_windiest_days": [
+      {
+        "rank": 1,
+        "date": "2024-02-08",
+        "year": 2024,
+        "value": 97.2,
+        "temp_max": 18.0,
+        "temp_min": 14.2,
+        "temp_mean": 16.4,
+        "rain_daily": 0.3,
+        "wind_gust": 97.2
+      },
+      {
+        "rank": 2,
+        "date": "2025-01-26",
+        "year": 2025,
+        "value": 86.4,
+        "temp_max": 20.0,
+        "temp_min": 5.3,
+        "temp_mean": 15.5,
+        "rain_daily": 4.6,
+        "wind_gust": 86.4
+      },
+      {
+        "rank": 3,
+        "date": "2025-01-06",
+        "year": 2025,
+        "value": 78.9,
+        "temp_max": 16.9,
+        "temp_min": 4.4,
+        "temp_mean": 10.0,
+        "rain_daily": 25.7,
+        "wind_gust": 78.9
+      },
+      {
+        "rank": 4,
+        "date": "2025-03-21",
+        "year": 2025,
+        "value": 78.9,
+        "temp_max": 18.2,
+        "temp_min": 11.4,
+        "temp_mean": 16.0,
+        "rain_daily": 4.3,
+        "wind_gust": 78.9
+      },
+      {
+        "rank": 5,
+        "date": "2025-12-09",
+        "year": 2025,
+        "value": 77.1,
+        "temp_max": 18.8,
+        "temp_min": 15.4,
+        "temp_mean": 17.6,
+        "rain_daily": 0.0,
+        "wind_gust": 77.1
+      },
+      {
+        "rank": 6,
+        "date": "2026-01-21",
+        "year": 2026,
+        "value": 73.4,
+        "temp_max": 16.8,
+        "temp_min": 7.3,
+        "temp_mean": 12.7,
+        "rain_daily": 13.4,
+        "wind_gust": 73.4
+      },
+      {
+        "rank": 7,
+        "date": "2025-01-24",
+        "year": 2025,
+        "value": 73.4,
+        "temp_max": 19.1,
+        "temp_min": 13.2,
+        "temp_mean": 17.8,
+        "rain_daily": 0.0,
+        "wind_gust": 73.4
+      },
+      {
+        "rank": 8,
+        "date": "2022-12-31",
+        "year": 2022,
+        "value": 73.4,
+        "temp_max": 20.9,
+        "temp_min": 17.4,
+        "temp_mean": 18.8,
+        "rain_daily": 0.0,
+        "wind_gust": 73.4
+      },
+      {
+        "rank": 9,
+        "date": "2023-11-04",
+        "year": 2023,
+        "value": 73.4,
+        "temp_max": 20.3,
+        "temp_min": 13.4,
+        "temp_mean": 16.4,
+        "rain_daily": 14.8,
+        "wind_gust": 73.4
+      },
+      {
+        "rank": 10,
+        "date": "2024-10-09",
+        "year": 2024,
+        "value": 73.4,
+        "temp_max": 26.0,
+        "temp_min": 13.5,
+        "temp_mean": 19.5,
+        "rain_daily": 23.9,
+        "wind_gust": 73.4
+      }
+    ],
+    "top_amplitude_days": [
+      {
+        "rank": 1,
+        "date": "2026-07-06",
+        "year": 2026,
+        "value": 25.2,
+        "temp_max": 39.2,
+        "temp_min": 14.0,
+        "temp_mean": 25.3,
+        "rain_daily": 0.0,
+        "wind_gust": 9.3
+      },
+      {
+        "rank": 2,
+        "date": "2026-07-28",
+        "year": 2026,
+        "value": 24.5,
+        "temp_max": 37.1,
+        "temp_min": 12.6,
+        "temp_mean": 23.0,
+        "rain_daily": 0.0,
+        "wind_gust": 9.3
+      },
+      {
+        "rank": 3,
+        "date": "2022-09-11",
+        "year": 2022,
+        "value": 24.4,
+        "temp_max": 37.4,
+        "temp_min": 13.0,
+        "temp_mean": 22.3,
+        "rain_daily": 0.0,
+        "wind_gust": 21.9
+      },
+      {
+        "rank": 4,
+        "date": "2026-04-06",
+        "year": 2026,
+        "value": 24.0,
+        "temp_max": 30.4,
+        "temp_min": 6.4,
+        "temp_mean": 18.8,
+        "rain_daily": 0.0,
+        "wind_gust": 23.8
+      },
+      {
+        "rank": 5,
+        "date": "2022-04-10",
+        "year": 2022,
+        "value": 23.7,
+        "temp_max": 27.6,
+        "temp_min": 3.9,
+        "temp_mean": 16.9,
+        "rain_daily": 0.0,
+        "wind_gust": 33.2
+      },
+      {
+        "rank": 6,
+        "date": "2024-08-11",
+        "year": 2024,
+        "value": 23.7,
+        "temp_max": 42.1,
+        "temp_min": 18.4,
+        "temp_mean": 26.8,
+        "rain_daily": 0.0,
+        "wind_gust": 21.9
+      },
+      {
+        "rank": 7,
+        "date": "2023-03-28",
+        "year": 2023,
+        "value": 23.7,
+        "temp_max": 28.0,
+        "temp_min": 4.3,
+        "temp_mean": 16.5,
+        "rain_daily": 0.0,
+        "wind_gust": 25.6
+      },
+      {
+        "rank": 8,
+        "date": "2025-09-06",
+        "year": 2025,
+        "value": 23.6,
+        "temp_max": 37.4,
+        "temp_min": 13.8,
+        "temp_mean": 24.0,
+        "rain_daily": 0.0,
+        "wind_gust": 34.9
+      },
+      {
+        "rank": 9,
+        "date": "2026-06-13",
+        "year": 2026,
+        "value": 23.5,
+        "temp_max": 34.9,
+        "temp_min": 11.4,
+        "temp_mean": 22.8,
+        "rain_daily": 0.0,
+        "wind_gust": 13.0
+      },
+      {
+        "rank": 10,
+        "date": "2026-05-21",
+        "year": 2026,
+        "value": 23.2,
+        "temp_max": 34.1,
+        "temp_min": 10.9,
+        "temp_mean": 21.1,
+        "rain_daily": 0.0,
+        "wind_gust": 11.1
+      }
+    ],
+    "top_coldest_max_days": [
+      {
+        "rank": 1,
+        "date": "2023-01-23",
+        "year": 2023,
+        "value": 5.1,
+        "temp_max": 5.1,
+        "temp_min": 1.2,
+        "temp_mean": 3.7,
+        "rain_daily": 11.4,
+        "wind_gust": 5.5
+      },
+      {
+        "rank": 2,
+        "date": "2023-01-18",
+        "year": 2023,
+        "value": 5.8,
+        "temp_max": 5.8,
+        "temp_min": 0.4,
+        "temp_mean": 3.0,
+        "rain_daily": 50.3,
+        "wind_gust": 34.9
+      },
+      {
+        "rank": 3,
+        "date": "2023-01-24",
+        "year": 2023,
+        "value": 6.0,
+        "temp_max": 6.0,
+        "temp_min": 2.7,
+        "temp_mean": 4.2,
+        "rain_daily": 11.7,
+        "wind_gust": 7.2
+      },
+      {
+        "rank": 4,
+        "date": "2024-01-11",
+        "year": 2024,
+        "value": 6.1,
+        "temp_max": 6.1,
+        "temp_min": 2.5,
+        "temp_mean": 4.4,
+        "rain_daily": 6.4,
+        "wind_gust": 7.2
+      },
+      {
+        "rank": 5,
+        "date": "2023-02-27",
+        "year": 2023,
+        "value": 6.5,
+        "temp_max": 6.5,
+        "temp_min": 2.6,
+        "temp_mean": 4.1,
+        "rain_daily": 0.2,
+        "wind_gust": 20.1
+      },
+      {
+        "rank": 6,
+        "date": "2024-01-10",
+        "year": 2024,
+        "value": 6.6,
+        "temp_max": 6.6,
+        "temp_min": 2.8,
+        "temp_mean": 5.0,
+        "rain_daily": 5.6,
+        "wind_gust": 9.3
+      },
+      {
+        "rank": 7,
+        "date": "2023-01-28",
+        "year": 2023,
+        "value": 6.9,
+        "temp_max": 6.9,
+        "temp_min": 3.1,
+        "temp_mean": 4.6,
+        "rain_daily": 19.8,
+        "wind_gust": 18.3
+      },
+      {
+        "rank": 8,
+        "date": "2023-03-01",
+        "year": 2023,
+        "value": 6.9,
+        "temp_max": 6.9,
+        "temp_min": 1.0,
+        "temp_mean": 3.6,
+        "rain_daily": 4.0,
+        "wind_gust": 9.3
+      },
+      {
+        "rank": 9,
+        "date": "2026-01-04",
+        "year": 2026,
+        "value": 7.2,
+        "temp_max": 7.2,
+        "temp_min": -1.4,
+        "temp_mean": 2.9,
+        "rain_daily": 0.0,
+        "wind_gust": 14.8
+      },
+      {
+        "rank": 10,
+        "date": "2023-02-23",
+        "year": 2023,
+        "value": 7.4,
+        "temp_max": 7.4,
+        "temp_min": 3.0,
+        "temp_mean": 4.2,
+        "rain_daily": 60.2,
+        "wind_gust": 16.6
+      }
+    ],
+    "top_warmest_min_days": [
+      {
+        "rank": 1,
+        "date": "2026-08-13",
+        "year": 2026,
+        "value": 21.2,
+        "temp_max": 28.9,
+        "temp_min": 21.2,
+        "temp_mean": 23.9,
+        "rain_daily": 0.0,
+        "wind_gust": 13.0
+      },
+      {
+        "rank": 2,
+        "date": "2026-07-15",
+        "year": 2026,
+        "value": 21.2,
+        "temp_max": 28.6,
+        "temp_min": 21.2,
+        "temp_mean": 23.2,
+        "rain_daily": 0.3,
+        "wind_gust": 13.0
+      },
+      {
+        "rank": 3,
+        "date": "2026-07-10",
+        "year": 2026,
+        "value": 20.7,
+        "temp_max": 26.8,
+        "temp_min": 20.7,
+        "temp_mean": 22.5,
+        "rain_daily": 0.5,
+        "wind_gust": 13.0
+      },
+      {
+        "rank": 4,
+        "date": "2023-10-18",
+        "year": 2023,
+        "value": 20.3,
+        "temp_max": 26.0,
+        "temp_min": 20.3,
+        "temp_mean": 23.2,
+        "rain_daily": 0.5,
+        "wind_gust": 68.1
+      },
+      {
+        "rank": 5,
+        "date": "2026-08-19",
+        "year": 2026,
+        "value": 20.2,
+        "temp_max": 27.6,
+        "temp_min": 20.2,
+        "temp_mean": 22.4,
+        "rain_daily": 0.0,
+        "wind_gust": 18.3
+      },
+      {
+        "rank": 6,
+        "date": "2026-09-05",
+        "year": 2026,
+        "value": 19.9,
+        "temp_max": 28.9,
+        "temp_min": 19.9,
+        "temp_mean": 22.4,
+        "rain_daily": 0.0,
+        "wind_gust": 11.1
+      },
+      {
+        "rank": 7,
+        "date": "2026-08-12",
+        "year": 2026,
+        "value": 19.8,
+        "temp_max": 31.5,
+        "temp_min": 19.8,
+        "temp_mean": 24.6,
+        "rain_daily": 0.0,
+        "wind_gust": 13.0
+      },
+      {
+        "rank": 8,
+        "date": "2026-07-09",
+        "year": 2026,
+        "value": 19.8,
+        "temp_max": 26.6,
+        "temp_min": 19.8,
+        "temp_mean": 22.2,
+        "rain_daily": 0.3,
+        "wind_gust": 7.2
+      },
+      {
+        "rank": 9,
+        "date": "2026-08-16",
+        "year": 2026,
+        "value": 19.7,
+        "temp_max": 25.0,
+        "temp_min": 19.7,
+        "temp_mean": 21.0,
+        "rain_daily": 2.8,
+        "wind_gust": 11.1
+      },
+      {
+        "rank": 10,
+        "date": "2026-08-15",
+        "year": 2026,
+        "value": 19.7,
+        "temp_max": 25.1,
+        "temp_min": 19.7,
+        "temp_mean": 21.5,
+        "rain_daily": 5.4,
+        "wind_gust": 11.1
+      }
+    ]
+  },
+  "monthly_records": [
+    {
+      "month": 1,
+      "name": "Enero",
+      "short": "Ene",
+      "temp_max_abs": 24.9,
+      "temp_max_date": "2024-01-28",
+      "temp_min_abs": -3.1,
+      "temp_min_date": "2024-01-20",
+      "max_daily_rain": 125.9,
+      "max_daily_rain_date": "2023-01-16",
+      "max_wind_gust": 86.4,
+      "max_wind_gust_date": "2025-01-26",
+      "wettest_edition": {
+        "year": 2023,
+        "rain_mm": 509.8
+      },
+      "driest_edition": {
+        "year": 2024,
+        "rain_mm": 134.0
+      },
+      "warmest_edition": {
+        "year": 2025,
+        "temp_mean": 10.2
+      },
+      "coldest_edition": {
+        "year": 2022,
+        "temp_mean": 7.2
+      }
+    },
+    {
+      "month": 2,
+      "name": "Febrero",
+      "short": "Feb",
+      "temp_max_abs": 26.2,
+      "temp_max_date": "2026-02-25",
+      "temp_min_abs": -1.7,
+      "temp_min_date": "2023-02-11",
+      "max_daily_rain": 80.0,
+      "max_daily_rain_date": "2026-02-16",
+      "max_wind_gust": 97.2,
+      "max_wind_gust_date": "2024-02-08",
+      "wettest_edition": {
+        "year": 2024,
+        "rain_mm": 284.0
+      },
+      "driest_edition": {
+        "year": 2022,
+        "rain_mm": 71.2
+      },
+      "warmest_edition": {
+        "year": 2026,
+        "temp_mean": 11.9
+      },
+      "coldest_edition": {
+        "year": 2023,
+        "temp_mean": 7.9
+      }
+    },
+    {
+      "month": 3,
+      "name": "Marzo",
+      "short": "Mar",
+      "temp_max_abs": 28.3,
+      "temp_max_date": "2023-03-29",
+      "temp_min_abs": -1.3,
+      "temp_min_date": "2023-03-05",
+      "max_daily_rain": 74.2,
+      "max_daily_rain_date": "2026-03-06",
+      "max_wind_gust": 78.9,
+      "max_wind_gust_date": "2025-03-21",
+      "wettest_edition": {
+        "year": 2026,
+        "rain_mm": 302.0
+      },
+      "driest_edition": {
+        "year": 2023,
+        "rain_mm": 77.1
+      },
+      "warmest_edition": {
+        "year": 2023,
+        "temp_mean": 13.0
+      },
+      "coldest_edition": {
+        "year": 2026,
+        "temp_mean": 10.6
+      }
+    },
+    {
+      "month": 4,
+      "name": "Abril",
+      "short": "Abr",
+      "temp_max_abs": 31.8,
+      "temp_max_date": "2026-04-21",
+      "temp_min_abs": -1.9,
+      "temp_min_date": "2022-04-05",
+      "max_daily_rain": 45.9,
+      "max_daily_rain_date": "2022-04-19",
+      "max_wind_gust": 53.3,
+      "max_wind_gust_date": "2024-04-02",
+      "wettest_edition": {
+        "year": 2022,
+        "rain_mm": 185.6
+      },
+      "driest_edition": {
+        "year": 2026,
+        "rain_mm": 71.2
+      },
+      "warmest_edition": {
+        "year": 2026,
+        "temp_mean": 14.2
+      },
+      "coldest_edition": {
+        "year": 2022,
+        "temp_mean": 11.4
+      }
+    },
+    {
+      "month": 5,
+      "name": "Mayo",
+      "short": "May",
+      "temp_max_abs": 37.2,
+      "temp_max_date": "2026-05-26",
+      "temp_min_abs": 3.6,
+      "temp_min_date": "2024-05-02",
+      "max_daily_rain": 45.0,
+      "max_daily_rain_date": "2026-05-15",
+      "max_wind_gust": 56.8,
+      "max_wind_gust_date": "2024-05-04",
+      "wettest_edition": {
+        "year": 2023,
+        "rain_mm": 188.7
+      },
+      "driest_edition": {
+        "year": 2022,
+        "rain_mm": 34.1
+      },
+      "warmest_edition": {
+        "year": 2026,
+        "temp_mean": 16.2
+      },
+      "coldest_edition": {
+        "year": 2024,
+        "temp_mean": 14.5
+      }
+    },
+    {
+      "month": 6,
+      "name": "Junio",
+      "short": "Jun",
+      "temp_max_abs": 41.3,
+      "temp_max_date": "2026-06-24",
+      "temp_min_abs": 7.1,
+      "temp_min_date": "2024-06-13",
+      "max_daily_rain": 53.9,
+      "max_daily_rain_date": "2023-06-13",
+      "max_wind_gust": 40.4,
+      "max_wind_gust_date": "2023-06-09",
+      "wettest_edition": {
+        "year": 2026,
+        "rain_mm": 132.2
+      },
+      "driest_edition": {
+        "year": 2025,
+        "rain_mm": 113.5
+      },
+      "warmest_edition": {
+        "year": 2026,
+        "temp_mean": 19.5
+      },
+      "coldest_edition": {
+        "year": 2024,
+        "temp_mean": 16.7
+      }
+    },
+    {
+      "month": 7,
+      "name": "Julio",
+      "short": "Jul",
+      "temp_max_abs": 39.4,
+      "temp_max_date": "2022-07-17",
+      "temp_min_abs": 7.5,
+      "temp_min_date": "2022-07-01",
+      "max_daily_rain": 40.7,
+      "max_daily_rain_date": "2026-07-25",
+      "max_wind_gust": 29.5,
+      "max_wind_gust_date": "2024-07-15",
+      "wettest_edition": {
+        "year": 2024,
+        "rain_mm": 90.8
+      },
+      "driest_edition": {
+        "year": 2022,
+        "rain_mm": 27.4
+      },
+      "warmest_edition": {
+        "year": 2026,
+        "temp_mean": 21.4
+      },
+      "coldest_edition": {
+        "year": 2025,
+        "temp_mean": 19.1
+      }
+    },
+    {
+      "month": 8,
+      "name": "Agosto",
+      "short": "Ago",
+      "temp_max_abs": 42.1,
+      "temp_max_date": "2024-08-11",
+      "temp_min_abs": 10.1,
+      "temp_min_date": "2023-08-05",
+      "max_daily_rain": 54.4,
+      "max_daily_rain_date": "2022-08-17",
+      "max_wind_gust": 34.9,
+      "max_wind_gust_date": "2023-08-03",
+      "wettest_edition": {
+        "year": 2023,
+        "rain_mm": 171.1
+      },
+      "driest_edition": {
+        "year": 2026,
+        "rain_mm": 56.3
+      },
+      "warmest_edition": {
+        "year": 2026,
+        "temp_mean": 20.8
+      },
+      "coldest_edition": {
+        "year": 2024,
+        "temp_mean": 19.7
+      }
+    },
+    {
+      "month": 9,
+      "name": "Septiembre",
+      "short": "Sep",
+      "temp_max_abs": 37.4,
+      "temp_max_date": "2022-09-11",
+      "temp_min_abs": 6.0,
+      "temp_min_date": "2025-09-25",
+      "max_daily_rain": 62.2,
+      "max_daily_rain_date": "2025-09-22",
+      "max_wind_gust": 56.8,
+      "max_wind_gust_date": "2024-09-25",
+      "wettest_edition": {
+        "year": 2024,
+        "rain_mm": 291.7
+      },
+      "driest_edition": {
+        "year": 2026,
+        "rain_mm": 81.7
+      },
+      "warmest_edition": {
+        "year": 2023,
+        "temp_mean": 20.7
+      },
+      "coldest_edition": {
+        "year": 2024,
+        "temp_mean": 16.1
+      }
+    },
+    {
+      "month": 10,
+      "name": "Octubre",
+      "short": "Oct",
+      "temp_max_abs": 31.2,
+      "temp_max_date": "2022-10-18",
+      "temp_min_abs": 4.0,
+      "temp_min_date": "2026-10-20",
+      "max_daily_rain": 83.8,
+      "max_daily_rain_date": "2026-10-07",
+      "max_wind_gust": 73.4,
+      "max_wind_gust_date": "2024-10-09",
+      "wettest_edition": {
+        "year": 2024,
+        "rain_mm": 257.2
+      },
+      "driest_edition": {
+        "year": 2022,
+        "rain_mm": 37.1
+      },
+      "warmest_edition": {
+        "year": 2022,
+        "temp_mean": 18.9
+      },
+      "coldest_edition": {
+        "year": 2026,
+        "temp_mean": 15.2
+      }
+    },
+    {
+      "month": 11,
+      "name": "Noviembre",
+      "short": "Nov",
+      "temp_max_abs": 29.0,
+      "temp_max_date": "2025-11-12",
+      "temp_min_abs": 0.4,
+      "temp_min_date": "2025-11-22",
+      "max_daily_rain": 67.8,
+      "max_daily_rain_date": "2025-11-24",
+      "max_wind_gust": 73.4,
+      "max_wind_gust_date": "2023-11-04",
+      "wettest_edition": {
+        "year": 2023,
+        "rain_mm": 424.3
+      },
+      "driest_edition": {
+        "year": 2024,
+        "rain_mm": 146.6
+      },
+      "warmest_edition": {
+        "year": 2024,
+        "temp_mean": 13.8
+      },
+      "coldest_edition": {
+        "year": 2022,
+        "temp_mean": 12.8
+      }
+    },
+    {
+      "month": 12,
+      "name": "Diciembre",
+      "short": "Dic",
+      "temp_max_abs": 22.3,
+      "temp_max_date": "2023-12-09",
+      "temp_min_abs": -0.5,
+      "temp_min_date": "2025-12-25",
+      "max_daily_rain": 44.7,
+      "max_daily_rain_date": "2024-12-08",
+      "max_wind_gust": 77.1,
+      "max_wind_gust_date": "2025-12-09",
+      "wettest_edition": {
+        "year": 2024,
+        "rain_mm": 267.7
+      },
+      "driest_edition": {
+        "year": 2022,
+        "rain_mm": 161.3
+      },
+      "warmest_edition": {
+        "year": 2022,
+        "temp_mean": 12.0
+      },
+      "coldest_edition": {
+        "year": 2024,
+        "temp_mean": 9.5
+      }
+    }
+  ]
+}

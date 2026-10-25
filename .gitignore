@@ -1,0 +1,29 @@
+# Variables de entorno, secretos y registros locales
+.env
+.env.*
+*.env.local
+*.log
+logs/
+
+# Documentación interna de contexto y sesiones locales (no publicar en GitHub)
+contexto/
+
+# Cachés de datos brutos y artefactos temporales de construcción
+.cache/
+_site/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Archivos del sistema operativo y editores
+.DS_Store
+Thumbs.db
+*~
+.~lock.*
+.vscode/
+.idea/
