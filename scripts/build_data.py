@@ -702,6 +702,152 @@ def compute_wind_analysis(df_daily: pd.DataFrame, df_30: Optional[pd.DataFrame])
     }
 
 
+def compute_foehn_analysis(
+    df_daily: pd.DataFrame, df_30: Optional[pd.DataFrame], year: int
+) -> Dict[str, Any]:
+    """
+    EVO-005: Detección algorítmica de episodios de «surada» / efecto Foehn en el valle de Riotuerto.
+    Aplica una definición física explícita adaptada a la canalización topográfica desde el puerto
+    de Alisas (SE) hasta la divisoria pasiega (OSO), arco 120°–245°:
+      - Condición direccional: rumbo medio diario entre 120° y 245° (SE–S–SO–OSO) o al menos
+        4 intervalos semihorarios (≥ 2 h) en dicho sector con humedad relativa mínima ≤ 45 %.
+      - Ausencia de precipitación frontal relevante: lluvia diaria < 5,0 mm.
+      - Modalidad 1 (Surada eólica): racha máxima ≥ 35,0 km/h y humedad relativa mínima ≤ 45 %.
+      - Modalidad 2 (Compresión adiabática / térmica): humedad relativa mínima ≤ 38 % con
+        temperatura máxima ≥ 28,0 °C o gran amplitud térmica (≥ 16,0 °C con racha ≥ 22,0 km/h).
+    """
+    df_d = df_daily.copy()
+    df_d["month"] = df_d["dt"].dt.month
+    df_d["amp"] = df_d["temp_max"] - df_d["temp_min"]
+
+    south_30_dates = set()
+    intraday_jumps_by_date: Dict[str, Dict[str, Any]] = {}
+
+    if df_30 is not None and not df_30.empty:
+        sub_s = df_30[
+            (df_30["wind_dir"] >= 120.0)
+            & (df_30["wind_dir"] <= 245.0)
+            & (df_30["humidity_min"] <= 45.0)
+        ]
+        cnts = sub_s.groupby("date").size()
+        south_30_dates = set(cnts[cnts >= 4].index)
+
+        # Calcular saltos térmicos intradiarios en ventanas de 3 horas (6 intervalos de 30 min)
+        df_30_sorted = df_30.sort_values("dt").copy()
+        df_30_sorted["jump_3h_c"] = df_30_sorted["temp_mean"].diff(6)
+        df_30_sorted["hum_drop_3h_pct"] = df_30_sorted["humidity_mean"].diff(6)
+
+        for d_str, grp in df_30_sorted.groupby("date"):
+            valid_j = grp.dropna(subset=["jump_3h_c"])
+            if not valid_j.empty:
+                idx_max_j = valid_j["jump_3h_c"].idxmax()
+                intraday_jumps_by_date[str(d_str)] = {
+                    "jump_3h_c": safe_round(valid_j.loc[idx_max_j, "jump_3h_c"], 1),
+                    "hum_drop_3h_pct": safe_round(valid_j.loc[idx_max_j, "hum_drop_3h_pct"], 1),
+                    "peak_time": valid_j.loc[idx_max_j, "dt"].strftime("%H:%M") if pd.notna(valid_j.loc[idx_max_j, "dt"]) else None,
+                }
+
+    cond_dir = ((df_d["wind_dir"] >= 120.0) & (df_d["wind_dir"] <= 245.0)) | (
+        df_d["date"].isin(south_30_dates)
+    )
+    cond_rain = df_d["rain_daily"].fillna(0.0) < 5.0
+
+    cond_wind_foehn = cond_dir & cond_rain & (df_d["humidity_min"] <= 45.0) & (df_d["wind_gust"] >= 35.0)
+    cond_therm_foehn = (
+        cond_dir
+        & cond_rain
+        & (df_d["humidity_min"] <= 38.0)
+        & ((df_d["temp_max"] >= 28.0) | ((df_d["amp"] >= 16.0) & (df_d["wind_gust"] >= 22.0)))
+    )
+
+    df_d["is_wind_foehn"] = cond_wind_foehn
+    df_d["is_therm_foehn"] = cond_therm_foehn
+    df_d["is_foehn"] = cond_wind_foehn | cond_therm_foehn
+
+    foehn_df = df_d[df_d["is_foehn"]].copy()
+    total_foehn = int(len(foehn_df))
+    wind_foehn_cnt = int(cond_wind_foehn.sum())
+    therm_foehn_cnt = int(cond_therm_foehn.sum())
+
+    monthly_counts: List[int] = []
+    for m in range(1, 13):
+        monthly_counts.append(int(df_d[df_d["month"] == m]["is_foehn"].sum()))
+
+    # Extremos dentro de los días de surada
+    if not foehn_df.empty:
+        i_fg = foehn_df["wind_gust"].idxmax()
+        max_fg_val = safe_round(foehn_df.loc[i_fg, "wind_gust"], 1)
+        max_fg_date = str(foehn_df.loc[i_fg, "date"])
+
+        i_ft = foehn_df["temp_max"].idxmax()
+        max_ft_val = safe_round(foehn_df.loc[i_ft, "temp_max"], 1)
+        max_ft_date = str(foehn_df.loc[i_ft, "date"])
+
+        i_fh = foehn_df["humidity_min"].idxmin()
+        min_fh_val = safe_round(foehn_df.loc[i_fh, "humidity_min"], 0)
+        min_fh_date = str(foehn_df.loc[i_fh, "date"])
+    else:
+        max_fg_val, max_fg_date = None, None
+        max_ft_val, max_ft_date = None, None
+        min_fh_val, min_fh_date = None, None
+
+    # Selección de los 8 episodios de surada más intensos del año
+    episodes_list: List[Dict[str, Any]] = []
+    if not foehn_df.empty:
+        # Puntuación compuesta para priorizar tanto grandes vendavales del sur como picos térmicos Foehn
+        foehn_df["foehn_score"] = (
+            foehn_df["wind_gust"].fillna(0.0) * 0.9
+            + foehn_df["temp_max"].fillna(0.0) * 1.4
+            + (50.0 - foehn_df["humidity_min"].fillna(50.0)).clip(lower=0.0) * 0.8
+        )
+        top_f = foehn_df.sort_values("foehn_score", ascending=False).head(8)
+        for _, r in top_f.iterrows():
+            d_str = str(r["date"])
+            if r["is_wind_foehn"] and r["is_therm_foehn"]:
+                subtype = "Surada mixta (eólica y térmica)"
+            elif r["is_wind_foehn"]:
+                subtype = "Surada eólica (vendaval del sur)"
+            else:
+                subtype = "Compresión adiabática cálida"
+
+            j_info = intraday_jumps_by_date.get(d_str, {})
+            episodes_list.append({
+                "date": d_str,
+                "subtype": subtype,
+                "temp_max": safe_round(r["temp_max"], 1),
+                "temp_min": safe_round(r["temp_min"], 1),
+                "temp_amp": safe_round(r["amp"], 1),
+                "humidity_min": safe_round(r["humidity_min"], 0),
+                "wind_gust": safe_round(r["wind_gust"], 1),
+                "wind_dir": safe_round(r["wind_dir"], 0),
+                "sector": deg_to_sector16(r["wind_dir"]) or "S",
+                "jump_3h_c": j_info.get("jump_3h_c"),
+                "hum_drop_3h_pct": j_info.get("hum_drop_3h_pct"),
+            })
+
+    foehn_dates_set = set(foehn_df["date"].astype(str).tolist())
+
+    return {
+        "total_foehn_days": total_foehn,
+        "wind_foehn_days": wind_foehn_cnt,
+        "thermal_foehn_days": therm_foehn_cnt,
+        "monthly_counts": monthly_counts,
+        "max_gust_kmh": max_fg_val,
+        "max_gust_date": max_fg_date,
+        "max_temp_c": max_ft_val,
+        "max_temp_date": max_ft_date,
+        "min_humidity_pct": min_fh_val,
+        "min_humidity_date": min_fh_date,
+        "top_episodes": episodes_list,
+        "foehn_dates": sorted(list(foehn_dates_set)),
+        "criteria_summary": (
+            "Rumbo en sector topográfico SE–S–SO–OSO (120°–245°, promedio diario o ≥2 h en serie de 30 min), "
+            "precipitación < 5 mm y bien racha ≥ 35 km/h con HR mín. ≤ 45 % (surada eólica) o bien HR mín. ≤ 38 % "
+            "con Tmáx ≥ 28 °C o amplitud ≥ 16 °C (compresión adiabática cálida)."
+        ),
+    }
+
+
 def compute_year_almanac(
     year: int,
     df_daily: pd.DataFrame,
@@ -805,6 +951,9 @@ def compute_year_almanac(
     wind_days_40 = int((df_d["wind_gust"] >= 40.0).sum())
     wind_days_60 = int((df_d["wind_gust"] >= 60.0).sum())
     wind_analysis = compute_wind_analysis(df_d, df_30)
+    foehn_analysis = compute_foehn_analysis(df_d, df_30, year)
+    foehn_dates_set = set(foehn_analysis["foehn_dates"])
+    df_d["foehn_flag"] = df_d["date"].astype(str).isin(foehn_dates_set).astype(int)
 
     # Humedad, presión y radiación
     hum_mean = safe_round(df_d["humidity_mean"].mean(), 1)
@@ -874,6 +1023,7 @@ def compute_year_almanac(
                 "frost_days": None,
                 "hot_days_30": None,
                 "tropical_nights": None,
+                "foehn_days": None,
             })
             continue
 
@@ -909,6 +1059,7 @@ def compute_year_almanac(
             "frost_days": int((sub["temp_min"] <= 0.0).sum()),
             "hot_days_30": int((sub["temp_max"] >= 30.0).sum()),
             "tropical_nights": int((sub["temp_min"] >= 20.0).sum()),
+            "foehn_days": int(sub["foehn_flag"].sum()),
         })
 
     # Serie diaria columnar completa del año (rellenando todos los días del calendario hasta el último día observado)
@@ -943,6 +1094,7 @@ def compute_year_almanac(
         "pressure_rel_max": col_to_list("pressure_rel_max", 1),
         "solar_max": col_to_list("solar", 1),
         "uvi_max": col_to_list("uvi", 0),
+        "foehn_flag": [int(v) if v is not None and not pd.isna(v) else 0 for v in df_indexed["foehn_flag"].tolist()],
     }
 
     editorial = EDITORIAL_CHRONICLES.get(year, {})
@@ -1020,6 +1172,9 @@ def compute_year_almanac(
                 "days_gust_ge_40": wind_days_40,
                 "days_gust_ge_60": wind_days_60,
                 "predominant_sector": wind_analysis["predominant_sector"],
+                "foehn_days": foehn_analysis["total_foehn_days"],
+                "wind_foehn_days": foehn_analysis["wind_foehn_days"],
+                "thermal_foehn_days": foehn_analysis["thermal_foehn_days"],
             },
             "atmosphere_and_solar": {
                 "humidity_mean_pct": hum_mean,
@@ -1040,6 +1195,7 @@ def compute_year_almanac(
             },
         },
         "wind_analysis": wind_analysis,
+        "foehn_analysis": foehn_analysis,
         "monthly": monthly_list,
         "daily_series": daily_series,
     }
@@ -1322,6 +1478,9 @@ def build_records_and_comparisons(
             "wind_gust_max_kmh": st_w["max_gust_kmh"],
             "wind_gust_max_date": st_w["max_gust_date"],
             "wind_days_40": st_w["days_gust_ge_40"],
+            "foehn_days": st_w["foehn_days"],
+            "wind_foehn_days": st_w["wind_foehn_days"],
+            "thermal_foehn_days": st_w["thermal_foehn_days"],
             "humidity_mean_pct": st_a["humidity_mean_pct"],
             "pressure_mean_hpa": st_a["pressure_mean_hpa"],
             "solar_max_wm2": st_a["solar_max_wm2"],
@@ -1338,6 +1497,7 @@ def build_records_and_comparisons(
         "rain_total": {},
         "rain_days_02": {},
         "wind_gust_max": {},
+        "foehn_days": {},
     }
     for y, alm in sorted(almanacs.items()):
         monthly_matrices["temp_mean"][str(y)] = [m["temp_mean"] for m in alm["monthly"]]
@@ -1346,6 +1506,7 @@ def build_records_and_comparisons(
         monthly_matrices["rain_total"][str(y)] = [m["rain_total"] for m in alm["monthly"]]
         monthly_matrices["rain_days_02"][str(y)] = [m["rain_days_02"] for m in alm["monthly"]]
         monthly_matrices["wind_gust_max"][str(y)] = [m["wind_gust_max"] for m in alm["monthly"]]
+        monthly_matrices["foehn_days"][str(y)] = [m["foehn_days"] for m in alm["monthly"]]
 
     # Medias mensuales de referencia (2022–2025)
     ref_monthly_temp = []

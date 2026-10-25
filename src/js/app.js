@@ -959,7 +959,7 @@
         return `
           <tr>
             <td><strong>${m.name}</strong></td>
-            <td class="num" colspan="10" style="text-align:center;color:var(--txt-muted)">Mes aún no observado o sin registros</td>
+            <td class="num" colspan="11" style="text-align:center;color:var(--txt-muted)">Mes aún no observado o sin registros</td>
           </tr>
         `;
       }
@@ -978,7 +978,34 @@
           <td class="num">${fmtNum(m.rain_days_02, 0)}</td>
           <td class="num">${fmtNum(m.rain_max_day, 1)} <small>(${fmtDateShortMonth(m.rain_max_date)})</small></td>
           <td class="num">${fmtNum(m.wind_gust_max, 1)}</td>
+          <td class="num">${fmtNum(m.foehn_days ?? 0, 0)}</td>
           <td class="num">${fmtNum(m.humidity_mean, 1)}%</td>
+        </tr>
+      `;
+    }).join('');
+
+    const foehn = alm.foehn_analysis || {
+      total_foehn_days: 0,
+      wind_foehn_days: 0,
+      thermal_foehn_days: 0,
+      top_episodes: [],
+      criteria_summary: '',
+    };
+    const foehnRowsHtml = (foehn.top_episodes || []).map((ep) => {
+      const jumpStr = ep.jump_3h_c !== null && ep.jump_3h_c !== undefined
+        ? `${fmtSignNum(ep.jump_3h_c, 1, '°C')} / ${fmtSignNum(ep.hum_drop_3h_pct, 0, '%')}`
+        : '— (serie diaria)';
+      return `
+        <tr>
+          <td><strong>${fmtDateES(ep.date, false)}</strong></td>
+          <td><span class="badge" style="background:var(--accent-heat-soft);color:var(--accent-heat)">${escapeHtml(ep.subtype)}</span></td>
+          <td class="num" style="color:var(--accent-heat)"><strong>${fmtNum(ep.temp_max, 1)} °C</strong></td>
+          <td class="num">${fmtNum(ep.temp_min, 1)} °C</td>
+          <td class="num">${fmtNum(ep.temp_amp, 1)} °C</td>
+          <td class="num"><strong>${fmtNum(ep.humidity_min, 0)} %</strong></td>
+          <td class="num"><strong>${fmtNum(ep.wind_gust, 1)} km/h</strong></td>
+          <td class="num">${escapeHtml(ep.sector)} (${fmtNum(ep.wind_dir, 0)}°)</td>
+          <td class="num mono">${jumpStr}</td>
         </tr>
       `;
     }).join('');
@@ -1198,6 +1225,66 @@
         </div>
       </section>
 
+      <!-- EVO-005: Análisis algorítmico de «suradas» y efecto Foehn -->
+      <section class="section-block" aria-labelledby="sec-foehn-title">
+        <div class="section-header">
+          <div>
+            <h3 id="sec-foehn-title" class="section-title">🔥 Análisis de episodios de «surada» y efecto Foehn (${alm.year})</h3>
+            <p class="section-subtitle">
+              Detección algorítmica de advecciones del cuadrante sur (canalización Alisas–divisoria pasiega, 120°–245°) con compresión adiabática y desecamiento brusco
+            </p>
+          </div>
+        </div>
+
+        <div class="kpi-grid" style="margin-bottom:18px">
+          <div class="kpi-card accent-heat">
+            <div class="kpi-label">Días con firma Foehn (${alm.year})</div>
+            <div class="kpi-value">${fmtNum(foehn.total_foehn_days, 0)} <span class="kpi-unit">días</span></div>
+            <div class="kpi-meta">${foehn.wind_foehn_days} suradas eólicas (≥35 km/h) · ${foehn.thermal_foehn_days} de compresión térmica</div>
+          </div>
+          <div class="kpi-card accent-wind">
+            <div class="kpi-label">Racha máxima en surada</div>
+            <div class="kpi-value">${foehn.max_gust_kmh !== null ? fmtNum(foehn.max_gust_kmh, 1) : '—'} <span class="kpi-unit">km/h</span></div>
+            <div class="kpi-meta">${foehn.max_gust_date ? `Registrada el ${fmtDateES(foehn.max_gust_date)}` : 'Sin registros'}</div>
+          </div>
+          <div class="kpi-card accent-heat">
+            <div class="kpi-label">Techo térmico bajo efecto Foehn</div>
+            <div class="kpi-value">${foehn.max_temp_c !== null ? fmtNum(foehn.max_temp_c, 1) : '—'} <span class="kpi-unit">°C</span></div>
+            <div class="kpi-meta">${foehn.max_temp_date ? `Alcanzado el ${fmtDateES(foehn.max_temp_date)}` : 'Sin registros'}</div>
+          </div>
+          <div class="kpi-card accent-solar">
+            <div class="kpi-label">Mínimo de humedad en surada</div>
+            <div class="kpi-value">${foehn.min_humidity_pct !== null ? fmtNum(foehn.min_humidity_pct, 0) : '—'} <span class="kpi-unit">%</span></div>
+            <div class="kpi-meta">${foehn.min_humidity_date ? `Resecamiento máximo el ${fmtDateES(foehn.min_humidity_date)}` : 'Sin registros'}</div>
+          </div>
+        </div>
+
+        <div class="callout callout-info" style="margin-bottom:16px;font-size:0.86rem">
+          <strong>Criterio físico aplicado (EVO-005):</strong> ${escapeHtml(foehn.criteria_summary || '')}
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Modalidad sinóptica</th>
+                <th class="num">T. máx.</th>
+                <th class="num">T. mín.</th>
+                <th class="num">Amplitud (ΔT)</th>
+                <th class="num">HR mín.</th>
+                <th class="num">Racha máx.</th>
+                <th class="num">Rumbo</th>
+                <th class="num">Salto máx. 3 h (ΔT / ΔHR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${foehnRowsHtml || '<tr><td colspan="9" style="text-align:center">No se detectaron episodios bajo este umbral.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- Ficha estadística exhaustiva del año -->
       <section class="section-block">
         <div class="section-header">
@@ -1258,6 +1345,7 @@
                 <tr><td>Velocidad media del viento</td><td class="num">${fmtNum(stW.mean_speed_kmh, 1)} km/h</td><td>Rumbo dominante: ${stW.predominant_sector}</td></tr>
                 <tr><td>Racha máxima de viento</td><td class="num"><strong>${fmtNum(stW.max_gust_kmh, 1)} km/h</strong></td><td>${fmtDateES(stW.max_gust_date)}${stW.max_gust_time ? ` (${stW.max_gust_time} h)` : ''}</td></tr>
                 <tr><td>Días con rachas ≥ 40 km/h / ≥ 60 km/h</td><td class="num">${stW.days_gust_ge_40} días</td><td>Rachas ≥ 60 km/h: ${stW.days_gust_ge_60} días</td></tr>
+                <tr><td>Días con firma de «surada» / efecto Foehn</td><td class="num"><strong>${foehn.total_foehn_days} días</strong></td><td>Eólicas: ${foehn.wind_foehn_days} d · Compresión térmica: ${foehn.thermal_foehn_days} d</td></tr>
                 <tr><td>Humedad relativa media / mínima</td><td class="num">${fmtNum(stA.humidity_mean_pct, 1)} %</td><td>Mín.: ${fmtNum(stA.humidity_min_pct, 0)} % (${fmtDateShortMonth(stA.humidity_min_date)})</td></tr>
                 <tr><td>Presión atmosférica máx. / mín.</td><td class="num">${fmtNum(stA.pressure_max_hpa, 1)} hPa</td><td>Mín.: ${fmtNum(stA.pressure_min_hpa, 1)} hPa (${fmtDateShortMonth(stA.pressure_min_date)})</td></tr>
                 <tr><td>Radiación solar máx. / Horas sol est.</td><td class="num">${fmtNum(stA.solar_max_wm2 || stA.solar_max_raw_wm2, 1)} W/m²</td><td>${stA.estimated_sunshine_hours !== null ? `${fmtNum(stA.estimated_sunshine_hours, 1)} h (≥120 W/m²)` : 'Serie 30 min no disponible'}</td></tr>
@@ -1289,6 +1377,7 @@
                 <th class="num">Días ≥0,2 mm</th>
                 <th class="num">Máx. 24h (mm)</th>
                 <th class="num">Racha máx. (km/h)</th>
+                <th class="num">Días Foehn</th>
                 <th class="num">Humedad med.</th>
               </tr>
             </thead>
@@ -1307,6 +1396,7 @@
                 <td class="num">${fmtNum(stP.days_ge_02mm, 0)}</td>
                 <td class="num">${fmtNum(stP.max_daily_mm, 1)}</td>
                 <td class="num">${fmtNum(stW.max_gust_kmh, 1)}</td>
+                <td class="num">${fmtNum(foehn.total_foehn_days, 0)}</td>
                 <td class="num">${fmtNum(stA.humidity_mean_pct, 1)}%</td>
               </tr>
             </tfoot>
@@ -1860,6 +1950,7 @@
             <option value="rain30">Lluvia muy fuerte (≥ 30 mm)</option>
             <option value="wind40">Viento fuerte (Racha ≥ 40 km/h)</option>
             <option value="wind60">Temporal de viento (Racha ≥ 60 km/h)</option>
+            <option value="foehn">Episodios de «surada» / efecto Foehn</option>
           </select>
         </div>
         <div class="control-group">
@@ -1990,6 +2081,7 @@
           humidity_mean: ds.humidity_mean[i],
           pressure_rel: ds.pressure_rel[i],
           solar_max: ds.solar_max[i],
+          foehn_flag: ds.foehn_flag ? ds.foehn_flag[i] : 0,
         };
         if (rec.temp_mean === null && rec.rain_daily === null) return;
 
@@ -2002,6 +2094,7 @@
         if (episodeFilter === 'rain30' && !(rec.rain_daily !== null && rec.rain_daily >= 30)) return;
         if (episodeFilter === 'wind40' && !(rec.wind_gust !== null && rec.wind_gust >= 40)) return;
         if (episodeFilter === 'wind60' && !(rec.wind_gust !== null && rec.wind_gust >= 60)) return;
+        if (episodeFilter === 'foehn' && rec.foehn_flag !== 1) return;
 
         rows.push(rec);
       });
@@ -2374,6 +2467,7 @@
         <td class="num">${r.frost_days}</td>
         <td class="num">${r.hot_days_30}</td>
         <td class="num">${r.tropical_nights}</td>
+        <td class="num"><strong>${r.foehn_days ?? '—'}</strong></td>
         <td class="num">${fmtNum(r.wind_gust_max_kmh, 1)} km/h</td>
       </tr>
     `).join('');
@@ -2524,6 +2618,7 @@
                 <th class="num">Heladas</th>
                 <th class="num">Días ≥30 °C</th>
                 <th class="num">Noches trop.</th>
+                <th class="num">Días Foehn</th>
                 <th class="num">Racha máx.</th>
               </tr>
             </thead>
@@ -2545,6 +2640,7 @@
                 <td class="num">11,8</td>
                 <td class="num">15,3</td>
                 <td class="num">0,3</td>
+                <td class="num">26,0</td>
                 <td class="num">97,2 km/h (máx.)</td>
               </tr>
             </tfoot>
@@ -2708,6 +2804,7 @@
           { label: 'Calor (≥30 °C)', data: rows.map((r) => r.hot_days_30), backgroundColor: pal.heat },
           { label: 'Lluvia muy fuerte (≥30 mm)', data: rows.map((r) => r.rain_days_30), backgroundColor: pal.rain },
           { label: 'Viento fuerte (≥40 km/h)', data: rows.map((r) => r.wind_days_40), backgroundColor: pal.wind },
+          { label: 'Suradas / Foehn', data: rows.map((r) => r.foehn_days ?? 0), backgroundColor: pal.solar },
         ],
       },
       options: {

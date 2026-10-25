@@ -139,6 +139,18 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         non_null_2026 = [v for v in cum["years"]["2026"] if v is not None]
         self.assertAlmostEqual(non_null_2026[-1], self.almanacs[2026]["stats"]["precipitation"]["total_mm"], places=1)
 
+    def test_foehn_detection_consistency(self) -> None:
+        # EVO-005: Verificar coherencia de la detección algorítmica de suradas / efecto Foehn
+        for y, alm in self.almanacs.items():
+            self.assertIn("foehn_analysis", alm)
+            fa = alm["foehn_analysis"]
+            self.assertEqual(sum(fa["monthly_counts"]), fa["total_foehn_days"])
+            self.assertEqual(sum(alm["daily_series"]["foehn_flag"]), fa["total_foehn_days"])
+            self.assertGreaterEqual(fa["total_foehn_days"], 10)
+        # Verificar detección de episodios emblemáticos de surada eólica (Karlotta 2024-02-08 y Herminia 2025-01-26)
+        self.assertIn("2024-02-08", self.almanacs[2024]["foehn_analysis"]["foehn_dates"])
+        self.assertIn("2025-01-26", self.almanacs[2025]["foehn_analysis"]["foehn_dates"])
+
     def test_web_structure_and_static_serving(self) -> None:
         # Verificar existencia de archivos clave
         required_paths = [
