@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -114,6 +115,21 @@ def validate_directory(data_dir: Path) -> List[str]:
             rain = ds["rain_daily"][i]
             if rain is not None and rain < 0:
                 errors.append(f"[{year} {d_str}] Lluvia negativa: {rain}")
+
+    # 3. Salvaguarda de seguridad, privacidad doméstica e identificadores físicos en los JSONs
+    forbidden_json_patterns = [
+        ("Credencial o token expuesto", re.compile(r"(?:ghp_[A-Za-z0-9]+|github_pat_[A-Za-z0-9_]+|APPLICATION_KEY|API_KEY|PASSKEY)")),
+        ("Dirección MAC de hardware expuesta", re.compile(r"\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b")),
+        ("Dirección IP privada local expuesta", re.compile(r"\b(?:192\.168\.|10\.\d+\.|172\.(?:1[6-9]|2\d|3[01])\.)\d+\.\d+\b")),
+        ("Ruta absoluta de usuario local expuesta", re.compile(r"/home/(?!index\b)[a-zA-Z0-9_-]+")),
+        ("Coordenada doméstica de alta precisión (>3 decimales) expuesta", re.compile(r"43[.,]3409\d*|3[.,]6698\d*")),
+        ("Variable de sensor interior doméstico expuesta", re.compile(r'"(?:interior|indoor|tempin|humidityin|dewpointin|feelslikein)"', re.IGNORECASE)),
+    ]
+    for fname in REQUIRED_FILES:
+        raw_text = (data_dir / fname).read_text(encoding="utf-8")
+        for label, pat in forbidden_json_patterns:
+            if pat.search(raw_text):
+                errors.append(f"[SEGURIDAD/PRIVACIDAD en {fname}] {label}")
 
     return errors
 

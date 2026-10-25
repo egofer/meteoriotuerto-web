@@ -9,7 +9,7 @@ Este documento describe con rigor metodológico los procedimientos empleados en 
 
 ### 2.1. Coordenadas y entorno fisiográfico
 - **Localidad y municipio:** Barrio de Arriba, Riotuerto (Cantabria, España).
-- **Coordenadas geográficas:** `43.341° N, -3.670° O` (sistema de referencia WGS84 / EPSG:4326).
+- **Coordenadas geográficas de referencia (nivel barrio):** `43.341° N, 3.670° W` (`43.341, -3.670` en sistema WGS84 / EPSG:4326, redondeadas a 3 decimales —~110 m de resolución espacial— para preservar la privacidad doméstica sin merma del contexto topográfico y climático).
 - **Altitud:** 115 metros sobre el nivel del mar.
 - **Zona horaria de referencia:** `Europe/Madrid` (UTC+1 en horario de invierno, UTC+2 en horario de verano).
 - **Singularidades topográficas:** Ubicada en el fondo del valle del río Covadal (afluente de la cuenca del Miera), a 14 km de la costa cantábrica y a 5 km del puerto de Alisas. Presenta una acusada retención orográfica ante flujos húmedos del noroeste y episodios de recalentamiento adiabático (efecto Foehn) durante advecciones del sur.

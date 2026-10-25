@@ -1,12 +1,29 @@
-# Variables de entorno, secretos y registros locales
+# Variables de entorno, credenciales, claves y secretos locales
 .env
 .env.*
+*.env
+*.env.*
 *.env.local
+.netrc
+*credentials*
+*secret*
+*token*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
 *.log
 logs/
 
-# Documentación interna de contexto y sesiones locales (no publicar en GitHub)
+# Documentación interna de contexto, memoria y sesiones locales (nunca publicar en GitHub)
 contexto/
+/contexto/
+scratch/
+tmp/
+temp/
 
 # Cachés de datos brutos y artefactos temporales de construcción
 .cache/
@@ -14,16 +31,21 @@ _site/
 __pycache__/
 *.py[cod]
 *$py.class
+*.sqlite*
+*.db
 
 # Entornos virtuales
 .venv/
 venv/
 env/
 
-# Archivos del sistema operativo y editores
+# Archivos del sistema operativo, copias de respaldo y editores
 .DS_Store
 Thumbs.db
 *~
+*.bak
+*.orig
+*.swp
 .~lock.*
 .vscode/
 .idea/

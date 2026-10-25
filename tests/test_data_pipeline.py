@@ -212,6 +212,57 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             finally:
                 httpd.shutdown()
 
+    def test_security_and_privacy_guarantees(self) -> None:
+        """
+        Verifica que ningún archivo rastreado por Git (ni los datos JSON publicados)
+        filtre credenciales, identificadores físicos (MAC, PASSKEY, IPs locales),
+        datos de privacidad doméstica (sensores interiores o coordenadas de 6 decimales)
+        ni rutas o archivos sensibles del equipo local (contexto/, .env, logs).
+        """
+        import subprocess
+
+        tracked = subprocess.check_output(
+            ["git", "-C", str(ROOT_DIR), "ls-files"], text=True
+        ).splitlines()
+
+        for rel_path in tracked:
+            # 1. Prohibir archivos de contexto, secretos o logs en el índice de Git
+            self.assertFalse(rel_path.startswith("contexto/"), f"Archivo de contexto filtrado en Git: {rel_path}")
+            self.assertFalse(rel_path.startswith(".env"), f"Archivo .env filtrado en Git: {rel_path}")
+            self.assertFalse(rel_path.endswith(".log"), f"Archivo .log filtrado en Git: {rel_path}")
+            self.assertFalse(rel_path.endswith(".key") or rel_path.endswith(".pem"), f"Clave privada en Git: {rel_path}")
+
+            if rel_path in ("tests/test_data_pipeline.py", "scripts/validate_data.py"):
+                continue
+
+            full_p = ROOT_DIR / rel_path
+            txt = full_p.read_text(encoding="utf-8")
+
+            # 2. Prohibir tokens o credenciales reales
+            self.assertIsNone(
+                re.search(r"(?:ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|PASSKEY\s*=)", txt),
+                f"Posible token o credencial en {rel_path}",
+            )
+            # 3. Prohibir direcciones MAC e IPs privadas de red doméstica
+            self.assertIsNone(
+                re.search(r"\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b", txt),
+                f"Dirección MAC física detectada en {rel_path}",
+            )
+            self.assertIsNone(
+                re.search(r"\b(?:192\.168\.|10\.\d+\.|172\.(?:1[6-9]|2\d|3[01])\.)\d+\.\d+\b", txt),
+                f"Dirección IP privada local detectada en {rel_path}",
+            )
+            # 4. Prohibir rutas locales del sistema (/home/<usuario>/)
+            self.assertIsNone(
+                re.search(r"/home/(?!index\b)[a-zA-Z0-9_-]+", txt),
+                f"Ruta del sistema local detectada en {rel_path}",
+            )
+            # 5. Prohibir coordenadas domésticas exactas de >3 decimales (43.340920 / 3.669827)
+            self.assertIsNone(
+                re.search(r"43[.,]3409\d*|3[.,]6698\d*", txt),
+                f"Coordenada doméstica de alta precisión detectada en {rel_path}",
+            )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
