@@ -1225,42 +1225,43 @@
         </div>
       </section>
 
-      <!-- EVO-005: Análisis algorítmico de «suradas» y efecto Foehn -->
+      <!-- EVO-005: Análisis algorítmico de patrones compatibles con «suradas» y efecto Foehn -->
       <section class="section-block" aria-labelledby="sec-foehn-title">
         <div class="section-header">
           <div>
-            <h3 id="sec-foehn-title" class="section-title">🔥 Análisis de episodios de «surada» y efecto Foehn (${alm.year})</h3>
+            <h3 id="sec-foehn-title" class="section-title">🔥 Patrones compatibles con episodios de «surada» y efecto Foehn (${alm.year})</h3>
             <p class="section-subtitle">
-              Detección algorítmica de advecciones del cuadrante sur (canalización Alisas–divisoria pasiega, 120°–245°) con compresión adiabática y desecamiento brusco
+              El algoritmo identifica en los registros en superficie patrones termohigrométricos y eólicos compatibles con este fenómeno (canalización topográfica 120°–245°, recalentamiento y caída brusca de humedad)
             </p>
           </div>
         </div>
 
         <div class="kpi-grid" style="margin-bottom:18px">
           <div class="kpi-card accent-heat">
-            <div class="kpi-label">Días con firma Foehn (${alm.year})</div>
+            <div class="kpi-label">Días con patrón compatible (${alm.year})</div>
             <div class="kpi-value">${fmtNum(foehn.total_foehn_days, 0)} <span class="kpi-unit">días</span></div>
-            <div class="kpi-meta">${foehn.wind_foehn_days} suradas eólicas (≥35 km/h) · ${foehn.thermal_foehn_days} de compresión térmica</div>
+            <div class="kpi-meta">${foehn.wind_foehn_days} de perfil eólico (≥35 km/h) · ${foehn.thermal_foehn_days} de perfil térmico</div>
           </div>
           <div class="kpi-card accent-wind">
-            <div class="kpi-label">Racha máxima en surada</div>
+            <div class="kpi-label">Racha máxima en estos episodios</div>
             <div class="kpi-value">${foehn.max_gust_kmh !== null ? fmtNum(foehn.max_gust_kmh, 1) : '—'} <span class="kpi-unit">km/h</span></div>
             <div class="kpi-meta">${foehn.max_gust_date ? `Registrada el ${fmtDateES(foehn.max_gust_date)}` : 'Sin registros'}</div>
           </div>
           <div class="kpi-card accent-heat">
-            <div class="kpi-label">Techo térmico bajo efecto Foehn</div>
+            <div class="kpi-label">Techo térmico en patrón Foehn</div>
             <div class="kpi-value">${foehn.max_temp_c !== null ? fmtNum(foehn.max_temp_c, 1) : '—'} <span class="kpi-unit">°C</span></div>
             <div class="kpi-meta">${foehn.max_temp_date ? `Alcanzado el ${fmtDateES(foehn.max_temp_date)}` : 'Sin registros'}</div>
           </div>
           <div class="kpi-card accent-solar">
-            <div class="kpi-label">Mínimo de humedad en surada</div>
+            <div class="kpi-label">Mínimo de humedad en estos días</div>
             <div class="kpi-value">${foehn.min_humidity_pct !== null ? fmtNum(foehn.min_humidity_pct, 0) : '—'} <span class="kpi-unit">%</span></div>
             <div class="kpi-meta">${foehn.min_humidity_date ? `Resecamiento máximo el ${fmtDateES(foehn.min_humidity_date)}` : 'Sin registros'}</div>
           </div>
         </div>
 
         <div class="callout callout-info" style="margin-bottom:16px;font-size:0.86rem">
-          <strong>Criterio físico aplicado (EVO-005):</strong> ${escapeHtml(foehn.criteria_summary || '')}
+          <strong>Nota metodológica — Identificación de patrones compatibles (EVO-005):</strong>
+          Dado que una estación meteorológica en superficie registra variables locales en un único punto del valle y no el campo barométrico sinóptico en altura, <strong>este algoritmo identifica patrones instrumentales compatibles con el fenómeno de «surada» / efecto Foehn</strong>. ${escapeHtml(foehn.criteria_summary || '')}
         </div>
 
         <div class="table-responsive">
@@ -1345,7 +1346,7 @@
                 <tr><td>Velocidad media del viento</td><td class="num">${fmtNum(stW.mean_speed_kmh, 1)} km/h</td><td>Rumbo dominante: ${stW.predominant_sector}</td></tr>
                 <tr><td>Racha máxima de viento</td><td class="num"><strong>${fmtNum(stW.max_gust_kmh, 1)} km/h</strong></td><td>${fmtDateES(stW.max_gust_date)}${stW.max_gust_time ? ` (${stW.max_gust_time} h)` : ''}</td></tr>
                 <tr><td>Días con rachas ≥ 40 km/h / ≥ 60 km/h</td><td class="num">${stW.days_gust_ge_40} días</td><td>Rachas ≥ 60 km/h: ${stW.days_gust_ge_60} días</td></tr>
-                <tr><td>Días con firma de «surada» / efecto Foehn</td><td class="num"><strong>${foehn.total_foehn_days} días</strong></td><td>Eólicas: ${foehn.wind_foehn_days} d · Compresión térmica: ${foehn.thermal_foehn_days} d</td></tr>
+                <tr><td>Días con patrón compatible con «surada» / Foehn</td><td class="num"><strong>${foehn.total_foehn_days} días</strong></td><td>Perfil eólico: ${foehn.wind_foehn_days} d · Perfil térmico: ${foehn.thermal_foehn_days} d</td></tr>
                 <tr><td>Humedad relativa media / mínima</td><td class="num">${fmtNum(stA.humidity_mean_pct, 1)} %</td><td>Mín.: ${fmtNum(stA.humidity_min_pct, 0)} % (${fmtDateShortMonth(stA.humidity_min_date)})</td></tr>
                 <tr><td>Presión atmosférica máx. / mín.</td><td class="num">${fmtNum(stA.pressure_max_hpa, 1)} hPa</td><td>Mín.: ${fmtNum(stA.pressure_min_hpa, 1)} hPa (${fmtDateShortMonth(stA.pressure_min_date)})</td></tr>
                 <tr><td>Radiación solar máx. / Horas sol est.</td><td class="num">${fmtNum(stA.solar_max_wm2 || stA.solar_max_raw_wm2, 1)} W/m²</td><td>${stA.estimated_sunshine_hours !== null ? `${fmtNum(stA.estimated_sunshine_hours, 1)} h (≥120 W/m²)` : 'Serie 30 min no disponible'}</td></tr>
@@ -1950,7 +1951,7 @@
             <option value="rain30">Lluvia muy fuerte (≥ 30 mm)</option>
             <option value="wind40">Viento fuerte (Racha ≥ 40 km/h)</option>
             <option value="wind60">Temporal de viento (Racha ≥ 60 km/h)</option>
-            <option value="foehn">Episodios de «surada» / efecto Foehn</option>
+            <option value="foehn">Patrones compatibles con «surada» / efecto Foehn</option>
           </select>
         </div>
         <div class="control-group">

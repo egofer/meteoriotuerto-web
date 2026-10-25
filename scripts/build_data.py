@@ -841,9 +841,10 @@ def compute_foehn_analysis(
         "top_episodes": episodes_list,
         "foehn_dates": sorted(list(foehn_dates_set)),
         "criteria_summary": (
-            "Rumbo en sector topográfico SE–S–SO–OSO (120°–245°, promedio diario o ≥2 h en serie de 30 min), "
-            "precipitación < 5 mm y bien racha ≥ 35 km/h con HR mín. ≤ 45 % (surada eólica) o bien HR mín. ≤ 38 % "
-            "con Tmáx ≥ 28 °C o amplitud ≥ 16 °C (compresión adiabática cálida)."
+            "El algoritmo identifica patrones instrumentales en superficie compatibles con episodios de «surada» y efecto Foehn "
+            "(sin sustituir un diagnóstico sinóptico tridimensional): rumbo en el sector topográfico SE–S–SO–OSO "
+            "(120°–245°, promedio diario o ≥2 h en serie de 30 min), precipitación < 5 mm y bien racha ≥ 35 km/h con "
+            "HR mín. ≤ 45 % (patrón eólico) o bien HR mín. ≤ 38 % con Tmáx ≥ 28 °C o amplitud ≥ 16 °C (patrón de compresión adiabática cálida)."
         ),
     }
 
