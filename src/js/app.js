@@ -316,7 +316,7 @@
             </p>
             <p class="location-desc">
               La estación meteorológica automática está instalada en una pradera abierta en la localidad de <strong>Barrio de Arriba</strong> (115 m s. n. m.),
-              un enclave caracterizado por un microclima de gran personalidad:
+              un enclave de fondo de valle con un marcado régimen pluviométrico orográfico y acusadas oscilaciones por efecto Foehn e inversión térmica:
             </p>
             <ul class="location-highlights">
               <li><strong>Retención orográfica Cantábrica:</strong> a solo 14 km del mar Cantábrico, las masas de aire húmedo del noroeste quedan retenidas contra la barrera montañosa, generando una elevada pluviosidad (1.600 a más de 2.100 mm anuales).</li>
