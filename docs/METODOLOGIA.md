@@ -76,6 +76,14 @@ Antes de generar los productos JSON, el motor de procesamiento (`scripts/build_d
 - **Irradiancia solar máxima validada:** Valor máximo en $\text{W/m}^2$ que no supere la constante solar extraterrestre ($1.361\text{ W/m}^2$).
 - **Horas de insolación directa estimada:** Siguiendo el criterio de la OMM, suma de intervalos semihorarios con irradiancia media $\ge 120\text{ W/m}^2$ multiplicada por $0,5\text{ h}$.
 
+### 4.5. Identificación algorítmica de patrones compatibles con «surada» y efecto Foehn (EVO-005)
+Dado que una estación meteorológica en superficie registra variables locales en un único punto del valle y no el campo barométrico sinóptico tridimensional, el procesador identifica **patrones instrumentales compatibles con episodios de «surada» / efecto Foehn** cuando concurren:
+1. **Umbral direccional empírico (`120°–245°`):** Rumbo medio diario o al menos 4 intervalos semihorarios ($\ge 2\text{ h}$) con humedad relativa $\le 45\text{ \%}$ comprendidos entre $120^\circ$ y $245^\circ$. Este intervalo amplía ligeramente el cuadrante sur meteorológico estándar ($135^\circ\text{–}225^\circ$, SE–S–SO) de forma empírica para cubrir la canalización local del flujo observada en la veleta de Barrio de Arriba tanto en episodios de compresión térmica encauzados desde el SE–SSE ($124^\circ\text{–}159^\circ$) como en vendavales del SSO–SO ($203^\circ\text{–}233^\circ$).
+2. **Ausencia de precipitación frontal relevante:** Precipitación diaria $< 5,0\text{ mm}$.
+3. **Firma termohigrométrica o eólica:**
+   - *Patrón eólico:* racha máxima diaria $\ge 35,0\text{ km/h}$ y humedad relativa mínima $\le 45\text{ \%}$.
+   - *Patrón de compresión adiabática cálida:* humedad relativa mínima $\le 38\text{ \%}$ acompañada de temperatura máxima $\ge 28,0\text{ °C}$ o amplitud térmica diaria $\ge 16,0\text{ °C}$ (con racha $\ge 22,0\text{ km/h}$).
+
 ---
 
 ## 5. Control de calidad y tratamiento de anomalías

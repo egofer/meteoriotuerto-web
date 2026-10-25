@@ -1231,7 +1231,7 @@
           <div>
             <h3 id="sec-foehn-title" class="section-title">🔥 Patrones compatibles con episodios de «surada» y efecto Foehn (${alm.year})</h3>
             <p class="section-subtitle">
-              El algoritmo identifica en los registros en superficie patrones termohigrométricos y eólicos compatibles con este fenómeno (canalización topográfica 120°–245°, recalentamiento y caída brusca de humedad)
+              El algoritmo identifica en los registros en superficie patrones termohigrométricos y eólicos compatibles con este fenómeno (umbral empírico de veleta 120°–245°, recalentamiento y caída brusca de humedad)
             </p>
           </div>
         </div>

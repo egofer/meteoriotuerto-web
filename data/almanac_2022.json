@@ -482,7 +482,7 @@
       "2022-12-19",
       "2022-12-31"
     ],
-    "criteria_summary": "El algoritmo identifica patrones instrumentales en superficie compatibles con episodios de «surada» y efecto Foehn (sin sustituir un diagnóstico sinóptico tridimensional): rumbo en el sector topográfico SE–S–SO–OSO (120°–245°, promedio diario o ≥2 h en serie de 30 min), precipitación < 5 mm y bien racha ≥ 35 km/h con HR mín. ≤ 45 % (patrón eólico) o bien HR mín. ≤ 38 % con Tmáx ≥ 28 °C o amplitud ≥ 16 °C (patrón de compresión adiabática cálida)."
+    "criteria_summary": "El algoritmo identifica patrones instrumentales en superficie compatibles con episodios de «surada» y efecto Foehn (sin sustituir un diagnóstico sinóptico tridimensional): rumbo entre 120° y 245° —umbral empírico adoptado para cubrir la canalización local del viento de componente sur observada en la veleta de la estación, ampliando el cuadrante sur meteorológico estándar (135°–225°)— en el promedio diario o durante ≥2 h en la serie de 30 min, precipitación < 5 mm y bien racha ≥ 35 km/h con HR mín. ≤ 45 % (patrón eólico) o bien HR mín. ≤ 38 % con Tmáx ≥ 28 °C o amplitud ≥ 16 °C (patrón de compresión adiabática cálida)."
   },
   "monthly": [
     {

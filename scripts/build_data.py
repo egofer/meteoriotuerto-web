@@ -706,14 +706,16 @@ def compute_foehn_analysis(
     df_daily: pd.DataFrame, df_30: Optional[pd.DataFrame], year: int
 ) -> Dict[str, Any]:
     """
-    EVO-005: Detección algorítmica de episodios de «surada» / efecto Foehn en el valle de Riotuerto.
-    Aplica una definición física explícita adaptada a la canalización topográfica desde el puerto
-    de Alisas (SE) hasta la divisoria pasiega (OSO), arco 120°–245°:
+    EVO-005: Identificación algorítmica de patrones instrumentales compatibles con episodios de
+    «surada» / efecto Foehn en Barrio de Arriba (Riotuerto).
+    Utiliza el umbral direccional empírico 120°–245° (ampliando el cuadrante sur meteorológico
+    estándar 135°–225° para cubrir la canalización local del flujo por el relieve del valle
+    observada en la veleta de la estación):
       - Condición direccional: rumbo medio diario entre 120° y 245° (SE–S–SO–OSO) o al menos
         4 intervalos semihorarios (≥ 2 h) en dicho sector con humedad relativa mínima ≤ 45 %.
       - Ausencia de precipitación frontal relevante: lluvia diaria < 5,0 mm.
-      - Modalidad 1 (Surada eólica): racha máxima ≥ 35,0 km/h y humedad relativa mínima ≤ 45 %.
-      - Modalidad 2 (Compresión adiabática / térmica): humedad relativa mínima ≤ 38 % con
+      - Modalidad 1 (Perfil eólico): racha máxima ≥ 35,0 km/h y humedad relativa mínima ≤ 45 %.
+      - Modalidad 2 (Perfil de compresión térmica): humedad relativa mínima ≤ 38 % con
         temperatura máxima ≥ 28,0 °C o gran amplitud térmica (≥ 16,0 °C con racha ≥ 22,0 km/h).
     """
     df_d = df_daily.copy()
@@ -842,9 +844,11 @@ def compute_foehn_analysis(
         "foehn_dates": sorted(list(foehn_dates_set)),
         "criteria_summary": (
             "El algoritmo identifica patrones instrumentales en superficie compatibles con episodios de «surada» y efecto Foehn "
-            "(sin sustituir un diagnóstico sinóptico tridimensional): rumbo en el sector topográfico SE–S–SO–OSO "
-            "(120°–245°, promedio diario o ≥2 h en serie de 30 min), precipitación < 5 mm y bien racha ≥ 35 km/h con "
-            "HR mín. ≤ 45 % (patrón eólico) o bien HR mín. ≤ 38 % con Tmáx ≥ 28 °C o amplitud ≥ 16 °C (patrón de compresión adiabática cálida)."
+            "(sin sustituir un diagnóstico sinóptico tridimensional): rumbo entre 120° y 245° —umbral empírico adoptado "
+            "para cubrir la canalización local del viento de componente sur observada en la veleta de la estación, ampliando "
+            "el cuadrante sur meteorológico estándar (135°–225°)— en el promedio diario o durante ≥2 h en la serie de 30 min, "
+            "precipitación < 5 mm y bien racha ≥ 35 km/h con HR mín. ≤ 45 % (patrón eólico) o bien HR mín. ≤ 38 % "
+            "con Tmáx ≥ 28 °C o amplitud ≥ 16 °C (patrón de compresión adiabática cálida)."
         ),
     }
 
