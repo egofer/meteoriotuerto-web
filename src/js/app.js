@@ -2225,11 +2225,12 @@
       }
 
       // Media de referencia 2022–2025 (curva punteada contrastada)
+      const baselineColor = STATE.theme === 'dark' ? '#e2e8f0' : '#1e293b';
       cumDatasets.unshift({
         label: `Media referencia 2022–2025 (${fmtNum(ref.mean_annual_rain_mm, 1)} mm)`,
         data: cum.baseline_mean,
-        borderColor: isDarkMode() ? '#e2e8f0' : '#1e293b',
-        backgroundColor: isDarkMode() ? '#e2e8f0' : '#1e293b',
+        borderColor: baselineColor,
+        backgroundColor: baselineColor,
         borderDash: [6, 4],
         borderWidth: 3.2,
         pointRadius: 0,
