@@ -1331,6 +1331,44 @@ html[data-theme="dark"] .btn-primary {
   color: rgba(233, 242, 238, 0.68);
 }
 
+/* Indicadores de lluvia acumulada (EVO-001) */
+.cum-rain-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.cum-kpi-box {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cum-kpi-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--txt-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cum-kpi-val {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+}
+
+.cum-kpi-sub {
+  font-size: 0.78rem;
+  color: var(--txt-secondary);
+}
+
 /* Responsividad móvil y tableta */
 @media (max-width: 900px) {
   .editorial-columns {

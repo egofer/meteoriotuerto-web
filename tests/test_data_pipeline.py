@@ -125,6 +125,20 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertEqual(ref["excluded_provisional"], [2026])
         self.assertAlmostEqual(ref["mean_annual_rain_mm"], 1875.0, places=1)
 
+    def test_cumulative_precipitation_curve(self) -> None:
+        cum = self.comparisons.get("cumulative_precipitation")
+        self.assertIsNotNone(cum, "Falta la clave cumulative_precipitation en comparisons.json")
+        self.assertEqual(len(cum["calendar_days"]), 366)
+        self.assertEqual(len(cum["labels"]), 366)
+        self.assertEqual(len(cum["baseline_mean"]), 366)
+        self.assertAlmostEqual(cum["baseline_mean"][-1], 1875.0, places=1)
+        for y in [2022, 2023, 2024, 2025]:
+            alm_total = self.almanacs[y]["stats"]["precipitation"]["total_mm"]
+            self.assertAlmostEqual(cum["years"][str(y)][-1], alm_total, places=1)
+        # Verificar que 2026 termina con el total observado hasta el momento
+        non_null_2026 = [v for v in cum["years"]["2026"] if v is not None]
+        self.assertAlmostEqual(non_null_2026[-1], self.almanacs[2026]["stats"]["precipitation"]["total_mm"], places=1)
+
     def test_web_structure_and_static_serving(self) -> None:
         # Verificar existencia de archivos clave
         required_paths = [

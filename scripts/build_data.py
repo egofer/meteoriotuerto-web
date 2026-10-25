@@ -1356,6 +1356,59 @@ def build_records_and_comparisons(
         ref_monthly_temp.append(round(float(np.mean(t_vals)), 1) if t_vals else None)
         ref_monthly_rain.append(round(float(np.mean(r_vals)), 1) if r_vals else None)
 
+    # -------------------------------------------------------------------------
+    # Curvas de precipitación acumulada diaria (EVO-001: comparativa interanual 366 días)
+    # -------------------------------------------------------------------------
+    ref_366_dates = pd.date_range("2024-01-01", "2024-12-31")
+    cal_md_keys = [d.strftime("%m-%d") for d in ref_366_dates]
+    cal_labels = [f"{d.day} {MONTH_SHORT_ES[d.month - 1].lower()}" for d in ref_366_dates]
+
+    cum_rain_by_year: Dict[str, List[Optional[float]]] = {}
+    for y, alm in sorted(almanacs.items()):
+        ds = alm["daily_series"]
+        date_to_rain = {d_str[5:]: (r if r is not None else 0.0) for d_str, r in zip(ds["dates"], ds["rain_daily"])}
+        is_prov = alm["is_provisional"]
+        last_date = ds["dates"][-1] if ds["dates"] else ""
+        last_md = last_date[5:] if last_date else ""
+
+        cum_series: List[Optional[float]] = []
+        running_sum = 0.0
+        for md in cal_md_keys:
+            if is_prov and md > last_md:
+                cum_series.append(None)
+            else:
+                if md in date_to_rain:
+                    running_sum += date_to_rain[md]
+                cum_series.append(round(running_sum, 1))
+        cum_rain_by_year[str(y)] = cum_series
+
+        # Añadir también 'rain_accum' a cada 'daily_series' de cada almanaque individual
+        cum_running_alm = 0.0
+        accum_list = []
+        for r_val in ds["rain_daily"]:
+            if r_val is not None:
+                cum_running_alm += r_val
+            accum_list.append(round(cum_running_alm, 1))
+        ds["rain_accum"] = accum_list
+
+    # Curva media de referencia acumulada día a día (2022–2025)
+    baseline_cum_curve: List[Optional[float]] = []
+    for idx_day in range(366):
+        vals = [
+            cum_rain_by_year[str(y)][idx_day]
+            for y in complete_years
+            if cum_rain_by_year[str(y)][idx_day] is not None
+        ]
+        baseline_cum_curve.append(round(float(np.mean(vals)), 1) if vals else None)
+
+    cumulative_precipitation = {
+        "calendar_days": cal_md_keys,
+        "labels": cal_labels,
+        "baseline_mean": baseline_cum_curve,
+        "baseline_years": complete_years,
+        "years": cum_rain_by_year,
+    }
+
     comparisons_payload = {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "reference_baseline": {
@@ -1375,6 +1428,7 @@ def build_records_and_comparisons(
         },
         "yearly_table": yearly_comparison_table,
         "monthly_matrices": monthly_matrices,
+        "cumulative_precipitation": cumulative_precipitation,
     }
 
     return records_payload, comparisons_payload

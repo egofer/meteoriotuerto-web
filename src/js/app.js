@@ -815,8 +815,8 @@
           <div class="chart-panel">
             <div class="chart-panel-header">
               <div>
-                <h4 class="chart-panel-title">Distribución diaria de precipitaciones (${alm.year})</h4>
-                <p class="chart-panel-subtitle">Lluvia diaria acumulada (mm) · ${stP.days_ge_10mm} días ≥10 mm y ${stP.days_ge_30mm} días ≥30 mm</p>
+                <h4 class="chart-panel-title">Precipitación diaria y curva de lluvia acumulada (${alm.year})</h4>
+                <p class="chart-panel-subtitle">Hietograma diario (barras, mm) y progresión acumulada anual (línea continua, mm)</p>
               </div>
             </div>
             <div class="chart-canvas-wrap">
@@ -1208,33 +1208,65 @@
       },
     });
 
-    // 3. Lluvia diaria
+    // 3. Lluvia diaria y curva acumulada anual (EVO-001)
+    const almRainDatasets = [
+      {
+        type: 'bar',
+        label: 'Precipitación diaria (mm)',
+        data: ds.rain_daily,
+        backgroundColor: pal.rainBar,
+        borderColor: pal.rain,
+        borderWidth: 1,
+        yAxisID: 'y',
+        order: 2,
+      },
+    ];
+    if (ds.rain_accum) {
+      almRainDatasets.push({
+        type: 'line',
+        label: `Lluvia acumulada anual (${alm.year})`,
+        data: ds.rain_accum,
+        borderColor: '#0284c7',
+        borderWidth: 2.5,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        yAxisID: 'y1',
+        order: 1,
+      });
+    }
+
     createChart('alm_dailyrain', 'chart-alm-dailyrain', {
       type: 'bar',
       data: {
         labels: shortDates,
-        datasets: [
-          {
-            label: 'Precipitación diaria (mm)',
-            data: ds.rain_daily,
-            backgroundColor: pal.rainBar,
-            borderColor: pal.rain,
-            borderWidth: 1,
-          },
-        ],
+        datasets: almRainDatasets,
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { labels: { color: pal.text } } },
+        plugins: {
+          legend: { labels: { color: pal.text } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${fmtNum(ctx.parsed.y, 1)} mm`,
+            },
+          },
+        },
         scales: {
           x: { ticks: { color: pal.text, maxTicksLimit: 12 }, grid: { color: pal.grid } },
           y: {
             beginAtZero: true,
-            title: { display: true, text: 'Precipitación diaria (mm)', color: pal.text },
+            title: { display: true, text: 'Lluvia diaria (mm)', color: pal.text },
             ticks: { color: pal.text },
             grid: { color: pal.grid },
+          },
+          y1: {
+            position: 'right',
+            beginAtZero: true,
+            title: { display: true, text: 'Acumulado anual (mm)', color: pal.text },
+            ticks: { color: pal.text },
+            grid: { drawOnChartArea: false },
           },
         },
       },
@@ -1994,6 +2026,41 @@
         </label>
       </div>
 
+      <!-- Gráfico espagueti de precipitación acumulada interanual (EVO-001) -->
+      <div class="chart-panel" style="margin-bottom:28px">
+        <div class="chart-panel-header">
+          <div>
+            <h4 class="chart-panel-title">💧 Evolución interanual de la precipitación acumulada (curva espagueti)</h4>
+            <p class="chart-panel-subtitle">Suma diaria acumulada (1 ene – 31 dic) de cada año y contraste con la curva media de referencia 2022–2025</p>
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:440px">
+          <canvas id="chart-comp-cum-rain"></canvas>
+        </div>
+        <div class="cum-rain-kpis">
+          <div class="cum-kpi-box">
+            <span class="cum-kpi-label">Año en curso 2026 (al 25 oct)</span>
+            <span class="cum-kpi-val" style="color:var(--accent-rain)">1.504,3 mm</span>
+            <span class="cum-kpi-sub">Registro provisional en observación</span>
+          </div>
+          <div class="cum-kpi-box">
+            <span class="cum-kpi-label">Media esperada a 25 oct</span>
+            <span class="cum-kpi-val">1.370,8 mm</span>
+            <span class="cum-kpi-sub">Promedio acumulado 2022–2025</span>
+          </div>
+          <div class="cum-kpi-box">
+            <span class="cum-kpi-label">Superávit acumulado 2026</span>
+            <span class="cum-kpi-val" style="color:#059669">+133,5 mm (+9,7 %)</span>
+            <span class="cum-kpi-sub">Aportación hídrica sobre el promedio</span>
+          </div>
+          <div class="cum-kpi-box">
+            <span class="cum-kpi-label">Año récord más lluvioso</span>
+            <span class="cum-kpi-val" style="color:#2563eb">2023 (2.140,4 mm)</span>
+            <span class="cum-kpi-sub">Máximo absoluto de la serie</span>
+          </div>
+        </div>
+      </div>
+
       <div class="charts-grid-2">
         <div class="chart-panel">
           <div class="chart-panel-header">
@@ -2113,6 +2180,107 @@
     const rows = comp.yearly_table.filter((r) => STATE.include2026InComparisons || !r.is_provisional);
     const completeRows = comp.yearly_table.filter((r) => !r.is_provisional);
 
+    // Colores diferenciados y consistentes por año
+    const yearColors = {
+      '2022': '#d97706',
+      '2023': '#2563eb',
+      '2024': '#0d9488',
+      '2025': '#9333ea',
+      '2026': '#059669',
+    };
+
+    // 0. Curva espagueti de precipitación acumulada (EVO-001)
+    const cum = comp.cumulative_precipitation;
+    if (cum && cum.years) {
+      const cumDatasets = [];
+
+      // Años consolidados
+      ['2022', '2023', '2024', '2025'].forEach((y) => {
+        const row = comp.yearly_table.find((r) => String(r.year) === y);
+        const totalStr = row ? `${fmtNum(row.rain_total_mm, 1)} mm` : '';
+        cumDatasets.push({
+          label: `Año ${y} (${totalStr})`,
+          data: cum.years[y],
+          borderColor: yearColors[y],
+          backgroundColor: yearColors[y],
+          borderWidth: y === '2023' ? 2.8 : 2,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          tension: 0.1,
+        });
+      });
+
+      // Año 2026 (provisional) si está habilitado
+      if (STATE.include2026InComparisons && cum.years['2026']) {
+        cumDatasets.push({
+          label: 'Año 2026 (1.504,3 mm al 25 oct · prov.)',
+          data: cum.years['2026'],
+          borderColor: yearColors['2026'],
+          backgroundColor: yearColors['2026'],
+          borderWidth: 3.5,
+          pointRadius: 0,
+          pointHoverRadius: 7,
+          tension: 0.1,
+        });
+      }
+
+      // Media de referencia 2022–2025 (curva punteada contrastada)
+      cumDatasets.unshift({
+        label: `Media referencia 2022–2025 (${fmtNum(ref.mean_annual_rain_mm, 1)} mm)`,
+        data: cum.baseline_mean,
+        borderColor: isDarkMode() ? '#e2e8f0' : '#1e293b',
+        backgroundColor: isDarkMode() ? '#e2e8f0' : '#1e293b',
+        borderDash: [6, 4],
+        borderWidth: 3.2,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        tension: 0.1,
+      });
+
+      createChart('comp_cum_rain', 'chart-comp-cum-rain', {
+        type: 'line',
+        data: {
+          labels: cum.labels,
+          datasets: cumDatasets,
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              labels: {
+                color: pal.text,
+                usePointStyle: true,
+                boxWidth: 10,
+              },
+            },
+            tooltip: {
+              callbacks: {
+                title: (items) => 'Día: ' + items[0].label,
+                label: (ctx) => {
+                  const lbl = ctx.dataset.label.split('(')[0].trim();
+                  return `${lbl}: ${fmtNum(ctx.parsed.y, 1)} mm`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              ticks: { color: pal.text, maxTicksLimit: 12 },
+              grid: { color: pal.grid },
+            },
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Precipitación acumulada (mm)', color: pal.text },
+              ticks: { color: pal.text },
+              grid: { color: pal.grid },
+            },
+          },
+        },
+      });
+    }
+
     // 1. Anomalías de lluvia (sobre años cerrados)
     createChart('comp_rain_anom', 'chart-comp-rain-anom', {
       type: 'bar',
@@ -2170,15 +2338,6 @@
         },
       },
     });
-
-    // Colores diferenciados por año para series mensuales
-    const yearColors = {
-      '2022': '#64748b',
-      '2023': '#0284c7',
-      '2024': '#dc2626',
-      '2025': '#16a34a',
-      '2026': '#d97706',
-    };
 
     const yearsToPlot = rows.map((r) => String(r.year));
     const mat = comp.monthly_matrices;
