@@ -17,6 +17,7 @@
     theme: document.documentElement.getAttribute('data-theme') || 'light',
     route: 'portada',
     selectedYear: 2025,
+    onThisDay: null, // { month: 1..12, day: 1..31 }
     calendarMode: 'rain', // 'rain' | 'temp'
     include2026InComparisons: false,
     recordsRankingKey: 'top_hottest_days',
@@ -116,6 +117,13 @@
       .replace(/"/g, '&quot;');
   }
 
+  function degToSector(deg) {
+    if (deg === null || deg === undefined || Number.isNaN(Number(deg))) return '—';
+    const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+    const idx = Math.round(((Number(deg) % 360) + 360) % 360 / 45) % 8;
+    return dirs[idx];
+  }
+
   /* ------------------------------------------------------------------------
    * Carga de datos JSON con caché
    * ------------------------------------------------------------------------ */
@@ -210,9 +218,10 @@
    * VISTA 1: PORTADA DEL ALMANAQUE
    * ------------------------------------------------------------------------ */
   async function renderPortada() {
-    const [idx, comparisons] = await Promise.all([
+    const [idx, comparisons, almanacs] = await Promise.all([
       ensureIndexLoaded(),
       ensureComparisonsLoaded(),
+      ensureAllAlmanacsLoaded(),
     ]);
 
     const container = document.getElementById('view-portada');
@@ -384,6 +393,11 @@
         </div>
       </section>
 
+      <!-- EVO-004: Bloque interactivo «Un día como hoy en MeteoRiotuerto» -->
+      <section class="section-block on-this-day-section" id="sec-on-this-day" aria-labelledby="sec-otd-title">
+        <div id="on-this-day-widget"></div>
+      </section>
+
       <!-- Selección de récords históricos destacados -->
       <section class="section-block" aria-labelledby="sec-records-portada">
         <div class="section-header">
@@ -458,8 +472,294 @@
       </section>
     `;
 
+    // Renderizar bloque «Un día como hoy en MeteoRiotuerto» (EVO-004)
+    renderOnThisDayWidget(idx, almanacs);
+
     // Renderizar gráficos de portada
     renderHomeCharts(comparisons);
+  }
+
+  function renderOnThisDayWidget(idx, almanacs) {
+    const wrap = document.getElementById('on-this-day-widget');
+    if (!wrap) return;
+
+    const now = new Date();
+    const todayMonth = now.getMonth() + 1;
+    const todayDay = now.getDate();
+
+    if (!STATE.onThisDay) {
+      STATE.onThisDay = { month: todayMonth, day: todayDay };
+    }
+
+    const maxDaysPerMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    let { month, day } = STATE.onThisDay;
+    if (month < 1 || month > 12) month = todayMonth;
+    const maxDay = maxDaysPerMonth[month - 1];
+    if (day < 1) day = 1;
+    if (day > maxDay) day = maxDay;
+    STATE.onThisDay = { month, day };
+
+    const isToday = month === todayMonth && day === todayDay;
+    const mmdd = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dayLabel = `${day} de ${MONTH_NAMES_ES[month - 1].toLowerCase()}`;
+    const years = [...idx.series_overview.years_available].sort((a, b) => a - b);
+    const lastObsDate = idx.series_overview.last_observation_date || '2026-10-25';
+
+    // Extraer registros diarios para cada año en la fecha MM-DD
+    const yearEntries = years.map((y) => {
+      const alm = almanacs[y];
+      const ds = alm?.daily_series;
+      const isoTarget = `${y}-${mmdd}`;
+      const pos = ds ? ds.dates.indexOf(isoTarget) : -1;
+
+      if (pos === -1 || ds.temp_mean[pos] === null || ds.temp_mean[pos] === undefined) {
+        let missingReason = 'Sin registro disponible en esta fecha.';
+        const isLeapYear = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+        if (mmdd === '02-29' && !isLeapYear) {
+          missingReason = `Año no bisiesto (febrero de ${y} tuvo 28 días).`;
+        } else if (y === 2023 && month >= 9) {
+          missingReason = 'Laguna instrumental documentada por parada de la estación (sep.–dic. 2023).';
+        } else if (isoTarget > lastObsDate) {
+          missingReason = `Fecha aún no alcanzada en el año en curso (cierre actual: ${fmtDateES(lastObsDate, false)}).`;
+        }
+        return { year: y, hasData: false, missingReason, isoDate: isoTarget };
+      }
+
+      const tmean = ds.temp_mean[pos];
+      const tmax = ds.temp_max[pos];
+      const tmin = ds.temp_min[pos];
+      const tamp = ds.temp_amp[pos];
+      const rain = ds.rain_daily[pos] ?? 0;
+      const rainRate = ds.rain_rate[pos] ?? 0;
+      const gust = ds.wind_gust[pos];
+      const wdir = ds.wind_dir[pos];
+      const hum = ds.humidity_mean[pos];
+      const press = ds.pressure_rel[pos];
+
+      // Clasificación sinóptica rápida del día
+      let badgeText = '⛅ Seco y templado';
+      let badgeClass = 'otd-badge-mild';
+      if (rain >= 20) {
+        badgeText = '🌧️ Lluvia abundante';
+        badgeClass = 'otd-badge-heavy-rain';
+      } else if (rain >= 2) {
+        badgeText = '🌦️ Día lluvioso';
+        badgeClass = 'otd-badge-rain';
+      } else if (rain >= 0.2) {
+        badgeText = '💧 Lluvia débil';
+        badgeClass = 'otd-badge-light-rain';
+      } else if (tmax >= 28) {
+        badgeText = '🔥 Muy cálido / Surada';
+        badgeClass = 'otd-badge-hot';
+      } else if (tmin <= 0) {
+        badgeText = '❄️ Helada nocturna';
+        badgeClass = 'otd-badge-frost';
+      } else if (gust >= 50) {
+        badgeText = '💨 Racha fuerte';
+        badgeClass = 'otd-badge-wind';
+      } else if (tmax >= 23) {
+        badgeText = '☀️ Cálido y seco';
+        badgeClass = 'otd-badge-warm';
+      } else if (tmean <= 8) {
+        badgeText = '🧣 Frío y seco';
+        badgeClass = 'otd-badge-cold';
+      }
+
+      return {
+        year: y,
+        hasData: true,
+        isoDate: isoTarget,
+        tmean,
+        tmax,
+        tmin,
+        tamp,
+        rain,
+        rainRate,
+        gust,
+        sector: degToSector(wdir),
+        hum,
+        press,
+        badgeText,
+        badgeClass,
+      };
+    });
+
+    const validEntries = yearEntries.filter((e) => e.hasData);
+    const validCount = validEntries.length;
+
+    // Estadísticas interanuales del día seleccionado
+    const meanTempAll = validCount > 0
+      ? validEntries.reduce((acc, e) => acc + e.tmean, 0) / validCount
+      : null;
+
+    let maxTempEntry = null;
+    let minTempEntry = null;
+    let maxRainEntry = null;
+    let rainyYearsCount = 0;
+
+    validEntries.forEach((e) => {
+      if (!maxTempEntry || e.tmax > maxTempEntry.tmax) maxTempEntry = e;
+      if (!minTempEntry || e.tmin < minTempEntry.tmin) minTempEntry = e;
+      if (!maxRainEntry || e.rain > maxRainEntry.rain) maxRainEntry = e;
+      if (e.rain >= 0.2) rainyYearsCount += 1;
+    });
+
+    const monthOptionsHtml = MONTH_NAMES_ES.map((mName, idxM) => {
+      const mVal = idxM + 1;
+      return `<option value="${mVal}" ${mVal === month ? 'selected' : ''}>${mName}</option>`;
+    }).join('');
+
+    const dayOptionsHtml = Array.from({ length: maxDay }, (_, idxD) => {
+      const dVal = idxD + 1;
+      return `<option value="${dVal}" ${dVal === day ? 'selected' : ''}>${dVal}</option>`;
+    }).join('');
+
+    const yearCardsHtml = yearEntries.map((e) => {
+      if (!e.hasData) {
+        return `
+          <div class="otd-year-card otd-year-missing">
+            <div class="otd-year-header">
+              <a href="#almanaque/${e.year}" class="otd-year-num">${e.year}</a>
+              <span class="otd-badge otd-badge-missing">Sin dato</span>
+            </div>
+            <p class="otd-missing-text">${escapeHtml(e.missingReason)}</p>
+            <div class="otd-year-footer">
+              <a href="#almanaque/${e.year}">Abrir almanaque ${e.year} →</a>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="otd-year-card">
+          <div class="otd-year-header">
+            <a href="#almanaque/${e.year}" class="otd-year-num" title="Abrir almanaque de ${e.year}">${e.year}</a>
+            <span class="otd-badge ${e.badgeClass}">${e.badgeText}</span>
+          </div>
+          <div class="otd-temp-hero">
+            <div class="otd-temp-main">
+              <span class="otd-temp-label">T. media</span>
+              <strong class="otd-temp-val">${fmtNum(e.tmean, 1)} °C</strong>
+            </div>
+            <div class="otd-temp-ext">
+              <span class="val-cold" title="Temperatura mínima">↓ ${fmtNum(e.tmin, 1)}°</span>
+              <span class="val-heat" title="Temperatura máxima">↑ ${fmtNum(e.tmax, 1)}°</span>
+            </div>
+          </div>
+          <dl class="otd-metrics-list">
+            <div>
+              <dt>Precipitación</dt>
+              <dd class="${e.rain >= 0.2 ? 'val-rain' : ''}">${fmtNum(e.rain, 1)} mm</dd>
+            </div>
+            <div>
+              <dt>Racha máx.</dt>
+              <dd>${fmtNum(e.gust, 1)} km/h (${e.sector})</dd>
+            </div>
+            <div>
+              <dt>Amplitud / Hum.</dt>
+              <dd>Δ ${fmtNum(e.tamp, 1)} °C · ${fmtNum(e.hum, 0)}%</dd>
+            </div>
+            <div>
+              <dt>Presión media</dt>
+              <dd>${fmtNum(e.press, 1)} hPa</dd>
+            </div>
+          </dl>
+          <div class="otd-year-footer">
+            <a href="#almanaque/${e.year}">Ver almanaque ${e.year} →</a>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    wrap.innerHTML = `
+      <div class="otd-panel">
+        <div class="otd-header">
+          <div>
+            <div class="otd-kicker">
+              <span>EFEMÉRIDE DIARIA INTERANUAL (2022–2026)</span>
+              <span class="otd-status-pill ${isToday ? 'is-today' : ''}">
+                ${isToday ? '📅 Efeméride de hoy' : '🔎 Fecha seleccionada'}
+              </span>
+            </div>
+            <h2 id="sec-otd-title" class="section-title" style="margin-top:4px">
+              Un día como hoy en MeteoRiotuerto: <span class="otd-highlight-date">${dayLabel}</span>
+            </h2>
+            <p class="section-subtitle">
+              Comparativa directa de las condiciones registradas cada <strong>${dayLabel}</strong> en Barrio de Arriba.
+              Puede consultar cualquier otra fecha del calendario mediante el selector.
+            </p>
+          </div>
+          <div class="otd-controls" aria-label="Selector de fecha para consultar efeméride diaria">
+            <button type="button" class="btn btn-sm" id="btn-otd-prev" title="Día anterior">← Día ant.</button>
+            <div class="otd-select-group">
+              <label for="sel-otd-day" class="sr-only">Día</label>
+              <select id="sel-otd-day" class="otd-select" aria-label="Día del mes">${dayOptionsHtml}</select>
+              <label for="sel-otd-month" class="sr-only">Mes</label>
+              <select id="sel-otd-month" class="otd-select" aria-label="Mes del año">${monthOptionsHtml}</select>
+            </div>
+            <button type="button" class="btn btn-sm" id="btn-otd-next" title="Día siguiente">Día sig. →</button>
+            <button type="button" class="btn btn-sm ${isToday ? '' : 'btn-primary'}" id="btn-otd-today" ${isToday ? 'disabled' : ''}>Hoy</button>
+          </div>
+        </div>
+
+        <div class="otd-summary-strip">
+          <div class="otd-sum-item">
+            <span class="otd-sum-label">Promedio térmico del ${dayLabel}</span>
+            <strong class="otd-sum-val">${meanTempAll !== null ? fmtNum(meanTempAll, 1) + ' °C' : '—'}</strong>
+            <span class="otd-sum-meta">Media de ${validCount} de ${years.length} años con dato</span>
+          </div>
+          <div class="otd-sum-item">
+            <span class="otd-sum-label">Techo térmico en esta fecha</span>
+            <strong class="otd-sum-val val-heat">${maxTempEntry ? fmtNum(maxTempEntry.tmax, 1) + ' °C' : '—'}</strong>
+            <span class="otd-sum-meta">${maxTempEntry ? `Registrado en ${maxTempEntry.year} (mín. ese día: ${fmtNum(maxTempEntry.tmin, 1)} °C)` : 'Sin datos'}</span>
+          </div>
+          <div class="otd-sum-item">
+            <span class="otd-sum-label">Suelo térmico en esta fecha</span>
+            <strong class="otd-sum-val val-cold">${minTempEntry ? fmtNum(minTempEntry.tmin, 1) + ' °C' : '—'}</strong>
+            <span class="otd-sum-meta">${minTempEntry ? `Registrado en ${minTempEntry.year} (máx. ese día: ${fmtNum(minTempEntry.tmax, 1)} °C)` : 'Sin datos'}</span>
+          </div>
+          <div class="otd-sum-item">
+            <span class="otd-sum-label">Frecuencia de lluvia el ${dayLabel}</span>
+            <strong class="otd-sum-val val-rain">${validCount > 0 ? `${rainyYearsCount} de ${validCount} años` : '—'}</strong>
+            <span class="otd-sum-meta">${maxRainEntry && maxRainEntry.rain > 0 ? `Máximo: ${fmtNum(maxRainEntry.rain, 1)} mm en ${maxRainEntry.year}` : 'Sin lluvia registrada en esta fecha'}</span>
+          </div>
+        </div>
+
+        <div class="otd-years-grid">
+          ${yearCardsHtml}
+        </div>
+      </div>
+    `;
+
+    // Eventos de cambio de fecha en el bloque «Un día como hoy»
+    const shiftDay = (delta) => {
+      // Usamos el año bisiesto 2024 como calendario canónico de 366 días
+      const refDate = new Date(Date.UTC(2024, month - 1, day + delta));
+      STATE.onThisDay = {
+        month: refDate.getUTCMonth() + 1,
+        day: refDate.getUTCDate(),
+      };
+      renderOnThisDayWidget(idx, almanacs);
+    };
+
+    document.getElementById('btn-otd-prev')?.addEventListener('click', () => shiftDay(-1));
+    document.getElementById('btn-otd-next')?.addEventListener('click', () => shiftDay(1));
+    document.getElementById('btn-otd-today')?.addEventListener('click', () => {
+      const current = new Date();
+      STATE.onThisDay = { month: current.getMonth() + 1, day: current.getDate() };
+      renderOnThisDayWidget(idx, almanacs);
+    });
+    document.getElementById('sel-otd-month')?.addEventListener('change', (ev) => {
+      const newMonth = parseInt(ev.target.value, 10);
+      const maxD = maxDaysPerMonth[newMonth - 1];
+      STATE.onThisDay = { month: newMonth, day: Math.min(day, maxD) };
+      renderOnThisDayWidget(idx, almanacs);
+    });
+    document.getElementById('sel-otd-day')?.addEventListener('change', (ev) => {
+      const newDay = parseInt(ev.target.value, 10);
+      STATE.onThisDay = { month, day: newDay };
+      renderOnThisDayWidget(idx, almanacs);
+    });
   }
 
   function renderHomeCharts(comparisons) {

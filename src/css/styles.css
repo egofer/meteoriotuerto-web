@@ -1713,3 +1713,377 @@ html[data-theme="dark"] .btn-primary {
     padding: 1px !important;
   }
 }
+
+/* ============================================================================
+ * EVO-004: Bloque interactivo «Un día como hoy en MeteoRiotuerto»
+ * ============================================================================ */
+.otd-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-top: 4px solid var(--accent-forest);
+  border-radius: var(--radius-lg);
+  padding: 24px 26px;
+  box-shadow: var(--shadow-sm);
+}
+
+.otd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 18px;
+}
+
+.otd-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-forest);
+}
+
+.otd-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: var(--bg-subtle);
+  color: var(--txt-secondary);
+  border: 1px solid var(--border-strong);
+}
+
+.otd-status-pill.is-today {
+  background: var(--accent-forest-soft);
+  color: var(--accent-forest);
+  border-color: var(--accent-forest);
+}
+
+.otd-highlight-date {
+  color: var(--accent-forest);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.otd-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: var(--bg-elevated);
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.otd-select-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.otd-select {
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  color: var(--txt-primary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+}
+
+.btn-sm:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.otd-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.otd-sum-item {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.otd-sum-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--txt-muted);
+}
+
+.otd-sum-val {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+}
+
+.otd-sum-meta {
+  font-size: 0.76rem;
+  color: var(--txt-secondary);
+}
+
+.val-heat {
+  color: var(--accent-heat) !important;
+}
+
+.val-cold {
+  color: var(--accent-cold) !important;
+}
+
+.val-rain {
+  color: var(--accent-rain) !important;
+  font-weight: 700;
+}
+
+.otd-years-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+
+.otd-year-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.otd-year-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-forest);
+  box-shadow: var(--shadow-sm);
+}
+
+.otd-year-card.otd-year-missing {
+  background: var(--bg-subtle);
+  border-style: dashed;
+  opacity: 0.88;
+}
+
+.otd-year-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.otd-year-num {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+  text-decoration: none;
+}
+
+.otd-year-num:hover {
+  color: var(--accent-forest);
+  text-decoration: underline;
+}
+
+.otd-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.69rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.otd-badge-heavy-rain {
+  background: rgba(2, 132, 199, 0.2);
+  color: var(--accent-rain);
+  border: 1px solid rgba(2, 132, 199, 0.35);
+}
+
+.otd-badge-rain,
+.otd-badge-light-rain {
+  background: var(--accent-rain-soft);
+  color: var(--accent-rain);
+}
+
+.otd-badge-hot,
+.otd-badge-warm {
+  background: var(--accent-heat-soft);
+  color: var(--accent-heat);
+}
+
+.otd-badge-frost,
+.otd-badge-cold {
+  background: rgba(14, 116, 144, 0.15);
+  color: var(--accent-cold);
+}
+
+.otd-badge-wind {
+  background: rgba(15, 118, 110, 0.15);
+  color: var(--accent-wind);
+}
+
+.otd-badge-mild {
+  background: var(--accent-forest-soft);
+  color: var(--accent-forest);
+}
+
+.otd-badge-missing {
+  background: var(--bg-surface);
+  color: var(--txt-muted);
+  border: 1px solid var(--border-color);
+}
+
+.otd-temp-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+
+.otd-temp-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.otd-temp-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--txt-muted);
+}
+
+.otd-temp-val {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+}
+
+.otd-temp-ext {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  gap: 2px;
+}
+
+.otd-metrics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0 0 12px 0;
+  font-size: 0.8rem;
+}
+
+.otd-metrics-list > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 3px;
+}
+
+.otd-metrics-list dt {
+  color: var(--txt-secondary);
+}
+
+.otd-metrics-list dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--txt-primary);
+}
+
+.otd-missing-text {
+  font-size: 0.82rem;
+  color: var(--txt-secondary);
+  line-height: 1.45;
+  margin: 12px 0;
+  flex-grow: 1;
+}
+
+.otd-year-footer {
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.otd-year-footer a {
+  color: var(--accent-forest);
+  text-decoration: none;
+}
+
+.otd-year-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1120px) {
+  .otd-years-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .otd-summary-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .otd-years-grid {
+    grid-template-columns: 1fr;
+  }
+  .otd-summary-strip {
+    grid-template-columns: 1fr;
+  }
+  .otd-panel {
+    padding: 18px 16px;
+  }
+}
