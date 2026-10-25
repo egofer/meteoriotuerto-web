@@ -1,0 +1,89 @@
+name: Actualizar datos, validar y desplegar en GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    # Actualización automática diaria a las 06:30 UTC tras la sincronización de MeteoRiotuerto
+    - cron: '30 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  build_and_validate:
+    name: Procesar datos, validar integridad y empaquetar web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio meteoriotuerto-web
+        uses: actions/checkout@v4
+
+      - name: Clonar repositorio de datos primario (egofer/meteoriotuerto)
+        uses: actions/checkout@v4
+        with:
+          repository: egofer/meteoriotuerto
+          path: .cache/meteoriotuerto
+        continue-on-error: true
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar dependencias de procesamiento científico
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Regenerar productos JSON de forma atómica (con respaldo ante fallos)
+        run: |
+          # Si la regeneración desde el repositorio de origen falla, el script aborta
+          # sin corromper los archivos JSON previos ni desplegar versiones incompletas.
+          python3 scripts/build_data.py \
+            --source-dir .cache/meteoriotuerto \
+            --output-dir data
+
+      - name: Ejecutar validación de integridad e invariantes físicos
+        run: |
+          python3 scripts/validate_data.py --data-dir data
+
+      - name: Ejecutar suite de pruebas automatizadas
+        run: |
+          python3 -m unittest discover -s tests -v
+
+      - name: Preparar artefacto limpio de producción para GitHub Pages
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp -r src _site/
+          cp -r data _site/
+          touch _site/.nojekyll
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir artefacto de GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+  deploy:
+    name: Publicar en GitHub Pages
+    needs: build_and_validate
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
