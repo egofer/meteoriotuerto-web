@@ -594,6 +594,20 @@
     const cov = alm.coverage;
     const ed = alm.editorial || {};
 
+    const curIdx = yearsAvailable.indexOf(alm.year);
+    const prevYear = curIdx > 0 ? yearsAvailable[curIdx - 1] : null;
+    const nextYear = curIdx >= 0 && curIdx < yearsAvailable.length - 1 ? yearsAvailable[curIdx + 1] : null;
+    const prevSum = prevYear ? (idx.years_summary || []).find((s) => s.year === prevYear) : null;
+    const nextSum = nextYear ? (idx.years_summary || []).find((s) => s.year === nextYear) : null;
+
+    const prevBtnHtml = prevYear
+      ? `<a href="#almanaque/${prevYear}" class="year-step-btn" title="Ir al almanaque de ${prevYear} (Atajo: Alt + ←)" aria-label="Año anterior ${prevYear}">← ${prevYear}</a>`
+      : `<span class="year-step-btn disabled" aria-disabled="true" title="Primer año disponible de la serie">← Inicio</span>`;
+
+    const nextBtnHtml = nextYear
+      ? `<a href="#almanaque/${nextYear}" class="year-step-btn" title="Ir al almanaque de ${nextYear} (Atajo: Alt + →)" aria-label="Año siguiente ${nextYear}">${nextYear === 2026 ? '2026 (Prov.)' : nextYear} →</a>`
+      : `<span class="year-step-btn disabled" aria-disabled="true" title="Último año disponible de la serie">Actual →</span>`;
+
     const pillsHtml = yearsAvailable.map((y) => {
       const isAct = y === alm.year ? 'active' : '';
       const label = y === 2026 ? '2026 (Prov.)' : String(y);
@@ -679,7 +693,11 @@
           </h2>
         </div>
         <div class="year-pills">
+          ${prevBtnHtml}
+          <span class="year-pills-sep" aria-hidden="true"></span>
           ${pillsHtml}
+          <span class="year-pills-sep" aria-hidden="true"></span>
+          ${nextBtnHtml}
         </div>
       </div>
 
@@ -979,6 +997,41 @@
           </table>
         </div>
       </section>
+
+      <!-- Navegación inferior entre almanaques consecutivos (EVO-002) -->
+      <nav class="almanac-pager" aria-label="Navegación entre ediciones anuales del almanaque">
+        ${prevYear ? `
+          <a href="#almanaque/${prevYear}" class="almanac-pager-card prev">
+            <span class="pager-dir">← Edición anual anterior</span>
+            <strong class="pager-title">Almanaque meteorológico ${prevYear}</strong>
+            <span class="pager-meta">${escapeHtml(prevSum?.character || '')}${prevSum ? ` · ${fmtNum(prevSum.temp_mean, 1)} °C · ${fmtNum(prevSum.rain_total_mm, 1)} mm` : ''}</span>
+          </a>
+        ` : `
+          <a href="#portada" class="almanac-pager-card prev">
+            <span class="pager-dir">← Inicio de la serie consolidada</span>
+            <strong class="pager-title">Portada del almanaque digital</strong>
+            <span class="pager-meta">Síntesis general, récords y mapa de Riotuerto</span>
+          </a>
+        `}
+        <a href="#comparativas" class="almanac-pager-card center">
+          <span class="pager-dir">Perspectiva interanual</span>
+          <strong class="pager-title">Comparar años (2022–2026)</strong>
+          <span class="pager-meta">Curva espagueti de lluvia, anomalías y matrices</span>
+        </a>
+        ${nextYear ? `
+          <a href="#almanaque/${nextYear}" class="almanac-pager-card next">
+            <span class="pager-dir">Edición anual siguiente →</span>
+            <strong class="pager-title">Almanaque meteorológico ${nextYear}${nextSum?.is_provisional ? ' (Avance)' : ''}</strong>
+            <span class="pager-meta">${escapeHtml(nextSum?.character || '')}${nextSum ? ` · ${fmtNum(nextSum.temp_mean, 1)} °C · ${fmtNum(nextSum.rain_total_mm, 1)} mm` : ''}</span>
+          </a>
+        ` : `
+          <a href="#explorador" class="almanac-pager-card next">
+            <span class="pager-dir">Consulta avanzada →</span>
+            <strong class="pager-title">Explorador de series históricas</strong>
+            <span class="pager-meta">Filtrado diario por fechas, umbrales y descarga CSV</span>
+          </a>
+        `}
+      </nav>
     `;
 
     // Eventos del calendario y descarga
@@ -2776,6 +2829,24 @@
     updateThemeButtonUI();
     document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
     window.addEventListener('hashchange', handleRouteChange);
+
+    // Atajos de teclado (Alt + Flecha Izquierda / Derecha) para cambiar entre años consecutivos (EVO-002)
+    window.addEventListener('keydown', (e) => {
+      if (!e.altKey || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+      const tag = (e.target && e.target.tagName) || '';
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) return;
+      const { route } = parseHash();
+      if (route !== 'almanaque' || !STATE.cache.index) return;
+      const years = STATE.cache.index.series_overview.years_available || [];
+      const curIdx = years.indexOf(STATE.selectedYear);
+      if (curIdx < 0) return;
+      const targetIdx = e.key === 'ArrowLeft' ? curIdx - 1 : curIdx + 1;
+      if (targetIdx >= 0 && targetIdx < years.length) {
+        e.preventDefault();
+        window.location.hash = `#almanaque/${years[targetIdx]}`;
+      }
+    });
+
     handleRouteChange();
   });
 })();

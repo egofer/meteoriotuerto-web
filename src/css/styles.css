@@ -876,6 +876,108 @@ html[data-theme="dark"] .year-pill.active {
   color: #081c15;
 }
 
+.year-step-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  color: var(--txt-primary);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.year-step-btn:hover:not(.disabled) {
+  border-color: var(--accent-forest);
+  background: var(--accent-forest-soft);
+  color: var(--accent-forest);
+}
+
+.year-step-btn.disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  background: var(--bg-subtle);
+}
+
+.year-pills-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border-color);
+  margin: 0 2px;
+}
+
+/* Paginador inferior entre almanaques consecutivos (EVO-002) */
+.almanac-pager {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.almanac-pager-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.almanac-pager-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-forest);
+  box-shadow: var(--shadow-md);
+  color: inherit;
+}
+
+.almanac-pager-card.center {
+  text-align: center;
+  background: var(--bg-elevated);
+}
+
+.almanac-pager-card.next {
+  text-align: right;
+}
+
+.pager-dir {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-forest);
+}
+
+.pager-title {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: var(--txt-primary);
+}
+
+.pager-meta {
+  font-size: 0.8rem;
+  color: var(--txt-secondary);
+}
+
+@media (max-width: 780px) {
+  .almanac-pager {
+    grid-template-columns: 1fr;
+  }
+  .almanac-pager-card.center,
+  .almanac-pager-card.next {
+    text-align: left;
+  }
+}
+
 /* Crónica narrativa del almanaque */
 .chronicle-grid {
   display: grid;
