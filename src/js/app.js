@@ -6052,12 +6052,15 @@
   function updateThemeButtonUI() {
     const icon = document.getElementById('theme-icon');
     const label = document.getElementById('theme-label');
+    const mobileIcon = document.getElementById('mobile-theme-icon');
     if (STATE.theme === 'dark') {
       if (icon) icon.textContent = '☀';
       if (label) label.textContent = 'Modo claro';
+      if (mobileIcon) mobileIcon.textContent = '☀';
     } else {
       if (icon) icon.textContent = '☾';
       if (label) label.textContent = 'Modo oscuro';
+      if (mobileIcon) mobileIcon.textContent = '☾';
     }
   }
 
@@ -6078,6 +6081,50 @@
   document.addEventListener('DOMContentLoaded', () => {
     updateThemeButtonUI();
     document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
+    document.getElementById('mobile-theme-toggle')?.addEventListener('click', toggleTheme);
+
+    // Menú de navegación accesible para dispositivos móviles
+    const navToggle = document.getElementById('nav-toggle');
+    const mainNav = document.getElementById('main-nav');
+    if (navToggle && mainNav) {
+      navToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = mainNav.classList.toggle('nav-open');
+        navToggle.setAttribute('aria-expanded', String(isOpen));
+        navToggle.classList.toggle('active', isOpen);
+      });
+
+      // Cerrar menú al hacer clic en cualquier enlace
+      mainNav.querySelectorAll('.nav-link').forEach((link) => {
+        link.addEventListener('click', () => {
+          if (mainNav.classList.contains('nav-open')) {
+            mainNav.classList.remove('nav-open');
+            navToggle.setAttribute('aria-expanded', 'false');
+            navToggle.classList.remove('active');
+          }
+        });
+      });
+
+      // Cerrar menú al hacer clic fuera
+      document.addEventListener('click', (e) => {
+        if (mainNav.classList.contains('nav-open') && !mainNav.contains(e.target) && !navToggle.contains(e.target)) {
+          mainNav.classList.remove('nav-open');
+          navToggle.setAttribute('aria-expanded', 'false');
+          navToggle.classList.remove('active');
+        }
+      });
+
+      // Cerrar menú con la tecla Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mainNav.classList.contains('nav-open')) {
+          mainNav.classList.remove('nav-open');
+          navToggle.setAttribute('aria-expanded', 'false');
+          navToggle.classList.remove('active');
+          navToggle.focus();
+        }
+      });
+    }
+
     window.addEventListener('hashchange', handleRouteChange);
 
     // Cerrar modal interactivo de términos

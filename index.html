@@ -83,6 +83,21 @@
           <div class="edition-value mono" id="header-period-range">2022 — 2026</div>
           <div class="edition-sub" id="header-total-days">Estación operativa desde nov. 2020</div>
         </div>
+
+        <!-- Controles rápidos y menú de navegación para móvil (≤768px) -->
+        <div class="mobile-header-controls">
+          <button type="button" id="mobile-theme-toggle" class="btn-mobile-icon" aria-label="Alternar entre tema claro y oscuro" title="Cambiar tema">
+            <span id="mobile-theme-icon" aria-hidden="true">☾</span>
+          </button>
+          <button type="button" id="nav-toggle" class="btn-mobile-nav" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="main-nav">
+            <span class="hamburger-box" aria-hidden="true">
+              <span class="hamburger-bar"></span>
+              <span class="hamburger-bar"></span>
+              <span class="hamburger-bar"></span>
+            </span>
+            <span class="nav-toggle-text">Menú</span>
+          </button>
+        </div>
       </div>
 
       <nav class="site-nav" aria-label="Navegación principal del almanaque">
@@ -95,6 +110,12 @@
           <li><a href="#fiestas" data-route="fiestas" class="nav-link">Fiestas locales</a></li>
           <li><a href="#metodologia" data-route="metodologia" class="nav-link">Metodología y datos</a></li>
           <li><a href="#glosario" data-route="glosario" class="nav-link">Glosario</a></li>
+          <li class="mobile-only-nav-item">
+            <a href="https://app.weathercloud.net/d6619283754" target="_blank" rel="noopener noreferrer" class="nav-link nav-link-weathercloud" title="Consultar datos instantáneos en abierto en Weathercloud">
+              <span class="pulse-dot" aria-hidden="true"></span>
+              <span>Tiempo en vivo (Weathercloud) ↗</span>
+            </a>
+          </li>
         </ul>
       </nav>
     </div>

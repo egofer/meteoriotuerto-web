@@ -347,6 +347,80 @@ a:hover {
   color: var(--txt-muted);
 }
 
+/* Controles de cabecera y navegación para dispositivos móviles */
+.mobile-header-controls {
+  display: none;
+}
+
+.mobile-only-nav-item {
+  display: none;
+}
+
+.btn-mobile-icon,
+.btn-mobile-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  color: var(--txt-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.btn-mobile-icon {
+  width: 36px;
+  height: 36px;
+  font-size: 1.1rem;
+  padding: 0;
+}
+
+.btn-mobile-nav {
+  height: 36px;
+  padding: 0 10px;
+  gap: 7px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.btn-mobile-icon:hover,
+.btn-mobile-nav:hover {
+  background: var(--bg-subtle);
+  border-color: var(--border-strong);
+}
+
+.hamburger-box {
+  width: 17px;
+  height: 13px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hamburger-bar {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Animación a cruz ✕ al abrir el menú móvil */
+.btn-mobile-nav.active .hamburger-bar:nth-child(1) {
+  transform: translateY(5.5px) rotate(45deg);
+}
+
+.btn-mobile-nav.active .hamburger-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.btn-mobile-nav.active .hamburger-bar:nth-child(3) {
+  transform: translateY(-5.5px) rotate(-45deg);
+}
+
 /* Navegación */
 .site-nav {
   padding: 0;
@@ -1708,7 +1782,7 @@ html[data-theme="dark"] .btn-excel:hover {
 }
 
 /* Responsividad móvil y tableta */
-@media (max-width: 900px) {
+@media (min-width: 769px) and (max-width: 900px) {
   .editorial-columns {
     grid-template-columns: 1fr;
   }
@@ -1726,6 +1800,170 @@ html[data-theme="dark"] .btn-excel:hover {
   .header-edition-box {
     text-align: left;
     width: 100%;
+  }
+}
+
+/* Optimización móvil ultracompacta (≤768px) — Ahorro del 82% del espacio del Header */
+@media (max-width: 768px) {
+  /* 1. Ocultar la barra institucional superior para ganar ~80px verticales */
+  .masthead-meta {
+    display: none !important;
+  }
+
+  /* 2. Cabecera sticky ultracompacta de ~52px de altura */
+  .site-header {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+
+  /* 3. Fila de marca horizontal sin desbordamientos */
+  .brand-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
+    gap: 8px;
+  }
+
+  .brand-link {
+    gap: 10px !important;
+  }
+
+  .brand-emblem {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+  }
+
+  .brand-emblem img {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  /* Ocultar elementos secundarios redundantes en la cabecera fija */
+  .brand-kicker,
+  .brand-subtitle,
+  .header-edition-box {
+    display: none !important;
+  }
+
+  .brand-title {
+    font-size: 1.25rem !important;
+    line-height: 1.1 !important;
+    margin: 0 !important;
+  }
+
+  /* Mostrar controles móviles en cabecera */
+  .mobile-header-controls {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* 4. Menú de navegación colapsable y accesible */
+  .site-nav {
+    position: relative;
+    padding: 0;
+  }
+
+  .nav-list {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: -20px;
+    right: -20px;
+    background: var(--bg-surface);
+    border-bottom: 2px solid var(--border-color);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+    padding: 10px 18px 16px 18px;
+    max-height: calc(100vh - 65px);
+    overflow-y: auto;
+    z-index: 300;
+    gap: 6px;
+  }
+
+  .nav-list.nav-open {
+    display: flex !important;
+    animation: navSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-link {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-elevated);
+    box-sizing: border-box;
+    white-space: normal;
+  }
+
+  .nav-link:hover {
+    background: var(--bg-subtle);
+    border-color: var(--border-strong);
+  }
+
+  .nav-link.active {
+    background: var(--accent-forest) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-forest) !important;
+  }
+
+  html[data-theme="dark"] .nav-link.active {
+    color: #081c15 !important;
+  }
+
+  .mobile-only-nav-item {
+    display: block !important;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-color);
+  }
+
+  .nav-link-weathercloud {
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: var(--accent-forest) !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+    font-weight: 700;
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* 5. Liberar espacio vertical para el contenido */
+  .site-main {
+    padding-top: 16px;
+  }
+
+  .editorial-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .charts-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+@keyframes navSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
