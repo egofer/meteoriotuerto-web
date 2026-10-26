@@ -43,6 +43,7 @@
       yearB: 2025,
       monthB: 8,
     },
+    festivalSelectedId: 'san_juan',
     cache: {
       index: null,
       records: null,
@@ -446,6 +447,24 @@
             <div class="kpi-label">Intensidad máxima de lluvia</div>
             <div class="kpi-value">${fmtNum(rec.max_rain_rate.value, 1)} <span class="kpi-unit">mm/h</span></div>
             <div class="kpi-meta"><strong>${fmtDateES(rec.max_rain_rate.date)}</strong> (${rec.max_rain_rate.time} h) · 44,2 mm en 1 h</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Banner costumbrista: El tiempo en las fiestas de Riotuerto (EVO-013) -->
+      <section class="section-block" style="background: linear-gradient(135deg, rgba(37,99,235,0.06), rgba(16,185,129,0.05)); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 22px;">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+          <div style="max-width: 720px;">
+            <span class="guide-badge">🎉 Crónica costumbrista de Riotuerto</span>
+            <h3 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 6px 0; color: var(--txt-primary);">
+              El tiempo en las festividades y tradiciones del municipio
+            </h3>
+            <p style="color: var(--txt-secondary); margin: 0; font-size: 0.92rem; line-height: 1.55;">
+              Descubra qué tiempo hizo en San José Obrero (Monte), San Juan (La Cavada), El Carmen y San Cipriano (Barrio de Arriba), Santa María Magdalena (Rucandio), San Roque (Angustina), la Fiesta de la Juventud y la Toma de Posesión del Brigadier Casado Torres en las Reales Fábricas (Fiesta de Interés Turístico Regional).
+            </p>
+          </div>
+          <div>
+            <a href="#fiestas" class="btn btn-primary" style="white-space: nowrap;">Consultar fiestas locales →</a>
           </div>
         </div>
       </section>
@@ -923,6 +942,9 @@
 
     const maxGddMonthObj = validMonths.reduce((prev, curr) => (curr.gdd_10_0 || 0) > (prev?.gdd_10_0 || 0) ? curr : prev, null);
     const maxGddStr = maxGddMonthObj && maxGddMonthObj.gdd_10_0 > 0 ? `${maxGddMonthObj.name} (${fmtNum(maxGddMonthObj.gdd_10_0, 1)} GDD)` : '—';
+    const vegDaysCount = alm.daily_series?.temp_mean
+      ? alm.daily_series.temp_mean.filter((t) => t !== null && t !== undefined && t >= 10.0).length
+      : '—';
 
     // EVO-007: Percentiles térmicos y bandas de confort
     const tp = alm.stats.thermal_percentiles || {
@@ -1413,6 +1435,98 @@
             <p class="degree-desc">
               Mide la energía térmica útil acumulada para el desarrollo vegetal. Por encima de 10 °C, el pasto de las praderas y los cultivos despiertan e impulsan su fotosíntesis. Permite a ganaderos y hortelanos seguir el ritmo de rebrote de la hierba, los cortes de forraje y las cosechas de huerta.
             </p>
+          </div>
+        </div>
+
+        <!-- Guía de utilidad cotidiana en Riotuerto (EVO-013) -->
+        <div class="practical-guide-box">
+          <div class="practical-guide-header">
+            <span class="guide-badge">🚜 Riotuerto cotidiano</span>
+            <h4 class="guide-title">Guía de utilidad práctica para vecinos, huertas y praderas</h4>
+            <p class="guide-subtitle">
+              Cómo trasladar los indicadores de grados día e índices bioclimáticos del año ${alm.year} a las tareas habituales del municipio
+            </p>
+          </div>
+          <div class="practical-cards-grid">
+            <div class="practical-card">
+              <div class="practical-card-top">
+                <span class="practical-card-icon">🔥</span>
+                <div>
+                  <h5 class="practical-card-title">Calefacción y acopio de leña / pellets</h5>
+                  <span class="practical-card-meta">Basado en Grados Día de Calefacción (HDD)</span>
+                </div>
+              </div>
+              <p class="practical-card-body">
+                Cada punto de HDD refleja demanda térmica de las viviendas. Permite planificar el acopio de combustible y saber cuándo arrancar la caldera en otoño al encadenarse días con más de 4–5 HDD (medias diarias por debajo de 11 °C). En primavera, cuando los HDD caen persistentemente por debajo de 2 HDD/día, es el momento idóneo para pasar la caldera a modo solo agua caliente (ACS).
+              </p>
+              <div class="practical-card-stat">
+                Acumulado en ${alm.year}: <strong>${fmtNum(dd.hdd_15_5, 1)} HDD</strong> (Mes pico: ${maxHddStr})
+              </div>
+            </div>
+
+            <div class="practical-card">
+              <div class="practical-card-top">
+                <span class="practical-card-icon">🤖</span>
+                <div>
+                  <h5 class="practical-card-title">Robots cortacésped e invernada de aperos</h5>
+                  <span class="practical-card-meta">Basado en el Cero Vegetativo (10,0 °C)</span>
+                </div>
+              </div>
+              <p class="practical-card-body">
+                El césped y las praderas detienen su crecimiento activo por debajo de 10,0 °C. Indica cuándo retirar a resguardo los robots cortacésped y aperos para invernar a finales de otoño (protegiendo baterías y evitando apelmazar el terreno enfangado) y cuándo volver a ponerlos en marcha en primavera al consolidarse medias diarias &gt;10 °C de forma regular.
+              </p>
+              <div class="practical-card-stat">
+                Jornadas de crecimiento biológico (&ge;10 °C): <strong>${vegDaysCount} días</strong>
+              </div>
+            </div>
+
+            <div class="practical-card">
+              <div class="practical-card-top">
+                <span class="practical-card-icon">🚜</span>
+                <div>
+                  <h5 class="practical-card-title">Siega de prados y cortes de forraje</h5>
+                  <span class="practical-card-meta">Basado en Grados Día Agrícolas (GDD)</span>
+                </div>
+              </div>
+              <p class="practical-card-body">
+                Las praderas trasmeranas (raigrás, trébol y festuca) acumulan grados día para alcanzar su punto óptimo de biomasa y digestibilidad. El primer corte de forraje suele programarse al alcanzar ~200–250 GDD desde marzo, buscando ventanas sinópticas de 3 a 4 jornadas consecutivas secas con viento sur o brisa de ladera para garantizar un buen curado o ensilado.
+              </p>
+              <div class="practical-card-stat">
+                Energía biológica acumulada en ${alm.year}: <strong>${fmtNum(dd.gdd_10_0, 1)} GDD</strong> (Pico: ${maxGddStr})
+              </div>
+            </div>
+
+            <div class="practical-card">
+              <div class="practical-card-top">
+                <span class="practical-card-icon">🍅</span>
+                <div>
+                  <h5 class="practical-card-title">Huerta y sulfatos contra plagas (mildiu y oídio)</h5>
+                  <span class="practical-card-meta">Combinación de Temperatura + Humedad relativa</span>
+                </div>
+              </div>
+              <p class="practical-card-body">
+                Las esporas de hongos proliferan cuando la temperatura media supera los 10–12 °C (crecimiento activo) combinada con humedad relativa sostenida (&gt;85 %) o rocío matinal denso tras jornadas de lluvia. Este indicador señala las fechas críticas para aplicar tratamientos preventivos de cobre o azufre en tomateras y frutales antes de que aparezcan las manchas foliares.
+              </p>
+              <div class="practical-card-stat">
+                Humedad media anual: <strong>${fmtNum(stA.humidity_mean_pct, 1)} %</strong> · Precipitación: <strong>${fmtNum(stP.total_mm, 1)} mm</strong>
+              </div>
+            </div>
+
+            <div class="practical-card">
+              <div class="practical-card-top">
+                <span class="practical-card-icon">🥾</span>
+                <div>
+                  <h5 class="practical-card-title">Turismo, senderismo y confort estival</h5>
+                  <span class="practical-card-meta">Basado en Grados Día de Refrigeración (CDD)</span>
+                </div>
+              </div>
+              <p class="practical-card-body">
+                Los bajísimos valores de CDD en el municipio demuestran la ventaja bioclimática de Riotuerto frente a zonas continentales: noches frescas garantizadas para el descanso sin necesidad de aire acondicionado mecánico. Para rutas hacia Alisas o el Picón del Carlista, vigilar los días con CDD positivos o surada para planificar salidas temprano y evitar bochornos.
+              </p>
+              <div class="practical-card-stat">
+                Demanda de refrigeración: <strong>${fmtNum(dd.cdd_21_0, 1)} CDD</strong> (Descanso nocturno garantizado)
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -4940,6 +5054,508 @@
   }
 
   /* ------------------------------------------------------------------------
+   * VISTA 8: EL TIEMPO EN LAS FIESTAS Y TRADICIONES DE RIOTUERTO (EVO-013)
+   * ------------------------------------------------------------------------ */
+  const FESTIVALS_CATALOG = [
+    {
+      id: 'san_jose',
+      name: 'San José Obrero',
+      place: 'Monte',
+      type: 'fixed',
+      mmdd: '05-01',
+      dateLabel: '1 de mayo',
+      icon: '🌸',
+      description: 'Festividad primaveral del barrio de Monte que abre el calendario anual de fiestas en Riotuerto.',
+      culturalNotes: 'Celebración tradicional en la ermita y praderas de Monte con misa solemne, aperitivo popular y juegos tradicionales cántabros en un privilegiado mirador hacia los valles pasiegos y Trasmiera.'
+    },
+    {
+      id: 'san_juan',
+      name: 'San Juan Bautista (Patrón)',
+      place: 'La Cavada',
+      type: 'fixed',
+      mmdd: '06-24',
+      dateLabel: '24 de junio',
+      icon: '🔥',
+      badge: 'Patrón del municipio',
+      description: 'Fiesta patronal del municipio de Riotuerto con gran concurrencia popular en La Cavada.',
+      culturalNotes: 'San Juan Bautista reúne a todo el vecindario con pasacalles, mercado tradicional, actividades infantiles, verbenas multitudinarias y la clásica hoguera de San Juan la noche víspera junto al río Covadal. Es históricamente la festividad más calurosa del municipio: en 2026 registró el segundo valor más alto de la serie con 41,3 °C.'
+    },
+    {
+      id: 'carmen',
+      name: 'Nuestra Señora del Carmen',
+      place: 'Barrio de Arriba',
+      type: 'fixed',
+      mmdd: '07-16',
+      dateLabel: '16 de julio',
+      icon: '⛵',
+      description: 'Festividad mariana y romería tradicional en el Barrio de Arriba.',
+      culturalNotes: 'Romería emblemática con devoción vecinal, procesión, almuerzos compartidos en huertas y praderías del barrio y baile al atardecer bajo los tilos en un ambiente típicamente montañés y veraniego.'
+    },
+    {
+      id: 'magdalena',
+      name: 'Santa María Magdalena',
+      place: 'Rucandio',
+      type: 'fixed',
+      mmdd: '07-22',
+      dateLabel: '22 de julio',
+      icon: '🏛️',
+      description: 'Fiestas patronales del pueblo de Rucandio en un marco arquitectónico señero.',
+      culturalNotes: 'Celebración al pie de la monumental iglesia barroca de Santa María Magdalena (Bien de Interés Cultural). Destaca por su procesión con danzantes montañeses, conciertos de folclore cántabro y meriendas populares en la campa.'
+    },
+    {
+      id: 'san_roque',
+      name: 'San Roque',
+      place: 'Angustina',
+      type: 'fixed',
+      mmdd: '08-16',
+      dateLabel: '16 de agosto',
+      icon: '🐕',
+      description: 'Romería campestre y festividad tradicional en el pueblo de Angustina.',
+      culturalNotes: 'Cita estival muy arraigada con misa solemne en la ermita de San Roque, bendición del pan y los romeros, concurso gastronómico vecinal y baile campestre hasta la noche.'
+    },
+    {
+      id: 'juventud',
+      name: 'Fiesta de la Juventud',
+      place: 'La Cavada',
+      type: 'rule',
+      dateLabel: '3.er sábado de agosto',
+      dateRule: 'Tercera semana de agosto (sábado)',
+      datesByYear: {
+        2022: '2022-08-20',
+        2023: '2023-08-19',
+        2024: '2024-08-17',
+        2025: '2025-08-16',
+        2026: '2026-08-15'
+      },
+      icon: '🎉',
+      description: 'Encuentro juvenil y festivo multitudinario en el casco urbano de La Cavada.',
+      culturalNotes: 'Organizada por peñas y colectivos jóvenes, congrega charangas, fiesta de la espuma, paelladas gigantes, torneos deportivos y orquestas hasta altas horas de la madrugada aprovechando el apogeo estival.'
+    },
+    {
+      id: 'brigadier',
+      name: 'Toma de Posesión del Brigadier Casado Torres',
+      place: 'La Cavada (Reales Fábricas de Artillería)',
+      type: 'rule',
+      dateLabel: '4.º sábado de agosto',
+      dateRule: 'Cuarto sábado de agosto',
+      datesByYear: {
+        2022: '2022-08-27',
+        2023: '2023-08-26',
+        2024: '2024-08-24',
+        2025: '2025-08-23',
+        2026: '2026-08-22'
+      },
+      icon: '⚔️',
+      badge: 'Fiesta de Interés Turístico Regional',
+      description: 'Recreación histórica militar del siglo XVIII y ciclo cultural de conferencias de 5 días de duración.',
+      culturalNotes: 'Conmemora la toma de posesión del Brigadier Fernando Casado de Torres en 1787 al mando de las Reales Fábricas de Cañones de La Cavada. Declarada Fiesta de Interés Turístico Regional de Cantabria, incluye desfile de tropas con uniformes de época dieciochesca, salvas de artillería con cañones navales de tiro real, mercado barroco y cinco jornadas de conferencias históricas.'
+    },
+    {
+      id: 'san_cipriano',
+      name: 'San Cipriano',
+      place: 'Barrio de Arriba',
+      type: 'fixed',
+      mmdd: '09-16',
+      dateLabel: '16 de septiembre',
+      icon: '🍂',
+      description: 'Romería que despide el ciclo de fiestas veraniegas en el Barrio de Arriba.',
+      culturalNotes: 'Jornada costumbrista de hermandad vecinal previa al equinoccio de otoño, con misa solemne, procesión, romería amenizada con pitu y tambor y meriendas al aire libre en los prados del barrio.'
+    }
+  ];
+
+  function getFestivalYearRecord(fest, year, almanacs) {
+    const alm = almanacs[year];
+    const ds = alm?.daily_series;
+    const isoDate = fest.type === 'fixed' ? `${year}-${fest.mmdd}` : fest.datesByYear[year];
+    if (!ds || !isoDate) return { year, isoDate, hasData: false };
+
+    const pos = ds.dates.indexOf(isoDate);
+    if (pos === -1 || ds.temp_mean[pos] === null || ds.temp_mean[pos] === undefined) {
+      return { year, isoDate, hasData: false };
+    }
+
+    const tmean = ds.temp_mean[pos];
+    const tmax = ds.temp_max[pos];
+    const tmin = ds.temp_min[pos];
+    const tamp = ds.temp_amp[pos];
+    const rain = ds.rain_daily[pos] ?? 0;
+    const gust = ds.wind_gust[pos];
+    const wdir = ds.wind_dir[pos];
+    const hum = ds.humidity_mean[pos];
+
+    let badgeText = '⛅ Seco y agradable';
+    let badgeClass = 'fest-badge-dry';
+    if (rain >= 10.0) {
+      badgeText = '🌧️ Lluvia abundante';
+      badgeClass = 'fest-badge-rain';
+    } else if (rain >= 0.2) {
+      badgeText = '🌦️ Lluvia débil / orvallo';
+      badgeClass = 'fest-badge-rain';
+    } else if (tmax >= 35.0) {
+      badgeText = '🔥 Calor extremo / Surada';
+      badgeClass = 'fest-badge-heat';
+    } else if (tmax >= 28.0) {
+      badgeText = '☀️ Caluroso y soleado';
+      badgeClass = 'fest-badge-heat';
+    }
+
+    return {
+      year,
+      isoDate,
+      hasData: true,
+      tmean,
+      tmax,
+      tmin,
+      tamp,
+      rain,
+      gust,
+      wdir,
+      sector: degToSector(wdir),
+      hum,
+      badgeText,
+      badgeClass
+    };
+  }
+
+  function computeFestivalStats(fest, almanacs) {
+    const years = [2022, 2023, 2024, 2025, 2026];
+    const records = years.map((y) => getFestivalYearRecord(fest, y, almanacs)).filter((r) => r.hasData);
+    if (records.length === 0) return null;
+
+    const tmaxList = records.map((r) => r.tmax).filter((v) => v !== null && v !== undefined);
+    const tminList = records.map((r) => r.tmin).filter((v) => v !== null && v !== undefined);
+    const tmeanList = records.map((r) => r.tmean).filter((v) => v !== null && v !== undefined);
+    const rainList = records.map((r) => r.rain);
+    const gustList = records.map((r) => r.gust).filter((v) => v !== null && v !== undefined);
+
+    const avgTmax = tmaxList.reduce((a, b) => a + b, 0) / tmaxList.length;
+    const avgTmin = tminList.reduce((a, b) => a + b, 0) / tminList.length;
+    const avgTmean = tmeanList.reduce((a, b) => a + b, 0) / tmeanList.length;
+    const avgRain = rainList.reduce((a, b) => a + b, 0) / rainList.length;
+
+    const rainDays = rainList.filter((r) => r >= 0.2).length;
+    const rainProbPct = (rainDays / records.length) * 100;
+
+    const maxTmaxRecord = records.reduce((max, r) => (r.tmax > (max?.tmax ?? -999) ? r : max), null);
+    const maxRainRecord = records.reduce((max, r) => (r.rain > (max?.rain ?? -999) ? r : max), null);
+    const maxGustRecord = records.reduce((max, r) => ((r.gust || 0) > (max?.gust ?? -999) ? r : max), null);
+
+    return {
+      fest,
+      records,
+      avgTmax,
+      avgTmin,
+      avgTmean,
+      avgRain,
+      rainDays,
+      totalObservedYears: records.length,
+      rainProbPct,
+      maxTmaxRecord,
+      maxRainRecord,
+      maxGustRecord
+    };
+  }
+
+  function exportFestivalsToExcel(almanacs) {
+    const festStatsList = FESTIVALS_CATALOG.map((f) => computeFestivalStats(f, almanacs)).filter(Boolean);
+
+    // Hoja 1: Resumen comparativo de festividades
+    const summaryHeaders = [
+      'Festividad', 'Localidad', 'Fecha canónica / Regla', 'T. máx. media (°C)',
+      'T. mín. media (°C)', 'T. media global (°C)', 'Probabilidad de lluvia (%)',
+      'Lluvia media (mm)', 'Récord T. máx. (°C)', 'Año récord calor',
+      'Lluvia máx. (mm)', 'Año lluvia máx.', 'Racha máx. (km/h)'
+    ];
+    const summaryRows = [summaryHeaders];
+
+    festStatsList.forEach((fs) => {
+      summaryRows.push([
+        fs.fest.name,
+        fs.fest.place,
+        fs.fest.dateLabel || fs.fest.dateRule,
+        round(fs.avgTmax, 1),
+        round(fs.avgTmin, 1),
+        round(fs.avgTmean, 1),
+        round(fs.rainProbPct, 1),
+        round(fs.avgRain, 1),
+        round(fs.maxTmaxRecord?.tmax, 1),
+        fs.maxTmaxRecord?.year || '—',
+        round(fs.maxRainRecord?.rain, 1),
+        fs.maxRainRecord?.year || '—',
+        round(fs.maxGustRecord?.gust, 1)
+      ]);
+    });
+
+    // Hoja 2: Serie histórica detallada por fiesta y año
+    const detailHeaders = [
+      'Festividad', 'Localidad', 'Año', 'Fecha ISO', 'T. media (°C)',
+      'T. máx. (°C)', 'T. mín. (°C)', 'Amplitud (ΔT, °C)', 'Lluvia (mm)',
+      'Racha máx. (km/h)', 'Dirección viento', 'Humedad media (%)', 'Calificación sinóptica'
+    ];
+    const detailRows = [detailHeaders];
+
+    festStatsList.forEach((fs) => {
+      fs.records.forEach((r) => {
+        detailRows.push([
+          fs.fest.name,
+          fs.fest.place,
+          r.year,
+          r.isoDate,
+          round(r.tmean, 1),
+          round(r.tmax, 1),
+          round(r.tmin, 1),
+          round(r.tamp, 1),
+          round(r.rain, 1),
+          round(r.gust, 1),
+          r.sector || '—',
+          round(r.hum, 0),
+          r.badgeText.replace(/^[^\wáéíóúÁÉÍÓÚñÑ]+/, '').trim()
+        ]);
+      });
+    });
+
+    // Hoja 3: Ficha metodológica y etnográfica
+    const metaHeaders = ['Clave', 'Información'];
+    const metaRows = [
+      metaHeaders,
+      ['Título', 'El tiempo en las festividades y tradiciones de Riotuerto (2022–2026)'],
+      ['Estación', 'Barrio de Arriba (Riotuerto, Cantabria, 115 m s. n. m.)'],
+      ['Periodo de observación', '2022–2026 (5 años documentados)'],
+      ['Criterio de lluvia', 'Precipitación acumulada diaria ≥ 0,2 mm'],
+      ['Aviso metodológico', 'Los datos proceden de la estación meteorológica de Barrio de Arriba. Al ser un valle de relieve accidentado, pueden registrarse ligeras diferencias térmicas o de viento en cotas altas como Monte o Rucandio.'],
+      ['Fecha de exportación', new Date().toISOString()]
+    ];
+
+    exportWorkbookToXLSX({
+      'Resumen_Festividades': summaryRows,
+      'Historico_2022_2026': detailRows,
+      'Ficha_Metodologica': metaRows
+    }, 'meteoriotuerto_fiestas_tradiciones_2022_2026.xlsx');
+  }
+
+  async function renderFiestas(param) {
+    const almanacs = await ensureAllAlmanacsLoaded();
+    const container = document.getElementById('view-fiestas');
+    if (!container) return;
+
+    if (param && FESTIVALS_CATALOG.some((f) => f.id === param)) {
+      STATE.festivalSelectedId = param;
+    } else if (!STATE.festivalSelectedId) {
+      STATE.festivalSelectedId = 'san_juan';
+    }
+
+    const festStatsList = FESTIVALS_CATALOG.map((f) => computeFestivalStats(f, almanacs)).filter(Boolean);
+    const activeStat = festStatsList.find((s) => s.fest.id === STATE.festivalSelectedId) || festStatsList[0];
+    const f = activeStat.fest;
+
+    // Fila de botones de pestañas
+    const tabsHtml = FESTIVALS_CATALOG.map((item) => {
+      const isActive = item.id === f.id;
+      return `
+        <button type="button" class="festival-tab-btn ${isActive ? 'active' : ''}" data-fest-id="${item.id}" role="tab" aria-selected="${isActive}">
+          <span>${item.icon} ${escapeHtml(item.name)}</span>
+          <span class="festival-tab-date">${escapeHtml(item.dateLabel)} · ${escapeHtml(item.place)}</span>
+        </button>
+      `;
+    }).join('');
+
+    // Filas de la tabla histórica de la festividad activa
+    const detailRowsHtml = activeStat.records.map((r) => {
+      return `
+        <tr>
+          <td><strong>${r.year}</strong></td>
+          <td><span class="mono">${fmtDateES(r.isoDate, false)}</span></td>
+          <td class="num">${fmtNum(r.tmean, 1)} °C</td>
+          <td class="num"><strong>${fmtNum(r.tmax, 1)} °C</strong></td>
+          <td class="num">${fmtNum(r.tmin, 1)} °C</td>
+          <td class="num">${fmtNum(r.tamp, 1)} °C</td>
+          <td class="num">${r.rain > 0 ? `<strong>${fmtNum(r.rain, 1)} mm</strong>` : '<span style="color:var(--txt-muted)">0,0 mm</span>'}</td>
+          <td class="num">${r.gust !== null ? `${fmtNum(r.gust, 1)} km/h (${r.sector || '—'})` : '—'}</td>
+          <td class="num">${r.hum !== null ? `${fmtNum(r.hum, 0)} %` : '—'}</td>
+          <td><span class="${r.badgeClass}">${escapeHtml(r.badgeText)}</span></td>
+        </tr>
+      `;
+    }).join('');
+
+    // Filas del cuadro sinóptico de las 8 fiestas
+    const summaryRowsHtml = festStatsList.map((fs) => {
+      const isCur = fs.fest.id === f.id;
+      const rainBadgeClass = fs.rainProbPct <= 25 ? 'fest-badge-dry' : (fs.rainProbPct >= 50 ? 'fest-badge-rain' : '');
+      return `
+        <tr style="${isCur ? 'background: rgba(37,99,235,0.06); font-weight: 600;' : ''}">
+          <td>
+            <a href="#fiestas/${fs.fest.id}" class="data-link" data-jump-fest="${fs.fest.id}">
+              ${fs.fest.icon} ${escapeHtml(fs.fest.name)}
+            </a>
+            ${fs.fest.badge ? `<span style="display:block; font-size:0.75rem; color:var(--txt-muted); font-weight:normal;">${escapeHtml(fs.fest.badge)}</span>` : ''}
+          </td>
+          <td>${escapeHtml(fs.fest.place)}</td>
+          <td>${escapeHtml(fs.fest.dateLabel)}</td>
+          <td class="num">${fmtNum(fs.avgTmax, 1)} °C</td>
+          <td class="num">${fmtNum(fs.avgTmin, 1)} °C</td>
+          <td class="num"><span class="${rainBadgeClass}">${fmtNum(fs.rainProbPct, 0)} %</span> (${fs.rainDays}/${fs.totalObservedYears})</td>
+          <td class="num">${fmtNum(fs.avgRain, 1)} mm</td>
+          <td class="num"><strong>${fmtNum(fs.maxTmaxRecord?.tmax, 1)} °C</strong> <span style="font-size:0.75rem; color:var(--txt-muted);">(${fs.maxTmaxRecord?.year})</span></td>
+        </tr>
+      `;
+    }).join('');
+
+    container.innerHTML = `
+      <section class="section-block">
+        <div class="section-header">
+          <div>
+            <div class="editorial-kicker">COSTUMBRISMO Y METEOROLOGÍA DE RIOTUERTO · SERIE 2022–2026</div>
+            <h2 id="fiestas-heading" class="section-title">El tiempo en las festividades y tradiciones del municipio</h2>
+            <p class="section-subtitle">
+              Crónica meteorológica retrospectiva, estabilidad y extremos históricos en las 8 celebraciones patronales y eventos de Riotuerto
+            </p>
+          </div>
+          <div class="btn-group">
+            <button type="button" class="btn btn-primary btn-excel" id="btn-export-festivals-xlsx">
+              📥 Descargar monografía de festividades (.xlsx)
+            </button>
+          </div>
+        </div>
+
+        <!-- Selector de festividades -->
+        <div class="festivals-tabs-wrap" role="tablist" aria-label="Festividades de Riotuerto">
+          ${tabsHtml}
+        </div>
+
+        <!-- Tarjeta Hero de la festividad seleccionada -->
+        <div class="festival-card-hero">
+          <div class="festival-hero-header">
+            <span class="festival-hero-icon">${f.icon}</span>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <h3 class="festival-hero-title">${escapeHtml(f.name)}</h3>
+                ${f.badge ? `<span class="badge badge-complete">${escapeHtml(f.badge)}</span>` : ''}
+              </div>
+              <div class="festival-hero-place">
+                📍 <strong>${escapeHtml(f.place)}</strong> · ${f.dateRule ? `Regla: ${escapeHtml(f.dateRule)}` : `Fecha fija: ${escapeHtml(f.dateLabel)}`}
+              </div>
+            </div>
+          </div>
+
+          <p class="festival-chronicle-p">
+            ${escapeHtml(f.culturalNotes)}
+          </p>
+
+          <div class="festival-stats-strip">
+            <div class="fest-stat-box">
+              <div class="fest-stat-label">T. Media histórica</div>
+              <div class="fest-stat-val">${fmtNum(activeStat.avgTmean, 1)} °C</div>
+            </div>
+            <div class="fest-stat-box">
+              <div class="fest-stat-label">T. Máxima media</div>
+              <div class="fest-stat-val">${fmtNum(activeStat.avgTmax, 1)} °C</div>
+            </div>
+            <div class="fest-stat-box">
+              <div class="fest-stat-label">T. Mínima media</div>
+              <div class="fest-stat-val">${fmtNum(activeStat.avgTmin, 1)} °C</div>
+            </div>
+            <div class="fest-stat-box">
+              <div class="fest-stat-label">Probabilidad de lluvia</div>
+              <div class="fest-stat-val">${fmtNum(activeStat.rainProbPct, 0)} %</div>
+            </div>
+            <div class="fest-stat-box">
+              <div class="fest-stat-label">Récord de calor</div>
+              <div class="fest-stat-val" style="color:#dc2626">${fmtNum(activeStat.maxTmaxRecord?.tmax, 1)} °C <span style="font-size:0.75rem; color:var(--txt-muted);">(${activeStat.maxTmaxRecord?.year})</span></div>
+            </div>
+            <div class="fest-stat-box">
+              <div class="fest-stat-label">Lluvia máxima 24h</div>
+              <div class="fest-stat-val" style="color:#2563eb">${fmtNum(activeStat.maxRainRecord?.rain, 1)} mm <span style="font-size:0.75rem; color:var(--txt-muted);">(${activeStat.maxRainRecord?.year})</span></div>
+            </div>
+          </div>
+
+          <!-- Tabla histórica de los 5 años -->
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Año</th>
+                  <th>Fecha observada</th>
+                  <th class="num">T. media</th>
+                  <th class="num">T. máx.</th>
+                  <th class="num">T. mín.</th>
+                  <th class="num">Amplitud (ΔT)</th>
+                  <th class="num">Lluvia (24h)</th>
+                  <th class="num">Racha máx.</th>
+                  <th class="num">Humedad media</th>
+                  <th>Calificación sinóptica</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${detailRowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cuadro comparativo de las 8 festividades -->
+      <section class="section-block" aria-labelledby="sec-all-fest-title">
+        <div class="section-header">
+          <div>
+            <h3 id="sec-all-fest-title" class="section-title">Cuadro sinóptico comparativo de las fiestas municipales</h3>
+            <p class="section-subtitle">
+              Resumen interanual conjunto para planificar visitas, romerías y actos al aire libre en Riotuerto
+            </p>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Festividad</th>
+                <th>Localidad</th>
+                <th>Fecha habitual</th>
+                <th class="num">T. máx. media</th>
+                <th class="num">T. mín. media</th>
+                <th class="num">Probabilidad de lluvia</th>
+                <th class="num">Lluvia media</th>
+                <th class="num">Récord T. máx.</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${summaryRowsHtml}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    `;
+
+    // Listeners de pestañas
+    container.querySelectorAll('.festival-tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const festId = btn.getAttribute('data-fest-id');
+        if (festId) {
+          STATE.festivalSelectedId = festId;
+          window.location.hash = `#fiestas/${festId}`;
+        }
+      });
+    });
+
+    // Listeners de enlaces de salto en la tabla comparativa
+    container.querySelectorAll('[data-jump-fest]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const festId = link.getAttribute('data-jump-fest');
+        if (festId) {
+          STATE.festivalSelectedId = festId;
+          window.location.hash = `#fiestas/${festId}`;
+        }
+      });
+    });
+
+    // Listener del botón de exportación a Excel
+    document.getElementById('btn-export-festivals-xlsx')?.addEventListener('click', () => {
+      exportFestivalsToExcel(almanacs);
+    });
+  }
+
+  /* ------------------------------------------------------------------------
    * Enrutador SPA basado en Hash (#portada, #almanaque/2025, etc.)
    * ------------------------------------------------------------------------ */
   function parseHashRoute() {
@@ -4947,7 +5563,7 @@
     const parts = raw.split('/');
     const route = parts[0] || 'portada';
     const param = parts[1] || null;
-    const validRoutes = ['portada', 'almanaque', 'explorador', 'records', 'comparativas', 'metodologia', 'glosario'];
+    const validRoutes = ['portada', 'almanaque', 'explorador', 'records', 'comparativas', 'fiestas', 'metodologia', 'glosario'];
     return {
       route: validRoutes.includes(route) ? route : 'portada',
       param,
@@ -5004,6 +5620,8 @@
         await renderRecords();
       } else if (route === 'comparativas') {
         await renderComparativas();
+      } else if (route === 'fiestas') {
+        await renderFiestas(param);
       } else if (route === 'metodologia') {
         await renderMetodologia();
       } else if (route === 'glosario') {

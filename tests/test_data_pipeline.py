@@ -180,6 +180,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             "view-comparativas",
             "view-metodologia",
             "view-glosario",
+            "view-fiestas",
         ]:
             self.assertIn(f'id="{section_id}"', html_text)
 
@@ -584,7 +585,50 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
         self.assertIn(".btn-excel", css_text, "Faltan estilos de .btn-excel en src/css/styles.css")
 
+    def test_festivals_and_practical_guide_readiness(self):
+        """
+        EVO-013: Verifica la guía práctica cotidiana en almanaques y glosario,
+        y la sección costumbrista del tiempo en las 8 festividades de Riotuerto.
+        """
+        html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="#fiestas"', html_text, "Falta enlace a #fiestas en index.html")
+        self.assertIn('id="view-fiestas"', html_text, "Falta id view-fiestas en index.html")
 
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("function renderFiestas", app_js, "Falta función renderFiestas en app.js")
+        self.assertIn("function exportFestivalsToExcel", app_js, "Falta función exportFestivalsToExcel en app.js")
+        self.assertIn("btn-export-festivals-xlsx", app_js, "Falta botón btn-export-festivals-xlsx en app.js")
+        self.assertIn("practical-guide-box", app_js, "Falta bloque practical-guide-box en app.js")
+
+        # Verificar presencia de las 8 fiestas requeridas en el catálogo JS
+        expected_festivals = [
+            "san_jose",      # 1 de mayo, Monte
+            "san_juan",      # 24 de junio, La Cavada (Patrón)
+            "carmen",        # 16 de julio, Barrio de Arriba
+            "magdalena",     # 22 de julio, Rucandio
+            "san_roque",     # 16 de agosto, Angustina
+            "juventud",      # 3ª semana de agosto, La Cavada
+            "brigadier",     # 4º sábado de agosto, Reales Fábricas (Interés Regional)
+            "san_cipriano",  # 16 de septiembre, Barrio de Arriba
+        ]
+        for fest_id in expected_festivals:
+            self.assertIn(f"id: '{fest_id}'", app_js, f"Falta fiesta '{fest_id}' en FESTIVALS_CATALOG")
+
+        # Verificar estilos en styles.css
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".practical-guide-box", css_text, "Falta .practical-guide-box en styles.css")
+        self.assertIn(".festivals-tabs-wrap", css_text, "Falta .festivals-tabs-wrap en styles.css")
+        self.assertIn(".festival-card-hero", css_text, "Falta .festival-card-hero en styles.css")
+
+        # Verificar términos enriquecidos en data/glossary.json
+        glossary_path = ROOT_DIR / "data" / "glossary.json"
+        self.assertTrue(glossary_path.exists(), "Falta data/glossary.json")
+        glossary_data = json.loads(glossary_path.read_text(encoding="utf-8"))
+        terms_by_id = {t["id"]: t for t in glossary_data.get("terms", [])}
+        for term_id in ["hdd", "cdd", "gdd", "cero_vegetativo"]:
+            self.assertIn(term_id, terms_by_id, f"Falta término '{term_id}' en glossary.json")
+            context = terms_by_id[term_id].get("riotuerto_context", "")
+            self.assertGreater(len(context), 50, f"Contexto de '{term_id}' demasiado breve")
 
 
 if __name__ == "__main__":
