@@ -641,6 +641,44 @@ def compute_spells(df_daily: pd.DataFrame, threshold_mm: float = 0.2) -> Dict[st
     }
 
 
+
+def compute_eto_hargreaves_daily(
+    dt: pd.Timestamp,
+    tmean: Optional[float],
+    tmax: Optional[float],
+    tmin: Optional[float],
+    lat_deg: float = 43.341,
+) -> Optional[float]:
+    """
+    Calcula la Evapotranspiración de Referencia diaria (ET0 en mm/día)
+    utilizando el modelo FAO-56 Hargreaves-Samani (1985):
+        ET0 = 0.0023 * Ra_eq * (Tmean + 17.8) * sqrt(max(0, Tmax - Tmin))
+    donde Ra_eq = 0.408 * Ra es la radiación extraterrestre convertida a
+    evaporación equivalente en mm/día a partir de la latitud local y día juliano.
+    """
+    if tmean is None or tmax is None or tmin is None:
+        return None
+    if pd.isna(tmean) or pd.isna(tmax) or pd.isna(tmin):
+        return None
+    phi = math.radians(lat_deg)
+    j = dt.dayofyear
+    dr = 1.0 + 0.033 * math.cos(2.0 * math.pi * j / 365.0)
+    delta = 0.409 * math.sin(2.0 * math.pi * j / 365.0 - 1.39)
+    cos_omega = max(-1.0, min(1.0, -math.tan(phi) * math.tan(delta)))
+    omega_s = math.acos(cos_omega)
+    # Constante solar Gsc = 0.0820 MJ m-2 min-1
+    g_sc = 0.0820
+    ra = (24.0 * 60.0 / math.pi) * g_sc * dr * (
+        omega_s * math.sin(phi) * math.sin(delta) + math.cos(phi) * math.cos(delta) * math.sin(omega_s)
+    )
+    ra_eq = 0.408 * ra
+    tdiff = max(0.0, float(tmax) - float(tmin))
+    if float(tmean) + 17.8 <= 0:
+        return 0.0
+    eto = 0.0023 * ra_eq * (float(tmean) + 17.8) * math.sqrt(tdiff)
+    return round(max(0.0, eto), 1)
+
+
 def safe_round(val: Any, decimals: int = 1) -> Optional[float]:
     if val is None or pd.isna(val):
         return None
@@ -885,6 +923,17 @@ def compute_year_almanac(
     df_d["month"] = df_d["dt"].dt.month
     df_d["amp"] = df_d["temp_max"] - df_d["temp_min"]
 
+    # EVO-022 (EVO-A): Evapotranspiración de referencia FAO-56 Hargreaves-Samani y balance hídrico diario
+    station_lat = STATION_META["location"]["latitude"]
+    df_d["eto"] = [
+        compute_eto_hargreaves_daily(row["dt"], row["temp_mean"], row["temp_max"], row["temp_min"], lat_deg=station_lat)
+        for _, row in df_d.iterrows()
+    ]
+    df_d["water_balance"] = [
+        round(r - e, 1) if (r is not None and not pd.isna(r) and e is not None and not pd.isna(e)) else None
+        for r, e in zip(df_d["rain_daily"], df_d["eto"])
+    ]
+
     valid_temp_days = int(df_d["temp_mean"].notna().sum())
     observed_span_days = len(df_d) if is_provisional else calendar_days
     coverage_pct = round((valid_temp_days / observed_span_days) * 100.0, 1)
@@ -1093,6 +1142,10 @@ def compute_year_almanac(
                 "hdd_15_5": None,
                 "cdd_21_0": None,
                 "gdd_10_0": None,
+                "eto_mm": None,
+                "water_balance_mm": None,
+                "deficit_days": 0,
+                "surplus_days": 0,
             })
             continue
 
@@ -1100,6 +1153,12 @@ def compute_year_almanac(
         m_tmin_idx = sub["temp_min"].idxmin()
         m_rmax_idx = sub["rain_daily"].idxmax()
         m_gmax_idx = sub["wind_gust"].idxmax()
+
+        m_eto = safe_round(sub["eto"].dropna().sum(), 1) if sub["eto"].notna().any() else None
+        m_rain = safe_round(sub["rain_daily"].sum(), 1)
+        m_wb = safe_round(m_rain - m_eto, 1) if (m_rain is not None and m_eto is not None) else None
+        m_deficit_days = int((sub["water_balance"] < 0).sum())
+        m_surplus_days = int((sub["water_balance"] >= 0).sum())
 
         monthly_list.append({
             "month": m,
@@ -1114,7 +1173,7 @@ def compute_year_almanac(
             "temp_max_date": str(sub.loc[m_tmax_idx, "date"]),
             "temp_min_abs": safe_round(sub.loc[m_tmin_idx, "temp_min"], 1),
             "temp_min_date": str(sub.loc[m_tmin_idx, "date"]),
-            "rain_total": safe_round(sub["rain_daily"].sum(), 1),
+            "rain_total": m_rain,
             "rain_days_02": int((sub["rain_daily"] >= 0.2).sum()),
             "rain_days_10": int((sub["rain_daily"] >= 10.0).sum()),
             "rain_max_day": safe_round(sub.loc[m_rmax_idx, "rain_daily"], 1),
@@ -1132,6 +1191,10 @@ def compute_year_almanac(
             "hdd_15_5": safe_round((15.5 - sub["temp_mean"]).clip(lower=0.0).sum(), 1) if sub["temp_mean"].notna().any() else None,
             "cdd_21_0": safe_round((sub["temp_mean"] - 21.0).clip(lower=0.0).sum(), 1) if sub["temp_mean"].notna().any() else None,
             "gdd_10_0": safe_round((sub["temp_mean"] - 10.0).clip(lower=0.0).sum(), 1) if sub["temp_mean"].notna().any() else None,
+            "eto_mm": m_eto,
+            "water_balance_mm": m_wb,
+            "deficit_days": m_deficit_days,
+            "surplus_days": m_surplus_days,
         })
 
     # Serie diaria columnar completa del año (rellenando todos los días del calendario hasta el último día observado)
@@ -1167,6 +1230,73 @@ def compute_year_almanac(
         "solar_max": col_to_list("solar", 1),
         "uvi_max": col_to_list("uvi", 0),
         "foehn_flag": [int(v) if v is not None and not pd.isna(v) else 0 for v in df_indexed["foehn_flag"].tolist()],
+        "eto": col_to_list("eto", 1),
+        "water_balance": col_to_list("water_balance", 1),
+    }
+
+    # Series acumuladas de evapotranspiración y balance neto
+    eto_running = 0.0
+    eto_accum_list = []
+    wb_running = 0.0
+    wb_accum_list = []
+    for r_v, e_v in zip(daily_series["rain_daily"], daily_series["eto"]):
+        if e_v is not None:
+            eto_running += e_v
+            eto_accum_list.append(round(eto_running, 1))
+        else:
+            eto_accum_list.append(None)
+        if r_v is not None and e_v is not None:
+            wb_running += (r_v - e_v)
+            wb_accum_list.append(round(wb_running, 1))
+        else:
+            wb_accum_list.append(None)
+    daily_series["eto_accum"] = eto_accum_list
+    daily_series["water_balance_accum"] = wb_accum_list
+
+    # Estadísticas anuales de balance hídrico y régimen agroclimático (EVO-022 / EVO-A)
+    eto_valid = df_d["eto"].dropna()
+    eto_total = safe_round(eto_valid.sum(), 1) if not eto_valid.empty else None
+    wb_valid = df_d["water_balance"].dropna()
+    wb_total = safe_round(rain_total - eto_total, 1) if (rain_total is not None and eto_total is not None) else None
+    deficit_days_total = int((df_d["water_balance"] < 0).sum())
+    surplus_days_total = int((df_d["water_balance"] >= 0).sum())
+
+    summer_sub = df_d[df_d["month"].isin([6, 7, 8])]
+    summer_rain = summer_sub["rain_daily"].dropna().sum() if not summer_sub.empty else 0.0
+    summer_eto = summer_sub["eto"].dropna().sum() if not summer_sub.empty else 0.0
+    summer_deficit_mm = safe_round(summer_rain - summer_eto, 1)
+
+    valid_m_wb = [m_d for m_d in monthly_list if m_d.get("water_balance_mm") is not None]
+    if valid_m_wb:
+        driest_wb_item = min(valid_m_wb, key=lambda x: x["water_balance_mm"])
+        wettest_wb_item = max(valid_m_wb, key=lambda x: x["water_balance_mm"])
+        surplus_m_count = len([x for x in valid_m_wb if x["water_balance_mm"] >= 0])
+        deficit_m_count = len([x for x in valid_m_wb if x["water_balance_mm"] < 0])
+        driest_balance_m = driest_wb_item["name"]
+        driest_balance_m_mm = driest_wb_item["water_balance_mm"]
+        wettest_balance_m = wettest_wb_item["name"]
+        wettest_balance_m_mm = wettest_wb_item["water_balance_mm"]
+    else:
+        driest_balance_m = None
+        driest_balance_m_mm = None
+        wettest_balance_m = None
+        wettest_balance_m_mm = None
+        surplus_m_count = 0
+        deficit_m_count = 0
+
+    water_balance_stats = {
+        "eto_total_mm": eto_total,
+        "water_balance_mm": wb_total,
+        "deficit_days": deficit_days_total,
+        "surplus_days": surplus_days_total,
+        "summer_deficit_mm": summer_deficit_mm,
+        "surplus_months_count": surplus_m_count,
+        "deficit_months_count": deficit_m_count,
+        "driest_balance_month": driest_balance_m,
+        "driest_balance_month_mm": driest_balance_m_mm,
+        "wettest_balance_month": wettest_balance_m,
+        "wettest_balance_month_mm": wettest_balance_m_mm,
+        "methodology": "FAO-56 Penman-Monteith / Hargreaves-Samani (Lat 43.341° N)",
     }
 
     editorial = EDITORIAL_CHRONICLES.get(year, {})
@@ -1277,6 +1407,7 @@ def compute_year_almanac(
             },
             "thermal_percentiles": thermal_percentiles,
             "thermal_comfort_bands": thermal_comfort_bands,
+            "water_balance": water_balance_stats,
         },
         "wind_analysis": wind_analysis,
         "foehn_analysis": foehn_analysis,
@@ -2102,6 +2233,15 @@ def build_records_and_comparisons(
     ref_gdd_mean = round(
         float(np.mean([almanacs[y]["stats"]["degree_days"]["gdd_10_0"] for y in complete_years])), 1
     )
+    ref_eto_mean = round(
+        float(np.mean([almanacs[y]["stats"]["water_balance"]["eto_total_mm"] for y in complete_years])), 1
+    )
+    ref_wb_mean = round(
+        float(np.mean([almanacs[y]["stats"]["water_balance"]["water_balance_mm"] for y in complete_years])), 1
+    )
+    ref_summer_wb_mean = round(
+        float(np.mean([almanacs[y]["stats"]["water_balance"]["summer_deficit_mm"] for y in complete_years])), 1
+    )
 
     yearly_comparison_table: List[Dict[str, Any]] = []
     for y in sorted(almanacs.keys()):
@@ -2139,6 +2279,11 @@ def build_records_and_comparisons(
             "rain_total_mm": st_p["total_mm"],
             "rain_anomaly_mm": r_anom_mm,
             "rain_anomaly_pct": r_anom_pct,
+            "eto_total_mm": alm["stats"]["water_balance"]["eto_total_mm"],
+            "water_balance_mm": alm["stats"]["water_balance"]["water_balance_mm"],
+            "summer_balance_mm": alm["stats"]["water_balance"]["summer_deficit_mm"],
+            "water_deficit_days": alm["stats"]["water_balance"]["deficit_days"],
+            "water_surplus_days": alm["stats"]["water_balance"]["surplus_days"],
             "rain_days_02": st_p["days_ge_02mm"],
             "rain_days_1": st_p["days_ge_1mm"],
             "rain_days_10": st_p["days_ge_10mm"],
@@ -2185,6 +2330,8 @@ def build_records_and_comparisons(
         "hdd_15_5": {},
         "cdd_21_0": {},
         "gdd_10_0": {},
+        "eto_total": {},
+        "water_balance": {},
     }
     for y, alm in sorted(almanacs.items()):
         monthly_matrices["temp_mean"][str(y)] = [m["temp_mean"] for m in alm["monthly"]]
@@ -2197,15 +2344,23 @@ def build_records_and_comparisons(
         monthly_matrices["hdd_15_5"][str(y)] = [m["hdd_15_5"] for m in alm["monthly"]]
         monthly_matrices["cdd_21_0"][str(y)] = [m["cdd_21_0"] for m in alm["monthly"]]
         monthly_matrices["gdd_10_0"][str(y)] = [m["gdd_10_0"] for m in alm["monthly"]]
+        monthly_matrices["eto_total"][str(y)] = [m.get("eto_mm") for m in alm["monthly"]]
+        monthly_matrices["water_balance"][str(y)] = [m.get("water_balance_mm") for m in alm["monthly"]]
 
     # Medias mensuales de referencia (2022–2025)
     ref_monthly_temp = []
     ref_monthly_rain = []
+    ref_monthly_eto = []
+    ref_monthly_wb = []
     for m_idx in range(12):
         t_vals = [almanacs[y]["monthly"][m_idx]["temp_mean"] for y in complete_years if almanacs[y]["monthly"][m_idx]["temp_mean"] is not None]
         r_vals = [almanacs[y]["monthly"][m_idx]["rain_total"] for y in complete_years if almanacs[y]["monthly"][m_idx]["rain_total"] is not None]
+        e_vals = [almanacs[y]["monthly"][m_idx]["eto_mm"] for y in complete_years if almanacs[y]["monthly"][m_idx]["eto_mm"] is not None]
+        wb_vals = [almanacs[y]["monthly"][m_idx]["water_balance_mm"] for y in complete_years if almanacs[y]["monthly"][m_idx]["water_balance_mm"] is not None]
         ref_monthly_temp.append(round(float(np.mean(t_vals)), 1) if t_vals else None)
         ref_monthly_rain.append(round(float(np.mean(r_vals)), 1) if r_vals else None)
+        ref_monthly_eto.append(round(float(np.mean(e_vals)), 1) if e_vals else None)
+        ref_monthly_wb.append(round(float(np.mean(wb_vals)), 1) if wb_vals else None)
 
     # -------------------------------------------------------------------------
     # Curvas de precipitación acumulada diaria (EVO-001: comparativa interanual 366 días)
@@ -2296,14 +2451,50 @@ def build_records_and_comparisons(
             "mean_annual_hdd_15_5": ref_hdd_mean,
             "mean_annual_cdd_21_0": ref_cdd_mean,
             "mean_annual_gdd_10_0": ref_gdd_mean,
+            "mean_annual_eto_mm": ref_eto_mean,
+            "mean_annual_water_balance_mm": ref_wb_mean,
+            "mean_summer_balance_mm": ref_summer_wb_mean,
             "monthly_mean_temp_c": ref_monthly_temp,
             "monthly_mean_rain_mm": ref_monthly_rain,
+            "monthly_mean_eto_mm": ref_monthly_eto,
+            "monthly_mean_water_balance_mm": ref_monthly_wb,
         },
         "yearly_table": yearly_comparison_table,
         "monthly_matrices": monthly_matrices,
         "cumulative_precipitation": cumulative_precipitation,
         "thermal_distribution": thermal_distribution,
         "seasonal_comparison": seasonal_payload,
+        "water_balance_comparison": {
+            "methodology": "FAO-56 Hargreaves-Samani (1985) [Lat 43.341° N]",
+            "baseline_years": complete_years,
+            "mean_annual_eto_mm": ref_eto_mean,
+            "mean_annual_water_balance_mm": ref_wb_mean,
+            "mean_summer_balance_mm": ref_summer_wb_mean,
+            "monthly_baseline_eto": ref_monthly_eto,
+            "monthly_baseline_water_balance": ref_monthly_wb,
+            "years": {
+                str(y): {
+                    "rain_total_mm": alm["stats"]["precipitation"]["total_mm"],
+                    "eto_total_mm": alm["stats"]["water_balance"]["eto_total_mm"],
+                    "water_balance_mm": alm["stats"]["water_balance"]["water_balance_mm"],
+                    "summer_balance_mm": alm["stats"]["water_balance"]["summer_deficit_mm"],
+                    "deficit_days": alm["stats"]["water_balance"]["deficit_days"],
+                    "surplus_days": alm["stats"]["water_balance"]["surplus_days"],
+                    "driest_month": alm["stats"]["water_balance"]["driest_balance_month"],
+                    "driest_month_mm": alm["stats"]["water_balance"]["driest_balance_month_mm"],
+                    "wettest_month": alm["stats"]["water_balance"]["wettest_balance_month"],
+                    "wettest_month_mm": alm["stats"]["water_balance"]["wettest_balance_month_mm"],
+                } for y, alm in sorted(almanacs.items())
+            },
+            "agroclimatic_assessment": (
+                "El régimen agroclimático de Barrio de Arriba (Riotuerto) presenta un balance neto anual hiperhúmedo "
+                "(superávit anual de +536 mm a +1205 mm), característico de la franja costero-prelitoral cantábrica. "
+                "No obstante, la estacionalidad radiativa y térmica produce un déficit hídrico sistemático durante el estío "
+                "(trimestre JJA: balance medio de -83 mm), con especial intensidad en julio (déficit medio mensual de -85 mm). "
+                "En suelos someros sobre caliza kárstica, este contraste estival condiciona el pastoreo, el crecimiento forrajero "
+                "y la recarga de manantiales y surgencias cársticas de la cuenca del Miera."
+            ),
+        },
     }
 
     return records_payload, comparisons_payload

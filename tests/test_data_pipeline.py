@@ -844,6 +844,99 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".offline-dot", css_text)
         self.assertIn(".btn-pwa-install", css_text)
 
+    def test_water_balance_and_evapotranspiration_readiness(self):
+        """
+        EVO-022 (EVO-A): Verifica el cómputo de la Evapotranspiración de referencia (ET0 FAO-56),
+        el balance hídrico neto del suelo (P - ET0), series diarias y acumuladas, matrices mensuales,
+        comparativas interanuales, interfaz interactiva y exportación a Excel.
+        """
+        # 1. Almanaques anuales
+        for year in [2022, 2023, 2024, 2025, 2026]:
+            alm_path = self.data_dir / f"almanac_{year}.json"
+            self.assertTrue(alm_path.exists())
+            with open(alm_path, "r", encoding="utf-8") as f:
+                alm = json.load(f)
+
+            stats = alm.get("stats", {})
+            self.assertIn("water_balance", stats, f"Falta stats.water_balance en almanaque {year}")
+            wb = stats["water_balance"]
+            self.assertIn("eto_total_mm", wb)
+            self.assertIn("water_balance_mm", wb)
+            self.assertIn("summer_deficit_mm", wb)
+            self.assertIn("deficit_days", wb)
+            self.assertIn("surplus_days", wb)
+            self.assertIn("driest_balance_month", wb)
+            self.assertIn("wettest_balance_month", wb)
+
+            # Invariantes físicos
+            eto_tot = wb["eto_total_mm"]
+            wb_net = wb["water_balance_mm"]
+            self.assertGreaterEqual(eto_tot, 600.0)
+            self.assertLessEqual(eto_tot, 1400.0)
+            self.assertGreaterEqual(wb_net, 300.0)
+            self.assertLess(wb["summer_deficit_mm"], 0.0, f"En clima de Riotuerto el verano JJA debe tener déficit hídrico en {year}")
+
+            # Desglose mensual
+            self.assertEqual(len(alm["monthly"]), 12)
+            for m in alm["monthly"]:
+                if m.get("valid_days", 0) > 0:
+                    self.assertIn("eto_mm", m)
+                    self.assertIn("water_balance_mm", m)
+                    self.assertIn("deficit_days", m)
+                    self.assertIn("surplus_days", m)
+
+            # Serie diaria columnar y acumulada
+            ds = alm["daily_series"]
+            n_dates = len(ds["dates"])
+            for req_k in ["eto", "water_balance", "eto_accum", "water_balance_accum"]:
+                self.assertIn(req_k, ds)
+                self.assertEqual(len(ds[req_k]), n_dates)
+
+        # 2. Comparativas multianuales
+        comp_path = self.data_dir / "comparisons.json"
+        self.assertTrue(comp_path.exists())
+        with open(comp_path, "r", encoding="utf-8") as f:
+            comp = json.load(f)
+
+        self.assertIn("water_balance_comparison", comp)
+        wbc = comp["water_balance_comparison"]
+        self.assertIn("mean_annual_eto_mm", wbc)
+        self.assertIn("mean_annual_water_balance_mm", wbc)
+        self.assertIn("mean_summer_balance_mm", wbc)
+        self.assertIn("monthly_baseline_eto", wbc)
+        self.assertIn("monthly_baseline_water_balance", wbc)
+        self.assertEqual(len(wbc["monthly_baseline_eto"]), 12)
+        self.assertEqual(len(wbc["monthly_baseline_water_balance"]), 12)
+        self.assertIn("years", wbc)
+        self.assertIn("agroclimatic_assessment", wbc)
+
+        # Matriz mensual y tabla anual
+        matrices = comp.get("monthly_matrices", {})
+        self.assertIn("eto_total", matrices)
+        self.assertIn("water_balance", matrices)
+
+        for row in comp.get("yearly_table", []):
+            self.assertIn("eto_total_mm", row)
+            self.assertIn("water_balance_mm", row)
+            self.assertIn("summer_balance_mm", row)
+            self.assertIn("water_deficit_days", row)
+            self.assertIn("water_surplus_days", row)
+
+        # 3. Interfaz web, gráficos y exportador Excel
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("renderAlmanacWaterBalanceHtml", app_js)
+        self.assertIn("exportWaterBalanceToExcel", app_js)
+        self.assertIn("chart-alm-waterbalance", app_js)
+        self.assertIn("chart-comp-waterbalance", app_js)
+        self.assertIn("btn-export-waterbalance-xlsx", app_js)
+
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".water-balance-section", css_text)
+        self.assertIn(".water-balance-kpis-grid", css_text)
+        self.assertIn(".wb-kpi-card", css_text)
+        self.assertIn(".wb-days-bar", css_text)
+        self.assertIn(".wb-assessment-callout", css_text)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

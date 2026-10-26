@@ -4428,3 +4428,142 @@ html[data-theme="dark"] .offline-badge.online-restored {
   font-size: 0.85rem;
   color: var(--txt-secondary);
 }
+
+/* ==========================================================================
+ * EVO-022 (EVO-A): Balance Hídrico del Suelo y Evapotranspiración ET0 (FAO-56)
+ * ========================================================================== */
+
+.water-balance-section {
+  margin-bottom: 2rem;
+}
+
+.water-balance-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.wb-kpi-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wb-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.wb-kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.wb-kpi-card.wb-surplus::before { background: #059669; }
+.wb-kpi-card.wb-deficit::before { background: #ea580c; }
+.wb-kpi-card.wb-eto::before { background: #0284c7; }
+.wb-kpi-card.wb-ratio::before { background: #8b5cf6; }
+
+.wb-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.wb-kpi-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--txt-muted);
+}
+
+.wb-kpi-icon {
+  font-size: 1.15rem;
+}
+
+.wb-kpi-val {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--txt-primary);
+  margin-bottom: 6px;
+  font-family: var(--font-mono, monospace);
+}
+
+.wb-kpi-val.surplus { color: #059669; }
+.wb-kpi-val.deficit { color: #ea580c; }
+.wb-kpi-val.neutral { color: #0284c7; }
+
+.wb-kpi-sub {
+  font-size: 0.8rem;
+  color: var(--txt-secondary);
+  line-height: 1.4;
+}
+
+.wb-days-bar-container {
+  margin-top: 8px;
+}
+
+.wb-days-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--bg-body);
+}
+
+.wb-bar-deficit {
+  background: #ea580c;
+  height: 100%;
+}
+
+.wb-bar-surplus {
+  background: #059669;
+  height: 100%;
+}
+
+.wb-days-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--txt-muted);
+  margin-top: 4px;
+}
+
+.wb-assessment-callout {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid #059669;
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.wb-assessment-callout h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wb-assessment-callout p {
+  font-size: 0.88rem;
+  color: var(--txt-secondary);
+  margin: 0;
+}

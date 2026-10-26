@@ -138,6 +138,25 @@ def validate_directory(data_dir: Path) -> List[str]:
         if not alm_ee or "counts" not in alm_ee or "episodes" not in alm_ee:
             errors.append(f"[{year}] almanac_{year}.json carece del objeto 'extreme_episodes' (EVO-D)")
 
+        # Validar balance hídrico y evapotranspiración FAO-56 (EVO-022 / EVO-A)
+        wb = alm.get("stats", {}).get("water_balance")
+        if not wb:
+            errors.append(f"[{year}] almanac_{year}.json carece de 'stats.water_balance' (EVO-A)")
+        else:
+            eto_tot = wb.get("eto_total_mm")
+            wb_net = wb.get("water_balance_mm")
+            if eto_tot is None or not (600.0 <= eto_tot <= 1400.0):
+                errors.append(f"[{year}] ET0 total fuera de rango físico razonable (600–1400 mm): {eto_tot}")
+            if wb_net is None or wb_net < 300.0:
+                errors.append(f"[{year}] Balance hídrico neto anual inesperado en clima hiperhúmedo (<300 mm): {wb_net}")
+            if "deficit_days" not in wb or "surplus_days" not in wb:
+                errors.append(f"[{year}] Faltan deficit_days o surplus_days en water_balance")
+
+        # Verificar presencia de series agroclimáticas en daily_series
+        for req_ds_key in ["eto", "water_balance", "eto_accum", "water_balance_accum"]:
+            if req_ds_key not in ds:
+                errors.append(f"[{year}] Falta '{req_ds_key}' en daily_series (EVO-A)")
+
     comp = loaded.get("comparisons.json", {})
     sc = comp.get("seasonal_comparison", {})
     if not sc:
@@ -147,6 +166,16 @@ def validate_directory(data_dir: Path) -> List[str]:
             errors.append(f"Tabla estacional incompleta en comparisons.json: {len(sc.get('table', []))} < 20 filas.")
         if len(sc.get("baseline_reference_2022_2025", {})) != 4:
             errors.append("Referencia climática estacional incompleta en comparisons.json.")
+
+    # Validar balance hídrico multianual en comparisons.json (EVO-022 / EVO-A)
+    wbc = comp.get("water_balance_comparison", {})
+    if not wbc:
+        errors.append("comparisons.json carece del objeto 'water_balance_comparison' (EVO-A).")
+    else:
+        if "mean_annual_eto_mm" not in wbc or "mean_annual_water_balance_mm" not in wbc:
+            errors.append("Faltan medias de balance hídrico en comparisons.json.")
+        if len(wbc.get("years", {})) < 5:
+            errors.append(f"Años insuficientes en water_balance_comparison: {len(wbc.get('years', {}))} < 5.")
 
     # Validar catálogo de episodios extremos en records.json (EVO-020 / EVO-D)
     rec = loaded.get("records.json", {})

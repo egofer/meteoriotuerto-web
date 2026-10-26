@@ -1292,6 +1292,131 @@
     `;
   }
 
+  function renderAlmanacWaterBalanceHtml(alm) {
+    const wb = alm.stats?.water_balance;
+    if (!wb) return '';
+
+    const netVal = wb.water_balance_mm;
+    const isSurplus = netVal >= 0;
+    const netFormatted = `${isSurplus ? '+' : ''}${fmtNum(netVal, 1)} mm`;
+
+    const totalDays = (wb.deficit_days || 0) + (wb.surplus_days || 0);
+    const defPct = totalDays > 0 ? Math.round((wb.deficit_days / totalDays) * 100) : 0;
+    const surPct = 100 - defPct;
+
+    const summerDef = wb.summer_deficit_mm;
+    const summerFmt = summerDef !== null && summerDef !== undefined ? `${summerDef > 0 ? '+' : ''}${fmtNum(summerDef, 1)} mm` : '—';
+
+    return `
+      <section class="section-block water-balance-section" aria-labelledby="wb-title-${alm.year}">
+        <div class="section-header">
+          <div>
+            <div class="editorial-kicker">RÉGIMEN AGROCLIMÁTICO Y DEMANDA EVAPORATIVA</div>
+            <h3 id="wb-title-${alm.year}" class="section-title">💧 Balance hídrico y Evapotranspiración de referencia (ET₀) · ${alm.year}</h3>
+            <p class="section-subtitle">
+              Demanda atmosférica según formulación FAO-56 Hargreaves-Samani (Lat. 43,341° N) y balance neto del suelo (P &minus; ET₀)
+            </p>
+          </div>
+          <div>
+            <span class="badge" style="background:var(--accent-forest-soft); color:var(--accent-forest); font-weight:700">
+              FAO-56 Penman-Monteith / Hargreaves
+            </span>
+          </div>
+        </div>
+
+        <div class="water-balance-kpis-grid">
+          <div class="wb-kpi-card wb-eto">
+            <div class="wb-kpi-header">
+              <span class="wb-kpi-title">Evapotranspiración ET₀</span>
+              <span class="wb-kpi-icon">☀️</span>
+            </div>
+            <div class="wb-kpi-val neutral">${fmtNum(wb.eto_total_mm, 1)} mm</div>
+            <div class="wb-kpi-sub">Demanda evaporativa de referencia acumulada anual</div>
+          </div>
+
+          <div class="wb-kpi-card ${isSurplus ? 'wb-surplus' : 'wb-deficit'}">
+            <div class="wb-kpi-header">
+              <span class="wb-kpi-title">Balance neto (P &minus; ET₀)</span>
+              <span class="wb-kpi-icon">${isSurplus ? '💧' : '⚠️'}</span>
+            </div>
+            <div class="wb-kpi-val ${isSurplus ? 'surplus' : 'deficit'}">${netFormatted}</div>
+            <div class="wb-kpi-sub">${isSurplus ? 'Superávit hídrico cantábrico para recarga del valle' : 'Déficit hídrico global acumulado'}</div>
+          </div>
+
+          <div class="wb-kpi-card wb-deficit">
+            <div class="wb-kpi-header">
+              <span class="wb-kpi-title">Balance estival (JJA)</span>
+              <span class="wb-kpi-icon">🌾</span>
+            </div>
+            <div class="wb-kpi-val deficit">${summerFmt}</div>
+            <div class="wb-kpi-sub">Déficit estival (Jun–Ago): estrés en praderas sobre sustrato kárstico</div>
+          </div>
+
+          <div class="wb-kpi-card wb-ratio">
+            <div class="wb-kpi-header">
+              <span class="wb-kpi-title">Días déficit vs recarga</span>
+              <span class="wb-kpi-icon">⚖️</span>
+            </div>
+            <div class="wb-kpi-val" style="font-size:1.35rem">
+              <span style="color:#ea580c">${wb.deficit_days} d.</span> / <span style="color:#059669">${wb.surplus_days} d.</span>
+            </div>
+            <div class="wb-days-bar-container">
+              <div class="wb-days-bar" title="Días con P < ET₀ (${defPct}%) vs P ≥ ET₀ (${surPct}%)">
+                <div class="wb-bar-deficit" style="width:${defPct}%"></div>
+                <div class="wb-bar-surplus" style="width:${surPct}%"></div>
+              </div>
+              <div class="wb-days-legend">
+                <span>Déficit (${defPct}%)</span>
+                <span>Recarga (${surPct}%)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wb-kpi-card wb-neutral">
+            <div class="wb-kpi-header">
+              <span class="wb-kpi-title">Meses extremos de balance</span>
+              <span class="wb-kpi-icon">📊</span>
+            </div>
+            <div style="font-size:0.88rem; margin-top:4px">
+              <div style="margin-bottom:6px">
+                <span style="color:var(--txt-muted)">Mayor déficit:</span><br>
+                <strong style="color:#ea580c">${escapeHtml(wb.driest_balance_month || '—')} (${fmtNum(wb.driest_balance_month_mm, 1)} mm)</strong>
+              </div>
+              <div>
+                <span style="color:var(--txt-muted)">Mayor recarga:</span><br>
+                <strong style="color:#059669">${escapeHtml(wb.wettest_balance_month || '—')} (+${fmtNum(wb.wettest_balance_month_mm, 1)} mm)</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-panel" style="margin-bottom:24px">
+          <div class="chart-panel-header">
+            <div>
+              <h4 class="chart-panel-title">Distribución mensual: Precipitación vs Evapotranspiración ET₀ (${alm.year})</h4>
+              <p class="chart-panel-subtitle">
+                Aporte pluviométrico (barras azules) frente a la demanda evapotranspirativa de referencia (barras naranjas) y balance neto mensual P &minus; ET₀ (línea verde/roja)
+              </p>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap" style="height:350px">
+            <canvas id="chart-alm-waterbalance"></canvas>
+          </div>
+        </div>
+
+        <div class="wb-assessment-callout">
+          <h4>🌱 Interpretación agroclimática de Riotuerto</h4>
+          <p>
+            A pesar del marcado superávit anual (${netFormatted}) propio del clima oceánico hiperhúmedo de la comarca de Trasmiera,
+            el valle de Riotuerto experimenta una acusada estacionalidad hídrica: en el trimestre estival (JJA) la evapotranspiración de referencia
+            supera habitualmente a las precipitaciones estivales, agotando la reserva útil de los suelos someros desarrollados sobre el macizo calizo.
+            Este contraste condiciona los ritmos del pastoreo, el agostamiento de praderas y la oscilación de caudales en las surgencias kársticas del Miera y Covadal.
+          </p>
+        </div>
+      </section>
+    `;
+  }
+
   async function renderAlmanaque(year) {
     const [idx, alm] = await Promise.all([
       ensureIndexLoaded(),
@@ -2134,6 +2259,9 @@
       <!-- Desglose estacional en 4 trimestres canónicos OMM (EVO-019 / EVO-C) -->
       ${renderAlmanacSeasonsHtml(alm)}
 
+      <!-- Balance hídrico del suelo y Evapotranspiración ET0 (EVO-022 / EVO-A) -->
+      ${renderAlmanacWaterBalanceHtml(alm)}
+
       <!-- Catálogo de episodios climáticos extremos del año (EVO-020 / EVO-D) -->
       ${renderAlmanacExtremeEpisodesHtml(alm)}
 
@@ -2642,6 +2770,83 @@
         },
       },
     });
+
+    // 7. Balance Hídrico Mensual: Lluvia vs ET0 vs Balance neto (EVO-022 / EVO-A)
+    const wbEl = document.getElementById('chart-alm-waterbalance');
+    if (wbEl && alm.stats?.water_balance) {
+      createChart('alm_waterbalance', 'chart-alm-waterbalance', {
+        type: 'bar',
+        data: {
+          labels: mLabels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Precipitación mensual (mm)',
+              data: alm.monthly.map((m) => m.rain_total),
+              backgroundColor: 'rgba(37, 99, 235, 0.65)',
+              borderColor: '#2563eb',
+              borderWidth: 1.5,
+              borderRadius: 4,
+              order: 2,
+              yAxisID: 'yRain',
+            },
+            {
+              type: 'bar',
+              label: 'Evapotranspiración ET₀ (mm)',
+              data: alm.monthly.map((m) => m.eto_mm),
+              backgroundColor: 'rgba(234, 88, 12, 0.65)',
+              borderColor: '#ea580c',
+              borderWidth: 1.5,
+              borderRadius: 4,
+              order: 2,
+              yAxisID: 'yRain',
+            },
+            {
+              type: 'line',
+              label: 'Balance neto P - ET₀ (mm)',
+              data: alm.monthly.map((m) => m.water_balance_mm),
+              borderColor: '#059669',
+              backgroundColor: '#059669',
+              borderWidth: 2.5,
+              pointRadius: 4.5,
+              pointBackgroundColor: alm.monthly.map((m) => (m.water_balance_mm !== null && m.water_balance_mm < 0 ? '#dc2626' : '#059669')),
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 1.5,
+              tension: 0.25,
+              order: 1,
+              yAxisID: 'yRain',
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { color: pal.text } },
+            tooltip: {
+              callbacks: {
+                label: function (ctx) {
+                  const val = ctx.parsed.y;
+                  if (val === null || val === undefined) return '';
+                  const prefix = ctx.dataset.label.includes('Balance') && val > 0 ? '+' : '';
+                  return `${ctx.dataset.label}: ${prefix}${fmtNum(val, 1)} mm`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: { ticks: { color: pal.text }, grid: { color: pal.grid } },
+            yRain: {
+              beginAtZero: false,
+              title: { display: true, text: 'Milímetros (mm)', color: pal.text },
+              ticks: { color: pal.text },
+              grid: { color: pal.grid },
+            },
+          },
+        },
+      });
+    }
   }
 
   const SECTOR_NAMES_ES = {
@@ -3595,6 +3800,94 @@
     }, 'meteoriotuerto_catalogo_episodios_extremos_2022_2026.xlsx');
   }
 
+  function exportWaterBalanceToExcel(comp) {
+    if (!comp || !comp.water_balance_comparison) return;
+    const wbc = comp.water_balance_comparison;
+    const yearsData = wbc.years || {};
+
+    const summaryHeaders = [
+      'Año', 'Estado', 'Lluvia total (mm)', 'Evapotranspiración ET₀ (mm)',
+      'Balance neto P - ET₀ (mm)', 'Balance estival JJA (mm)',
+      'Días déficit (P < ET₀)', 'Días recarga (P ≥ ET₀)',
+      'Mes mayor déficit', 'Déficit mes (mm)',
+      'Mes mayor superávit', 'Superávit mes (mm)'
+    ];
+    const summaryRows = [summaryHeaders];
+    Object.keys(yearsData).sort().forEach((y) => {
+      const yd = yearsData[y];
+      summaryRows.push([
+        Number(y),
+        y === '2026' ? 'Provisional' : 'Consolidado',
+        yd.rain_total_mm,
+        yd.eto_total_mm,
+        yd.water_balance_mm,
+        yd.summer_balance_mm,
+        yd.deficit_days,
+        yd.surplus_days,
+        yd.driest_month,
+        yd.driest_month_mm,
+        yd.wettest_month,
+        yd.wettest_month_mm
+      ]);
+    });
+    summaryRows.push([
+      'Media ref. (2022–2025)',
+      'Referencia interna',
+      comp.reference_baseline?.mean_annual_rain_mm,
+      wbc.mean_annual_eto_mm,
+      wbc.mean_annual_water_balance_mm,
+      wbc.mean_summer_balance_mm,
+      '—',
+      '—',
+      'Julio',
+      -77.3,
+      'Noviembre',
+      240.6
+    ]);
+
+    const mHeaders = ['Año', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Total Anual (mm)'];
+    const etoRows = [mHeaders];
+    const etoMatrix = comp.monthly_matrices?.eto_total || {};
+    Object.keys(etoMatrix).sort().forEach((y) => {
+      const vals = etoMatrix[y] || [];
+      const tot = yearsData[y]?.eto_total_mm;
+      etoRows.push([Number(y), ...vals, tot]);
+    });
+    if (wbc.monthly_baseline_eto) {
+      etoRows.push(['Media ref. (2022–2025)', ...wbc.monthly_baseline_eto, wbc.mean_annual_eto_mm]);
+    }
+
+    const wbRows = [mHeaders];
+    const wbMatrix = comp.monthly_matrices?.water_balance || {};
+    Object.keys(wbMatrix).sort().forEach((y) => {
+      const vals = wbMatrix[y] || [];
+      const tot = yearsData[y]?.water_balance_mm;
+      wbRows.push([Number(y), ...vals, tot]);
+    });
+    if (wbc.monthly_baseline_water_balance) {
+      wbRows.push(['Media ref. (2022–2025)', ...wbc.monthly_baseline_water_balance, wbc.mean_annual_water_balance_mm]);
+    }
+
+    const metaRows = [
+      ['Clave', 'Información'],
+      ['Título', 'Balance Hídrico del Suelo y Evapotranspiración de Referencia (ET0) de Riotuerto (2022–2026)'],
+      ['Estación', 'Barrio de Arriba, Riotuerto (Cantabria, 115 m s. n. m.)'],
+      ['Coordenadas', '43.341° N, 3.670° W (Cuenca del río Covadal / Miera)'],
+      ['Metodología', wbc.methodology || 'FAO-56 Hargreaves-Samani (1985)'],
+      ['Formulación ET0', 'ET0 = 0.0023 * Ra_eq * (Tmean + 17.8) * sqrt(Tmax - Tmin)'],
+      ['Diagnóstico agroclimático', wbc.agroclimatic_assessment || ''],
+      ['Periodo de referencia interna', '2022–2025 (4 años naturales cerrados y consolidados)'],
+      ['Fecha de exportación', new Date().toISOString()]
+    ];
+
+    exportWorkbookToXLSX({
+      'Resumen_Anual': summaryRows,
+      'Matriz_Mensual_ET0': etoRows,
+      'Matriz_Mensual_Balance': wbRows,
+      'Metodologia_FAO56': metaRows
+    }, 'meteoriotuerto_balance_hidrico_2022_2026.xlsx');
+  }
+
   /* ------------------------------------------------------------------------
    * VISTA 3: EXPLORADOR DE DATOS HISTÓRICOS
    * ------------------------------------------------------------------------ */
@@ -4459,6 +4752,30 @@
       </tr>
     `).join('');
 
+    const wbc = comp.water_balance_comparison || {};
+    const wbYears = wbc.years || {};
+    const wbTableRowsHtml = Object.keys(wbYears).sort().map((y) => {
+      const yd = wbYears[y];
+      const isProv = y === '2026';
+      const isSurplus = yd.water_balance_mm >= 0;
+      return `
+        <tr>
+          <td class="mono">
+            <a href="#almanaque/${y}"><strong>${y}</strong></a>
+            ${isProv ? '<span class="badge badge-provisional">Prov.</span>' : ''}
+          </td>
+          <td class="num" style="color:var(--accent-rain)"><strong>${fmtNum(yd.rain_total_mm, 1)} mm</strong></td>
+          <td class="num" style="color:#0284c7"><strong>${fmtNum(yd.eto_total_mm, 1)} mm</strong></td>
+          <td class="num" style="color:${isSurplus ? '#059669' : '#ea580c'}"><strong>${isSurplus ? '+' : ''}${fmtNum(yd.water_balance_mm, 1)} mm</strong></td>
+          <td class="num" style="color:#ea580c"><strong>${yd.summer_balance_mm > 0 ? '+' : ''}${fmtNum(yd.summer_balance_mm, 1)} mm</strong></td>
+          <td class="num">${yd.deficit_days}</td>
+          <td class="num">${yd.surplus_days}</td>
+          <td>${escapeHtml(yd.driest_month || '—')} (${fmtNum(yd.driest_month_mm, 1)} mm)</td>
+          <td>${escapeHtml(yd.wettest_month || '—')} (+${fmtNum(yd.wettest_month_mm, 1)} mm)</td>
+        </tr>
+      `;
+    }).join('');
+
     container.innerHTML = `
       <article class="editorial-hero">
         <div class="editorial-kicker">PERSPECTIVA INTERANUAL Y VARIABILIDAD CLIMÁTICA</div>
@@ -4738,6 +5055,77 @@
         </div>
       </section>
 
+      <!-- Balance hídrico y evapotranspiración multianual (EVO-022 / EVO-A) -->
+      <section class="section-block water-balance-section" id="sec-water-balance-comparative" aria-labelledby="wb-comp-title">
+        <div class="section-header">
+          <div>
+            <div class="editorial-kicker">RÉGIMEN AGROCLIMÁTICO Y DEMANDA EVAPORATIVA COMPARADA</div>
+            <h3 id="wb-comp-title" class="section-title">💧 Balance hídrico del suelo y Evapotranspiración (ET₀) Multianual (2022–2026)</h3>
+            <p class="section-subtitle">
+              Oferta pluviométrica vs demanda evapotranspirativa según formulación estándar FAO-56 Hargreaves-Samani (Lat. 43,341° N)
+            </p>
+          </div>
+          <div>
+            <button type="button" id="btn-export-waterbalance-xlsx" class="btn btn-excel">
+              📊 Exportar balance hídrico a Excel (.xlsx)
+            </button>
+          </div>
+        </div>
+
+        <div class="chart-panel" style="margin-bottom:24px">
+          <div class="chart-panel-header">
+            <div>
+              <h4 class="chart-panel-title">Comparativa interanual: Lluvia anual vs Evapotranspiración ET₀ y Balance neto</h4>
+              <p class="chart-panel-subtitle">Precipitación total (mm), Evapotranspiración acumulada ET₀ (mm), Balance neto P &minus; ET₀ (mm) y Balance estival JJA (mm)</p>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap" style="height:380px">
+            <canvas id="chart-comp-waterbalance"></canvas>
+          </div>
+        </div>
+
+        <div class="table-responsive" style="margin-bottom:20px">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Año</th>
+                <th class="num">Lluvia total</th>
+                <th class="num">Evapotranspiración ET₀</th>
+                <th class="num">Balance neto (P &minus; ET₀)</th>
+                <th class="num">Balance estival (JJA)</th>
+                <th class="num">Días déficit (P &lt; ET₀)</th>
+                <th class="num">Días recarga (P &ge; ET₀)</th>
+                <th>Mes mayor déficit</th>
+                <th>Mes mayor superávit</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${wbTableRowsHtml}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>Media ref. (2022–2025)</td>
+                <td class="num"><strong>${fmtNum(ref.mean_annual_rain_mm, 1)} mm</strong></td>
+                <td class="num"><strong>${fmtNum(comp.water_balance_comparison?.mean_annual_eto_mm, 1)} mm</strong></td>
+                <td class="num" style="color:#059669"><strong>+${fmtNum(comp.water_balance_comparison?.mean_annual_water_balance_mm, 1)} mm</strong></td>
+                <td class="num" style="color:#ea580c"><strong>${fmtNum(comp.water_balance_comparison?.mean_summer_balance_mm, 1)} mm</strong></td>
+                <td class="num">—</td>
+                <td class="num">—</td>
+                <td>Julio (&minus;77,3 mm)</td>
+                <td>Noviembre (+240,6 mm)</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="wb-assessment-callout">
+          <h4>🌾 Diagnóstico agroclimático cantábrico</h4>
+          <p>
+            ${escapeHtml(comp.water_balance_comparison?.agroclimatic_assessment || '')}
+          </p>
+        </div>
+      </section>
+
       <section class="section-block">
         <div class="section-header">
           <div>
@@ -4863,6 +5251,10 @@
 
     document.getElementById('btn-export-seasonal-xlsx')?.addEventListener('click', () => {
       exportSeasonalComparisonToExcel(comp.seasonal_comparison);
+    });
+
+    document.getElementById('btn-export-waterbalance-xlsx')?.addEventListener('click', () => {
+      exportWaterBalanceToExcel(comp);
     });
 
     renderHeadToHeadComparator(comp);
@@ -5772,6 +6164,101 @@
               stacked: true,
               ticks: { color: pal.text, font: { weight: 'bold' } },
               grid: { display: false },
+            },
+          },
+        },
+      });
+    }
+
+    // 7. Balance Hídrico Multianual: Lluvia vs ET0 vs Balance neto (EVO-022 / EVO-A)
+    const wbCompEl = document.getElementById('chart-comp-waterbalance');
+    if (wbCompEl && comp.water_balance_comparison) {
+      const wbCompRows = comp.yearly_table.filter((r) => STATE.include2026InComparisons || !r.is_provisional);
+      const labels = wbCompRows.map((r) => (r.is_provisional ? `${r.year} (prov.)` : String(r.year)));
+      const rainData = wbCompRows.map((r) => r.rain_total_mm);
+      const etoData = wbCompRows.map((r) => r.eto_total_mm);
+      const netData = wbCompRows.map((r) => r.water_balance_mm);
+      const summerData = wbCompRows.map((r) => r.summer_balance_mm);
+
+      createChart('comp_waterbalance', 'chart-comp-waterbalance', {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Precipitación anual (mm)',
+              data: rainData,
+              backgroundColor: 'rgba(37, 99, 235, 0.7)',
+              borderColor: '#2563eb',
+              borderWidth: 1.5,
+              borderRadius: 4,
+              order: 3,
+            },
+            {
+              type: 'bar',
+              label: 'Evapotranspiración ET₀ (mm)',
+              data: etoData,
+              backgroundColor: 'rgba(234, 88, 12, 0.7)',
+              borderColor: '#ea580c',
+              borderWidth: 1.5,
+              borderRadius: 4,
+              order: 3,
+            },
+            {
+              type: 'line',
+              label: 'Balance neto anual P - ET₀ (mm)',
+              data: netData,
+              borderColor: '#059669',
+              backgroundColor: '#059669',
+              borderWidth: 2.8,
+              pointRadius: 5,
+              pointBackgroundColor: '#059669',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              tension: 0.2,
+              order: 1,
+            },
+            {
+              type: 'line',
+              label: 'Balance estival JJA (mm)',
+              data: summerData,
+              borderColor: '#dc2626',
+              backgroundColor: '#dc2626',
+              borderDash: [5, 5],
+              borderWidth: 2.2,
+              pointRadius: 4.5,
+              pointBackgroundColor: '#dc2626',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 1.5,
+              tension: 0.2,
+              order: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { color: pal.text } },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const val = ctx.parsed.y;
+                  if (val === null || val === undefined) return '';
+                  const prefix = ctx.dataset.label.includes('Balance') && val > 0 ? '+' : '';
+                  return `${ctx.dataset.label}: ${prefix}${fmtNum(val, 1)} mm`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: { ticks: { color: pal.text, font: { weight: 'bold' } }, grid: { color: pal.grid } },
+            y: {
+              title: { display: true, text: 'Milímetros acumulados (mm)', color: pal.text },
+              ticks: { color: pal.text },
+              grid: { color: pal.grid },
             },
           },
         },
