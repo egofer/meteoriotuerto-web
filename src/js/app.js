@@ -1521,7 +1521,7 @@
                 </div>
               </div>
               <p class="practical-card-body">
-                Los bajísimos valores de CDD en el municipio demuestran la ventaja bioclimática de Riotuerto frente a zonas continentales: noches frescas garantizadas para el descanso sin necesidad de aire acondicionado mecánico. Para rutas hacia Alisas o el Picón del Carlista, vigilar los días con CDD positivos o surada para planificar salidas temprano y evitar bochornos.
+                Los bajísimos valores de CDD en el municipio demuestran la ventaja bioclimática de Riotuerto frente a zonas continentales: noches frescas garantizadas para el descanso sin necesidad de aire acondicionado mecánico. Para rutas hacia Alisas o el Alto de Brenas, vigilar los días con CDD positivos o surada para planificar salidas temprano y evitar bochornos.
               </p>
               <div class="practical-card-stat">
                 Demanda de refrigeración: <strong>${fmtNum(dd.cdd_21_0, 1)} CDD</strong> (Descanso nocturno garantizado)
