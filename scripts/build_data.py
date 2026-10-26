@@ -28,6 +28,11 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+try:
+    from scripts.glossary_data import get_glossary_payload
+except ImportError:
+    from glossary_data import get_glossary_payload
+
 # -----------------------------------------------------------------------------
 # Constantes geográficas, meteorológicas y editoriales
 # -----------------------------------------------------------------------------
@@ -1765,6 +1770,7 @@ def build_all(source_dir: Optional[Path], output_dir: Path, cache_dir: Path) -> 
             "index.json": index_payload,
             "records.json": records_payload,
             "comparisons.json": comparisons_payload,
+            "glossary.json": get_glossary_payload(),
         }
         for y, alm in almanacs.items():
             files_to_write[f"almanac_{y}.json"] = alm

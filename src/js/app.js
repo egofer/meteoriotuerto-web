@@ -32,10 +32,15 @@
       page: 1,
       pageSize: 30,
     },
+    glossary: {
+      categoryFilter: 'all',
+      searchQuery: '',
+    },
     cache: {
       index: null,
       records: null,
       comparisons: null,
+      glossary: null,
       almanacs: {}, // { 2022: {...}, ... }
     },
     charts: {}, // Instancias activas de Chart.js
@@ -154,6 +159,13 @@
       STATE.cache.comparisons = await fetchJson('comparisons.json');
     }
     return STATE.cache.comparisons;
+  }
+
+  async function ensureGlossaryLoaded() {
+    if (!STATE.cache.glossary) {
+      STATE.cache.glossary = await fetchJson('glossary.json');
+    }
+    return STATE.cache.glossary;
   }
 
   async function ensureAlmanacLoaded(year) {
@@ -293,15 +305,15 @@
           <div class="notary-manifesto">
             <p>
               Situada en las estribaciones de la Cordillera Cantábrica, a 14 km del mar Cantábrico y a 5 km del puerto de Alisas,
-              la estación captura un microclima de valle muy definido: <strong>elevada pluviosidad orográfica</strong> cuando los
+              la estación captura un microclima de valle muy definido: <strong>elevada <abbr class="glossary-term" data-term="lluvia_orografica">pluviosidad orográfica</abbr></strong> cuando los
               frentes del noroeste remontan la cuenca del Miera (superando habitualmente los 1.600–2.100 mm anuales) y
-              <strong>marcadas suradas por efecto Foehn</strong> que desploman la humedad y disparan súbitamente la temperatura.
+              <strong>marcadas <abbr class="glossary-term" data-term="surada">suradas</abbr> por <abbr class="glossary-term" data-term="efecto_foehn">efecto Foehn</abbr></strong> que desploman la humedad y disparan súbitamente la temperatura.
             </p>
             <p>
               Cada cifra publicada en este archivo procede directamente de los registros instrumentales validados,
               distinguiendo con rigor entre observaciones directas, indicadores derivados y contexto sinóptico.
               El archivo ofrece <strong>comparaciones anuales muy útiles</strong> para examinar la variabilidad meteorológica reciente en Riotuerto,
-              pero <strong>todavía no permite establecer normales climatológicas de 30 años ni atribuir tendencias climáticas sólidas con garantías</strong>.
+              pero <strong>todavía no permite establecer <abbr class="glossary-term" data-term="normal_climatologica">normales climatológicas de 30 años</abbr> ni atribuir tendencias climáticas sólidas con garantías</strong>.
             </p>
           </div>
           <aside class="complement-box" aria-label="Nota sobre consulta en tiempo real">
@@ -327,11 +339,11 @@
             </p>
             <p class="location-desc">
               La estación meteorológica automática está instalada en una pradera abierta en la localidad de <strong>Barrio de Arriba</strong> (115 m s. n. m.),
-              un enclave de fondo de valle con un marcado régimen pluviométrico orográfico y acusadas oscilaciones por efecto Foehn e inversión térmica:
+              un enclave de fondo de valle con un marcado régimen pluviométrico orográfico y acusadas oscilaciones por <abbr class="glossary-term" data-term="efecto_foehn">efecto Foehn</abbr> e <abbr class="glossary-term" data-term="inversion_termica">inversión térmica</abbr>:
             </p>
             <ul class="location-highlights">
-              <li><strong>Retención orográfica Cantábrica:</strong> a solo 14 km del mar Cantábrico, las masas de aire húmedo del noroeste quedan retenidas contra la barrera montañosa, generando una elevada pluviosidad (1.600 a más de 2.100 mm anuales).</li>
-              <li><strong>Efecto Foehn («suradas»):</strong> cuando el viento sopla del sur desciende recalentado desde la divisoria de la cordillera, disparando bruscamente las temperaturas y hundiendo la humedad relativa.</li>
+              <li><strong><abbr class="glossary-term" data-term="lluvia_orografica">Retención orográfica Cantábrica</abbr>:</strong> a solo 14 km del mar Cantábrico, las masas de aire húmedo del noroeste quedan retenidas contra la barrera montañosa, generando una elevada pluviosidad (1.600 a más de 2.100 mm anuales).</li>
+              <li><strong><abbr class="glossary-term" data-term="efecto_foehn">Efecto Foehn</abbr> (<abbr class="glossary-term" data-term="surada">«suradas»</abbr>):</strong> cuando el viento sopla del sur desciende recalentado desde la divisoria de la cordillera, disparando bruscamente las temperaturas y hundiendo la humedad relativa.</li>
               <li><strong>Distancias clave:</strong> a 5 km de Alisas, a 7 km de Liérganes, a 16 km del aeropuerto de Santander y a 23 km de la ciudad de Santander.</li>
             </ul>
             <div class="location-coord-badge mono">
@@ -1349,7 +1361,7 @@
             <div class="degree-card-header">
               <span class="degree-icon">🏠</span>
               <div>
-                <h4 class="degree-title">Calefacción en el hogar (HDD)</h4>
+                <h4 class="degree-title">Calefacción en el hogar (<abbr class="glossary-term" data-term="hdd">HDD</abbr>)</h4>
                 <span class="degree-base">Base de confort térmico: 15,5 °C</span>
               </div>
             </div>
@@ -1366,7 +1378,7 @@
             <div class="degree-card-header">
               <span class="degree-icon">❄️</span>
               <div>
-                <h4 class="degree-title">Demanda de refrigeración (CDD)</h4>
+                <h4 class="degree-title">Demanda de refrigeración (<abbr class="glossary-term" data-term="cdd">CDD</abbr>)</h4>
                 <span class="degree-base">Base de sobrecalentamiento: 21,0 °C</span>
               </div>
             </div>
@@ -1375,7 +1387,7 @@
               <div><strong>Mes de mayor demanda:</strong> ${maxCddStr}</div>
             </div>
             <p class="degree-desc">
-              Evalúa el sobrecalentamiento interior en verano. En el fondo de valle de Riotuerto, las casas disfrutan de refrigeración pasiva natural gracias al clima oceánico; cifras elevadas señalan tardes de bochorno o noches tropicales en las que abrir ventanas no basta para disipar el calor acumulado en las estancias.
+              Evalúa el sobrecalentamiento interior en verano. En el fondo de valle de Riotuerto, las casas disfrutan de refrigeración pasiva natural gracias al clima oceánico; cifras elevadas señalan tardes de bochorno o <abbr class="glossary-term" data-term="noche_tropical">noches tropicales</abbr> en las que abrir ventanas no basta para disipar el calor acumulado en las estancias.
             </p>
           </div>
 
@@ -1383,8 +1395,8 @@
             <div class="degree-card-header">
               <span class="degree-icon">🌾</span>
               <div>
-                <h4 class="degree-title">Desarrollo agrícola y praderas (GDD)</h4>
-                <span class="degree-base">Cero vegetativo: 10,0 °C</span>
+                <h4 class="degree-title">Desarrollo agrícola y praderas (<abbr class="glossary-term" data-term="gdd">GDD</abbr>)</h4>
+                <span class="degree-base"><abbr class="glossary-term" data-term="cero_vegetativo">Cero vegetativo</abbr>: 10,0 °C</span>
               </div>
             </div>
             <div class="degree-value">${fmtNum(dd.gdd_10_0, 1)} <span class="degree-unit">GDD</span></div>
@@ -3458,10 +3470,263 @@
           <a href="./data/index.json" download="meteoriotuerto_index.json" class="btn btn-primary">⬇ Índice general (index.json)</a>
           <a href="./data/records.json" download="meteoriotuerto_records.json" class="btn">⬇ Récords e históricos (records.json)</a>
           <a href="./data/comparisons.json" download="meteoriotuerto_comparisons.json" class="btn">⬇ Comparativas (comparisons.json)</a>
+          <a href="./data/glossary.json" download="meteoriotuerto_glossary.json" class="btn">⬇ Glosario y conceptos (glossary.json)</a>
           <a href="https://github.com/egofer/meteoriotuerto/" target="_blank" rel="noopener noreferrer" class="btn">Repositorio CSV original en GitHub ↗</a>
         </div>
       </section>
     `;
+  }
+
+  /* ------------------------------------------------------------------------
+   * Modal interactivo de definiciones y conceptos meteorológicos (EVO-008)
+   * ------------------------------------------------------------------------ */
+  async function openTermModal(termId) {
+    if (!termId) return;
+    const glo = await ensureGlossaryLoaded();
+    const term = glo.terms.find((t) => t.id === termId);
+    if (!term) return;
+
+    const modal = document.getElementById('term-modal');
+    const backdrop = document.getElementById('term-modal-backdrop');
+    if (!modal || !backdrop) return;
+
+    const category = glo.categories.find((c) => c.id === term.category_id);
+    const catBadge = document.getElementById('modal-term-category');
+    if (catBadge) {
+      catBadge.textContent = category ? `${category.icon} ${category.name}` : term.category_id;
+    }
+
+    const titleEl = document.getElementById('modal-term-title');
+    if (titleEl) titleEl.textContent = term.term;
+
+    const threshEl = document.getElementById('modal-term-threshold');
+    if (threshEl) {
+      if (term.threshold) {
+        threshEl.hidden = false;
+        threshEl.textContent = `Umbral / Criterio: ${term.threshold}`;
+      } else {
+        threshEl.hidden = true;
+      }
+    }
+
+    const shortEl = document.getElementById('modal-term-short');
+    if (shortEl) shortEl.textContent = term.short_definition;
+
+    const bodyEl = document.getElementById('modal-term-body');
+    if (bodyEl) {
+      bodyEl.innerHTML = `<p>${escapeHtml(term.full_definition)}</p>`;
+    }
+
+    const rioEl = document.getElementById('modal-term-riotuerto');
+    if (rioEl) rioEl.textContent = term.riotuerto_context;
+
+    const footerEl = document.getElementById('modal-term-footer');
+    const seeAlsoContainer = document.getElementById('modal-term-see-also');
+    if (footerEl && seeAlsoContainer) {
+      if (term.see_also && term.see_also.length > 0) {
+        footerEl.hidden = false;
+        seeAlsoContainer.innerHTML = term.see_also.map((saId) => {
+          const saTerm = glo.terms.find((t) => t.id === saId);
+          const saLabel = saTerm ? saTerm.term : saId;
+          return `<button type="button" class="term-chip-link" data-open-term="${escapeHtml(saId)}">↳ ${escapeHtml(saLabel)}</button>`;
+        }).join('');
+      } else {
+        footerEl.hidden = true;
+      }
+    }
+
+    backdrop.hidden = false;
+    modal.setAttribute('open', '');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeTermModal() {
+    const modal = document.getElementById('term-modal');
+    const backdrop = document.getElementById('term-modal-backdrop');
+    if (modal) modal.removeAttribute('open');
+    if (backdrop) backdrop.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  /* ------------------------------------------------------------------------
+   * VISTA 7: GLOSARIO METEOROLÓGICO Y DIVULGATIVO (EVO-008)
+   * ------------------------------------------------------------------------ */
+  async function renderGlosario() {
+    const glo = await ensureGlossaryLoaded();
+    const container = document.getElementById('view-glosario');
+    if (!container) return;
+
+    const activeCat = STATE.glossary.categoryFilter || 'all';
+    const query = (STATE.glossary.searchQuery || '').trim().toLowerCase();
+
+    // Filtro reactivo
+    let filteredTerms = glo.terms.filter((t) => {
+      if (activeCat !== 'all' && t.category_id !== activeCat) {
+        return false;
+      }
+      if (!query) return true;
+      const haystack = [
+        t.term,
+        t.short_definition,
+        t.full_definition,
+        t.riotuerto_context,
+        t.threshold || '',
+        ...(t.aliases || []),
+      ].join(' ').toLowerCase();
+      return haystack.includes(query);
+    });
+
+    // Ordenar alfabéticamente por nombre del término
+    filteredTerms.sort((a, b) => a.term.localeCompare(b.term, 'es'));
+
+    // Categorías con conteos
+    const catChipsHtml = [
+      `<button type="button" class="glossary-filter-chip ${activeCat === 'all' ? 'active' : ''}" data-cat="all">Todas (${glo.terms.length})</button>`,
+      ...glo.categories.map((c) => {
+        const count = glo.terms.filter((t) => t.category_id === c.id).length;
+        const isActive = activeCat === c.id;
+        return `<button type="button" class="glossary-filter-chip ${isActive ? 'active' : ''}" data-cat="${c.id}">${c.icon} ${c.name} (${count})</button>`;
+      }),
+    ].join('');
+
+    // Tarjetas de términos
+    const termsHtml = filteredTerms.length === 0
+      ? `<div class="empty-state" style="grid-column: 1 / -1; padding: 48px 24px; text-align: center;">
+           <p style="font-size: 1.1rem; color: var(--txt-muted);">No se han encontrado conceptos coincidentes con la búsqueda <strong>"${escapeHtml(query)}"</strong>.</p>
+           <button type="button" class="btn btn-primary" id="btn-reset-glossary-search" style="margin-top: 12px;">Restablecer búsqueda</button>
+         </div>`
+      : filteredTerms.map((t) => {
+          const cat = glo.categories.find((c) => c.id === t.category_id);
+          const catLabel = cat ? `${cat.icon} ${cat.name}` : t.category_id;
+          return `
+            <article class="glossary-card" data-term-id="${escapeHtml(t.id)}">
+              <div class="glossary-card-header">
+                <span class="glossary-card-cat">${escapeHtml(catLabel)}</span>
+                ${t.threshold ? `<span class="glossary-card-threshold mono" title="Criterio de umbral">${escapeHtml(t.threshold)}</span>` : ''}
+              </div>
+              <h3 class="glossary-card-title">${escapeHtml(t.term)}</h3>
+              <p class="glossary-card-short">${escapeHtml(t.short_definition)}</p>
+              <div class="glossary-card-riotuerto">
+                <span class="riotuerto-mini-tag">🌱 En Riotuerto:</span>
+                <span class="riotuerto-mini-desc">${escapeHtml(t.riotuerto_context)}</span>
+              </div>
+              <div class="glossary-card-footer">
+                <button type="button" class="btn btn-outline-term" data-open-term="${escapeHtml(t.id)}">
+                  Ver definición completa y referencias ↗
+                </button>
+              </div>
+            </article>
+          `;
+        }).join('');
+
+    container.innerHTML = `
+      <div class="view-intro">
+        <span class="view-kicker">ENCICLOPEDIA Y DIVULGACIÓN LOCAL</span>
+        <h2 class="view-title" id="glosario-heading">Glosario meteorológico y microclimático de Riotuerto</h2>
+        <p class="view-lead">
+          Repertorio de conceptos atmosféricos, biofísicos, estadísticos y orográficos documentados en el valle del río Covadal.
+          Todas las definiciones combinan el rigor de los estándares de la Organización Meteorológica Mundial (OMM)
+          con el comportamiento real y singular observado en el municipio de Riotuerto.
+        </p>
+        <div class="intro-stats-strip">
+          <div class="stat-badge"><span class="num">${glo.total_terms}</span> conceptos documentados</div>
+          <div class="stat-badge"><span class="num">${glo.total_categories}</span> áreas temáticas</div>
+          <div class="stat-badge"><span class="num">100 %</span> contextualizado al valle</div>
+        </div>
+      </div>
+
+      <section class="section-block">
+        <div class="glossary-toolbar">
+          <div class="glossary-search-wrap">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input
+              type="search"
+              id="glossary-search-input"
+              class="glossary-search-input"
+              placeholder="Buscar por término, sinónimo o fenómeno (ej: Foehn, surada, helada, HDD, IQR)..."
+              value="${escapeHtml(STATE.glossary.searchQuery || '')}"
+              aria-label="Buscar concepto en el glosario"
+            />
+            ${STATE.glossary.searchQuery ? `<button type="button" id="btn-clear-glossary-search" class="btn-clear-search" aria-label="Limpiar búsqueda">✕</button>` : ''}
+          </div>
+          <div class="glossary-filter-chips" role="group" aria-label="Filtrar por categoría">
+            ${catChipsHtml}
+          </div>
+        </div>
+
+        <div class="glossary-results-count">
+          Mostrando <strong>${filteredTerms.length}</strong> de <strong>${glo.total_terms}</strong> conceptos
+          ${activeCat !== 'all' ? `en la categoría seleccionada` : ''}
+          ${query ? `para la búsqueda "<em>${escapeHtml(query)}</em>"` : ''}.
+        </div>
+
+        <div class="glossary-grid" id="glossary-grid">
+          ${termsHtml}
+        </div>
+      </section>
+
+      <!-- Descarga del glosario en formato abierto JSON -->
+      <section class="section-block">
+        <div class="section-header">
+          <div>
+            <h3 class="section-title">Datos abiertos del glosario</h3>
+            <p class="section-subtitle">Descarga del catálogo enciclopédico estructurado en formato JSON machine-readable</p>
+          </div>
+        </div>
+        <div class="btn-group">
+          <a href="./data/glossary.json" download="meteoriotuerto_glossary.json" class="btn btn-primary">⬇ Descargar glosario estructurado (glossary.json)</a>
+        </div>
+      </section>
+    `;
+
+    // Listeners del toolbar y tarjetas
+    const searchInput = document.getElementById('glossary-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        STATE.glossary.searchQuery = e.target.value;
+        renderGlosario();
+      });
+    }
+
+    const clearBtn = document.getElementById('btn-clear-glossary-search');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        STATE.glossary.searchQuery = '';
+        renderGlosario();
+      });
+    }
+
+    const resetBtn = document.getElementById('btn-reset-glossary-search');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        STATE.glossary.searchQuery = '';
+        STATE.glossary.categoryFilter = 'all';
+        renderGlosario();
+      });
+    }
+
+    container.querySelectorAll('.glossary-filter-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const cat = chip.getAttribute('data-cat');
+        STATE.glossary.categoryFilter = cat;
+        renderGlosario();
+      });
+    });
+
+    container.querySelectorAll('[data-open-term]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tId = btn.getAttribute('data-open-term');
+        if (tId) openTermModal(tId);
+      });
+    });
+
+    container.querySelectorAll('.glossary-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        const tId = card.getAttribute('data-term-id');
+        if (tId) openTermModal(tId);
+      });
+    });
   }
 
   /* ------------------------------------------------------------------------
@@ -3472,7 +3737,7 @@
     const parts = raw.split('/');
     const route = parts[0] || 'portada';
     const param = parts[1] || null;
-    const validRoutes = ['portada', 'almanaque', 'explorador', 'records', 'comparativas', 'metodologia'];
+    const validRoutes = ['portada', 'almanaque', 'explorador', 'records', 'comparativas', 'metodologia', 'glosario'];
     return {
       route: validRoutes.includes(route) ? route : 'portada',
       param,
@@ -3531,6 +3796,8 @@
         await renderComparativas();
       } else if (route === 'metodologia') {
         await renderMetodologia();
+      } else if (route === 'glosario') {
+        await renderGlosario();
       }
 
       if (loadingEl) loadingEl.hidden = true;
@@ -3583,12 +3850,37 @@
     document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
     window.addEventListener('hashchange', handleRouteChange);
 
-    // Atajos de teclado (Alt + Flecha Izquierda / Derecha) para cambiar entre años consecutivos (EVO-002)
+    // Cerrar modal interactivo de términos
+    document.getElementById('modal-term-close')?.addEventListener('click', closeTermModal);
+    document.getElementById('term-modal-backdrop')?.addEventListener('click', closeTermModal);
+
+    // Escuchar clics globales en términos contextuales interactivos (.glossary-term y [data-open-term])
+    document.addEventListener('click', (e) => {
+      const termEl = e.target.closest('.glossary-term');
+      if (termEl) {
+        e.preventDefault();
+        const termId = termEl.getAttribute('data-term');
+        if (termId) openTermModal(termId);
+        return;
+      }
+      const chipEl = e.target.closest('[data-open-term]');
+      if (chipEl) {
+        e.preventDefault();
+        const termId = chipEl.getAttribute('data-open-term');
+        if (termId) openTermModal(termId);
+      }
+    });
+
+    // Tecla Escape para cerrar modal y atajos de teclado Alt + Flecha Izq/Der
     window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeTermModal();
+        return;
+      }
       if (!e.altKey || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
       const tag = (e.target && e.target.tagName) || '';
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) return;
-      const { route } = parseHash();
+      const { route } = parseHashRoute();
       if (route !== 'almanaque' || !STATE.cache.index) return;
       const years = STATE.cache.index.series_overview.years_available || [];
       const curIdx = years.indexOf(STATE.selectedYear);

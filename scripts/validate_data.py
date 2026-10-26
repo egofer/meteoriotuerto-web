@@ -24,6 +24,7 @@ REQUIRED_FILES = [
     "index.json",
     "records.json",
     "comparisons.json",
+    "glossary.json",
     "almanac_2022.json",
     "almanac_2023.json",
     "almanac_2024.json",
@@ -121,7 +122,41 @@ def validate_directory(data_dir: Path) -> List[str]:
             if rain is not None and rain < 0:
                 errors.append(f"[{year} {d_str}] Lluvia negativa: {rain}")
 
-    # 3. Salvaguarda de seguridad, privacidad doméstica e identificadores físicos en los JSONs
+    # 3. Validar glosario meteorológico y divulgativo (glossary.json)
+    glo = loaded.get("glossary.json", {})
+    categories = glo.get("categories", [])
+    terms = glo.get("terms", [])
+    if len(categories) < 6:
+        errors.append(f"Número insuficiente de categorías en glosario: {len(categories)} < 6")
+    if len(terms) < 30:
+        errors.append(f"Número insuficiente de términos en glosario: {len(terms)} < 30")
+
+    cat_ids = {c.get("id") for c in categories if isinstance(c, dict)}
+    term_ids = set()
+    for t in terms:
+        t_id = t.get("id")
+        if not t_id:
+            errors.append(f"Término en glosario sin identificador: {t}")
+            continue
+        if t_id in term_ids:
+            errors.append(f"Identificador de término duplicado en glosario: {t_id}")
+        term_ids.add(t_id)
+
+        c_id = t.get("category_id")
+        if c_id not in cat_ids:
+            errors.append(f"Categoría desconocida '{c_id}' en término '{t_id}'")
+
+        for req_field in ["term", "short_definition", "full_definition", "riotuerto_context"]:
+            if not t.get(req_field):
+                errors.append(f"Campo obligatorio '{req_field}' vacío o ausente en término '{t_id}'")
+
+    # Verificar que las referencias cruzadas see_also apunten a términos existentes
+    for t in terms:
+        for sa in t.get("see_also", []):
+            if sa not in term_ids:
+                errors.append(f"Término '{t.get('id')}' referencia a término inexistente en see_also: '{sa}'")
+
+    # 4. Salvaguarda de seguridad, privacidad doméstica e identificadores físicos en los JSONs
     forbidden_json_patterns = [
         ("Credencial o token expuesto", re.compile(r"(?:ghp_[A-Za-z0-9]+|github_pat_[A-Za-z0-9_]+|APPLICATION_KEY|API_KEY|PASSKEY)")),
         ("Dirección MAC de hardware expuesta", re.compile(r"\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b")),

@@ -93,6 +93,7 @@
           <li><a href="#records" data-route="records" class="nav-link">Récords y efemérides</a></li>
           <li><a href="#comparativas" data-route="comparativas" class="nav-link">Comparativas entre años</a></li>
           <li><a href="#metodologia" data-route="metodologia" class="nav-link">Metodología y datos</a></li>
+          <li><a href="#glosario" data-route="glosario" class="nav-link">Glosario</a></li>
         </ul>
       </nav>
     </div>
@@ -135,6 +136,11 @@
     <section id="view-metodologia" class="view-section" hidden aria-labelledby="metodologia-heading">
       <!-- Renderizado por src/js/app.js -->
     </section>
+
+    <!-- VISTA 7: GLOSARIO METEOROLÓGICO Y DIVULGATIVO (EVO-008) -->
+    <section id="view-glosario" class="view-section" hidden aria-labelledby="glosario-heading">
+      <!-- Renderizado por src/js/app.js -->
+    </section>
   </main>
 
   <!-- Pie de página editorial -->
@@ -163,6 +169,7 @@
           <li><a href="#records">Récords y efemérides</a></li>
           <li><a href="#comparativas">Comparativas interanuales</a></li>
           <li><a href="#metodologia">Metodología y control de calidad</a></li>
+          <li><a href="#glosario">Glosario meteorológico</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -181,6 +188,31 @@
       <span id="footer-build-stamp" class="mono"></span>
     </div>
   </footer>
+
+  <!-- Modal interactivo y accesible para definiciones de términos (EVO-008) -->
+  <div id="term-modal-backdrop" class="term-modal-backdrop" hidden></div>
+  <dialog id="term-modal" class="term-modal" aria-labelledby="modal-term-title" aria-describedby="modal-term-body">
+    <div class="term-modal-inner">
+      <div class="term-modal-header">
+        <span class="term-modal-badge" id="modal-term-category"></span>
+        <button type="button" class="term-modal-close" id="modal-term-close" aria-label="Cerrar definición">✕</button>
+      </div>
+      <div class="term-modal-content">
+        <h3 id="modal-term-title" class="term-modal-title"></h3>
+        <div class="term-modal-threshold" id="modal-term-threshold" hidden></div>
+        <p id="modal-term-short" class="term-modal-short"></p>
+        <div id="modal-term-body" class="term-modal-body"></div>
+        <div class="term-modal-riotuerto">
+          <div class="riotuerto-tag">🌱 En el microclima de Riotuerto:</div>
+          <p id="modal-term-riotuerto" class="riotuerto-desc"></p>
+        </div>
+        <div class="term-modal-footer" id="modal-term-footer" hidden>
+          <span class="term-see-also-label">Conceptos relacionados:</span>
+          <div class="term-see-also-chips" id="modal-term-see-also"></div>
+        </div>
+      </div>
+    </div>
+  </dialog>
 
   <!-- Chart.js (v4.4.4 CDN con fallback y carga diferida controlada) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>

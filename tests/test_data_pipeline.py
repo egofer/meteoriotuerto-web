@@ -162,6 +162,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             ROOT_DIR / ".github" / "workflows" / "deploy.yml",
             ROOT_DIR / "docs" / "METODOLOGIA.md",
             ROOT_DIR / "docs" / "GUIA_DESPLIEGUE.md",
+            ROOT_DIR / "data" / "glossary.json",
         ]
         for p in required_paths:
             self.assertTrue(p.exists(), f"Falta el archivo requerido: {p}")
@@ -175,6 +176,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             "view-records",
             "view-comparativas",
             "view-metodologia",
+            "view-glosario",
         ]:
             self.assertIn(f'id="{section_id}"', html_text)
 
@@ -207,6 +209,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
                     "/data/index.json",
                     "/data/records.json",
                     "/data/comparisons.json",
+                    "/data/glossary.json",
                     "/data/almanac_2022.json",
                     "/data/almanac_2025.json",
                 ]:
@@ -370,6 +373,45 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             self.assertIn("temp_median", row)
             self.assertIn("comfort_days_15_25", row)
             self.assertIn("comfort_pct_15_25", row)
+
+    def test_glossary_integrity_and_serving(self) -> None:
+        """
+        EVO-008: Verifica la estructura, integridad y cobertura del glosario meteorológico
+        y divulgativo de Riotuerto.
+        """
+        glo_path = self.data_dir / "glossary.json"
+        self.assertTrue(glo_path.exists())
+        with open(glo_path, "r", encoding="utf-8") as f:
+            glo = json.load(f)
+
+        self.assertIn("title", glo)
+        self.assertIn("categories", glo)
+        self.assertIn("terms", glo)
+
+        categories = glo["categories"]
+        terms = glo["terms"]
+        self.assertEqual(len(categories), 6)
+        self.assertGreaterEqual(len(terms), 30)
+        self.assertEqual(glo["total_terms"], len(terms))
+        self.assertEqual(glo["total_categories"], len(categories))
+
+        cat_ids = {c["id"] for c in categories}
+        term_ids = {t["id"] for t in terms}
+
+        for t in terms:
+            self.assertIn(t["category_id"], cat_ids)
+            self.assertTrue(len(t["term"]) > 0)
+            self.assertTrue(len(t["short_definition"]) > 0)
+            self.assertTrue(len(t["full_definition"]) > 0)
+            self.assertTrue(len(t["riotuerto_context"]) > 0)
+            self.assertIsInstance(t["aliases"], list)
+            self.assertIsInstance(t["see_also"], list)
+            for sa in t["see_also"]:
+                self.assertIn(sa, term_ids, f"see_also '{sa}' no encontrado en términos")
+
+        # Verificar conceptos locales distintivos
+        for local_id in ["efecto_foehn", "surada", "inversion_termica", "hdd", "cdd", "gdd", "mediana_p50"]:
+            self.assertIn(local_id, term_ids)
 
 
 

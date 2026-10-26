@@ -2318,3 +2318,473 @@ html[data-theme="dark"] .btn-primary {
     padding: 18px 16px;
   }
 }
+
+/* ==========================================================================
+   EVO-008: Glosario meteorológico, microclimático y modal interactivo
+   ========================================================================== */
+
+/* Términos enlazados contextualmente en el texto */
+.glossary-term {
+  border-bottom: 1.5px dashed var(--accent-forest);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  padding: 0 2px;
+  border-radius: 3px;
+  font-weight: inherit;
+}
+
+.glossary-term:hover,
+.glossary-term:focus-visible {
+  background-color: var(--accent-forest-soft);
+  border-bottom-style: solid;
+  color: var(--accent-forest);
+  outline: none;
+}
+
+/* Telón de fondo (backdrop) del modal */
+.term-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 20, 18, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+  transition: opacity 0.2s ease;
+}
+
+/* Diálogo modal emergente */
+.term-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  color: var(--txt-primary);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.32);
+  width: min(92vw, 680px);
+  max-height: 88vh;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.term-modal:not([open]) {
+  display: none;
+}
+
+.term-modal-inner {
+  padding: 24px 28px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.term-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+}
+
+.term-modal-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-forest-soft);
+  color: var(--accent-forest);
+}
+
+.term-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--txt-muted);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.term-modal-close:hover {
+  background: var(--bg-subtle);
+  color: var(--txt-primary);
+}
+
+.term-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.term-modal-title {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.term-modal-threshold {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  background: var(--bg-subtle);
+  color: var(--accent-heat);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent-heat);
+  width: fit-content;
+}
+
+.term-modal-short {
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--txt-secondary);
+  margin: 0;
+}
+
+.term-modal-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--txt-primary);
+}
+
+.term-modal-body p {
+  margin: 0;
+}
+
+.term-modal-riotuerto {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-forest);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-top: 4px;
+}
+
+.riotuerto-tag {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--accent-forest);
+  margin-bottom: 4px;
+}
+
+.riotuerto-desc {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--txt-secondary);
+  margin: 0;
+}
+
+.term-modal-footer {
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.term-see-also-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--txt-muted);
+  letter-spacing: 0.04em;
+}
+
+.term-see-also-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.term-chip-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  color: var(--txt-primary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.term-chip-link:hover {
+  background: var(--accent-forest-soft);
+  border-color: var(--accent-forest);
+  color: var(--accent-forest);
+}
+
+/* Barra de herramientas del glosario (búsqueda y filtros) */
+.glossary-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.glossary-search-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.glossary-search-wrap .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.glossary-search-input {
+  width: 100%;
+  padding: 12px 42px 12px 42px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--txt-primary);
+  font-family: inherit;
+  font-size: 0.98rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.glossary-search-input:focus {
+  outline: none;
+  border-color: var(--accent-forest);
+  box-shadow: 0 0 0 3px var(--accent-forest-soft);
+}
+
+.glossary-search-wrap .btn-clear-search {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--txt-muted);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.glossary-search-wrap .btn-clear-search:hover {
+  background: var(--bg-subtle);
+  color: var(--txt-primary);
+}
+
+.glossary-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.glossary-filter-chip {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--txt-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.glossary-filter-chip:hover {
+  border-color: var(--accent-forest);
+  color: var(--txt-primary);
+  background: var(--bg-subtle);
+}
+
+.glossary-filter-chip.active {
+  background: var(--accent-forest);
+  color: #ffffff;
+  border-color: var(--accent-forest);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.glossary-results-count {
+  font-size: 0.88rem;
+  color: var(--txt-muted);
+  margin-bottom: 20px;
+}
+
+/* Cuadrícula de tarjetas del glosario */
+.glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.glossary-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.glossary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-forest);
+}
+
+.glossary-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.glossary-card-cat {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-forest);
+  background: var(--accent-forest-soft);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.glossary-card-threshold {
+  font-size: 0.74rem;
+  background: var(--bg-subtle);
+  color: var(--accent-heat);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--accent-heat);
+  white-space: nowrap;
+}
+
+.glossary-card-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.glossary-card-short {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--txt-secondary);
+  margin: 0;
+  flex-grow: 1;
+}
+
+.glossary-card-riotuerto {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent-forest);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--txt-muted);
+}
+
+.riotuerto-mini-tag {
+  display: block;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--accent-forest);
+  margin-bottom: 2px;
+}
+
+.glossary-card-footer {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.btn-outline-term {
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--txt-primary);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-outline-term:hover {
+  background: var(--accent-forest-soft);
+  border-color: var(--accent-forest);
+  color: var(--accent-forest);
+}
+
+/* Adaptación responsive en móviles */
+@media (max-width: 640px) {
+  .term-modal-inner {
+    padding: 18px 18px;
+  }
+  .term-modal-title {
+    font-size: 1.35rem;
+  }
+  .glossary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Reglas de impresión para el glosario */
+@media print {
+  .term-modal-backdrop,
+  .term-modal,
+  .glossary-toolbar,
+  .glossary-card-footer {
+    display: none !important;
+  }
+  .glossary-term {
+    border-bottom: none !important;
+    font-weight: 600;
+  }
+  .glossary-grid {
+    display: block;
+  }
+  .glossary-card {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    page-break-inside: avoid;
+  }
+}
