@@ -5111,7 +5111,7 @@
       kicker: 'DINÁMICA 1: ADVECCIÓN DEL SUR Y SOTAVENTO ADIABÁTICO',
       color: '#ea580c',
       badge: '🔥 Efecto Foehn',
-      physicalDescription: 'Cuando las borrascas o frentes atlánticos se aproximan por el oeste, se canaliza un potente flujo del sector Sur-Sudoeste sobre la cordillera cantábrica. El aire húmedo se ve forzado a ascender por la vertiente sur perdiendo humedad por condensación. Al rebasar las cumbres de Peña Pelada (686 m) y Alto de Brenas (579 m) y desplomarse hacia el fondo del valle del Covadal (115 m), experimenta compresión adiabática seca: se recalienta a un ritmo de +1 °C por cada 100 m de descenso y su humedad relativa se desploma violentamente.',
+      physicalDescription: 'Cuando las borrascas o frentes atlánticos se aproximan por el oeste, se canaliza un potente flujo del sector Sur-Sudoeste sobre la cordillera cantábrica. El aire húmedo se ve forzado a ascender por la vertiente sur perdiendo humedad por condensación. Al rebasar el collado del Puerto de Alisas (674 m) y las cumbres de Peña Pelada (686 m) y desplomarse hacia el fondo del valle del Covadal (115 m), experimenta compresión adiabática seca: se recalienta a un ritmo de +1 °C por cada 100 m de descenso y su humedad relativa se desploma violentamente.',
       territorialImpact: 'Provoca desecación repentina de praderas y vegetación arbórea, aceleración eólica canalizada por el desfiladero con rachas huracanadas en Barrio de Arriba y riesgo extremo de incendios forestales. Históricamente se conoce como «el viento de las castañas» por favorecer su caída en otoño, y altera el biorritmo vecinal por ionización positiva y subidas térmicas fulgurantes en pleno invierno.',
       records: [
         { label: 'Racha máxima histórica', val: '86,4 km/h', sub: 'SW · 27 de marzo de 2024' },
@@ -5298,7 +5298,7 @@
 
         ${dynamicLayerHtml}
 
-        <path d="M 40,310 L 70,310 Q 130,306 180,301 Q 250,293 310,282 Q 370,274 430,270 Q 480,265 540,248 Q 585,235 630,220 Q 675,170 720,111 Q 760,85 800,75 Q 835,90 860,156 L 860,320 L 40,320 Z" fill="${terrainFill}" />
+        <path d="M 40,310 L 70,310 Q 130,306 180,301 Q 250,293 310,282 Q 370,274 430,270 Q 500,260 580,215 Q 655,160 725,78 Q 770,82 815,74 Q 845,90 860,156 L 860,320 L 40,320 Z" fill="${terrainFill}" />
         <path d="M 40,310 Q 120,308 180,303 Q 250,295 310,284 Q 370,276 430,272" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0.75" />
 
         <circle cx="70" cy="310" r="3" fill="#38bdf8" />
@@ -5308,13 +5308,13 @@
         <line x1="310" y1="282" x2="310" y2="295" stroke="${textMutedColor}" stroke-width="1" />
         <text x="310" y="307" font-size="10" font-weight="600" fill="${textPrimaryColor}" text-anchor="middle">La Cavada (80 m)</text>
 
-        <circle cx="720" cy="111" r="3.5" fill="#f59e0b" />
-        <line x1="720" y1="111" x2="720" y2="95" stroke="#f59e0b" stroke-width="1" />
-        <text x="720" y="88" font-size="10" font-weight="700" fill="${textPrimaryColor}" text-anchor="middle">Alto de Brenas (579 m)</text>
+        <circle cx="725" cy="78" r="4" fill="#f59e0b" />
+        <line x1="725" y1="78" x2="725" y2="60" stroke="#f59e0b" stroke-width="1.2" />
+        <text x="715" y="52" font-size="10" font-weight="700" fill="${textPrimaryColor}" text-anchor="middle">Puerto de Alisas (674 m)</text>
 
-        <circle cx="800" cy="75" r="4" fill="#dc2626" />
-        <line x1="800" y1="75" x2="800" y2="58" stroke="#dc2626" stroke-width="1" />
-        <text x="800" y="52" font-size="10" font-weight="700" fill="${textPrimaryColor}" text-anchor="middle">Peña Pelada (686 m)</text>
+        <circle cx="815" cy="74" r="3.5" fill="#dc2626" />
+        <line x1="815" y1="74" x2="815" y2="60" stroke="#dc2626" stroke-width="1" />
+        <text x="825" y="52" font-size="9" font-weight="600" fill="${textPrimaryColor}" text-anchor="middle">Peña Pelada (686 m)</text>
 
         <text x="55" y="35" font-size="11" font-weight="700" fill="${textMutedColor}">⮜ NORTE (Hacia la costa)</text>
         <text x="855" y="35" font-size="11" font-weight="700" fill="${textMutedColor}" text-anchor="end">SUR (Hacia la cordillera) ⮞</text>
