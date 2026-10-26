@@ -50,5 +50,4 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Workflow local (el PAT actual no tiene scope 'workflow'; plantilla en docs/deploy.yml)
-.github/workflows/
+

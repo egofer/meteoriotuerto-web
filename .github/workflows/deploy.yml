@@ -1,0 +1,101 @@
+name: Actualizar datos, validar y desplegar en GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    # Actualización automática diaria a las 06:30 UTC tras la sincronización de MeteoRiotuerto
+    - cron: '30 6 * * *'
+  repository_dispatch:
+    types:
+      - meteoriotuerto_data_updated
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  build_and_validate:
+    name: Procesar datos, validar integridad y empaquetar web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio meteoriotuerto-web
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clonar repositorio de datos primario (egofer/meteoriotuerto)
+        uses: actions/checkout@v4
+        with:
+          repository: egofer/meteoriotuerto
+          path: .cache/meteoriotuerto
+        continue-on-error: true
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar dependencias de procesamiento científico
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Sincronizar productos JSON de forma atómica y validar invariantes (EVO-009)
+        run: |
+          # Ejecuta build_data.py, validate_data.py y unittest de forma atómica.
+          # Si ocurre cualquier error, restaura los JSONs previos y detiene el flujo.
+          python3 scripts/sync_data.py \
+            --source-dir .cache/meteoriotuerto \
+            --output-dir data
+
+      - name: Confirmar nuevos productos JSON en la rama main (si hubo cambios de datos)
+        if: github.event_name != 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/*.json data/*.geojson
+          if ! git diff --cached --quiet; then
+            STAMP=$(date '+%Y-%m-%d')
+            git commit -m "data(sync): actualización automática desde meteoriotuerto [$STAMP]"
+            git push origin main
+          else
+            echo "Sin cambios nuevos en data/*.json para confirmar en main."
+          fi
+
+      - name: Preparar artefacto limpio de producción para GitHub Pages
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp favicon.* apple-touch-icon.png site.webmanifest _site/ 2>/dev/null || true
+          cp -r src _site/
+          cp -r data _site/
+          touch _site/.nojekyll
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir artefacto de GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+  deploy:
+    name: Publicar en GitHub Pages
+    needs: build_and_validate
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
