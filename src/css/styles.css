@@ -1542,6 +1542,48 @@ html[data-theme="dark"] .btn-primary {
   color: #081c15;
 }
 
+.btn-excel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--bg-elevated);
+  color: #107c41;
+  border: 1px solid #107c41;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.btn-excel:hover {
+  background-color: #107c41;
+  color: #ffffff;
+  border-color: #107c41;
+  box-shadow: 0 2px 6px rgba(16, 124, 65, 0.25);
+}
+
+html[data-theme="dark"] .btn-excel {
+  color: #34d399;
+  border-color: #059669;
+  background-color: var(--bg-surface);
+}
+
+html[data-theme="dark"] .btn-excel:hover {
+  background-color: #059669;
+  color: #ffffff;
+  border-color: #10b981;
+}
+
+.table-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .btn-group {
   display: inline-flex;
   gap: 6px;

@@ -1474,6 +1474,7 @@
           </div>
           <div class="btn-group">
             <button type="button" id="btn-print-almanac" class="btn btn-print">🖨️ Imprimir ficha / Guardar PDF</button>
+            <button type="button" id="btn-dl-year-xlsx" class="btn btn-excel">📊 Descargar libro del año (${alm.year}.xlsx)</button>
             <button type="button" id="btn-dl-year-csv" class="btn">⬇ Descargar serie diaria ${alm.year} (CSV)</button>
             <a href="./data/almanac_${alm.year}.json" download="meteoriotuerto_almanaque_${alm.year}.json" class="btn">⬇ Descargar JSON anual</a>
           </div>
@@ -1547,6 +1548,11 @@
           <div>
             <h3 class="section-title">Resumen climatológico mensual (${alm.year})</h3>
             <p class="section-subtitle">Valores mensuales de temperatura, extremos absolutos, precipitación, rachas de viento y humedad</p>
+          </div>
+          <div>
+            <button type="button" id="btn-export-monthly-xlsx" class="btn btn-excel">
+              📊 Exportar resumen a Excel (.xlsx)
+            </button>
           </div>
         </div>
         <div class="table-responsive">
@@ -1645,6 +1651,12 @@
       document.getElementById('btn-cal-temp')?.classList.add('btn-primary');
       document.getElementById('btn-cal-rain')?.classList.remove('btn-primary');
       renderCalendarMatrix(alm, 'temp');
+    });
+    document.getElementById('btn-export-monthly-xlsx')?.addEventListener('click', () => {
+      exportAlmanacMonthlyToExcel(alm);
+    });
+    document.getElementById('btn-dl-year-xlsx')?.addEventListener('click', () => {
+      exportAlmanacFullYearToExcel(alm);
     });
     document.getElementById('btn-dl-year-csv')?.addEventListener('click', () => {
       downloadYearDailyCSV(alm);
@@ -2083,6 +2095,490 @@
   }
 
   /* ------------------------------------------------------------------------
+   * EXPORTACIÓN NATIVA A EXCEL (.XLSX) CON SHEETJS
+   * ------------------------------------------------------------------------ */
+  async function ensureXLSXLoaded() {
+    if (window.XLSX && typeof window.XLSX.writeFile === 'function') {
+      return window.XLSX;
+    }
+    return new Promise((resolve, reject) => {
+      const existing = document.getElementById('script-xlsx-vendor');
+      if (existing) {
+        if (window.XLSX && typeof window.XLSX.writeFile === 'function') {
+          return resolve(window.XLSX);
+        }
+        existing.addEventListener('load', () => resolve(window.XLSX));
+        existing.addEventListener('error', () => reject(new Error('No se pudo cargar la librería XLSX')));
+        return;
+      }
+      const s = document.createElement('script');
+      s.id = 'script-xlsx-vendor';
+      s.src = './src/js/vendor/xlsx.mini.min.js';
+      s.defer = true;
+      s.onload = () => resolve(window.XLSX);
+      s.onerror = () => {
+        const sCdn = document.createElement('script');
+        sCdn.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.mini.min.js';
+        sCdn.onload = () => resolve(window.XLSX);
+        sCdn.onerror = (e) => reject(new Error('Error al cargar la librería de exportación a Excel.'));
+        document.head.appendChild(sCdn);
+      };
+      document.head.appendChild(s);
+    });
+  }
+
+  async function exportWorkbookToXLSX(sheetsMap, defaultFilename) {
+    try {
+      const XLSX = await ensureXLSXLoaded();
+      const wb = XLSX.utils.book_new();
+      Object.entries(sheetsMap).forEach(([rawSheetName, sheetData]) => {
+        const sheetName = rawSheetName.replace(/[:\\/?*\[\]]/g, '_').slice(0, 31);
+        let ws;
+        if (Array.isArray(sheetData) && Array.isArray(sheetData[0])) {
+          ws = XLSX.utils.aoa_to_sheet(sheetData);
+        } else {
+          ws = XLSX.utils.json_to_sheet(sheetData);
+        }
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      });
+      XLSX.writeFile(wb, defaultFilename);
+    } catch (err) {
+      console.error('Error al exportar archivo Excel:', err);
+      alert('No se pudo generar el archivo Excel: ' + (err.message || err));
+    }
+  }
+
+  function exportAlmanacMonthlyToExcel(alm) {
+    const stT = alm.stats.temperature;
+    const stP = alm.stats.precipitation;
+    const stW = alm.stats.wind;
+    const stA = alm.stats.atmosphere_and_solar;
+    const dd = alm.stats.degree_days || {};
+    const foehn = alm.foehn_analysis || { total_foehn_days: 0 };
+
+    const monthlyHeaders = [
+      'Mes', 'Días válidos', 'Días mes', 'T. media (°C)', 'Media máx. (°C)', 'Media mín. (°C)',
+      'T. máx. abs. (°C)', 'Fecha máx.', 'T. mín. abs. (°C)', 'Fecha mín.', 'Lluvia total (mm)',
+      'Días lluvia ≥0,2 mm', 'Días lluvia ≥10 mm', 'Lluvia máx. 24h (mm)', 'Fecha máx. lluvia',
+      'Viento medio (km/h)', 'Racha máx. (km/h)', 'Fecha racha', 'Días helada (≤0 °C)',
+      'Días calor (≥30 °C)', 'Noches tropicales (≥20 °C)', 'Días Foehn / surada',
+      'HDD Calefacción (15,5 °C)', 'CDD Refrigeración (21,0 °C)', 'GDD Agrícola (10,0 °C)',
+      'Humedad media (%)', 'Presión media (hPa)'
+    ];
+
+    const monthlyRows = [monthlyHeaders];
+    alm.monthly.forEach((m) => {
+      monthlyRows.push([
+        m.name, m.valid_days, m.calendar_days, m.temp_mean, m.temp_max_mean, m.temp_min_mean,
+        m.temp_max_abs, m.temp_max_date, m.temp_min_abs, m.temp_min_date, m.rain_total,
+        m.rain_days_02, m.rain_days_10, m.rain_max_day, m.rain_max_date,
+        m.wind_speed_mean, m.wind_gust_max, m.wind_gust_date, m.frost_days,
+        m.hot_days_30, m.tropical_nights, m.foehn_days ?? 0, m.hdd_15_5,
+        m.cdd_21_0, m.gdd_10_0, m.humidity_mean, m.pressure_mean
+      ]);
+    });
+
+    monthlyRows.push([
+      `Anual / Total (${alm.year})`, alm.coverage.valid_days, alm.coverage.observed_span_days,
+      stT.mean, stT.max_mean, stT.min_mean, stT.max_abs, stT.max_abs_date, stT.min_abs, stT.min_abs_date,
+      stP.total_mm, stP.days_ge_02mm, stP.days_ge_30mm, stP.max_daily_mm, stP.max_daily_date,
+      stW.mean_speed_kmh, stW.max_gust_kmh, stW.max_gust_date, stT.frost_days_le_0,
+      stT.hot_days_ge_30, stT.tropical_nights_ge_20, foehn.total_foehn_days,
+      dd.hdd_15_5, dd.cdd_21_0, dd.gdd_10_0, stA.humidity_mean_pct, stA.pressure_mean_hpa
+    ]);
+
+    const metadataRows = [
+      ['Archivo climatológico local', 'MeteoRiotuerto — Notario del clima de Riotuerto'],
+      ['Emplazamiento', 'Barrio de Arriba, Riotuerto (Cantabria, España)'],
+      ['Coordenadas (WGS84) y cota', '43.341° N, 3.670° W · 115 m s. n. m.'],
+      ['Año observado', alm.year],
+      ['Estado del anuario', alm.is_provisional ? 'Provisional (año en curso)' : 'Anuario cerrado y consolidado'],
+      ['Carácter sinóptico', alm.editorial?.character || ''],
+      ['Titular editorial', alm.editorial?.headline || ''],
+      ['Días observados válidos', alm.coverage.valid_days],
+      ['Días transcurridos en periodo', alm.coverage.observed_span_days],
+      ['Porcentaje de cobertura (%)', alm.coverage.coverage_pct],
+      ['Temperatura media anual (°C)', stT.mean],
+      ['Máxima absoluta anual (°C)', stT.max_abs],
+      ['Fecha máxima absoluta', stT.max_abs_date],
+      ['Mínima absoluta anual (°C)', stT.min_abs],
+      ['Fecha mínima absoluta', stT.min_abs_date],
+      ['Precipitación total anual (mm)', stP.total_mm],
+      ['Días con lluvia apreciable (≥0,2 mm)', stP.days_ge_02mm],
+      ['Precipitación máxima en 24 h (mm)', stP.max_daily_mm],
+      ['Fecha máx. precipitación 24 h', stP.max_daily_date],
+      ['Racha máxima de viento (km/h)', stW.max_gust_kmh],
+      ['Fecha racha máxima', stW.max_gust_date],
+      ['Días con patrón Foehn / surada', foehn.total_foehn_days],
+      ['HDD Calefacción (base 15,5 °C)', dd.hdd_15_5],
+      ['CDD Refrigeración (base 21,0 °C)', dd.cdd_21_0],
+      ['GDD Crecimiento agrícola (base 10,0 °C)', dd.gdd_10_0],
+      ['Fecha de generación del archivo', new Date().toISOString()]
+    ];
+
+    exportWorkbookToXLSX({
+      [`Resumen_Mensual_${alm.year}`]: monthlyRows,
+      [`Ficha_Anual_${alm.year}`]: metadataRows
+    }, `meteoriotuerto_resumen_mensual_${alm.year}.xlsx`);
+  }
+
+  function exportAlmanacFullYearToExcel(alm) {
+    const ds = alm.daily_series;
+    const dailyHeaders = [
+      'Fecha', 'T. media (°C)', 'T. máx. (°C)', 'T. mín. (°C)', 'Amplitud (°C)',
+      'Lluvia diaria (mm)', 'Lluvia acumulada (mm)', 'Viento medio (km/h)', 'Racha máx. (km/h)',
+      'Rumbo viento (°)', 'Sector', 'HDD Calefacción (15,5 °C)', 'CDD Refrigeración (21,0 °C)',
+      'GDD Agrícola (10,0 °C)', 'Humedad media (%)', 'Presión relativa (hPa)',
+      'Radiación máx. (W/m²)', 'Índice UV máx.'
+    ];
+
+    const dailyRows = [dailyHeaders];
+    ds.dates.forEach((d, i) => {
+      const tm = ds.temp_mean[i];
+      const hdd = tm !== null && tm !== undefined ? Number(Math.max(0, 15.5 - tm).toFixed(1)) : null;
+      const cdd = tm !== null && tm !== undefined ? Number(Math.max(0, tm - 21.0).toFixed(1)) : null;
+      const gdd = tm !== null && tm !== undefined ? Number(Math.max(0, tm - 10.0).toFixed(1)) : null;
+
+      dailyRows.push([
+        d,
+        ds.temp_mean[i],
+        ds.temp_max[i],
+        ds.temp_min[i],
+        ds.temp_amp[i],
+        ds.rain_daily[i],
+        ds.rain_accum ? ds.rain_accum[i] : null,
+        ds.wind_speed[i],
+        ds.wind_gust[i],
+        ds.wind_dir[i],
+        ds.wind_dir[i] !== null && ds.wind_dir[i] !== undefined ? degToSector(ds.wind_dir[i]) : '',
+        hdd,
+        cdd,
+        gdd,
+        ds.humidity_mean[i],
+        ds.pressure_rel[i],
+        ds.solar_max[i],
+        ds.uvi_max[i]
+      ]);
+    });
+
+    const epHeaders = ['Fecha', 'Tipo', 'Título del episodio', 'Valor registrado', 'Descripción'];
+    const epRows = [epHeaders];
+    (alm.editorial?.episodes || []).forEach((ep) => {
+      epRows.push([ep.date, ep.type, ep.title, ep.value, ep.description]);
+    });
+
+    const monthlyHeaders = [
+      'Mes', 'Días válidos', 'Días mes', 'T. media (°C)', 'Media máx. (°C)', 'Media mín. (°C)',
+      'T. máx. abs. (°C)', 'Fecha máx.', 'T. mín. abs. (°C)', 'Fecha mín.', 'Lluvia total (mm)',
+      'Días lluvia ≥0,2 mm', 'Días lluvia ≥10 mm', 'Lluvia máx. 24h (mm)', 'Fecha máx. lluvia',
+      'Viento medio (km/h)', 'Racha máx. (km/h)', 'Fecha racha', 'Días helada',
+      'Días calor ≥30 °C', 'Noches tropicales', 'Días Foehn', 'HDD (15,5 °C)',
+      'CDD (21,0 °C)', 'GDD (10,0 °C)', 'Humedad (%)', 'Presión (hPa)'
+    ];
+    const monthlyRows = [monthlyHeaders];
+    alm.monthly.forEach((m) => {
+      monthlyRows.push([
+        m.name, m.valid_days, m.calendar_days, m.temp_mean, m.temp_max_mean, m.temp_min_mean,
+        m.temp_max_abs, m.temp_max_date, m.temp_min_abs, m.temp_min_date, m.rain_total,
+        m.rain_days_02, m.rain_days_10, m.rain_max_day, m.rain_max_date,
+        m.wind_speed_mean, m.wind_gust_max, m.wind_gust_date, m.frost_days,
+        m.hot_days_30, m.tropical_nights, m.foehn_days ?? 0, m.hdd_15_5,
+        m.cdd_21_0, m.gdd_10_0, m.humidity_mean, m.pressure_mean
+      ]);
+    });
+
+    exportWorkbookToXLSX({
+      [`Serie_Diaria_${alm.year}`]: dailyRows,
+      [`Resumen_Mensual_${alm.year}`]: monthlyRows,
+      [`Episodios_${alm.year}`]: epRows
+    }, `meteoriotuerto_libro_anual_${alm.year}.xlsx`);
+  }
+
+  function exportComparisonsSynopticToExcel(comp) {
+    const headers = [
+      'Año', 'Carácter sinóptico', 'T. media (°C)', 'Anomalía T. (°C)', 'Mediana P50 (°C)',
+      'T. máx. abs. (°C)', 'T. mín. abs. (°C)', 'Días confort 15-25 °C', 'Confort (%)',
+      'Lluvia total (mm)', 'Anomalía lluvia (mm)', 'Días lluvia ≥0,2 mm', 'Días lluvia ≥30 mm',
+      'Días helada (≤0 °C)', 'Días calor (≥30 °C)', 'Noches tropicales (≥20 °C)', 'Días Foehn / surada',
+      'HDD Calefacción (15,5 °C)', 'CDD Refrigeración (21,0 °C)', 'GDD Agrícola (10,0 °C)',
+      'Racha máx. (km/h)', 'Días válidos', 'Cobertura (%)'
+    ];
+    const rows = [headers];
+    comp.yearly_table.forEach((r) => {
+      rows.push([
+        r.year + (r.is_provisional ? ' (provisional)' : ''),
+        r.character,
+        r.temp_mean,
+        r.anom_temp_c,
+        r.temp_median,
+        r.temp_max_abs,
+        r.temp_min_abs,
+        r.comfort_days_15_25,
+        r.comfort_pct_15_25,
+        r.rain_total_mm,
+        r.anom_rain_mm,
+        r.rain_days_02,
+        r.rain_days_30,
+        r.frost_days_le_0,
+        r.hot_days_ge_30,
+        r.tropical_nights_ge_20,
+        r.foehn_days,
+        r.hdd_15_5,
+        r.cdd_21_0,
+        r.gdd_10_0,
+        r.wind_gust_max_kmh,
+        r.valid_days,
+        r.coverage_pct
+      ]);
+    });
+
+    const ref = comp.reference_baseline;
+    rows.push([
+      `Referencia OMM local (${ref.years_included.join('–')})`,
+      'Promedio climático del periodo cerrado de referencia',
+      ref.mean_annual_temp_c,
+      0,
+      null,
+      null,
+      null,
+      null,
+      null,
+      ref.mean_annual_rain_mm,
+      0,
+      ref.mean_annual_rain_days,
+      null,
+      null,
+      null,
+      null,
+      null,
+      ref.mean_annual_hdd_15_5,
+      ref.mean_annual_cdd_21_0,
+      ref.mean_annual_gdd_10_0,
+      null,
+      null,
+      null
+    ]);
+
+    const matTHeaders = ['Año', ...MONTH_NAMES_ES];
+    const matTRows = [matTHeaders];
+    Object.entries(comp.monthly_matrices?.temp_mean || {}).forEach(([y, vals]) => {
+      matTRows.push([y, ...vals]);
+    });
+
+    const matRHeaders = ['Año', ...MONTH_NAMES_ES];
+    const matRRows = [matRHeaders];
+    Object.entries(comp.monthly_matrices?.rain_total || {}).forEach(([y, vals]) => {
+      matRRows.push([y, ...vals]);
+    });
+
+    exportWorkbookToXLSX({
+      'Cuadro_Sinoptico_2022_2026': rows,
+      'Matriz_Temperaturas_C': matTRows,
+      'Matriz_Precipitacion_mm': matRRows
+    }, 'meteoriotuerto_comparativas_sinopticas.xlsx');
+  }
+
+  function exportHeadToHeadScoreboardToExcel(profA, profB, mode) {
+    const scoreboardHeaders = [
+      'Indicador climatológico',
+      `Periodo A (${profA.shortLabel})`,
+      `Periodo B (${profB.shortLabel})`,
+      'Diferencia (B − A)',
+      'Unidad',
+      'Fecha extremo Periodo A',
+      'Fecha extremo Periodo B'
+    ];
+
+    const metricDefs = [
+      { label: 'Temperatura media diaria', key: 'tempMean', unit: '°C', dec: 1 },
+      { label: 'Mediana térmica diaria (P50)', key: 'tempMedian', unit: '°C', dec: 1 },
+      { label: 'Media de las temperaturas máximas', key: 'tempMaxMean', unit: '°C', dec: 1 },
+      { label: 'Media de las temperaturas mínimas', key: 'tempMinMean', unit: '°C', dec: 1 },
+      { label: 'Amplitud térmica media diaria', key: 'tempAmpMean', unit: '°C', dec: 1 },
+      { label: 'Temperatura máxima absoluta', key: 'tempMaxAbs', unit: '°C', dec: 1, dateKey: 'tempMaxDate' },
+      { label: 'Temperatura mínima absoluta', key: 'tempMinAbs', unit: '°C', dec: 1, dateKey: 'tempMinDate' },
+      { label: 'Días en confort térmico (15–25 °C)', key: 'comfortDays1525', unit: 'días', dec: 0 },
+      { label: 'Días cálidos (≥25 °C)', key: 'warmDays25', unit: 'días', dec: 0 },
+      { label: 'Días de calor intenso (≥30 °C)', key: 'hotDays30', unit: 'días', dec: 0 },
+      { label: 'Días de helada (≤0 °C)', key: 'frostDays', unit: 'días', dec: 0 },
+      { label: 'Noches tropicales (mín. ≥20 °C)', key: 'tropicalNights', unit: 'noches', dec: 0 },
+      { label: 'Precipitación total acumulada', key: 'rainTotal', unit: 'mm', dec: 1 },
+      { label: 'Días de lluvia apreciable (≥0,2 mm)', key: 'rainDays02', unit: 'días', dec: 0 },
+      { label: profA.rainHeavyLabel, key: 'rainHeavyDays', unit: 'días', dec: 0 },
+      { label: 'Precipitación máxima en 24 h', key: 'rainMaxDay', unit: 'mm', dec: 1, dateKey: 'rainMaxDate' },
+      { label: 'Velocidad media del viento', key: 'windSpeedMean', unit: 'km/h', dec: 1 },
+      { label: 'Racha máxima de viento', key: 'windGustMax', unit: 'km/h', dec: 1, dateKey: 'windGustDate' },
+      { label: 'Días con patrón Foehn / surada', key: 'foehnDays', unit: 'días', dec: 0 },
+      { label: 'Grados día de calefacción (HDD 15,5 °C)', key: 'hdd', unit: 'HDD', dec: 1 },
+      { label: 'Grados día de refrigeración (CDD 21,0 °C)', key: 'cdd', unit: 'CDD', dec: 1 },
+      { label: 'Grados día de crecimiento vegetal (GDD 10,0 °C)', key: 'gdd', unit: 'GDD', dec: 1 },
+      { label: 'Humedad relativa media', key: 'humidityMean', unit: '%', dec: 1 },
+      { label: 'Presión atmosférica media', key: 'pressureMean', unit: 'hPa', dec: 1 },
+      { label: 'Días válidos observados', key: 'validDays', unit: 'días', dec: 0 }
+    ];
+
+    const rows = [scoreboardHeaders];
+    metricDefs.forEach((mDef) => {
+      const valA = profA[mDef.key];
+      const valB = profB[mDef.key];
+      const hasBoth = valA !== null && valA !== undefined && valB !== null && valB !== undefined;
+      const diff = hasBoth ? Number((valB - valA).toFixed(mDef.dec)) : null;
+
+      rows.push([
+        mDef.label,
+        valA,
+        valB,
+        diff,
+        mDef.unit,
+        mDef.dateKey ? profA[mDef.dateKey] || '' : '',
+        mDef.dateKey ? profB[mDef.dateKey] || '' : ''
+      ]);
+    });
+
+    const seriesHeaders = [
+      mode === 'yearly' ? 'Mes' : 'Día del mes',
+      `T. media ${profA.shortLabel} (°C)`,
+      `T. media ${profB.shortLabel} (°C)`,
+      `Lluvia ${profA.shortLabel} (mm)`,
+      `Lluvia ${profB.shortLabel} (mm)`
+    ];
+    const seriesRows = [seriesHeaders];
+    for (let i = 0; i < profA.seriesLabels.length; i += 1) {
+      seriesRows.push([
+        profA.seriesLabels[i],
+        profA.seriesTemp[i],
+        profB.seriesTemp[i],
+        profA.seriesRain[i],
+        profB.seriesRain[i]
+      ]);
+    }
+
+    const safeA = profA.shortLabel.replace(/[\s\/:]/g, '_');
+    const safeB = profB.shortLabel.replace(/[\s\/:]/g, '_');
+    exportWorkbookToXLSX({
+      'Scoreboard_H2H': rows,
+      'Series_Superpuestas': seriesRows
+    }, `meteoriotuerto_h2h_${safeA}_vs_${safeB}.xlsx`);
+  }
+
+  function exportExplorerSelectionToExcel(rows, dateFrom, dateTo) {
+    const headers = [
+      'Fecha', 'T. media (°C)', 'T. máx. (°C)', 'T. mín. (°C)', 'Amplitud (°C)',
+      'Lluvia (mm)', 'Viento medio (km/h)', 'Racha máx. (km/h)', 'Humedad media (%)', 'Presión rel. (hPa)'
+    ];
+    const exportRows = [headers];
+    rows.forEach((r) => {
+      exportRows.push([
+        r.date, r.temp_mean, r.temp_max, r.temp_min, r.temp_amp,
+        r.rain_daily, r.wind_speed, r.wind_gust, r.humidity_mean, r.pressure_rel
+      ]);
+    });
+    exportWorkbookToXLSX({
+      'Seleccion_MeteoRiotuerto': exportRows
+    }, `meteoriotuerto_seleccion_${dateFrom}_${dateTo}.xlsx`);
+  }
+
+  function exportRecordsToExcel(rec) {
+    const absHeaders = ['Indicador', 'Valor', 'Unidad', 'Fecha', 'Hora', 'Contexto'];
+    const absRows = [absHeaders];
+    Object.values(rec.absolute_records || {}).forEach((item) => {
+      if (item && item.label) {
+        absRows.push([item.label, item.value, item.unit, item.date, item.time || '', item.context || '']);
+      }
+    });
+
+    const moHeaders = [
+      'Mes', 'T. máx. abs. (°C)', 'Fecha máx.', 'T. mín. abs. (°C)', 'Fecha mín.',
+      'Lluvia máx. 24h (mm)', 'Fecha máx. lluvia', 'Racha máx. (km/h)', 'Fecha racha',
+      'Año más lluvioso', 'Lluvia máx. año (mm)', 'Año más seco', 'Lluvia año seco (mm)',
+      'Año más cálido', 'T. media año cálido (°C)'
+    ];
+    const moRows = [moHeaders];
+    (rec.monthly_records || []).forEach((m) => {
+      moRows.push([
+        m.name, m.temp_max_abs, m.temp_max_date, m.temp_min_abs, m.temp_min_date,
+        m.max_daily_rain, m.max_daily_rain_date, m.max_wind_gust, m.max_wind_gust_date,
+        m.wettest_edition ? m.wettest_edition.year : '', m.wettest_edition ? m.wettest_edition.rain_mm : null,
+        m.driest_edition ? m.driest_edition.year : '', m.driest_edition ? m.driest_edition.rain_mm : null,
+        m.warmest_edition ? m.warmest_edition.year : '', m.warmest_edition ? m.warmest_edition.temp_mean : null
+      ]);
+    });
+
+    const sheets = {
+      'Extremos_Absolutos': absRows,
+      'Efemerides_Por_Mes': moRows
+    };
+
+    const topKeys = [
+      { key: 'top_hottest_days', name: 'Top10_Calidos', valLabel: 'T. máx. (°C)' },
+      { key: 'top_coldest_days', name: 'Top10_Frios', valLabel: 'T. mín. (°C)' },
+      { key: 'top_wettest_days', name: 'Top10_Lluviosos', valLabel: 'Lluvia 24h (mm)' },
+      { key: 'top_windiest_days', name: 'Top10_Viento', valLabel: 'Racha máx. (km/h)' },
+      { key: 'top_amplitude_days', name: 'Top10_Amplitud', valLabel: 'Amplitud (°C)' },
+      { key: 'top_coldest_max_days', name: 'Top10_Invernales_Frios', valLabel: 'T. máx. fría (°C)' },
+      { key: 'top_warmest_min_days', name: 'Top10_Noches_Calidas', valLabel: 'T. mín. cálida (°C)' }
+    ];
+
+    topKeys.forEach(({ key, name, valLabel }) => {
+      const items = rec.rankings?.[key] || [];
+      const rankHeaders = ['Posición', 'Fecha', 'Año', valLabel, 'T. máx. (°C)', 'T. mín. (°C)', 'T. media (°C)', 'Lluvia 24h (mm)', 'Racha máx. (km/h)'];
+      const rankRows = [rankHeaders];
+      items.forEach((it, idx) => {
+        rankRows.push([
+          idx + 1, it.date, it.year, it.value, it.temp_max, it.temp_min, it.temp_mean, it.rain_daily, it.wind_gust
+        ]);
+      });
+      sheets[name] = rankRows;
+    });
+
+    exportWorkbookToXLSX(sheets, 'meteoriotuerto_records_historicos.xlsx');
+  }
+
+  function exportAuditQualityToExcel(almanacs, overview) {
+    const headers = [
+      'Año', 'Días válidos', 'Días posibles en periodo', 'Cobertura diaria (%)',
+      'Registros 30 min limpios', 'Duplicados depurados', 'Filas diarias incrustadas depuradas',
+      'Filas fuera de año depuradas', 'Glitches RF filtrados', 'Incidencias y notas técnicas'
+    ];
+    const rows = [headers];
+    Object.keys(almanacs).sort().forEach((y) => {
+      const alm = almanacs[y];
+      const cov = alm.coverage;
+      const m30 = cov.quality_audit?.intraday_meta || {};
+      const notes = [];
+      if (!cov.has_30min_series) {
+        notes.push('Solo serie diaria consolidada en repositorio.');
+      } else {
+        if (m30.embedded_daily_removed > 0) notes.push(`Depuradas ${m30.embedded_daily_removed} filas diarias incrustadas.`);
+        if (m30.duplicates_removed > 0) notes.push(`Eliminados ${m30.duplicates_removed} timestamps duplicados.`);
+        if (m30.out_of_year_removed > 0) notes.push(`Excluidas ${m30.out_of_year_removed} filas fuera del año natural.`);
+        if (m30.glitches_filtered && m30.glitches_filtered.length > 0) {
+          notes.push(`Filtrado pico RF espurio (${m30.glitches_filtered.length}).`);
+        }
+      }
+      if (cov.missing_days > 0) notes.push(`${cov.missing_days} días sin observación.`);
+      if (alm.is_provisional) notes.push(`Año en curso hasta ${alm.last_observed_date}.`);
+
+      rows.push([
+        alm.year,
+        cov.valid_days,
+        cov.observed_span_days,
+        cov.coverage_pct,
+        cov.has_30min_series ? cov.clean_30min_records : null,
+        m30.duplicates_removed || 0,
+        m30.embedded_daily_removed || 0,
+        m30.out_of_year_removed || 0,
+        m30.glitches_filtered ? m30.glitches_filtered.length : 0,
+        notes.join(' ') || 'Serie íntegra sin incidencias.'
+      ]);
+    });
+
+    exportWorkbookToXLSX({
+      'Auditoria_y_Calidad': rows
+    }, 'meteoriotuerto_auditoria_calidad.xlsx');
+  }
+
+  /* ------------------------------------------------------------------------
    * VISTA 3: EXPLORADOR DE DATOS HISTÓRICOS
    * ------------------------------------------------------------------------ */
   async function renderExplorador() {
@@ -2163,8 +2659,9 @@
             <p id="explorer-chart-sub" class="chart-panel-subtitle"></p>
           </div>
           <div class="btn-group">
-            <button type="button" id="btn-exp-csv" class="btn">⬇ Exportar selección (CSV)</button>
-            <button type="button" id="btn-exp-json" class="btn">⬇ Exportar selección (JSON)</button>
+            <button type="button" id="btn-exp-xlsx" class="btn btn-excel">📊 Exportar a Excel (.xlsx)</button>
+            <button type="button" id="btn-exp-csv" class="btn">⬇ Exportar (CSV)</button>
+            <button type="button" id="btn-exp-json" class="btn">⬇ Exportar (JSON)</button>
           </div>
         </div>
         <div class="chart-canvas-wrap tall">
@@ -2434,6 +2931,13 @@
     }
 
     // Botones de exportación de la selección activa
+    const btnXlsx = document.getElementById('btn-exp-xlsx');
+    if (btnXlsx) {
+      btnXlsx.onclick = () => {
+        exportExplorerSelectionToExcel(rows, STATE.explorer.dateFrom, STATE.explorer.dateTo);
+      };
+    }
+
     const btnCsv = document.getElementById('btn-exp-csv');
     if (btnCsv) {
       btnCsv.onclick = () => {
@@ -2532,7 +3036,10 @@
             <h3 class="section-title">Clasificaciones históricas (Top 10 de toda la serie)</h3>
             <p class="section-subtitle">Los diez días más extremos observados en Riotuerto según cada indicador</p>
           </div>
-          <div style="min-width:260px">
+          <div class="table-header-actions">
+            <button type="button" id="btn-export-records-xlsx" class="btn btn-excel" title="Exportar extremos absolutos y todas las clasificaciones Top 10 a Excel">
+              📊 Exportar libro de récords a Excel (.xlsx)
+            </button>
             <select id="select-ranking-cat" class="form-select" aria-label="Seleccionar categoría del ranking histórico">
               <option value="top_hottest_days">🔥 Top 10 días más cálidos (T. máx. absoluta)</option>
               <option value="top_coldest_days">❄️ Top 10 madrugadas más frías (T. mín. absoluta)</option>
@@ -2571,6 +3078,11 @@
             <h3 class="section-title">Efemérides y extremos por mes del calendario (Enero – Diciembre)</h3>
             <p class="section-subtitle">Comparativa del comportamiento extremo de cada mes a lo largo de todos los años observados</p>
           </div>
+          <div>
+            <button type="button" id="btn-export-records-monthly-xlsx" class="btn btn-excel">
+              📊 Exportar efemérides a Excel (.xlsx)
+            </button>
+          </div>
         </div>
         <div class="table-responsive">
           <table class="data-table">
@@ -2593,6 +3105,13 @@
         </div>
       </section>
     `;
+
+    document.getElementById('btn-export-records-xlsx')?.addEventListener('click', () => {
+      exportRecordsToExcel(rec);
+    });
+    document.getElementById('btn-export-records-monthly-xlsx')?.addEventListener('click', () => {
+      exportRecordsToExcel(rec);
+    });
 
     const sel = document.getElementById('select-ranking-cat');
     if (sel) {
@@ -2833,6 +3352,11 @@
             <h3 class="section-title">Cuadro sinóptico multianual (2022–2026)</h3>
             <p class="section-subtitle">Síntesis de todos los indicadores anuales y anomalías respecto al periodo cerrado 2022–2025</p>
           </div>
+          <div>
+            <button type="button" id="btn-export-synoptic-xlsx" class="btn btn-excel">
+              📊 Exportar sinóptico a Excel (.xlsx)
+            </button>
+          </div>
         </div>
         <div class="table-responsive">
           <table class="data-table">
@@ -2895,6 +3419,10 @@
     document.getElementById('chk-include-2026')?.addEventListener('change', (e) => {
       STATE.include2026InComparisons = e.target.checked;
       renderComparisonCharts(comp);
+    });
+
+    document.getElementById('btn-export-synoptic-xlsx')?.addEventListener('click', () => {
+      exportComparisonsSynopticToExcel(comp);
     });
 
     renderHeadToHeadComparator(comp);
@@ -3303,6 +3831,12 @@
       </div>
 
       <div class="table-responsive">
+        <div class="table-header-actions" style="justify-content:space-between;margin-bottom:10px;">
+          <h4 style="margin:0;font-size:0.95rem;font-weight:700;">Marcador cara a cara (21 indicadores)</h4>
+          <button type="button" id="btn-export-h2h-xlsx" class="btn btn-excel">
+            📊 Exportar cara a cara a Excel (.xlsx)
+          </button>
+        </div>
         <table class="data-table h2h-table">
           <thead>
             <tr>
@@ -3402,6 +3936,9 @@
     });
 
     // Eventos de interacción del comparador cara a cara
+    document.getElementById('btn-export-h2h-xlsx')?.addEventListener('click', () => {
+      exportHeadToHeadScoreboardToExcel(profA, profB, mode);
+    });
     document.getElementById('btn-h2h-mode-yearly')?.addEventListener('click', () => {
       STATE.headToHead.mode = 'yearly';
       renderHeadToHeadComparator(comp);
@@ -3925,6 +4462,11 @@
             <h3 class="section-title">Auditoría de cobertura temporal y depuración por año</h3>
             <p class="section-subtitle">Estado real comprobado de los archivos CSV originales y resultados del pipeline de validación</p>
           </div>
+          <div>
+            <button type="button" id="btn-export-audit-xlsx" class="btn btn-excel">
+              📊 Exportar auditoría a Excel (.xlsx)
+            </button>
+          </div>
         </div>
         <div class="table-responsive">
           <table class="data-table">
@@ -4083,6 +4625,10 @@
         </div>
       </section>
     `;
+
+    document.getElementById('btn-export-audit-xlsx')?.addEventListener('click', () => {
+      exportAuditQualityToExcel(STATE.cache.almanacs, idx.series_overview);
+    });
   }
 
   /* ------------------------------------------------------------------------

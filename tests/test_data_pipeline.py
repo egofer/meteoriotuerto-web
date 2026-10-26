@@ -157,6 +157,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             ROOT_DIR / "index.html",
             ROOT_DIR / "src" / "css" / "styles.css",
             ROOT_DIR / "src" / "js" / "app.js",
+            ROOT_DIR / "src" / "js" / "vendor" / "xlsx.mini.min.js",
             ROOT_DIR / "favicon.svg",
             ROOT_DIR / "favicon.ico",
             ROOT_DIR / ".github" / "workflows" / "deploy.yml",
@@ -208,6 +209,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
                     "/favicon.ico",
                     "/src/css/styles.css",
                     "/src/js/app.js",
+                    "/src/js/vendor/xlsx.mini.min.js",
                     "/data/index.json",
                     "/data/records.json",
                     "/data/comparisons.json",
@@ -534,6 +536,50 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertNotIn("alm.chronicle", app_js, "No debe usarse 'alm.chronicle' ya que el campo editorial se denomina 'editorial'")
         self.assertNotIn("mountChart", app_js, "No debe usarse 'mountChart'; la función global es 'createChart'")
         self.assertIn("createChart('comp-h2h-dual', 'chart-h2h-comparison'", app_js)
+
+    def test_excel_export_readiness_and_vendor_integrity(self) -> None:
+        """
+        EVO-012: Verifica la presencia del vendor SheetJS (xlsx.mini.min.js), su inclusión
+        en index.html, la definición de las funciones de exportación XLSX en app.js y los
+        botones correspondientes en las tablas del sitio web.
+        """
+        vendor_file = ROOT_DIR / "src" / "js" / "vendor" / "xlsx.mini.min.js"
+        self.assertTrue(vendor_file.exists(), "Falta el archivo vendor SheetJS")
+        self.assertGreater(vendor_file.stat().st_size, 100_000, "El script SheetJS es menor de 100 KB")
+
+        html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn("xlsx.mini.min.js", html_text, "Falta la carga de SheetJS en index.html")
+
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        required_functions = [
+            "function ensureXLSXLoaded",
+            "function exportWorkbookToXLSX",
+            "function exportAlmanacMonthlyToExcel",
+            "function exportAlmanacFullYearToExcel",
+            "function exportComparisonsSynopticToExcel",
+            "function exportHeadToHeadScoreboardToExcel",
+            "function exportExplorerSelectionToExcel",
+            "function exportRecordsToExcel",
+            "function exportAuditQualityToExcel",
+        ]
+        for fn in required_functions:
+            self.assertIn(fn, app_js, f"Falta función '{fn}' en src/js/app.js")
+
+        required_buttons = [
+            "btn-export-monthly-xlsx",
+            "btn-dl-year-xlsx",
+            "btn-exp-xlsx",
+            "btn-export-synoptic-xlsx",
+            "btn-export-h2h-xlsx",
+            "btn-export-records-xlsx",
+            "btn-export-records-monthly-xlsx",
+            "btn-export-audit-xlsx",
+        ]
+        for btn in required_buttons:
+            self.assertIn(btn, app_js, f"Falta botón de exportación '{btn}' en src/js/app.js")
+
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".btn-excel", css_text, "Faltan estilos de .btn-excel en src/css/styles.css")
 
 
 
