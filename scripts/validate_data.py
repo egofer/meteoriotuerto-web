@@ -124,6 +124,25 @@ def validate_directory(data_dir: Path) -> List[str]:
             if rain is not None and rain < 0:
                 errors.append(f"[{year} {d_str}] Lluvia negativa: {rain}")
 
+        # Validar climatología estacional OMM (EVO-019 / EVO-C)
+        seasons = alm.get("seasons", [])
+        if len(seasons) != 4:
+            errors.append(f"[{year}] almanac_{year}.json debe tener 4 estaciones canónicas, encontradas: {len(seasons)}")
+        else:
+            s_ids = [s.get("season_id") for s in seasons]
+            if s_ids != ["winter", "spring", "summer", "autumn"]:
+                errors.append(f"[{year}] Estaciones inesperadas en almanac_{year}.json: {s_ids}")
+
+    comp = loaded.get("comparisons.json", {})
+    sc = comp.get("seasonal_comparison", {})
+    if not sc:
+        errors.append("comparisons.json carece del objeto 'seasonal_comparison' (EVO-C).")
+    else:
+        if len(sc.get("table", [])) < 20:
+            errors.append(f"Tabla estacional incompleta en comparisons.json: {len(sc.get('table', []))} < 20 filas.")
+        if len(sc.get("baseline_reference_2022_2025", {})) != 4:
+            errors.append("Referencia climática estacional incompleta en comparisons.json.")
+
     # 3. Validar glosario meteorológico y divulgativo (glossary.json)
     glo = loaded.get("glossary.json", {})
     categories = glo.get("categories", [])

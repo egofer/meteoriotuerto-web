@@ -1285,6 +1285,260 @@ def compute_year_almanac(
     }
 
 
+SEASONS_META = [
+    {
+        "id": "winter",
+        "code": "DJF",
+        "name": "Invierno",
+        "icon": "❄️",
+        "months": [12, 1, 2],
+        "months_es": "Diciembre – Febrero",
+        "description": "Frío de fondo de valle, heladas por inversión térmica nocturna y temporales atlánticos.",
+        "color": "#0284c7",
+    },
+    {
+        "id": "spring",
+        "code": "MAM",
+        "name": "Primavera",
+        "icon": "🌸",
+        "months": [3, 4, 5],
+        "months_es": "Marzo – Mayo",
+        "description": "Reactivación vegetativa de praderas, acumulación de grados día (GDD) y borrascas marítimas.",
+        "color": "#10b981",
+    },
+    {
+        "id": "summer",
+        "code": "JJA",
+        "name": "Verano",
+        "icon": "☀️",
+        "months": [6, 7, 8],
+        "months_es": "Junio – Agosto",
+        "description": "Calidez estival, picos caniculares, noches templadas y episodios de viento sur / Foehn en situaciones atlánticas.",
+        "color": "#ea580c",
+    },
+    {
+        "id": "autumn",
+        "code": "SON",
+        "name": "Otoño",
+        "icon": "🍂",
+        "months": [9, 10, 11],
+        "months_es": "Septiembre – Noviembre",
+        "description": "Máximo pluviométrico cantábrico, advecciones de viento sur otoñal y enfriamiento progresivo.",
+        "color": "#d97706",
+    },
+]
+
+
+def compute_seasonal_climatology(
+    all_daily_df: pd.DataFrame,
+    complete_years: List[int],
+    provisional_years: List[int],
+) -> Dict[str, Any]:
+    """
+    EVO-C (EVO-019): Climatología estacional y trimestres canónicos OMM (DJF, MAM, JJA, SON).
+    Calcula los agregados biofísicos y climatológicos por estación para cada año,
+    establece las normales de referencia internas (2022–2025) y genera rankings históricos.
+    """
+    df_all = all_daily_df.copy()
+    df_all["year"] = df_all["dt"].dt.year
+    df_all["month"] = df_all["dt"].dt.month
+    years_available = [int(y) for y in sorted(df_all["year"].unique())]
+
+    seasonal_rows: List[Dict[str, Any]] = []
+
+    for y in years_available:
+        for s_def in SEASONS_META:
+            s_id = s_def["id"]
+            s_code = s_def["code"]
+            s_name = s_def["name"]
+            s_icon = s_def["icon"]
+
+            if s_id == "winter":
+                if y == 2022:
+                    sub = df_all[(df_all["year"] == 2022) & (df_all["month"].isin([1, 2]))].copy()
+                    months_label = "Enero – Febrero 2022"
+                    expected_days = 59
+                    is_prov = False
+                    notes = "Inicio de observaciones el 01/01/2022 (Enero–Febrero 2022)."
+                else:
+                    sub = df_all[
+                        ((df_all["year"] == y - 1) & (df_all["month"] == 12))
+                        | ((df_all["year"] == y) & (df_all["month"].isin([1, 2])))
+                    ].copy()
+                    months_label = f"Dic {y-1} – Feb {y}"
+                    expected_days = 91 if calendar.isleap(y) else 90
+                    is_prov = False
+                    notes = None
+            elif s_id == "spring":
+                sub = df_all[(df_all["year"] == y) & (df_all["month"].isin([3, 4, 5]))].copy()
+                months_label = f"Mar – May {y}"
+                expected_days = 92
+                is_prov = False
+                notes = None
+            elif s_id == "summer":
+                sub = df_all[(df_all["year"] == y) & (df_all["month"].isin([6, 7, 8]))].copy()
+                months_label = f"Jun – Ago {y}"
+                expected_days = 92
+                is_prov = False
+                notes = None
+            elif s_id == "autumn":
+                sub = df_all[(df_all["year"] == y) & (df_all["month"].isin([9, 10, 11]))].copy()
+                months_label = f"Sep – Nov {y}"
+                expected_days = 91
+                if y in provisional_years:
+                    is_prov = True
+                    notes = "Trimestre en curso (datos consolidados hasta octubre)."
+                else:
+                    is_prov = False
+                    notes = None
+
+            obs_days = int(sub["temp_mean"].notna().sum()) if not sub.empty else 0
+            cov_pct = round((obs_days / expected_days) * 100.0, 1) if expected_days > 0 else 0.0
+
+            if not sub.empty and obs_days > 0:
+                t_mean = safe_round(sub["temp_mean"].mean(), 1)
+                t_max_mean = safe_round(sub["temp_max"].mean(), 1)
+                t_min_mean = safe_round(sub["temp_min"].mean(), 1)
+                idx_tmax = sub["temp_max"].idxmax()
+                t_max_abs = safe_round(sub.loc[idx_tmax, "temp_max"], 1)
+                t_max_date = str(sub.loc[idx_tmax, "date"])
+                idx_tmin = sub["temp_min"].idxmin()
+                t_min_abs = safe_round(sub.loc[idx_tmin, "temp_min"], 1)
+                t_min_date = str(sub.loc[idx_tmin, "date"])
+
+                rain_tot = safe_round(sub["rain_daily"].sum(), 1)
+                r_days_02 = int((sub["rain_daily"] >= 0.2).sum())
+                r_days_10 = int((sub["rain_daily"] >= 10.0).sum())
+                r_days_30 = int((sub["rain_daily"] >= 30.0).sum())
+                idx_rmax = sub["rain_daily"].idxmax()
+                r_max_day = safe_round(sub.loc[idx_rmax, "rain_daily"], 1)
+                r_max_date = str(sub.loc[idx_rmax, "date"])
+
+                w_mean = safe_round(sub["wind_speed"].mean(), 1) if "wind_speed" in sub and sub["wind_speed"].notna().any() else None
+                if "wind_gust" in sub and sub["wind_gust"].notna().any():
+                    idx_wgust = sub["wind_gust"].idxmax()
+                    w_gust_max = safe_round(sub.loc[idx_wgust, "wind_gust"], 1)
+                    w_gust_date = str(sub.loc[idx_wgust, "date"])
+                else:
+                    w_gust_max = None
+                    w_gust_date = None
+
+                frost_days = int((sub["temp_min"] <= 0.0).sum())
+                warm_days_25 = int((sub["temp_max"] >= 25.0).sum())
+                hot_days_30 = int((sub["temp_max"] >= 30.0).sum())
+                tropical_nights = int((sub["temp_min"] >= 20.0).sum())
+                foehn_cnt = int(sub["foehn_flag"].sum()) if "foehn_flag" in sub else 0
+
+                hdd_15_5 = safe_round((15.5 - sub["temp_mean"]).clip(lower=0.0).sum(), 1)
+                cdd_21_0 = safe_round((sub["temp_mean"] - 21.0).clip(lower=0.0).sum(), 1)
+                gdd_10_0 = safe_round((sub["temp_mean"] - 10.0).clip(lower=0.0).sum(), 1)
+            else:
+                t_mean = t_max_mean = t_min_mean = t_max_abs = t_min_abs = None
+                t_max_date = t_min_date = None
+                rain_tot = r_days_02 = r_days_10 = r_days_30 = r_max_day = None
+                r_max_date = w_mean = w_gust_max = w_gust_date = None
+                frost_days = warm_days_25 = hot_days_30 = tropical_nights = foehn_cnt = 0
+                hdd_15_5 = cdd_21_0 = gdd_10_0 = 0.0
+
+            seasonal_rows.append({
+                "year": int(y),
+                "season_id": s_id,
+                "season_code": s_code,
+                "season_name": s_name,
+                "season_icon": s_icon,
+                "months_label": months_label,
+                "is_provisional": is_prov,
+                "is_complete": not is_prov,
+                "observed_days": obs_days,
+                "expected_days": expected_days,
+                "coverage_pct": cov_pct,
+                "notes": notes,
+                "temp_mean": t_mean,
+                "temp_max_mean": t_max_mean,
+                "temp_min_mean": t_min_mean,
+                "temp_max_abs": t_max_abs,
+                "temp_max_date": t_max_date,
+                "temp_min_abs": t_min_abs,
+                "temp_min_date": t_min_date,
+                "rain_total_mm": rain_tot,
+                "rain_days_02": r_days_02,
+                "rain_days_10": r_days_10,
+                "rain_days_30": r_days_30,
+                "max_daily_rain_mm": r_max_day,
+                "max_daily_rain_date": r_max_date,
+                "wind_speed_mean_kmh": w_mean,
+                "wind_gust_max_kmh": w_gust_max,
+                "wind_gust_max_date": w_gust_date,
+                "frost_days": frost_days,
+                "warm_days_25": warm_days_25,
+                "hot_days_30": hot_days_30,
+                "tropical_nights": tropical_nights,
+                "foehn_days": foehn_cnt,
+                "hdd_15_5": hdd_15_5,
+                "cdd_21_0": cdd_21_0,
+                "gdd_10_0": gdd_10_0,
+            })
+
+    # Referencia canónica por estación (promedio 2022–2025)
+    baseline_seasons: Dict[str, Dict[str, Any]] = {}
+    for s_def in SEASONS_META:
+        s_id = s_def["id"]
+        s_ref_rows = [r for r in seasonal_rows if r["season_id"] == s_id and r["year"] in complete_years and not r["is_provisional"]]
+        baseline_seasons[s_id] = {
+            "season_id": s_id,
+            "season_code": s_def["code"],
+            "season_name": s_def["name"],
+            "season_icon": s_def["icon"],
+            "temp_mean": round(float(np.mean([r["temp_mean"] for r in s_ref_rows])), 1) if s_ref_rows else None,
+            "temp_max_mean": round(float(np.mean([r["temp_max_mean"] for r in s_ref_rows])), 1) if s_ref_rows else None,
+            "temp_min_mean": round(float(np.mean([r["temp_min_mean"] for r in s_ref_rows])), 1) if s_ref_rows else None,
+            "rain_total_mm": round(float(np.mean([r["rain_total_mm"] for r in s_ref_rows])), 1) if s_ref_rows else None,
+            "rain_days_02": round(float(np.mean([r["rain_days_02"] for r in s_ref_rows])), 1) if s_ref_rows else None,
+            "frost_days": round(float(np.mean([r["frost_days"] for r in s_ref_rows])), 1) if s_ref_rows else None,
+            "hot_days_30": round(float(np.mean([r["hot_days_30"] for r in s_ref_rows])), 1) if s_ref_rows else None,
+            "tropical_nights": round(float(np.mean([r["tropical_nights"] for r in s_ref_rows])), 1) if s_ref_rows else None,
+            "foehn_days": round(float(np.mean([r["foehn_days"] for r in s_ref_rows])), 1) if s_ref_rows else None,
+            "gdd_10_0": round(float(np.mean([r["gdd_10_0"] for r in s_ref_rows])), 1) if s_ref_rows else None,
+            "hdd_15_5": round(float(np.mean([r["hdd_15_5"] for r in s_ref_rows])), 1) if s_ref_rows else None,
+        }
+
+    # Asignar anomalías respecto a la referencia a cada fila
+    for r in seasonal_rows:
+        ref_s = baseline_seasons.get(r["season_id"], {})
+        if ref_s.get("temp_mean") is not None and r["temp_mean"] is not None:
+            r["temp_anomaly"] = round(r["temp_mean"] - ref_s["temp_mean"], 2)
+        else:
+            r["temp_anomaly"] = None
+
+        if ref_s.get("rain_total_mm") is not None and r["rain_total_mm"] is not None and not r["is_provisional"]:
+            r["rain_anomaly_mm"] = round(r["rain_total_mm"] - ref_s["rain_total_mm"], 1)
+            r["rain_anomaly_pct"] = round(((r["rain_total_mm"] - ref_s["rain_total_mm"]) / ref_s["rain_total_mm"]) * 100.0, 1)
+        else:
+            r["rain_anomaly_mm"] = None
+            r["rain_anomaly_pct"] = None
+
+    # Rankings históricos estacionales
+    complete_seasonal = [r for r in seasonal_rows if not r["is_provisional"]]
+    hottest_summer = sorted([r for r in complete_seasonal if r["season_id"] == "summer"], key=lambda x: x["temp_mean"], reverse=True)
+    coldest_winter = sorted([r for r in complete_seasonal if r["season_id"] == "winter"], key=lambda x: x["temp_mean"])
+    wettest_autumn = sorted([r for r in complete_seasonal if r["season_id"] == "autumn"], key=lambda x: x["rain_total_mm"], reverse=True)
+    wettest_season = sorted(complete_seasonal, key=lambda x: x["rain_total_mm"], reverse=True)[:5]
+    driest_season = sorted(complete_seasonal, key=lambda x: x["rain_total_mm"])[:5]
+
+    return {
+        "seasons_meta": SEASONS_META,
+        "baseline_reference_2022_2025": baseline_seasons,
+        "table": seasonal_rows,
+        "rankings": {
+            "hottest_summer": hottest_summer,
+            "coldest_winter": coldest_winter,
+            "wettest_autumn": wettest_autumn,
+            "wettest_season_overall": wettest_season,
+            "driest_season_overall": driest_season,
+        },
+    }
+
+
 def build_records_and_comparisons(
     almanacs: Dict[int, Dict[str, Any]],
     all_daily_df: pd.DataFrame,
@@ -1298,6 +1552,13 @@ def build_records_and_comparisons(
     df_all["year"] = df_all["dt"].dt.year
     df_all["month"] = df_all["dt"].dt.month
     df_all["amp"] = df_all["temp_max"] - df_all["temp_min"]
+
+    # EVO-019 (EVO-C): Climatología estacional canónica (DJF, MAM, JJA, SON)
+    complete_years = STATION_META["hardware"]["complete_years"]
+    provisional_years = STATION_META["hardware"]["provisional_years"]
+    seasonal_payload = compute_seasonal_climatology(df_all, complete_years, provisional_years)
+    for y, alm in almanacs.items():
+        alm["seasons"] = [r for r in seasonal_payload["table"] if r["year"] == y]
 
     def top_n_days(col: str, n: int = 10, ascending: bool = False) -> List[Dict[str, Any]]:
         sub = df_all.dropna(subset=[col]).sort_values(col, ascending=ascending).head(n)
@@ -1721,6 +1982,7 @@ def build_records_and_comparisons(
         "monthly_matrices": monthly_matrices,
         "cumulative_precipitation": cumulative_precipitation,
         "thermal_distribution": thermal_distribution,
+        "seasonal_comparison": seasonal_payload,
     }
 
     return records_payload, comparisons_payload
@@ -1743,6 +2005,7 @@ def build_all(source_dir: Optional[Path], output_dir: Path, cache_dir: Path) -> 
         df_30, meta_30 = load_and_clean_30min(resolved_src, y)
         alm = compute_year_almanac(y, df_daily, df_30, anomalies_daily, meta_30)
         almanacs[y] = alm
+        df_daily["foehn_flag"] = df_daily["date"].astype(str).isin(alm["foehn_analysis"]["foehn_dates"]).astype(int)
         daily_frames.append(df_daily)
         all_30min_dfs[y] = df_30
         print(

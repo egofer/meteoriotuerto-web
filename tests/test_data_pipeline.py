@@ -675,6 +675,63 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".topography-mode-btn", css_text, "Falta .topography-mode-btn en styles.css")
         self.assertIn(".topo-pulse-circle", css_text, "Falta .topo-pulse-circle en styles.css")
 
+    def test_seasonal_climatology_readiness(self):
+        """
+        EVO-019 (EVO-C): Verifica la climatología estacional canónica OMM (DJF, MAM, JJA, SON)
+        en almanaques anuales, comparativas interanuales, interfaz y exportación Excel.
+        """
+        # 1. Almanaques anuales
+        for year in [2022, 2023, 2024, 2025, 2026]:
+            alm_path = self.data_dir / f"almanac_{year}.json"
+            self.assertTrue(alm_path.exists())
+            with open(alm_path, "r", encoding="utf-8") as f:
+                alm = json.load(f)
+            self.assertIn("seasons", alm)
+            self.assertEqual(len(alm["seasons"]), 4)
+            season_ids = [s["season_id"] for s in alm["seasons"]]
+            self.assertEqual(season_ids, ["winter", "spring", "summer", "autumn"])
+            for s in alm["seasons"]:
+                self.assertIn("temp_mean", s)
+                self.assertIn("rain_total_mm", s)
+                self.assertIn("frost_days", s)
+                self.assertIn("foehn_days", s)
+
+        # 2. Comparativas interanuales
+        comp_path = self.data_dir / "comparisons.json"
+        self.assertTrue(comp_path.exists())
+        with open(comp_path, "r", encoding="utf-8") as f:
+            comp = json.load(f)
+
+        self.assertIn("seasonal_comparison", comp)
+        sc = comp["seasonal_comparison"]
+        self.assertIn("seasons_meta", sc)
+        self.assertIn("baseline_reference_2022_2025", sc)
+        self.assertIn("table", sc)
+        self.assertIn("rankings", sc)
+
+        self.assertEqual(len(sc["seasons_meta"]), 4)
+        self.assertGreaterEqual(len(sc["table"]), 20)
+
+        base = sc["baseline_reference_2022_2025"]
+        for sid in ["winter", "spring", "summer", "autumn"]:
+            self.assertIn(sid, base)
+            self.assertIsNotNone(base[sid].get("temp_mean"))
+            self.assertIsNotNone(base[sid].get("rain_total_mm"))
+
+        # 3. Interfaz web y estilos
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("initSeasonalComparison", app_js)
+        self.assertIn("renderSeasonalComparisonChart", app_js)
+        self.assertIn("renderSeasonalTableRows", app_js)
+        self.assertIn("exportSeasonalComparisonToExcel", app_js)
+        self.assertIn("renderAlmanacSeasonsHtml", app_js)
+
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".seasonal-cards-grid", css_text)
+        self.assertIn(".seasonal-card", css_text)
+        self.assertIn(".seasonal-tabs-bar", css_text)
+        self.assertIn(".seasonal-pill", css_text)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

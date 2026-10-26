@@ -43,6 +43,10 @@
       yearB: 2025,
       monthB: 8,
     },
+    seasonal: {
+      seasonFilter: 'all', // 'all' | 'winter' | 'spring' | 'summer' | 'autumn'
+      metric: 'temp', // 'temp' | 'rain' | 'extremes' | 'foehn'
+    },
     festivalSelectedId: 'san_juan',
     cache: {
       index: null,
@@ -1106,6 +1110,106 @@
   /* ------------------------------------------------------------------------
    * VISTA 2: ALMANAQUE ANUAL (Plantilla reutilizable 2022–2026)
    * ------------------------------------------------------------------------ */
+  function getSeasonColor(sId) {
+    switch (sId) {
+      case 'winter': return '#0284c7';
+      case 'spring': return '#10b981';
+      case 'summer': return '#ea580c';
+      case 'autumn': return '#d97706';
+      default: return '#64748b';
+    }
+  }
+
+  function renderAlmanacSeasonsHtml(alm) {
+    const seasons = alm.seasons || [];
+    if (!seasons.length) return '';
+
+    const cardsHtml = seasons.map((s) => {
+      const anomTStr = s.temp_anomaly !== null && s.temp_anomaly !== undefined ? fmtSignNum(s.temp_anomaly, 2, '°C') : '—';
+      const anomRStr = s.rain_anomaly_pct !== null && s.rain_anomaly_pct !== undefined ? fmtSignNum(s.rain_anomaly_pct, 1, '%') : (s.is_provisional ? '<span class="badge badge-provisional">Prov.</span>' : '—');
+
+      let keyIndHtml = '';
+      if (s.season_id === 'winter') {
+        keyIndHtml = `
+          <div class="seasonal-indicator-row"><span>Días de helada (&le;0 °C):</span> <span class="seasonal-indicator-val">${s.frost_days} días</span></div>
+          <div class="seasonal-indicator-row"><span>Demanda calefacción:</span> <span class="seasonal-indicator-val">${fmtNum(s.hdd_15_5, 1)} HDD</span></div>
+          <div class="seasonal-indicator-row"><span>Lluvia máx. 24h:</span> <span class="seasonal-indicator-val">${fmtNum(s.max_daily_rain_mm, 1)} mm</span></div>
+        `;
+      } else if (s.season_id === 'spring') {
+        keyIndHtml = `
+          <div class="seasonal-indicator-row"><span>Crecimiento vegetal:</span> <span class="seasonal-indicator-val">${fmtNum(s.gdd_10_0, 1)} GDD</span></div>
+          <div class="seasonal-indicator-row"><span>Días de lluvia (&ge;0,2 mm):</span> <span class="seasonal-indicator-val">${s.rain_days_02} días</span></div>
+          <div class="seasonal-indicator-row"><span>Días cálidos (&ge;25 °C):</span> <span class="seasonal-indicator-val">${s.warm_days_25} días</span></div>
+        `;
+      } else if (s.season_id === 'summer') {
+        keyIndHtml = `
+          <div class="seasonal-indicator-row"><span>Días de calor (&ge;30 °C):</span> <span class="seasonal-indicator-val" style="color:var(--accent-heat)">${s.hot_days_30} días</span></div>
+          <div class="seasonal-indicator-row"><span>Noches tropicales (&ge;20 °C):</span> <span class="seasonal-indicator-val">${s.tropical_nights} noches</span></div>
+          <div class="seasonal-indicator-row"><span>Racha máx. viento:</span> <span class="seasonal-indicator-val">${fmtNum(s.wind_gust_max_kmh, 1)} km/h</span></div>
+        `;
+      } else {
+        keyIndHtml = `
+          <div class="seasonal-indicator-row"><span>Días Foehn (surada):</span> <span class="seasonal-indicator-val" style="color:var(--accent-heat)">${s.foehn_days} días</span></div>
+          <div class="seasonal-indicator-row"><span>Lluvia abundante (&ge;10 mm):</span> <span class="seasonal-indicator-val">${s.rain_days_10} días</span></div>
+          <div class="seasonal-indicator-row"><span>Lluvia máx. 24h:</span> <span class="seasonal-indicator-val">${fmtNum(s.max_daily_rain_mm, 1)} mm</span></div>
+        `;
+      }
+
+      return `
+        <div class="seasonal-card season-${s.season_id}">
+          <div class="seasonal-card-header">
+            <div class="seasonal-card-title-wrap">
+              <span class="seasonal-card-icon">${s.season_icon}</span>
+              <div>
+                <h4 class="seasonal-card-name">${escapeHtml(s.season_name)}</h4>
+                <div class="seasonal-card-months">${escapeHtml(s.months_label)}</div>
+              </div>
+            </div>
+            <span class="seasonal-card-code">${s.season_code}</span>
+          </div>
+
+          <div class="seasonal-card-main-stats">
+            <div class="seasonal-stat-item">
+              <span class="seasonal-stat-lbl">T. Media</span>
+              <span class="seasonal-stat-val">${fmtNum(s.temp_mean, 1)} °C</span>
+              <span class="seasonal-stat-sub">Anom: ${anomTStr}</span>
+            </div>
+            <div class="seasonal-stat-item">
+              <span class="seasonal-stat-lbl">Lluvia Total</span>
+              <span class="seasonal-stat-val" style="color:var(--accent-rain)">${fmtNum(s.rain_total_mm, 1)} mm</span>
+              <span class="seasonal-stat-sub">Anom: ${anomRStr}</span>
+            </div>
+          </div>
+
+          <div class="seasonal-indicators-list">
+            <div class="seasonal-indicator-row">
+              <span>Extremos térmicos:</span>
+              <span class="seasonal-indicator-val">${fmtNum(s.temp_max_abs, 1)} / ${fmtNum(s.temp_min_abs, 1)} °C</span>
+            </div>
+            ${keyIndHtml}
+          </div>
+          ${s.notes ? `<div style="font-size:0.75rem; color:var(--txt-muted); font-style:italic">${escapeHtml(s.notes)}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <section class="section-block">
+        <div class="section-header">
+          <div>
+            <h3 class="section-title">🍂 Balance por trimestres canónicos OMM (${alm.year})</h3>
+            <p class="section-subtitle">
+              Síntesis de las 4 estaciones climatológicas estándar: Invierno (DJF), Primavera (MAM), Verano (JJA) y Otoño (SON)
+            </p>
+          </div>
+        </div>
+        <div class="seasonal-cards-grid">
+          ${cardsHtml}
+        </div>
+      </section>
+    `;
+  }
+
   async function renderAlmanaque(year) {
     const [idx, alm] = await Promise.all([
       ensureIndexLoaded(),
@@ -1944,6 +2048,9 @@
           </div>
         </div>
       </section>
+
+      <!-- Desglose estacional en 4 trimestres canónicos OMM (EVO-019 / EVO-C) -->
+      ${renderAlmanacSeasonsHtml(alm)}
 
       <!-- Desglose mensual en tabla -->
       <section class="section-block">
@@ -3259,6 +3366,66 @@
     }, 'meteoriotuerto_calendario_agroclimatico_2022_2026.xlsx');
   }
 
+  function exportSeasonalComparisonToExcel(seasonalComp) {
+    if (!seasonalComp) return;
+    const table = seasonalComp.table || [];
+    const headers = [
+      'Año', 'Estación', 'Código OMM', 'Meses canónicos', 'Días válidos', 'Días estación',
+      'Estado', 'T. media (°C)', 'Anomalía T. (°C)', 'Media máx. (°C)', 'Media mín. (°C)',
+      'T. máx. abs. (°C)', 'Fecha máx.', 'T. mín. abs. (°C)', 'Fecha mín.',
+      'Lluvia total (mm)', 'Anomalía lluvia (mm)', 'Anomalía lluvia (%)', 'Días lluvia (≥0,2 mm)',
+      'Días lluvia (≥10 mm)', 'Días lluvia (≥30 mm)', 'Lluvia máx. 24h (mm)', 'Fecha máx. lluvia',
+      'Viento medio (km/h)', 'Racha máx. (km/h)', 'Fecha racha máx.',
+      'Días helada (≤0 °C)', 'Días cálidos (≥25 °C)', 'Días calor (≥30 °C)',
+      'Noches tropicales (≥20 °C)', 'Días Foehn (surada)',
+      'HDD Calefacción (15,5 °C)', 'CDD Refrigeración (21,0 °C)', 'GDD Agrícola (10,0 °C)', 'Notas'
+    ];
+    const rows = [headers];
+    table.forEach((r) => {
+      rows.push([
+        r.year, r.season_name, r.season_code, r.months_label, r.observed_days, r.expected_days,
+        r.is_provisional ? 'Provisional' : 'Consolidada',
+        r.temp_mean, r.temp_anomaly, r.temp_max_mean, r.temp_min_mean,
+        r.temp_max_abs, r.temp_max_date, r.temp_min_abs, r.temp_min_date,
+        r.rain_total_mm, r.rain_anomaly_mm, r.rain_anomaly_pct, r.rain_days_02,
+        r.rain_days_10, r.rain_days_30, r.max_daily_rain_mm, r.max_daily_rain_date,
+        r.wind_speed_mean_kmh, r.wind_gust_max_kmh, r.wind_gust_max_date,
+        r.frost_days, r.warm_days_25, r.hot_days_30,
+        r.tropical_nights, r.foehn_days,
+        r.hdd_15_5, r.cdd_21_0, r.gdd_10_0, r.notes || ''
+      ]);
+    });
+
+    const refHeaders = [
+      'Estación', 'Código OMM', 'Meses canónicos', 'T. media ref. (°C)', 'Lluvia ref. (mm)',
+      'Días lluvia ref.', 'Heladas ref.', 'Días ≥30 °C ref.', 'Foehn ref.', 'GDD ref.', 'HDD ref.'
+    ];
+    const refRows = [refHeaders];
+    const base = seasonalComp.baseline_reference_2022_2025 || {};
+    (seasonalComp.seasons_meta || []).forEach((sm) => {
+      const b = base[sm.id] || {};
+      refRows.push([
+        sm.name, sm.code, sm.months_es, b.temp_mean, b.rain_total_mm, b.rain_days_02,
+        b.frost_days, b.hot_days_30, b.foehn_days, b.gdd_10_0, b.hdd_15_5
+      ]);
+    });
+
+    const metaRows = [
+      ['Clave', 'Información'],
+      ['Título', 'Climatología estacional canónica OMM (DJF, MAM, JJA, SON) de Riotuerto (2022–2026)'],
+      ['Estación', 'Barrio de Arriba, Riotuerto (Cantabria, 115 m s. n. m.)'],
+      ['Estándar climatológico', 'Trimestres canónicos de la Organización Meteorológica Mundial (OMM)'],
+      ['Periodo de referencia interna', '2022–2025 (4 años naturales cerrados y consolidados)'],
+      ['Fecha de exportación', new Date().toISOString()]
+    ];
+
+    exportWorkbookToXLSX({
+      'Climatologia_Estacional': rows,
+      'Normales_Referencia_2022_2025': refRows,
+      'Metadatos': metaRows
+    }, 'meteoriotuerto_climatologia_estacional_2022_2026.xlsx');
+  }
+
   /* ------------------------------------------------------------------------
    * VISTA 3: EXPLORADOR DE DATOS HISTÓRICOS
    * ------------------------------------------------------------------------ */
@@ -4067,6 +4234,130 @@
         </div>
       </div>
 
+      <!-- EVO-019 (EVO-C): Climatología estacional comparada (Trimestres canónicos OMM) -->
+      <section class="section-block seasonal-section" id="seasonal-comparison-section" aria-labelledby="seasonal-heading">
+        <div class="section-header">
+          <div>
+            <h3 id="seasonal-heading" class="section-title">🍂 Climatología estacional comparada (Trimestres canónicos DJF, MAM, JJA, SON)</h3>
+            <p class="section-subtitle">
+              Evolución interanual de los 4 trimestres climáticos canónicos de la Organización Meteorológica Mundial (OMM): Invierno (DJF), Primavera (MAM), Verano (JJA) y Otoño (SON)
+            </p>
+          </div>
+          <div>
+            <button type="button" id="btn-export-seasonal-xlsx" class="btn btn-excel">
+              📊 Exportar climatología estacional a Excel (.xlsx)
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de pestañas de estaciones -->
+        <div class="seasonal-tabs-bar" role="tablist" aria-label="Filtro de estación climatológica">
+          <button type="button" class="seasonal-tab-btn active" data-season="all" id="btn-season-all">🌐 Todas las estaciones</button>
+          <button type="button" class="seasonal-tab-btn" data-season="winter" id="btn-season-winter">❄️ Invierno (DJF)</button>
+          <button type="button" class="seasonal-tab-btn" data-season="spring" id="btn-season-spring">🌸 Primavera (MAM)</button>
+          <button type="button" class="seasonal-tab-btn" data-season="summer" id="btn-season-summer">☀️ Verano (JJA)</button>
+          <button type="button" class="seasonal-tab-btn" data-season="autumn" id="btn-season-autumn">🍂 Otoño (SON)</button>
+        </div>
+
+        <!-- Panel del gráfico comparativo estacional -->
+        <div class="chart-panel" style="margin-top:16px; margin-bottom:24px">
+          <div class="chart-panel-header" style="flex-wrap:wrap; gap:10px">
+            <div>
+              <h4 class="chart-panel-title" id="seasonal-chart-title">Comparativa estacional de temperatura y precipitación</h4>
+              <p class="chart-panel-subtitle" id="seasonal-chart-subtitle">Contraste interanual de trimestres canónicos frente al promedio histórico 2022–2025</p>
+            </div>
+            <div class="seasonal-metric-toggles" role="group" aria-label="Métrica estacional para el gráfico">
+              <button type="button" class="seasonal-metric-btn active" data-metric="temp" id="btn-smetric-temp">🌡️ T. Media (°C)</button>
+              <button type="button" class="seasonal-metric-btn" data-metric="rain" id="btn-smetric-rain">💧 Lluvia (mm)</button>
+              <button type="button" class="seasonal-metric-btn" data-metric="extremes" id="btn-smetric-extremes">⚡ Heladas / Calor</button>
+              <button type="button" class="seasonal-metric-btn" data-metric="foehn" id="btn-smetric-foehn">🔥 Días Foehn</button>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap" style="height:360px">
+            <canvas id="chart-seasonal-comp"></canvas>
+          </div>
+        </div>
+
+        <!-- Tabla analítica de todas las estaciones registradas -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Año</th>
+                <th>Estación</th>
+                <th class="num">OMM</th>
+                <th>Meses</th>
+                <th class="num">Días</th>
+                <th class="num">T. media</th>
+                <th class="num">Anom. T.</th>
+                <th class="num">T. máx. abs.</th>
+                <th class="num">T. mín. abs.</th>
+                <th class="num">Lluvia trimestral</th>
+                <th class="num">Anom. lluvia</th>
+                <th class="num">Días ≥0,2 mm</th>
+                <th class="num">Heladas</th>
+                <th class="num">Días ≥30 °C</th>
+                <th class="num">Noches trop.</th>
+                <th class="num">Días Foehn</th>
+                <th class="num">GDD (10 °C)</th>
+                <th class="num">HDD (15,5 °C)</th>
+                <th class="num">Racha máx.</th>
+              </tr>
+            </thead>
+            <tbody id="seasonal-table-body">
+              <!-- Renderizado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Fichas de hitos estacionales históricos de Riotuerto -->
+        <div class="seasonal-highlights-grid">
+          <div class="seasonal-highlight-card" style="border-top: 3px solid #ea580c">
+            <div class="seasonal-highlight-card-top">
+              <span class="seasonal-highlight-badge" style="background:#ffedd5; color:#c2410c">☀️ Verano récord</span>
+              <span style="font-size:1.2rem">🔥</span>
+            </div>
+            <div class="seasonal-highlight-val">2026 y 2024</div>
+            <p class="seasonal-highlight-desc">
+              El <strong>Verano 2026</strong> registró la media más cálida con <strong>20,6 °C</strong> (+1,3 °C sobre la referencia). En el <strong>Verano 2024</strong> se alcanzó la máxima absoluta histórica de Riotuerto con <strong>42,1 °C</strong> (11 de agosto).
+            </p>
+          </div>
+
+          <div class="seasonal-highlight-card" style="border-top: 3px solid #d97706">
+            <div class="seasonal-highlight-card-top">
+              <span class="seasonal-highlight-badge" style="background:#fef3c7; color:#b45309">🍂 Otoño torrencial</span>
+              <span style="font-size:1.2rem">🌧️</span>
+            </div>
+            <div class="seasonal-highlight-val">695,5 mm</div>
+            <p class="seasonal-highlight-desc">
+              El <strong>Otoño 2024</strong> lidera la precipitación otoñal con <strong>695,5 mm</strong>, seguido de cerca por el <strong>Otoño 2023</strong> (639,8 mm). Concentra además el mayor número de advecciones de viento sur otoñal (19 días con Surada en 2022).
+            </p>
+          </div>
+
+          <div class="seasonal-highlight-card" style="border-top: 3px solid #0284c7">
+            <div class="seasonal-highlight-card-top">
+              <span class="seasonal-highlight-badge" style="background:#e0f2fe; color:#0369a1">❄️ Invierno frío / nivoso</span>
+              <span style="font-size:1.2rem">⛄</span>
+            </div>
+            <div class="seasonal-highlight-val">781,6 mm / 17 d</div>
+            <p class="seasonal-highlight-desc">
+              El <strong>Invierno 2022/2023</strong> fue el más lluvioso con <strong>781,6 mm</strong> (+40,3 % de superávit). El <strong>Invierno 2022</strong> concentró 17 días de helada en solo 2 meses por persistentes inversiones térmicas.
+            </p>
+          </div>
+
+          <div class="seasonal-highlight-card" style="border-top: 3px solid #10b981">
+            <div class="seasonal-highlight-card-top">
+              <span class="seasonal-highlight-badge" style="background:#d1fae5; color:#065f46">🌸 Primavera húmeda</span>
+              <span style="font-size:1.2rem">🌱</span>
+            </div>
+            <div class="seasonal-highlight-val">551,4 mm</div>
+            <p class="seasonal-highlight-desc">
+              La <strong>Primavera 2026</strong> superó todas las marcas previas con <strong>551,4 mm</strong> (+49,0 % sobre la media de 370,1 mm) impulsando un desarrollo forrajero temprano de 356,9 GDD.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section class="section-block">
         <div class="section-header">
           <div>
@@ -4178,6 +4469,8 @@
     document.getElementById('chk-include-2026')?.addEventListener('change', (e) => {
       STATE.include2026InComparisons = e.target.checked;
       renderComparisonCharts(comp);
+      updateSeasonalTable(comp);
+      renderSeasonalComparisonChart(comp);
     });
 
     document.getElementById('btn-export-synoptic-xlsx')?.addEventListener('click', () => {
@@ -4188,8 +4481,13 @@
       exportPhenologyCalendarToExcel(almanacs);
     });
 
+    document.getElementById('btn-export-seasonal-xlsx')?.addEventListener('click', () => {
+      exportSeasonalComparisonToExcel(comp.seasonal_comparison);
+    });
+
     renderHeadToHeadComparator(comp);
     renderComparisonCharts(comp);
+    initSeasonalComparison(comp);
   }
 
   /* ------------------------------------------------------------------------
@@ -5099,6 +5397,597 @@
         },
       });
     }
+  }
+
+  /* ------------------------------------------------------------------------
+   * EVO-019 (EVO-C): Climatología estacional comparada (Trimestres canónicos OMM)
+   * ------------------------------------------------------------------------ */
+  function renderSeasonalTableRows(seasonalComp, seasonFilter) {
+    if (!seasonalComp || !seasonalComp.table) return '';
+    let rows = seasonalComp.table;
+    if (seasonFilter && seasonFilter !== 'all') {
+      rows = rows.filter((r) => r.season_id === seasonFilter);
+    }
+    if (!STATE.include2026InComparisons) {
+      rows = rows.filter((r) => !r.is_provisional);
+    }
+
+    return rows.map((r) => {
+      const yearBadge = r.is_provisional
+        ? `<span class="badge badge-provisional">${r.year} (prov.)</span>`
+        : `<strong>${r.year}</strong>`;
+      const seasonBadge = `<span class="seasonal-pill seasonal-pill-${r.season_id}">${r.season_icon} ${r.season_name}</span>`;
+      const ommBadge = `<span class="badge">${r.season_code}</span>`;
+
+      const tAnomHtml = r.temp_anomaly !== null && r.temp_anomaly !== undefined
+        ? `<span class="${r.temp_anomaly >= 0 ? 'text-warm' : 'text-cool'} font-mono">${fmtSignNum(r.temp_anomaly, 2, '°C')}</span>`
+        : '—';
+
+      const rAnomHtml = r.rain_anomaly_mm !== null && r.rain_anomaly_mm !== undefined
+        ? `<span class="${r.rain_anomaly_mm >= 0 ? 'text-rain-surplus' : 'text-rain-deficit'} font-mono">${fmtSignNum(r.rain_anomaly_mm, 1, 'mm')} <small>(${fmtSignNum(r.rain_anomaly_pct, 1, '%')})</small></span>`
+        : (r.is_provisional ? '<span class="badge badge-provisional">En curso</span>' : '—');
+
+      return `
+        <tr>
+          <td>${yearBadge}</td>
+          <td>${seasonBadge}</td>
+          <td class="num">${ommBadge}</td>
+          <td><small>${escapeHtml(r.months_label)}</small></td>
+          <td class="num font-mono">${r.observed_days}/${r.expected_days}</td>
+          <td class="num font-mono"><strong>${fmtNum(r.temp_mean, 1)} °C</strong></td>
+          <td class="num font-mono">${tAnomHtml}</td>
+          <td class="num font-mono">${fmtNum(r.temp_max_abs, 1)} °C</td>
+          <td class="num font-mono">${fmtNum(r.temp_min_abs, 1)} °C</td>
+          <td class="num font-mono"><strong>${fmtNum(r.rain_total_mm, 1)} mm</strong></td>
+          <td class="num font-mono">${rAnomHtml}</td>
+          <td class="num font-mono">${r.rain_days_02}</td>
+          <td class="num font-mono">${r.frost_days}</td>
+          <td class="num font-mono">${r.hot_days_30}</td>
+          <td class="num font-mono">${r.tropical_nights}</td>
+          <td class="num font-mono">${r.foehn_days}</td>
+          <td class="num font-mono">${fmtNum(r.gdd_10_0, 1)}</td>
+          <td class="num font-mono">${fmtNum(r.hdd_15_5, 1)}</td>
+          <td class="num font-mono">${fmtNum(r.wind_gust_max_kmh, 1)} km/h</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function updateSeasonalTable(comp) {
+    const sc = comp?.seasonal_comparison;
+    const tbody = document.getElementById('seasonal-table-body');
+    if (!tbody || !sc) return;
+    tbody.innerHTML = renderSeasonalTableRows(sc, STATE.seasonal.seasonFilter);
+  }
+
+  function renderSeasonalComparisonChart(comp) {
+    const sc = comp?.seasonal_comparison;
+    if (!sc || !sc.table) return;
+
+    const pal = chartPalette();
+    const filter = STATE.seasonal.seasonFilter || 'all';
+    const metric = STATE.seasonal.metric || 'temp';
+    const baseRef = sc.baseline_reference_2022_2025 || {};
+    const seasonsMeta = sc.seasons_meta || [];
+
+    const titleEl = document.getElementById('seasonal-chart-title');
+    const subtitleEl = document.getElementById('seasonal-chart-subtitle');
+
+    const yearColors = {
+      2022: '#d97706',
+      2023: '#2563eb',
+      2024: '#059669',
+      2025: '#7c3aed',
+      2026: '#ea580c'
+    };
+
+    let chartConfig = null;
+
+    if (filter === 'all') {
+      const seasonLabels = seasonsMeta.map((s) => `${s.icon} ${s.name} (${s.code})`);
+      const seasonIds = seasonsMeta.map((s) => s.id);
+
+      const availableYears = [2022, 2023, 2024, 2025];
+      if (STATE.include2026InComparisons) {
+        availableYears.push(2026);
+      }
+
+      if (metric === 'temp') {
+        if (titleEl) titleEl.textContent = 'Temperatura media estacional (°C) por trimestre OMM';
+        if (subtitleEl) subtitleEl.textContent = 'Comparativa interanual de los 4 trimestres climáticos respecto a la normal interna 2022–2025';
+
+        const datasets = availableYears.map((y) => {
+          const color = yearColors[y] || '#64748b';
+          const isProv = y === 2026;
+          return {
+            label: isProv ? `Año ${y} (prov.)` : `Año ${y}`,
+            data: seasonIds.map((sId) => {
+              const row = sc.table.find((r) => r.year === y && r.season_id === sId);
+              return row ? row.temp_mean : null;
+            }),
+            backgroundColor: isProv ? 'rgba(234, 88, 12, 0.45)' : color,
+            borderColor: color,
+            borderWidth: isProv ? 2 : 1,
+            borderDash: isProv ? [4, 4] : [],
+            borderRadius: 4
+          };
+        });
+
+        datasets.push({
+          type: 'line',
+          label: 'Normal Riotuerto (2022–2025)',
+          data: seasonIds.map((sId) => baseRef[sId]?.temp_mean ?? null),
+          borderColor: pal.text,
+          borderWidth: 2,
+          borderDash: [6, 4],
+          pointRadius: 5,
+          pointBackgroundColor: pal.text,
+          fill: false
+        });
+
+        chartConfig = {
+          type: 'bar',
+          data: { labels: seasonLabels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { color: pal.text, boxWidth: 14 } },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `${ctx.dataset.label}: ${fmtNum(ctx.parsed.y, 1)} °C`
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { color: pal.text, font: { weight: 'bold' } }, grid: { display: false } },
+              y: {
+                title: { display: true, text: 'Temperatura media (°C)', color: pal.text },
+                ticks: { color: pal.text, callback: (v) => `${v} °C` },
+                grid: { color: pal.grid }
+              }
+            }
+          }
+        };
+
+      } else if (metric === 'rain') {
+        if (titleEl) titleEl.textContent = 'Precipitación acumulada estacional (mm) por trimestre OMM';
+        if (subtitleEl) subtitleEl.textContent = 'Lluvia total de cada trimestre frente al promedio histórico de referencia 2022–2025';
+
+        const datasets = availableYears.map((y) => {
+          const color = yearColors[y] || '#64748b';
+          const isProv = y === 2026;
+          return {
+            label: isProv ? `Año ${y} (prov.)` : `Año ${y}`,
+            data: seasonIds.map((sId) => {
+              const row = sc.table.find((r) => r.year === y && r.season_id === sId);
+              return row ? row.rain_total_mm : null;
+            }),
+            backgroundColor: isProv ? 'rgba(234, 88, 12, 0.45)' : color,
+            borderColor: color,
+            borderWidth: isProv ? 2 : 1,
+            borderRadius: 4
+          };
+        });
+
+        datasets.push({
+          type: 'line',
+          label: 'Normal Riotuerto (2022–2025)',
+          data: seasonIds.map((sId) => baseRef[sId]?.rain_total_mm ?? null),
+          borderColor: pal.text,
+          borderWidth: 2,
+          borderDash: [6, 4],
+          pointRadius: 5,
+          pointBackgroundColor: pal.text,
+          fill: false
+        });
+
+        chartConfig = {
+          type: 'bar',
+          data: { labels: seasonLabels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { color: pal.text, boxWidth: 14 } },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `${ctx.dataset.label}: ${fmtNum(ctx.parsed.y, 1)} mm`
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { color: pal.text, font: { weight: 'bold' } }, grid: { display: false } },
+              y: {
+                title: { display: true, text: 'Precipitación acumulada (mm)', color: pal.text },
+                ticks: { color: pal.text, callback: (v) => `${v} mm` },
+                grid: { color: pal.grid }
+              }
+            }
+          }
+        };
+
+      } else if (metric === 'extremes') {
+        if (titleEl) titleEl.textContent = 'Extremos térmicos: Heladas vs Calor por estación';
+        if (subtitleEl) subtitleEl.textContent = 'Contraste estacional entre días de helada (≤0 °C) y días de calor (≥30 °C)';
+
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: seasonLabels,
+            datasets: [
+              {
+                label: 'Heladas (≤0 °C, media 2022–2025)',
+                data: seasonIds.map((sId) => baseRef[sId]?.frost_days ?? 0),
+                backgroundColor: 'rgba(2, 132, 199, 0.75)',
+                borderColor: '#0284c7',
+                borderWidth: 1,
+                borderRadius: 4
+              },
+              {
+                label: 'Días calor (≥30 °C, media 2022–2025)',
+                data: seasonIds.map((sId) => baseRef[sId]?.hot_days_30 ?? 0),
+                backgroundColor: 'rgba(234, 88, 12, 0.75)',
+                borderColor: '#ea580c',
+                borderWidth: 1,
+                borderRadius: 4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { color: pal.text, boxWidth: 14 } },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `${ctx.dataset.label}: ${fmtNum(ctx.parsed.y, 1)} días`
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { color: pal.text, font: { weight: 'bold' } }, grid: { display: false } },
+              y: {
+                title: { display: true, text: 'Días promedio por trimestre', color: pal.text },
+                ticks: { color: pal.text },
+                grid: { color: pal.grid }
+              }
+            }
+          }
+        };
+
+      } else if (metric === 'foehn') {
+        if (titleEl) titleEl.textContent = 'Días de viento sur / Foehn (surada) por trimestre OMM';
+        if (subtitleEl) subtitleEl.textContent = 'Frecuencia de episodios de viento sur por estación en Riotuerto';
+
+        const datasets = availableYears.map((y) => {
+          const color = yearColors[y] || '#64748b';
+          const isProv = y === 2026;
+          return {
+            label: isProv ? `Año ${y} (prov.)` : `Año ${y}`,
+            data: seasonIds.map((sId) => {
+              const row = sc.table.find((r) => r.year === y && r.season_id === sId);
+              return row ? row.foehn_days : null;
+            }),
+            backgroundColor: isProv ? 'rgba(234, 88, 12, 0.45)' : color,
+            borderColor: color,
+            borderWidth: isProv ? 2 : 1,
+            borderRadius: 4
+          };
+        });
+
+        datasets.push({
+          type: 'line',
+          label: 'Promedio Riotuerto (2022–2025)',
+          data: seasonIds.map((sId) => baseRef[sId]?.foehn_days ?? null),
+          borderColor: pal.text,
+          borderWidth: 2,
+          borderDash: [6, 4],
+          pointRadius: 5,
+          pointBackgroundColor: pal.text,
+          fill: false
+        });
+
+        chartConfig = {
+          type: 'bar',
+          data: { labels: seasonLabels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { color: pal.text, boxWidth: 14 } },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y} días de surada`
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { color: pal.text, font: { weight: 'bold' } }, grid: { display: false } },
+              y: {
+                title: { display: true, text: 'Días de viento sur / Foehn', color: pal.text },
+                ticks: { color: pal.text },
+                grid: { color: pal.grid }
+              }
+            }
+          }
+        };
+      }
+
+    } else {
+      const curSeasonMeta = seasonsMeta.find((s) => s.id === filter) || {
+        name: filter,
+        code: '',
+        icon: '🍂',
+        color: '#d97706'
+      };
+      const curBase = baseRef[filter] || {};
+
+      let rows = sc.table.filter((r) => r.season_id === filter);
+      if (!STATE.include2026InComparisons) {
+        rows = rows.filter((r) => !r.is_provisional);
+      }
+
+      const yearLabels = rows.map((r) => (r.is_provisional ? `${r.year} (prov.)` : String(r.year)));
+      const baseColor = curSeasonMeta.color || '#0284c7';
+
+      if (metric === 'temp') {
+        if (titleEl) titleEl.textContent = `${curSeasonMeta.icon} ${curSeasonMeta.name} (${curSeasonMeta.code}): Temperatura media interanual`;
+        if (subtitleEl) subtitleEl.textContent = `Referencia normal 2022–2025: ${fmtNum(curBase.temp_mean, 1)} °C`;
+
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: yearLabels,
+            datasets: [
+              {
+                label: 'T. Media (°C)',
+                data: rows.map((r) => r.temp_mean),
+                backgroundColor: rows.map((r) => (r.is_provisional ? 'rgba(234, 88, 12, 0.45)' : baseColor)),
+                borderColor: rows.map((r) => (r.is_provisional ? '#ea580c' : baseColor)),
+                borderWidth: 1,
+                borderRadius: 4
+              },
+              {
+                type: 'line',
+                label: `Normal 2022–2025 (${fmtNum(curBase.temp_mean, 1)} °C)`,
+                data: rows.map(() => curBase.temp_mean),
+                borderColor: pal.text,
+                borderWidth: 2,
+                borderDash: [6, 4],
+                pointRadius: 0,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { color: pal.text, boxWidth: 14 } },
+              tooltip: {
+                callbacks: {
+                  afterLabel: (ctx) => {
+                    const r = rows[ctx.dataIndex];
+                    if (!r) return '';
+                    return `T. Máx: ${fmtNum(r.temp_max_abs, 1)} °C | T. Mín: ${fmtNum(r.temp_min_abs, 1)} °C\nAnomalía: ${fmtSignNum(r.temp_anomaly, 2, '°C')}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { color: pal.text, font: { weight: 'bold' } }, grid: { display: false } },
+              y: {
+                title: { display: true, text: 'Temperatura media (°C)', color: pal.text },
+                ticks: { color: pal.text, callback: (v) => `${v} °C` },
+                grid: { color: pal.grid }
+              }
+            }
+          }
+        };
+
+      } else if (metric === 'rain') {
+        if (titleEl) titleEl.textContent = `${curSeasonMeta.icon} ${curSeasonMeta.name} (${curSeasonMeta.code}): Precipitación acumulada interanual`;
+        if (subtitleEl) subtitleEl.textContent = `Referencia normal 2022–2025: ${fmtNum(curBase.rain_total_mm, 1)} mm`;
+
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: yearLabels,
+            datasets: [
+              {
+                label: 'Precipitación (mm)',
+                data: rows.map((r) => r.rain_total_mm),
+                backgroundColor: rows.map((r) => (r.is_provisional ? 'rgba(2, 132, 199, 0.45)' : '#0284c7')),
+                borderColor: '#0284c7',
+                borderWidth: 1,
+                borderRadius: 4
+              },
+              {
+                type: 'line',
+                label: `Normal 2022–2025 (${fmtNum(curBase.rain_total_mm, 1)} mm)`,
+                data: rows.map(() => curBase.rain_total_mm),
+                borderColor: pal.text,
+                borderWidth: 2,
+                borderDash: [6, 4],
+                pointRadius: 0,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { color: pal.text, boxWidth: 14 } },
+              tooltip: {
+                callbacks: {
+                  afterLabel: (ctx) => {
+                    const r = rows[ctx.dataIndex];
+                    if (!r) return '';
+                    return `Días lluvia: ${r.rain_days_02} | Máx 24h: ${fmtNum(r.max_daily_rain_mm, 1)} mm\nAnom: ${fmtSignNum(r.rain_anomaly_mm, 1, 'mm')} (${fmtSignNum(r.rain_anomaly_pct, 1, '%')})`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { color: pal.text, font: { weight: 'bold' } }, grid: { display: false } },
+              y: {
+                title: { display: true, text: 'Lluvia total (mm)', color: pal.text },
+                ticks: { color: pal.text, callback: (v) => `${v} mm` },
+                grid: { color: pal.grid }
+              }
+            }
+          }
+        };
+
+      } else if (metric === 'extremes') {
+        if (titleEl) titleEl.textContent = `${curSeasonMeta.icon} ${curSeasonMeta.name}: Indicadores extremos e impacto térmico`;
+        if (subtitleEl) subtitleEl.textContent = `Días de helada (≤0 °C), días cálidos (≥25 °C / ≥30 °C) y noches tropicales (≥20 °C)`;
+
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: yearLabels,
+            datasets: [
+              {
+                label: 'Heladas (≤0 °C)',
+                data: rows.map((r) => r.frost_days),
+                backgroundColor: '#0284c7',
+                borderRadius: 4
+              },
+              {
+                label: 'Días cálidos (≥25 °C)',
+                data: rows.map((r) => r.warm_days_25),
+                backgroundColor: '#f59e0b',
+                borderRadius: 4
+              },
+              {
+                label: 'Días calor (≥30 °C)',
+                data: rows.map((r) => r.hot_days_30),
+                backgroundColor: '#ea580c',
+                borderRadius: 4
+              },
+              {
+                label: 'Noches trop. (≥20 °C)',
+                data: rows.map((r) => r.tropical_nights),
+                backgroundColor: '#7c3aed',
+                borderRadius: 4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { color: pal.text, boxWidth: 14 } }
+            },
+            scales: {
+              x: { ticks: { color: pal.text, font: { weight: 'bold' } }, grid: { display: false } },
+              y: {
+                title: { display: true, text: 'Número de días', color: pal.text },
+                ticks: { color: pal.text },
+                grid: { color: pal.grid }
+              }
+            }
+          }
+        };
+
+      } else if (metric === 'foehn') {
+        if (titleEl) titleEl.textContent = `${curSeasonMeta.icon} ${curSeasonMeta.name}: Días de viento sur / Foehn y racha máxima`;
+        if (subtitleEl) subtitleEl.textContent = `Días con viento del sector sur (SE-SO) y racha máxima observada (km/h)`;
+
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: yearLabels,
+            datasets: [
+              {
+                type: 'bar',
+                label: 'Días Foehn (surada)',
+                data: rows.map((r) => r.foehn_days),
+                backgroundColor: '#d97706',
+                yAxisID: 'y',
+                borderRadius: 4
+              },
+              {
+                type: 'line',
+                label: 'Racha máxima (km/h)',
+                data: rows.map((r) => r.wind_gust_max_kmh),
+                borderColor: '#ef4444',
+                backgroundColor: '#ef4444',
+                yAxisID: 'y1',
+                pointRadius: 4,
+                borderWidth: 2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { color: pal.text, boxWidth: 14 } },
+              tooltip: {
+                callbacks: {
+                  afterLabel: (ctx) => {
+                    const r = rows[ctx.dataIndex];
+                    if (!r) return '';
+                    return `Fecha racha: ${r.wind_gust_max_date || '—'}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { color: pal.text, font: { weight: 'bold' } }, grid: { display: false } },
+              y: {
+                title: { display: true, text: 'Días Foehn', color: pal.text },
+                ticks: { color: pal.text },
+                grid: { color: pal.grid }
+              },
+              y1: {
+                position: 'right',
+                title: { display: true, text: 'Racha máx. (km/h)', color: pal.text },
+                ticks: { color: pal.text },
+                grid: { display: false }
+              }
+            }
+          }
+        };
+      }
+    }
+
+    if (chartConfig) {
+      createChart('seasonal_comp', 'chart-seasonal-comp', chartConfig);
+    }
+  }
+
+  function initSeasonalComparison(comp) {
+    const sc = comp?.seasonal_comparison;
+    if (!sc) return;
+
+    updateSeasonalTable(comp);
+    renderSeasonalComparisonChart(comp);
+
+    const tabBtns = document.querySelectorAll('.seasonal-tab-btn');
+    tabBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        STATE.seasonal.seasonFilter = btn.dataset.season || 'all';
+        updateSeasonalTable(comp);
+        renderSeasonalComparisonChart(comp);
+      });
+    });
+
+    const metricBtns = document.querySelectorAll('.seasonal-metric-btn');
+    metricBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        metricBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        STATE.seasonal.metric = btn.dataset.metric || 'temp';
+        renderSeasonalComparisonChart(comp);
+      });
+    });
   }
 
   /* ------------------------------------------------------------------------
