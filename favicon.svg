@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0e2319"/>
+      <stop offset="100%" stop-color="#183d2c"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <linearGradient id="cloud" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="rain" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="mount1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#22553d"/>
+      <stop offset="100%" stop-color="#122c20"/>
+    </linearGradient>
+    <linearGradient id="mount2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3d8b63"/>
+      <stop offset="100%" stop-color="#1a4631"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Contenedor squircle con relieve sutil -->
+  <rect width="64" height="64" rx="15" fill="url(#sky)"/>
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="none" stroke="#52b788" stroke-width="1.2" stroke-opacity="0.35"/>
+
+  <!-- Montañas de fondo (Valle de Riotuerto / Montes de Trasmiera) -->
+  <polygon points="0,64 0,46 19,33 38,47 64,31 64,64" fill="url(#mount1)"/>
+  <polygon points="-2,64 -2,53 15,41 33,54 50,38 66,51 66,64" fill="url(#mount2)"/>
+
+  <!-- Sol radiante (Efecto Foehn y clima templado) -->
+  <circle cx="45" cy="20" r="11" fill="url(#sun)"/>
+
+  <!-- Nube meteorológica atlántica de alto contraste -->
+  <path d="M17 35 h24 a9 9 0 0 0 0 -18 a9.5 9.5 0 0 0 -5 1.4 A11.5 11.5 0 0 0 14 26 a8 8 0 0 0 3 9 z" fill="url(#cloud)"/>
+
+  <!-- Gota de lluvia atlántica que riega el valle -->
+  <path d="M29 38 C29 38 23 45.5 23 49 C23 52.3 25.7 55 29 55 C32.3 55 35 52.3 35 49 C35 45.5 29 38 29 38 Z" fill="url(#rain)"/>
+  <ellipse cx="27.5" cy="47.5" rx="1.2" ry="2.5" fill="#ffffff" opacity="0.6" transform="rotate(-20 27.5 47.5)"/>
+</svg>

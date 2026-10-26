@@ -1,0 +1,26 @@
+{
+  "name": "MeteoRiotuerto — Almanaque meteorológico y climatológico digital",
+  "short_name": "MeteoRiotuerto",
+  "description": "Archivo histórico, anuario estadístico y notario del clima del municipio de Riotuerto (Cantabria, España).",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#132a21",
+  "theme_color": "#132a21",
+  "icons": [
+    {
+      "src": "favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

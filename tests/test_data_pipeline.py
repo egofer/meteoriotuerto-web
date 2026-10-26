@@ -157,6 +157,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             ROOT_DIR / "index.html",
             ROOT_DIR / "src" / "css" / "styles.css",
             ROOT_DIR / "src" / "js" / "app.js",
+            ROOT_DIR / "favicon.svg",
+            ROOT_DIR / "favicon.ico",
             ROOT_DIR / ".github" / "workflows" / "deploy.yml",
             ROOT_DIR / "docs" / "METODOLOGIA.md",
             ROOT_DIR / "docs" / "GUIA_DESPLIEGUE.md",
@@ -178,6 +180,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # Verificar ausencia de credenciales o claves privadas
         for p in required_paths:
+            if p.suffix in (".ico", ".png"):
+                continue
             txt = p.read_text(encoding="utf-8")
             self.assertIsNone(re.search(r"APPLICATION_KEY\s*=\s*['\"][A-Za-z0-9]{16,}", txt))
             self.assertIsNone(re.search(r"API_KEY\s*=\s*['\"][A-Za-z0-9\-]{16,}", txt))
@@ -196,6 +200,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
                 for endpoint in [
                     "/",
                     "/index.html",
+                    "/favicon.svg",
+                    "/favicon.ico",
                     "/src/css/styles.css",
                     "/src/js/app.js",
                     "/data/index.json",
@@ -236,6 +242,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
                 continue
 
             full_p = ROOT_DIR / rel_path
+            if full_p.suffix in (".ico", ".png", ".jpg", ".jpeg", ".woff", ".woff2"):
+                continue
+
             txt = full_p.read_text(encoding="utf-8")
 
             # 2. Prohibir tokens o credenciales reales
