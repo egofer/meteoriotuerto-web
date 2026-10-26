@@ -532,6 +532,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("function renderHeadToHeadComparator", app_js)
         self.assertIn("h2h-comparator-container", app_js)
         self.assertNotIn("alm.chronicle", app_js, "No debe usarse 'alm.chronicle' ya que el campo editorial se denomina 'editorial'")
+        self.assertNotIn("mountChart", app_js, "No debe usarse 'mountChart'; la función global es 'createChart'")
+        self.assertIn("createChart('comp-h2h-dual', 'chart-h2h-comparison'", app_js)
 
 
 

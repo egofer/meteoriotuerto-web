@@ -3322,7 +3322,7 @@
 
     // Renderizar gráfico superpuesto A vs B
     const pal = chartPalette();
-    mountChart('comp-h2h-dual', 'chart-h2h-comparison', {
+    createChart('comp-h2h-dual', 'chart-h2h-comparison', {
       data: {
         labels: profA.seriesLabels,
         datasets: [
