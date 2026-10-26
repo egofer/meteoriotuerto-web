@@ -559,7 +559,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             "function exportComparisonsSynopticToExcel",
             "function exportHeadToHeadScoreboardToExcel",
             "function exportExplorerSelectionToExcel",
-            "function exportRecordsToExcel",
+            "function exportAbsoluteRecordsToExcel",
+            "function exportRankingsToExcel",
+            "function exportMonthlyRecordsToExcel",
             "function exportAuditQualityToExcel",
         ]
         for fn in required_functions:
@@ -571,7 +573,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             "btn-exp-xlsx",
             "btn-export-synoptic-xlsx",
             "btn-export-h2h-xlsx",
-            "btn-export-records-xlsx",
+            "btn-export-abs-records-xlsx",
+            "btn-export-rankings-xlsx",
             "btn-export-records-monthly-xlsx",
             "btn-export-audit-xlsx",
         ]

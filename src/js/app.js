@@ -2478,8 +2478,8 @@
     }, `meteoriotuerto_seleccion_${dateFrom}_${dateTo}.xlsx`);
   }
 
-  function exportRecordsToExcel(rec) {
-    const absHeaders = ['Indicador', 'Valor', 'Unidad', 'Fecha', 'Hora', 'Contexto'];
+  function exportAbsoluteRecordsToExcel(rec) {
+    const absHeaders = ['Indicador', 'Valor numérico', 'Unidad', 'Fecha', 'Hora', 'Contexto / Efeméride'];
     const absRows = [absHeaders];
     Object.values(rec.absolute_records || {}).forEach((item) => {
       if (item && item.label) {
@@ -2487,39 +2487,38 @@
       }
     });
 
-    const moHeaders = [
-      'Mes', 'T. máx. abs. (°C)', 'Fecha máx.', 'T. mín. abs. (°C)', 'Fecha mín.',
-      'Lluvia máx. 24h (mm)', 'Fecha máx. lluvia', 'Racha máx. (km/h)', 'Fecha racha',
-      'Año más lluvioso', 'Lluvia máx. año (mm)', 'Año más seco', 'Lluvia año seco (mm)',
-      'Año más cálido', 'T. media año cálido (°C)'
+    const metaRows = [
+      ['Archivo climatológico local', 'MeteoRiotuerto — Notario del clima de Riotuerto'],
+      ['Emplazamiento', 'Barrio de Arriba, Riotuerto (Cantabria, España) · 43.341° N, 3.670° W, 115 m s. n. m.'],
+      ['Periodo de referencia analizado', rec.period_covered],
+      ['Días con observación validada', rec.total_observed_days],
+      ['Aviso metodológico', rec.methodological_disclaimer],
+      ['Fecha de exportación', new Date().toISOString()]
     ];
-    const moRows = [moHeaders];
-    (rec.monthly_records || []).forEach((m) => {
-      moRows.push([
-        m.name, m.temp_max_abs, m.temp_max_date, m.temp_min_abs, m.temp_min_date,
-        m.max_daily_rain, m.max_daily_rain_date, m.max_wind_gust, m.max_wind_gust_date,
-        m.wettest_edition ? m.wettest_edition.year : '', m.wettest_edition ? m.wettest_edition.rain_mm : null,
-        m.driest_edition ? m.driest_edition.year : '', m.driest_edition ? m.driest_edition.rain_mm : null,
-        m.warmest_edition ? m.warmest_edition.year : '', m.warmest_edition ? m.warmest_edition.temp_mean : null
-      ]);
-    });
 
-    const sheets = {
+    exportWorkbookToXLSX({
       'Extremos_Absolutos': absRows,
-      'Efemerides_Por_Mes': moRows
-    };
+      'Ficha_Metodologica': metaRows
+    }, 'meteoriotuerto_extremos_absolutos.xlsx');
+  }
 
+  function exportRankingsToExcel(rec, activeKey) {
     const topKeys = [
-      { key: 'top_hottest_days', name: 'Top10_Calidos', valLabel: 'T. máx. (°C)' },
-      { key: 'top_coldest_days', name: 'Top10_Frios', valLabel: 'T. mín. (°C)' },
-      { key: 'top_wettest_days', name: 'Top10_Lluviosos', valLabel: 'Lluvia 24h (mm)' },
-      { key: 'top_windiest_days', name: 'Top10_Viento', valLabel: 'Racha máx. (km/h)' },
-      { key: 'top_amplitude_days', name: 'Top10_Amplitud', valLabel: 'Amplitud (°C)' },
-      { key: 'top_coldest_max_days', name: 'Top10_Invernales_Frios', valLabel: 'T. máx. fría (°C)' },
-      { key: 'top_warmest_min_days', name: 'Top10_Noches_Calidas', valLabel: 'T. mín. cálida (°C)' }
+      { key: 'top_hottest_days', name: 'Top10_Calidos', title: 'Top 10 días más cálidos (T. máx. absoluta)', valLabel: 'T. máx. extrema (°C)' },
+      { key: 'top_coldest_days', name: 'Top10_Frios', title: 'Top 10 madrugadas más frías (T. mín. absoluta)', valLabel: 'T. mín. extrema (°C)' },
+      { key: 'top_wettest_days', name: 'Top10_Lluviosos', title: 'Top 10 días más lluviosos (Precipitación en 24h)', valLabel: 'Lluvia 24h (mm)' },
+      { key: 'top_windiest_days', name: 'Top10_Viento', title: 'Top 10 mayores rachas de viento (km/h)', valLabel: 'Racha máx. (km/h)' },
+      { key: 'top_amplitude_days', name: 'Top10_Amplitud', title: 'Top 10 mayores amplitudes térmicas diarias', valLabel: 'Amplitud (ΔT, °C)' },
+      { key: 'top_coldest_max_days', name: 'Top10_Invernales_Frios', title: 'Top 10 días invernales más fríos (T. máx. más baja)', valLabel: 'T. máx. fría (°C)' },
+      { key: 'top_warmest_min_days', name: 'Top10_Noches_Calidas', title: 'Top 10 noches más cálidas (T. mín. más alta)', valLabel: 'T. mín. cálida (°C)' }
     ];
 
-    topKeys.forEach(({ key, name, valLabel }) => {
+    // La categoría actualmente seleccionada por el usuario encabeza el libro (Hoja 1)
+    const current = topKeys.find((k) => k.key === activeKey) || topKeys[0];
+    const ordered = [current, ...topKeys.filter((k) => k.key !== current.key)];
+
+    const sheets = {};
+    ordered.forEach(({ key, name, valLabel }) => {
       const items = rec.rankings?.[key] || [];
       const rankHeaders = ['Posición', 'Fecha', 'Año', valLabel, 'T. máx. (°C)', 'T. mín. (°C)', 'T. media (°C)', 'Lluvia 24h (mm)', 'Racha máx. (km/h)'];
       const rankRows = [rankHeaders];
@@ -2531,7 +2530,56 @@
       sheets[name] = rankRows;
     });
 
-    exportWorkbookToXLSX(sheets, 'meteoriotuerto_records_historicos.xlsx');
+    const safeKey = (activeKey || 'rankings').replace(/[^a-zA-Z0-9_]/g, '_');
+    exportWorkbookToXLSX(sheets, `meteoriotuerto_rankings_${safeKey}.xlsx`);
+  }
+
+  function exportMonthlyRecordsToExcel(rec) {
+    const moHeaders = [
+      'Mes', 'Techo térmico (°C)', 'Fecha techo térmico', 'Suelo térmico (°C)', 'Fecha suelo térmico',
+      'Precipitación máx. 24h (mm)', 'Fecha máx. precipitación', 'Racha máx. viento (km/h)', 'Fecha racha máx.',
+      'Año más lluvioso', 'Lluvia total récord (mm)', 'Año más seco', 'Lluvia total año seco (mm)',
+      'Año más cálido', 'T. media año cálido (°C)', 'Año más frío', 'T. media año frío (°C)'
+    ];
+    const moRows = [moHeaders];
+    (rec.monthly_records || []).forEach((m) => {
+      moRows.push([
+        m.name,
+        m.temp_max_abs,
+        m.temp_max_date,
+        m.temp_min_abs,
+        m.temp_min_date,
+        m.max_daily_rain,
+        m.max_daily_rain_date,
+        m.max_wind_gust,
+        m.max_wind_gust_date,
+        m.wettest_edition ? m.wettest_edition.year : '',
+        m.wettest_edition ? m.wettest_edition.rain_mm : null,
+        m.driest_edition ? m.driest_edition.year : '',
+        m.driest_edition ? m.driest_edition.rain_mm : null,
+        m.warmest_edition ? m.warmest_edition.year : '',
+        m.warmest_edition ? m.warmest_edition.temp_mean : null,
+        m.coldest_edition ? m.coldest_edition.year : '',
+        m.coldest_edition ? m.coldest_edition.temp_mean : null
+      ]);
+    });
+
+    const metaRows = [
+      ['Archivo climatológico local', 'MeteoRiotuerto — Notario del clima de Riotuerto'],
+      ['Emplazamiento', 'Barrio de Arriba, Riotuerto (Cantabria, España) · 43.341° N, 3.670° W, 115 m s. n. m.'],
+      ['Tabla', 'Efemérides y extremos por mes del calendario (Enero a Diciembre)'],
+      ['Periodo observado', rec.period_covered],
+      ['Fecha de exportación', new Date().toISOString()]
+    ];
+
+    exportWorkbookToXLSX({
+      'Efemerides_Mensuales': moRows,
+      'Ficha_Informativa': metaRows
+    }, 'meteoriotuerto_efemerides_mensuales.xlsx');
+  }
+
+  function exportRecordsToExcel(rec) {
+    exportRankingsToExcel(rec, STATE.recordsRankingKey);
   }
 
   function exportAuditQualityToExcel(almanacs, overview) {
@@ -3023,6 +3071,11 @@
             <h3 class="section-title">Cuadro de extremos absolutos de la estación</h3>
             <p class="section-subtitle">Registros máximos y mínimos verificados y depurados de anomalías de transmisión</p>
           </div>
+          <div>
+            <button type="button" id="btn-export-abs-records-xlsx" class="btn btn-excel">
+              📊 Exportar extremos absolutos a Excel (.xlsx)
+            </button>
+          </div>
         </div>
         <div class="kpi-grid">
           ${absHtml}
@@ -3037,8 +3090,8 @@
             <p class="section-subtitle">Los diez días más extremos observados en Riotuerto según cada indicador</p>
           </div>
           <div class="table-header-actions">
-            <button type="button" id="btn-export-records-xlsx" class="btn btn-excel" title="Exportar extremos absolutos y todas las clasificaciones Top 10 a Excel">
-              📊 Exportar libro de récords a Excel (.xlsx)
+            <button type="button" id="btn-export-rankings-xlsx" class="btn btn-excel" title="Exportar clasificación Top 10 a Excel">
+              📊 Exportar ranking Top 10 a Excel (.xlsx)
             </button>
             <select id="select-ranking-cat" class="form-select" aria-label="Seleccionar categoría del ranking histórico">
               <option value="top_hottest_days">🔥 Top 10 días más cálidos (T. máx. absoluta)</option>
@@ -3080,7 +3133,7 @@
           </div>
           <div>
             <button type="button" id="btn-export-records-monthly-xlsx" class="btn btn-excel">
-              📊 Exportar efemérides a Excel (.xlsx)
+              📊 Exportar efemérides mensuales a Excel (.xlsx)
             </button>
           </div>
         </div>
@@ -3106,11 +3159,14 @@
       </section>
     `;
 
-    document.getElementById('btn-export-records-xlsx')?.addEventListener('click', () => {
-      exportRecordsToExcel(rec);
+    document.getElementById('btn-export-abs-records-xlsx')?.addEventListener('click', () => {
+      exportAbsoluteRecordsToExcel(rec);
+    });
+    document.getElementById('btn-export-rankings-xlsx')?.addEventListener('click', () => {
+      exportRankingsToExcel(rec, STATE.recordsRankingKey);
     });
     document.getElementById('btn-export-records-monthly-xlsx')?.addEventListener('click', () => {
-      exportRecordsToExcel(rec);
+      exportMonthlyRecordsToExcel(rec);
     });
 
     const sel = document.getElementById('select-ranking-cat');
