@@ -945,6 +945,9 @@
     const vegDaysCount = alm.daily_series?.temp_mean
       ? alm.daily_series.temp_mean.filter((t) => t !== null && t !== undefined && t >= 10.0).length
       : '—';
+    const autMonths = (alm.monthly || []).filter((m) => [9, 10, 11].includes(m.month) && m.valid_days > 0);
+    const autRain = autMonths.reduce((sum, m) => sum + (m.rain_total || 0), 0);
+    const autRainDays = autMonths.reduce((sum, m) => sum + (m.rain_days_02 || 0), 0);
 
     // EVO-007: Percentiles térmicos y bandas de confort
     const tp = alm.stats.thermal_percentiles || {
@@ -1514,17 +1517,33 @@
 
             <div class="practical-card">
               <div class="practical-card-top">
-                <span class="practical-card-icon">🥾</span>
+                <span class="practical-card-icon">🍄</span>
                 <div>
-                  <h5 class="practical-card-title">Turismo, senderismo y confort estival</h5>
-                  <span class="practical-card-meta">Basado en Grados Día de Refrigeración (CDD)</span>
+                  <h5 class="practical-card-title">Temporada de setas y eclosión micológica</h5>
+                  <span class="practical-card-meta">Humedad del suelo + Ventanas térmicas en monte</span>
                 </div>
               </div>
               <p class="practical-card-body">
-                Los bajísimos valores de CDD en el municipio demuestran la ventaja bioclimática de Riotuerto frente a zonas continentales: noches frescas garantizadas para el descanso sin necesidad de aire acondicionado mecánico. Para rutas hacia Alisas o el Alto de Brenas, vigilar los días con CDD positivos o surada para planificar salidas temprano y evitar bochornos.
+                Las setas de otoño en los robledales, castañares y pinares de Riotuerto (boletus, cantarelas y senderuelas) requieren una secuencia precisa: un «riego abundante previo» (&gt;40–50 mm acumulados) seguido de 7 a 10 días de temperaturas medias templadas (11–17 °C) sin suradas resecantes que marchiten el micelio. Permite seguir las mejores semanas para la recogida en el monte antes de las primeras heladas invernales.
               </p>
               <div class="practical-card-stat">
-                Demanda de refrigeración: <strong>${fmtNum(dd.cdd_21_0, 1)} CDD</strong> (Descanso nocturno garantizado)
+                Lluvia otoñal (sep.–nov.): <strong>${fmtNum(autRain, 1)} mm</strong> (${autRainDays} días con lluvia)
+              </div>
+            </div>
+
+            <div class="practical-card">
+              <div class="practical-card-top">
+                <span class="practical-card-icon">☀️</span>
+                <div>
+                  <h5 class="practical-card-title">Autoconsumo solar fotovoltaico y térmico</h5>
+                  <span class="practical-card-meta">Radiación solar global + Horas de sol</span>
+                </div>
+              </div>
+              <p class="practical-card-body">
+                Para viviendas y explotaciones con placas solares en tejados o cubiertas. La persistente nubosidad orográfica matinal del fondo de valle modula la captación invernal, pero en primavera y verano y con viento sur la radiación supera los 950–1.050 W/m². Permite estimar el balance energético estacional, dimensionar baterías o acumuladores de agua y maximizar el autoconsumo en horas centrales.
+              </p>
+              <div class="practical-card-stat">
+                Horas de sol anuales: <strong>${stA.estimated_sunshine_hours !== null && stA.estimated_sunshine_hours !== undefined ? `${fmtNum(stA.estimated_sunshine_hours, 0)} h` : '—'}</strong> (Pico: ${stA.solar_max_wm2 !== null && stA.solar_max_wm2 !== undefined ? `${fmtNum(stA.solar_max_wm2, 1)} W/m²` : '—'})
               </div>
             </div>
           </div>
