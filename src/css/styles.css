@@ -1381,6 +1381,77 @@ html[data-theme="dark"] .year-pill.active {
   height: 390px;
 }
 
+/* Rosa de los vientos náutica polar (EVO-017) */
+.windrose-toggle-group {
+  display: inline-flex;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
+
+.windrose-toggle-btn {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--txt-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.windrose-toggle-btn:hover {
+  color: var(--txt-primary);
+}
+
+.windrose-toggle-btn.active {
+  background: var(--surface);
+  color: var(--brand-forest);
+  box-shadow: var(--shadow-sm);
+}
+
+.windrose-legend-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-subtle);
+  font-size: 0.77rem;
+  color: var(--txt-muted);
+}
+
+.windrose-leg-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.windrose-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.windrose-dot.dot-south {
+  background: #ea580c;
+}
+
+.windrose-dot.dot-north {
+  background: #0284c7;
+}
+
+.windrose-dot.dot-east {
+  background: #0d9488;
+}
+
 /* Calendario matricial anual interactivo (12 x 31) */
 .calendar-heatmap-wrap {
   overflow-x: auto;

@@ -1526,12 +1526,21 @@
           <div class="chart-panel">
             <div class="chart-panel-header">
               <div>
-                <h4 class="chart-panel-title">Frecuencia por dirección del viento (16 sectores)</h4>
-                <p class="chart-panel-subtitle">Sector predominante: ${stW.predominant_sector} · Basado en ${fmtNum(alm.wind_analysis.total_direction_observations, 0)} observaciones (${alm.wind_analysis.source_resolution})</p>
+                <h4 class="chart-panel-title">Rosa de los vientos (16 rumbos)</h4>
+                <p class="chart-panel-subtitle">Rumbo predominante: <strong>${stW.predominant_sector}</strong> · Basado en ${fmtNum(alm.wind_analysis.total_direction_observations, 0)} observaciones (${alm.wind_analysis.source_resolution})</p>
+              </div>
+              <div class="windrose-toggle-group" id="windrose-tools-${alm.year}">
+                <button type="button" class="windrose-toggle-btn active" id="btn-windrose-polar-${alm.year}" title="Rosa náutica polar 360°">🧭 Circular</button>
+                <button type="button" class="windrose-toggle-btn" id="btn-windrose-bar-${alm.year}" title="Histograma de frecuencias en barras">📊 Barras</button>
               </div>
             </div>
-            <div class="chart-canvas-wrap">
+            <div class="chart-canvas-wrap tall">
               <canvas id="chart-alm-windrose"></canvas>
+            </div>
+            <div class="windrose-legend-bar">
+              <span class="windrose-leg-item"><span class="windrose-dot dot-south"></span> <strong>Surada / Foehn</strong> (S, SSW, SW, SSE)</span>
+              <span class="windrose-leg-item"><span class="windrose-dot dot-north"></span> <strong>Cantábrico</strong> (NW, WNW, N, NNW)</span>
+              <span class="windrose-leg-item"><span class="windrose-dot dot-east"></span> <strong>Brisas este</strong> (NE, ENE, E, ESE)</span>
             </div>
           </div>
 
@@ -1542,7 +1551,7 @@
                 <p class="chart-panel-subtitle">Distribución del viento medio diario en el fondo del valle del Covadal</p>
               </div>
             </div>
-            <div class="chart-canvas-wrap">
+            <div class="chart-canvas-wrap tall">
               <canvas id="chart-alm-beaufort"></canvas>
             </div>
           </div>
@@ -2074,6 +2083,31 @@
     document.getElementById('btn-print-almanac-top')?.addEventListener('click', triggerPrint);
     document.getElementById('btn-print-almanac')?.addEventListener('click', triggerPrint);
 
+    // Controles interactivos de la rosa de los vientos (EVO-017)
+    const btnPolar = document.getElementById(`btn-windrose-polar-${alm.year}`);
+    const btnBar = document.getElementById(`btn-windrose-bar-${alm.year}`);
+    if (btnPolar && btnBar) {
+      if ((STATE.windRoseMode || 'polar') === 'bar') {
+        btnBar.classList.add('active');
+        btnPolar.classList.remove('active');
+      } else {
+        btnPolar.classList.add('active');
+        btnBar.classList.remove('active');
+      }
+      btnPolar.addEventListener('click', () => {
+        STATE.windRoseMode = 'polar';
+        btnPolar.classList.add('active');
+        btnBar.classList.remove('active');
+        renderAlmanacWindRose(alm, 'polar');
+      });
+      btnBar.addEventListener('click', () => {
+        STATE.windRoseMode = 'bar';
+        btnBar.classList.add('active');
+        btnPolar.classList.remove('active');
+        renderAlmanacWindRose(alm, 'bar');
+      });
+    }
+
     // Renderizar gráficos del almanaque
     renderAlmanacCharts(alm);
   }
@@ -2382,38 +2416,8 @@
       },
     });
 
-    // 5. Rosa de los vientos (16 sectores)
-    const rose = alm.wind_analysis.rose_16;
-    createChart('alm_windrose', 'chart-alm-windrose', {
-      type: 'bar',
-      data: {
-        labels: rose.map((r) => r.sector),
-        datasets: [
-          {
-            label: 'Frecuencia relativa (%)',
-            data: rose.map((r) => r.frequency_pct),
-            backgroundColor: pal.rainBar,
-            borderColor: pal.rain,
-            borderWidth: 1.2,
-            borderRadius: 4,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: pal.text } } },
-        scales: {
-          x: { ticks: { color: pal.text }, grid: { color: pal.grid } },
-          y: {
-            beginAtZero: true,
-            title: { display: true, text: 'Frecuencia (%)', color: pal.text },
-            ticks: { color: pal.text },
-            grid: { color: pal.grid },
-          },
-        },
-      },
-    });
+    // 5. Rosa de los vientos (16 sectores: modo polar circular náutico o histograma de barras)
+    renderAlmanacWindRose(alm, STATE.windRoseMode || 'polar');
 
     // 6. Distribución Beaufort
     const bft = alm.wind_analysis.beaufort_daily;
@@ -2446,6 +2450,184 @@
         },
       },
     });
+  }
+
+  const SECTOR_NAMES_ES = {
+    N: 'Norte (Tramontana)',
+    NNE: 'Nor-Nordeste',
+    NE: 'Nordeste (Gris)',
+    ENE: 'Este-Nordeste',
+    E: 'Este (Levante)',
+    ESE: 'Este-Sudeste',
+    SE: 'Sudeste (Siroco)',
+    SSE: 'Sur-Sudeste',
+    S: 'Sur (Surada / Ábrego)',
+    SSW: 'Sur-Sudoeste (Surada)',
+    SW: 'Sudoeste (Vendaval / Foehn)',
+    WSW: 'Oeste-Sudoeste',
+    W: 'Oeste (Poniente)',
+    WNW: 'Oeste-Noroeste',
+    NW: 'Noroeste (Gallego / Galerna)',
+    NNW: 'Nor-Noroeste',
+  };
+
+  function getWindSectorColor(sector, isDark, alpha = 0.78) {
+    if (['S', 'SSW'].includes(sector)) return `rgba(234, 88, 12, ${alpha})`;
+    if (['SW', 'SSE'].includes(sector)) return `rgba(249, 115, 22, ${alpha})`;
+    if (['NW', 'NNW'].includes(sector)) return `rgba(2, 132, 199, ${alpha})`;
+    if (['WNW', 'N'].includes(sector)) return `rgba(14, 165, 233, ${alpha})`;
+    if (['NNE', 'NE'].includes(sector)) return `rgba(6, 182, 212, ${alpha})`;
+    if (['ENE', 'E', 'ESE'].includes(sector)) return `rgba(20, 184, 166, ${alpha})`;
+    return `rgba(99, 102, 241, ${alpha})`;
+  }
+
+  function getWindSectorBorder(sector) {
+    if (['S', 'SSW', 'SW', 'SSE'].includes(sector)) return '#ea580c';
+    if (['NW', 'NNW', 'WNW', 'N'].includes(sector)) return '#0284c7';
+    if (['NNE', 'NE'].includes(sector)) return '#0891b2';
+    if (['ENE', 'E', 'ESE'].includes(sector)) return '#0d9488';
+    return '#4f46e5';
+  }
+
+  function renderAlmanacWindRose(alm, mode) {
+    const rose = alm.wind_analysis.rose_16;
+    const pal = chartPalette();
+    const isDark = STATE.theme === 'dark';
+    const chosenMode = mode || STATE.windRoseMode || 'polar';
+
+    if (chosenMode === 'polar') {
+      createChart('alm_windrose', 'chart-alm-windrose', {
+        type: 'polarArea',
+        data: {
+          labels: rose.map((r) => r.sector),
+          datasets: [
+            {
+              label: 'Frecuencia relativa (%)',
+              data: rose.map((r) => r.frequency_pct),
+              backgroundColor: rose.map((r) => getWindSectorColor(r.sector, isDark, isDark ? 0.82 : 0.72)),
+              borderColor: rose.map(() => (isDark ? 'rgba(15, 23, 42, 0.9)' : '#ffffff')),
+              borderWidth: 1.5,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          startAngle: -101.25,
+          animation: { duration: 500 },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.96)',
+              titleColor: isDark ? '#f8fafc' : '#0f172a',
+              bodyColor: isDark ? '#e2e8f0' : '#334155',
+              borderColor: isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(0, 0, 0, 0.12)',
+              borderWidth: 1,
+              padding: 11,
+              callbacks: {
+                title: (items) => {
+                  const idx = items[0].dataIndex;
+                  const r = rose[idx];
+                  return `${r.sector} · ${SECTOR_NAMES_ES[r.sector] || r.sector}`;
+                },
+                label: (context) => {
+                  const r = rose[context.dataIndex];
+                  return [
+                    ` Frecuencia: ${fmtNum(r.frequency_pct, 1)} % (${fmtNum(r.count, 0)} obs.)`,
+                    ` Velocidad media: ${fmtNum(r.mean_speed_kmh, 1)} km/h`,
+                    ` Racha máxima: ${fmtNum(r.max_gust_kmh, 1)} km/h`,
+                  ];
+                },
+              },
+            },
+          },
+          scales: {
+            r: {
+              startAngle: -101.25,
+              grid: {
+                circular: true,
+                color: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.07)',
+              },
+              angleLines: {
+                display: true,
+                color: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.10)',
+                lineWidth: 1,
+              },
+              ticks: {
+                display: true,
+                color: pal.muted,
+                backdropColor: 'transparent',
+                font: { size: 10 },
+                callback: (val) => `${val}%`,
+              },
+              pointLabels: {
+                display: true,
+                centerPointLabels: true,
+                font: {
+                  size: 11,
+                  weight: '600',
+                },
+                color: (ctx) => {
+                  const label = ctx.label;
+                  if (['S', 'SSW', 'SW', 'SSE'].includes(label)) return isDark ? '#fb923c' : '#c2410c';
+                  if (['N', 'NW', 'NNW', 'WNW'].includes(label)) return isDark ? '#38bdf8' : '#0369a1';
+                  return isDark ? '#e2e8f0' : '#334155';
+                },
+              },
+            },
+          },
+        },
+      });
+    } else {
+      createChart('alm_windrose', 'chart-alm-windrose', {
+        type: 'bar',
+        data: {
+          labels: rose.map((r) => r.sector),
+          datasets: [
+            {
+              label: 'Frecuencia relativa (%)',
+              data: rose.map((r) => r.frequency_pct),
+              backgroundColor: rose.map((r) => getWindSectorColor(r.sector, isDark, isDark ? 0.85 : 0.75)),
+              borderColor: rose.map((r) => getWindSectorBorder(r.sector)),
+              borderWidth: 1.2,
+              borderRadius: 4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => {
+                  const r = rose[items[0].dataIndex];
+                  return `${r.sector} · ${SECTOR_NAMES_ES[r.sector] || r.sector}`;
+                },
+                label: (context) => {
+                  const r = rose[context.dataIndex];
+                  return [
+                    ` Frecuencia: ${fmtNum(r.frequency_pct, 1)} % (${fmtNum(r.count, 0)} obs.)`,
+                    ` Velocidad media: ${fmtNum(r.mean_speed_kmh, 1)} km/h`,
+                    ` Racha máxima: ${fmtNum(r.max_gust_kmh, 1)} km/h`,
+                  ];
+                },
+              },
+            },
+          },
+          scales: {
+            x: { ticks: { color: pal.text }, grid: { color: pal.grid } },
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Frecuencia (%)', color: pal.text },
+              ticks: { color: pal.text },
+              grid: { color: pal.grid },
+            },
+          },
+        },
+      });
+    }
   }
 
   function downloadYearDailyCSV(alm) {

@@ -635,6 +635,23 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             context = terms_by_id[term_id].get("riotuerto_context", "")
             self.assertGreater(len(context), 50, f"Contexto de '{term_id}' demasiado breve")
 
+    def test_circular_polar_windrose_readiness(self):
+        """
+        EVO-017: Verifica la rosa de los vientos circular polar náutica (360°),
+        los controles de alternancia polar/barras y la leyenda de cuadrantes.
+        """
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("renderAlmanacWindRose", app_js, "Falta renderAlmanacWindRose en app.js")
+        self.assertIn("polarArea", app_js, "Falta tipo polarArea en app.js")
+        self.assertIn("SECTOR_NAMES_ES", app_js, "Falta diccionario SECTOR_NAMES_ES en app.js")
+        self.assertIn("btn-windrose-polar", app_js, "Falta botón polar en app.js")
+        self.assertIn("btn-windrose-bar", app_js, "Falta botón de barras en app.js")
+
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".windrose-toggle-group", css_text, "Falta .windrose-toggle-group en styles.css")
+        self.assertIn(".windrose-legend-bar", css_text, "Falta .windrose-legend-bar en styles.css")
+        self.assertIn(".windrose-dot", css_text, "Falta .windrose-dot en styles.css")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
