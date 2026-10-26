@@ -7847,6 +7847,88 @@
   }
 
   /* ------------------------------------------------------------------------
+   * EVO-021 (EVO-F): Registro de Service Worker, PWA y monitor offline
+   * ------------------------------------------------------------------------ */
+  function initServiceWorkerAndPWA() {
+    // 1. Registro del Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => {
+            reg.onupdatefound = () => {
+              const installingWorker = reg.installing;
+              if (installingWorker) {
+                installingWorker.onstatechange = () => {
+                  if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('[MeteoRiotuerto PWA] Nueva versión disponible en segundo plano.');
+                  }
+                };
+              }
+            };
+          })
+          .catch((err) => {
+            console.warn('[MeteoRiotuerto PWA] No se pudo registrar sw.js:', err);
+          });
+      });
+    }
+
+    // 2. Monitor de estado online / offline
+    const badge = document.getElementById('offline-badge');
+    const badgeText = document.getElementById('offline-badge-text');
+
+    function updateOnlineStatus() {
+      if (!badge) return;
+      if (!navigator.onLine) {
+        badge.classList.remove('online-restored');
+        if (badgeText) badgeText.textContent = 'Modo sin conexión';
+        badge.hidden = false;
+      } else {
+        if (!badge.hidden && !badge.classList.contains('online-restored')) {
+          badge.classList.add('online-restored');
+          if (badgeText) badgeText.textContent = 'Conectado';
+          setTimeout(() => {
+            badge.hidden = true;
+            badge.classList.remove('online-restored');
+          }, 3500);
+        } else {
+          badge.hidden = true;
+        }
+      }
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+
+    // 3. Soporte de instalación como aplicación PWA (beforeinstallprompt)
+    let deferredPrompt = null;
+    const installBtn = document.getElementById('btn-pwa-install');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBtn) {
+        installBtn.hidden = false;
+        installBtn.onclick = async () => {
+          installBtn.hidden = true;
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log('[MeteoRiotuerto PWA] Elección de instalación:', outcome);
+            deferredPrompt = null;
+          }
+        };
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      if (installBtn) installBtn.hidden = true;
+      deferredPrompt = null;
+      console.log('[MeteoRiotuerto PWA] Aplicación instalada con éxito.');
+    });
+  }
+
+  /* ------------------------------------------------------------------------
    * Conmutador de tema claro / oscuro
    * ------------------------------------------------------------------------ */
   function updateThemeButtonUI() {
@@ -7880,6 +7962,7 @@
    * ------------------------------------------------------------------------ */
   document.addEventListener('DOMContentLoaded', () => {
     updateThemeButtonUI();
+    initServiceWorkerAndPWA();
     document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle')?.addEventListener('click', toggleTheme);
 

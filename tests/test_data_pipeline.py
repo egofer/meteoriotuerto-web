@@ -794,6 +794,56 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".episodes-tabs-bar", css_text)
         self.assertIn(".episode-badge", css_text)
 
+    def test_pwa_and_offline_service_worker_readiness(self):
+        """
+        EVO-021 (EVO-F): Verifica el modo sin conexión, el Service Worker (sw.js),
+        el manifiesto web PWA (site.webmanifest) y la experiencia de usuario offline.
+        """
+        # 1. Service Worker en raíz
+        sw_path = ROOT_DIR / "sw.js"
+        self.assertTrue(sw_path.exists(), "Falta sw.js en la raíz del proyecto")
+        sw_text = sw_path.read_text(encoding="utf-8")
+        self.assertIn("CACHE_NAME", sw_text)
+        self.assertIn("PRECACHE_ASSETS", sw_text)
+        self.assertIn("./data/index.json", sw_text)
+        self.assertIn("./data/records.json", sw_text)
+        self.assertIn("./data/comparisons.json", sw_text)
+        self.assertIn("./src/js/app.js", sw_text)
+        self.assertIn("./src/css/styles.css", sw_text)
+        self.assertIn("caches.open", sw_text)
+        self.assertIn("fetch", sw_text)
+
+        # 2. Manifiesto PWA
+        manifest_path = ROOT_DIR / "site.webmanifest"
+        self.assertTrue(manifest_path.exists(), "Falta site.webmanifest")
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+        self.assertEqual(manifest["name"], "MeteoRiotuerto — Almanaque meteorológico y climatológico digital")
+        self.assertEqual(manifest["short_name"], "MeteoRiotuerto")
+        self.assertEqual(manifest["display"], "standalone")
+        self.assertIn("icons", manifest)
+        self.assertGreaterEqual(len(manifest["icons"]), 2)
+
+        # 3. HTML y enlaces de integración
+        index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="./site.webmanifest"', index_html)
+        self.assertIn('name="theme-color"', index_html)
+        self.assertIn('id="offline-badge"', index_html)
+        self.assertIn('id="btn-pwa-install"', index_html)
+
+        # 4. JavaScript y monitor de conexión
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("initServiceWorkerAndPWA", app_js)
+        self.assertIn("navigator.serviceWorker.register('./sw.js')", app_js)
+        self.assertIn("updateOnlineStatus", app_js)
+        self.assertIn("beforeinstallprompt", app_js)
+
+        # 5. Estilos
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".offline-badge", css_text)
+        self.assertIn(".offline-dot", css_text)
+        self.assertIn(".btn-pwa-install", css_text)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

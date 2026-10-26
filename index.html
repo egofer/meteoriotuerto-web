@@ -52,6 +52,13 @@
         <span class="hide-sm">Valle del río Covadal</span>
       </div>
       <div class="masthead-actions">
+        <div id="offline-badge" class="offline-badge" hidden aria-live="polite">
+          <span class="offline-dot" aria-hidden="true"></span>
+          <span id="offline-badge-text">Modo sin conexión</span>
+        </div>
+        <button type="button" id="btn-pwa-install" class="btn-pwa-install" hidden aria-label="Instalar MeteoRiotuerto como aplicación">
+          📱 Instalar app
+        </button>
         <a href="https://app.weathercloud.net/d6619283754" target="_blank" rel="noopener noreferrer" class="live-ext-link" title="Consultar datos instantáneos en abierto en Weathercloud">
           <span class="pulse-dot" aria-hidden="true"></span>
           <span>Tiempo actual en vivo (Weathercloud) ↗</span>
@@ -210,6 +217,7 @@
           <li><a href="./data/index.json" target="_blank" rel="noopener">Índice JSON del archivo (API estática)</a></li>
           <li><a href="./data/station.geojson" target="_blank" rel="noopener">Ficha cartográfica SIG (GeoJSON)</a></li>
           <li><a href="./data/schema.json" target="_blank" rel="noopener">Diccionario y esquema (JSON Schema)</a></li>
+          <li><span class="pwa-status-text">📱 PWA instalable con navegación sin conexión</span></li>
         </ul>
       </div>
     </div>
