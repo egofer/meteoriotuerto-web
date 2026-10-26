@@ -413,6 +413,38 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         for local_id in ["efecto_foehn", "surada", "inversion_termica", "hdd", "cdd", "gdd", "mediana_p50"]:
             self.assertIn(local_id, term_ids)
 
+    def test_sync_data_pipeline_and_workflows(self) -> None:
+        """
+        EVO-009: Verifica la detección idempotente de cambios en sync_data.py y la
+        presencia de los disparadores repository_dispatch en los workflows.
+        """
+        import sync_data
+
+        # 1. Comprobar que diferencias solo en generated_at no se marquen como cambio real
+        snap_a = {
+            "index.json": ('{"generated_at": "2026-10-25 10:00:00", "v": 1}', {"generated_at": "2026-10-25 10:00:00", "v": 1}),
+            "records.json": ('{"generated_at": "2026-10-25 10:00:00", "r": 5}', {"generated_at": "2026-10-25 10:00:00", "r": 5}),
+        }
+        snap_b = {
+            "index.json": ('{"generated_at": "2026-10-26 12:00:00", "v": 1}', {"generated_at": "2026-10-26 12:00:00", "v": 1}),
+            "records.json": ('{"generated_at": "2026-10-26 12:00:00", "r": 5}', {"generated_at": "2026-10-26 12:00:00", "r": 5}),
+        }
+        self.assertEqual(sync_data.detect_meaningful_changes(snap_a, snap_b), [])
+
+        # 2. Comprobar que un cambio real en los datos sí se detecta
+        snap_c = {
+            "index.json": ('{"generated_at": "2026-10-26 12:00:00", "v": 2}', {"generated_at": "2026-10-26 12:00:00", "v": 2}),
+            "records.json": ('{"generated_at": "2026-10-26 12:00:00", "r": 5}', {"generated_at": "2026-10-26 12:00:00", "r": 5}),
+        }
+        self.assertEqual(sync_data.detect_meaningful_changes(snap_a, snap_c), ["index.json"])
+
+        # 3. Verificar workflows y plantillas de sincronización
+        for wf_rel in [".github/workflows/deploy.yml", "docs/deploy.yml", "docs/notify_web.yml"]:
+            wf_path = ROOT_DIR / wf_rel
+            self.assertTrue(wf_path.exists(), f"Falta el archivo de workflow: {wf_rel}")
+            wf_txt = wf_path.read_text(encoding="utf-8")
+            self.assertIn("meteoriotuerto_data_updated", wf_txt)
+
 
 
 

@@ -66,25 +66,24 @@ git push -u origin main
 
 ---
 
-## 4. Proceso de actualización de los datos
+## 4. Proceso de actualización automática de los datos (EVO-009)
 
-Existen dos mecanismos complementarios y seguros para mantener actualizado el almanaque digital:
+Existen dos mecanismos complementarios, atómicos e idempotentes para mantener actualizado el almanaque digital tras cada descarga de `ecowitt_downloader`:
 
-### Opción A: Actualización automática en la nube (GitHub Actions)
-El archivo `.github/workflows/deploy.yml` incluye un disparador programado (`cron: '30 6 * * *'`) y un disparador manual (`workflow_dispatch`):
-1. Descarga la última versión disponible del repositorio de datos `egofer/meteoriotuerto`.
-2. Ejecuta `python3 scripts/build_data.py` de forma atómica.
-3. Ejecuta `python3 scripts/validate_data.py` y la batería de pruebas `unittest`.
-4. **Salvaguarda de integridad:** Si se produjera cualquier error de descarga, formato corrupto o fallo en algún test, el flujo se detiene inmediatamente en el paso de validación y **no ejecuta el despliegue**, preservando intacta la última versión válida publicada en GitHub Pages.
-
-### Opción B: Actualización desde el flujo diario local (`run_daily.sh`)
-Si desea que la máquina local regenere y publique también los JSONs del repositorio web tras sincronizar `meteoriotuerto`, basta con añadir al final de su rutina local:
+### Opción A: Sincronización atómica desde el flujo diario local (`scripts/sync_data.py` y `run_daily.sh`)
+El script `scripts/sync_data.py` orquesta en un solo paso la compilación (`build_data.py`), la auditoría de invariantes (`validate_data.py`), las pruebas unitarias (`unittest`), la comparación semántica de cambios (ignorando marcas de tiempo efímeras si no hay datos nuevos) y la publicación en GitHub:
 ```bash
-cd /ruta/a/meteoriotuerto-web
-python3 scripts/build_data.py && python3 scripts/validate_data.py
-git add data/
-if ! git diff --cached --quiet; then
-    git commit -m "data: actualización automática de productos JSON del almanaque [$(date '+%Y-%m-%d')]"
-    git push origin main
-fi
+python3 scripts/sync_data.py --push
 ```
+En la rutina diaria `run_daily.sh` de `ecowitt_downloader`, este comando se ejecuta automáticamente como **Paso 4** inmediatamente después de actualizar el repositorio primario `meteoriotuerto`. Si cualquier test o validación fallara, `sync_data.py` restaura automáticamente la instantánea previa de `data/*.json` y aborta sin publicar datos corruptos.
+
+### Opción B: Disparo reactivo entre repositorios en la nube (`repository_dispatch`)
+1. **En el repositorio primario (`egofer/meteoriotuerto`):**
+   - Se configura el secreto `DISPATCH_TOKEN` en *Settings → Secrets and variables → Actions*.
+   - El flujo `.github/workflows/notify_web.yml` (cuya plantilla se incluye en `docs/notify_web.yml`) envía el evento `meteoriotuerto_data_updated` a la API de GitHub cada vez que se actualizan los archivos `**/data/*.csv`, o bien puede dispararse desde línea de comandos con:
+     ```bash
+     DISPATCH_TOKEN="..." python3 scripts/sync_data.py --dispatch-only
+     ```
+2. **En este repositorio (`egofer/meteoriotuerto-web`):**
+   - El archivo `.github/workflows/deploy.yml` (y su copia en `docs/deploy.yml`) escucha `repository_dispatch: types: [meteoriotuerto_data_updated]`, además del `cron` diario (`30 6 * * *`) y `workflow_dispatch`.
+   - Ejecuta `python3 scripts/sync_data.py --source-dir .cache/meteoriotuerto --output-dir data`, confirma los nuevos JSON en `main` si hubo cambios reales y despliega en GitHub Pages.

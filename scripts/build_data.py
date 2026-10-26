@@ -304,18 +304,25 @@ def ensure_source_files(source_dir: Optional[Path], cache_dir: Path) -> Path:
     Devuelve la ruta base donde se encuentran los archivos CSV por año.
     Si `source_dir` existe localmente y contiene las carpetas anuales, la usa sin
     modificar nada. En caso contrario, descarga los CSVs desde el repositorio
-    público de GitHub hacia `cache_dir`.
+    público de GitHub hacia `cache_dir` (refrescando siempre los años en curso).
     """
+    if source_dir is None:
+        sibling_repo = Path(__file__).resolve().parent.parent.parent / "meteoriotuerto"
+        if sibling_repo.exists() and (sibling_repo / "2025" / "data").exists():
+            source_dir = sibling_repo
+
     if source_dir and source_dir.exists() and (source_dir / "2025" / "data").exists():
         return source_dir
 
+    provisional_years = set(STATION_META["hardware"].get("provisional_years", [2026]))
     cache_dir.mkdir(parents=True, exist_ok=True)
     for year, files in EXPECTED_YEAR_FILES.items():
         for kind, rel_path in files.items():
             if not rel_path:
                 continue
             dest = cache_dir / rel_path
-            if not dest.exists() or dest.stat().st_size == 0:
+            is_provisional = year in provisional_years
+            if is_provisional or not dest.exists() or dest.stat().st_size == 0:
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 url = f"{RAW_GITHUB_BASE}/{rel_path}"
                 print(f"[INFO] Descargando archivo fuente desde {url} -> {dest}")

@@ -7,10 +7,13 @@ on:
   schedule:
     # Actualización automática diaria a las 06:30 UTC tras la sincronización de MeteoRiotuerto
     - cron: '30 6 * * *'
+  repository_dispatch:
+    types:
+      - meteoriotuerto_data_updated
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -25,6 +28,8 @@ jobs:
     steps:
       - name: Clonar repositorio meteoriotuerto-web
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Clonar repositorio de datos primario (egofer/meteoriotuerto)
         uses: actions/checkout@v4
@@ -44,26 +49,33 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Regenerar productos JSON de forma atómica (con respaldo ante fallos)
+      - name: Sincronizar productos JSON de forma atómica y validar invariantes (EVO-009)
         run: |
-          # Si la regeneración desde el repositorio de origen falla, el script aborta
-          # sin corromper los archivos JSON previos ni desplegar versiones incompletas.
-          python3 scripts/build_data.py \
+          # Ejecuta build_data.py, validate_data.py y unittest de forma atómica.
+          # Si ocurre cualquier error, restaura los JSONs previos y detiene el flujo.
+          python3 scripts/sync_data.py \
             --source-dir .cache/meteoriotuerto \
             --output-dir data
 
-      - name: Ejecutar validación de integridad e invariantes físicos
+      - name: Confirmar nuevos productos JSON en la rama main (si hubo cambios de datos)
+        if: github.event_name != 'push'
         run: |
-          python3 scripts/validate_data.py --data-dir data
-
-      - name: Ejecutar suite de pruebas automatizadas
-        run: |
-          python3 -m unittest discover -s tests -v
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/*.json
+          if ! git diff --cached --quiet; then
+            STAMP=$(date '+%Y-%m-%d')
+            git commit -m "data(sync): actualización automática desde meteoriotuerto [$STAMP]"
+            git push origin main
+          else
+            echo "Sin cambios nuevos en data/*.json para confirmar en main."
+          fi
 
       - name: Preparar artefacto limpio de producción para GitHub Pages
         run: |
           mkdir -p _site
           cp index.html _site/
+          cp favicon.* apple-touch-icon.png site.webmanifest _site/ 2>/dev/null || true
           cp -r src _site/
           cp -r data _site/
           touch _site/.nojekyll
