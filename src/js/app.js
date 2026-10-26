@@ -5111,7 +5111,7 @@
       kicker: 'DINÁMICA 1: ADVECCIÓN DEL SUR Y SOTAVENTO ADIABÁTICO',
       color: '#ea580c',
       badge: '🔥 Efecto Foehn',
-      physicalDescription: 'Cuando las borrascas o frentes atlánticos se aproximan por el oeste, se canaliza un potente flujo del sector Sur-Sudoeste sobre la cordillera cantábrica. El aire húmedo se ve forzado a ascender por la vertiente sur perdiendo humedad por condensación. Al rebasar el collado del Puerto de Alisas (674 m) y las cumbres de Peña Pelada (686 m) y desplomarse hacia el fondo del valle del Covadal (115 m), experimenta compresión adiabática seca: se recalienta a un ritmo de +1 °C por cada 100 m de descenso y su humedad relativa se desploma violentamente.',
+      physicalDescription: 'Cuando las borrascas o frentes atlánticos se aproximan por el oeste, se canaliza un potente flujo del sector Sur-Sudoeste sobre la cordillera cantábrica. El aire húmedo se ve forzado a ascender por la vertiente sur perdiendo humedad por condensación. Al rebasar el collado del Puerto de Alisas (674 m) y desplomarse hacia el fondo del valle del Covadal (115 m), experimenta compresión adiabática seca: se recalienta a un ritmo de +1 °C por cada 100 m de descenso y su humedad relativa se desploma violentamente.',
       territorialImpact: 'Provoca desecación repentina de praderas y vegetación arbórea, aceleración eólica canalizada por el desfiladero con rachas huracanadas en Barrio de Arriba y riesgo extremo de incendios forestales. Históricamente se conoce como «el viento de las castañas» por favorecer su caída en otoño, y altera el biorritmo vecinal por ionización positiva y subidas térmicas fulgurantes en pleno invierno.',
       records: [
         { label: 'Racha máxima histórica', val: '86,4 km/h', sub: 'SW · 27 de marzo de 2024' },
@@ -5126,7 +5126,7 @@
       kicker: 'DINÁMICA 2: ADVECCIÓN CANTÁBRICA Y ASCENSO FORZADO',
       color: '#0284c7',
       badge: '🌧️ Lluvia orográfica',
-      physicalDescription: 'Tras el paso de frentes fríos o con vientos marítimos del noroeste («gallego»), masas de aire polar marítimo muy húmedas procedentes del golfo de Bizkaia penetran tierra adentro por el curso bajo del río Miera desde la ría de Cubas (a solo 14 km de Riotuerto). Al encontrarse con la rampa orográfica del valle del Covadal y la barrera frontal de Peña Pelada y la sierra de Alisas, el aire no puede rodear el relieve y asciende forzado. El enfriamiento por expansión adiabática satura la masa de aire, generando densas nubes estratiformes encajonadas y precipitaciones orográficas copiosas.',
+      physicalDescription: 'Tras el paso de frentes fríos o con vientos marítimos del noroeste («gallego»), masas de aire polar marítimo muy húmedas procedentes del golfo de Bizkaia penetran tierra adentro por el curso bajo del río Miera desde la ría de Cubas (a solo 14 km de Riotuerto). Al encontrarse con la rampa orográfica del valle del Covadal y la barrera frontal del Puerto de Alisas (674 m), el aire no puede rodear el relieve y asciende forzado. El enfriamiento por expansión adiabática satura la masa de aire, generando densas nubes estratiformes encajonadas y precipitaciones orográficas copiosas.',
       territorialImpact: 'Explica por qué Riotuerto registra pluviometrías anuales extraordinarias (entre 1.600 y más de 2.100 mm), superando con creces los acumulados de la franja costera de Santander. Proporciona una productividad forrajera excepcional para los pastizales cántabros y alimenta el caudal ininterrumpido del río Covadal y los acuíferos kársticos, aunque incrementa el riesgo de encharcamiento en vegas llanas en temporales de invierno.',
       records: [
         { label: 'Precipitación anual récord', val: '2.124,4 mm', sub: 'Año histórico 2024' },
@@ -5298,7 +5298,7 @@
 
         ${dynamicLayerHtml}
 
-        <path d="M 40,310 L 70,310 Q 130,306 180,301 Q 250,293 310,282 Q 370,274 430,270 Q 500,260 580,215 Q 655,160 725,78 Q 770,82 815,74 Q 845,90 860,156 L 860,320 L 40,320 Z" fill="${terrainFill}" />
+        <path d="M 40,310 L 70,310 Q 130,306 180,301 Q 250,293 310,282 Q 370,274 430,270 Q 510,260 600,210 Q 690,150 770,78 Q 815,78 860,170 L 860,320 L 40,320 Z" fill="${terrainFill}" />
         <path d="M 40,310 Q 120,308 180,303 Q 250,295 310,284 Q 370,276 430,272" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0.75" />
 
         <circle cx="70" cy="310" r="3" fill="#38bdf8" />
@@ -5308,13 +5308,9 @@
         <line x1="310" y1="282" x2="310" y2="295" stroke="${textMutedColor}" stroke-width="1" />
         <text x="310" y="307" font-size="10" font-weight="600" fill="${textPrimaryColor}" text-anchor="middle">La Cavada (80 m)</text>
 
-        <circle cx="725" cy="78" r="4" fill="#f59e0b" />
-        <line x1="725" y1="78" x2="725" y2="60" stroke="#f59e0b" stroke-width="1.2" />
-        <text x="715" y="52" font-size="10" font-weight="700" fill="${textPrimaryColor}" text-anchor="middle">Puerto de Alisas (674 m)</text>
-
-        <circle cx="815" cy="74" r="3.5" fill="#dc2626" />
-        <line x1="815" y1="74" x2="815" y2="60" stroke="#dc2626" stroke-width="1" />
-        <text x="825" y="52" font-size="9" font-weight="600" fill="${textPrimaryColor}" text-anchor="middle">Peña Pelada (686 m)</text>
+        <circle cx="770" cy="78" r="4" fill="#f59e0b" />
+        <line x1="770" y1="78" x2="770" y2="58" stroke="#f59e0b" stroke-width="1.2" />
+        <text x="770" y="50" font-size="10" font-weight="700" fill="${textPrimaryColor}" text-anchor="middle">Puerto de Alisas (674 m)</text>
 
         <text x="55" y="35" font-size="11" font-weight="700" fill="${textMutedColor}">⮜ NORTE (Hacia la costa)</text>
         <text x="855" y="35" font-size="11" font-weight="700" fill="${textMutedColor}" text-anchor="end">SUR (Hacia la cordillera) ⮞</text>

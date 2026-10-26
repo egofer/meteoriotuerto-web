@@ -662,7 +662,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("generateTopographySVG", app_js, "Falta generateTopographySVG en app.js")
         self.assertIn("initTopographyModule", app_js, "Falta initTopographyModule en app.js")
         self.assertIn("Puerto de Alisas (674 m)", app_js, "Falta hito Puerto de Alisas en app.js")
-        self.assertIn("Peña Pelada (686 m)", app_js, "Falta hito Peña Pelada en app.js")
+        self.assertNotIn("Peña Pelada", app_js, "Peña Pelada no debe aparecer en app.js")
         self.assertIn("btn-topo-foehn", app_js, "Falta botón Foehn en app.js")
         self.assertIn("btn-topo-orographic", app_js, "Falta botón orográfico en app.js")
         self.assertIn("btn-topo-inversion", app_js, "Falta botón inversión en app.js")
