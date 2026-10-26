@@ -3668,8 +3668,8 @@ html[data-theme="dark"] .festival-tab-btn.active {
    MODELO TOPOCLIMÁTICO Y PERFIL OROGRÁFICO INTERACTIVO (EVO-018)
    ========================================================================== */
 .topography-section {
-  background: var(--surface);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 24px;
   margin-top: 28px;
@@ -3684,11 +3684,11 @@ html[data-theme="dark"] .festival-tab-btn.active {
 }
 
 .topography-mode-btn {
-  background: var(--surface-subtle);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  padding: 6px 14px;
-  font-size: 0.82rem;
+  padding: 7px 15px;
+  font-size: 0.83rem;
   font-weight: 600;
   color: var(--txt-secondary);
   cursor: pointer;
@@ -3699,16 +3699,22 @@ html[data-theme="dark"] .festival-tab-btn.active {
 }
 
 .topography-mode-btn:hover {
-  background: var(--surface-hover);
-  color: var(--txt-primary);
-  border-color: var(--border-strong);
+  background: var(--accent-forest-soft);
+  color: var(--accent-forest);
+  border-color: var(--accent-forest);
 }
 
 .topography-mode-btn.active {
-  background: var(--brand-forest);
-  color: #ffffff;
-  border-color: var(--brand-forest);
-  box-shadow: 0 2px 6px rgba(27, 67, 50, 0.25);
+  background: var(--accent-forest) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-forest) !important;
+  box-shadow: 0 2px 6px rgba(27, 67, 50, 0.35);
+}
+
+html[data-theme="dark"] .topography-mode-btn.active {
+  background: var(--accent-forest-hover) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-forest-hover) !important;
 }
 
 .topography-card {
@@ -3720,8 +3726,8 @@ html[data-theme="dark"] .festival-tab-btn.active {
 
 .topography-svg-wrap {
   width: 100%;
-  background: var(--surface-subtle);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -3742,8 +3748,8 @@ html[data-theme="dark"] .festival-tab-btn.active {
 }
 
 .topo-explanation-card {
-  background: var(--surface-subtle);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 18px 20px;
   display: flex;
@@ -3776,8 +3782,8 @@ html[data-theme="dark"] .festival-tab-btn.active {
 }
 
 .topo-metric-pill {
-  background: var(--surface);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   padding: 8px 12px;
   display: flex;
@@ -3787,7 +3793,11 @@ html[data-theme="dark"] .festival-tab-btn.active {
 .topo-metric-val {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--brand-forest);
+  color: var(--accent-forest);
+}
+
+html[data-theme="dark"] .topo-metric-val {
+  color: var(--accent-forest-hover);
 }
 
 .topo-metric-lbl {
@@ -3810,8 +3820,8 @@ html[data-theme="dark"] .festival-tab-btn.active {
 }
 
 @keyframes topoWindFlowRight {
-  0% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: 40; }
+  0% { stroke-dashoffset: 40; }
+  100% { stroke-dashoffset: 0; }
 }
 
 .topo-pulse-circle {

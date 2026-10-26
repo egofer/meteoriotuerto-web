@@ -5126,7 +5126,7 @@
       kicker: 'DINÁMICA 2: ADVECCIÓN CANTÁBRICA Y ASCENSO FORZADO',
       color: '#0284c7',
       badge: '🌧️ Lluvia orográfica',
-      physicalDescription: 'Tras el paso de frentes fríos o con vientos marítimos del noroeste («gallego»), masas de aire polar marítimo muy húmedas procedentes del golfo de Bizkaia penetran tierra adentro por el curso bajo del río Miera desde la ría de Cubas (a solo 14 km de Riotuerto). Al encontrarse con la rampa orográfica del valle del Covadal y la barrera frontal del Puerto de Alisas (674 m), el aire no puede rodear el relieve y asciende forzado. El enfriamiento por expansión adiabática satura la masa de aire, generando densas nubes estratiformes encajonadas y precipitaciones orográficas copiosas.',
+      physicalDescription: 'Tras el paso de frentes fríos o con vientos marítimos del noroeste («gallego»), masas de aire polar marítimo muy húmedas procedentes del golfo de Vizcaya penetran tierra adentro por el curso bajo del río Miera desde la ría de Cubas (a solo 14 km de Riotuerto). Al encontrarse con la rampa orográfica del valle del Covadal y la barrera frontal del Puerto de Alisas (674 m), el aire no puede rodear el relieve y asciende forzado. El enfriamiento por expansión adiabática satura la masa de aire, generando densas nubes estratiformes encajonadas y precipitaciones orográficas copiosas.',
       territorialImpact: 'Explica por qué Riotuerto registra pluviometrías anuales extraordinarias (entre 1.600 y más de 2.100 mm), superando con creces los acumulados de la franja costera de Santander. Proporciona una productividad forrajera excepcional para los pastizales cántabros y alimenta el caudal ininterrumpido del río Covadal y los acuíferos kársticos, aunque incrementa el riesgo de encharcamiento en vegas llanas en temporales de invierno.',
       records: [
         { label: 'Precipitación anual récord', val: '2.124,4 mm', sub: 'Año histórico 2024' },
@@ -5164,10 +5164,11 @@
     const textMutedColor = isDark ? '#94a3b8' : '#64748b';
     const textPrimaryColor = isDark ? '#f8fafc' : '#0f172a';
 
-    let dynamicLayerHtml = '';
+    let skyDynamicHtml = '';
+    let overlayDynamicHtml = '';
 
     if (mode === 'foehn') {
-      dynamicLayerHtml = `
+      skyDynamicHtml = `
         <g class="topo-flow-left">
           <path d="M 855,105 Q 805,45 745,80 Q 640,155 540,215 Q 470,248 430,265" fill="none" stroke="#ea580c" stroke-width="3.5" stroke-linecap="round" />
           <path d="M 865,135 Q 815,75 765,100 Q 660,175 565,230 Q 495,258 440,270" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" />
@@ -5176,19 +5177,22 @@
         <polygon points="425,268 440,260 435,275" fill="#ea580c" />
         <ellipse cx="800" cy="50" rx="35" ry="12" fill="${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.85)'}" />
         <ellipse cx="785" cy="48" rx="20" ry="9" fill="${isDark ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.95)'}" />
-        <g transform="translate(480, 135)">
-          <rect x="0" y="0" width="220" height="30" rx="5" fill="${isDark ? 'rgba(30,10,5,0.88)' : 'rgba(255,247,237,0.95)'}" stroke="#ea580c" stroke-width="1.2" />
-          <text x="110" y="20" font-size="11" font-weight="700" text-anchor="middle" fill="${isDark ? '#fed7aa' : '#9a3412'}">Descenso adiabático (+1 °C/100m)</text>
+      `;
+
+      overlayDynamicHtml = `
+        <text x="855" y="18" font-size="11" font-weight="800" fill="#ea580c" text-anchor="end">🔥 Viento Sur / Ábrego ⮨</text>
+        <g transform="translate(460, 78)">
+          <rect x="0" y="0" width="220" height="28" rx="5" fill="${isDark ? 'rgba(30,10,5,0.92)' : 'rgba(255,247,237,0.96)'}" stroke="#ea580c" stroke-width="1.2" />
+          <text x="110" y="18" font-size="11" font-weight="700" text-anchor="middle" fill="${isDark ? '#fed7aa' : '#9a3412'}">Descenso adiabático (+1 °C/100m)</text>
         </g>
-        <text x="830" y="35" font-size="11" font-weight="700" fill="#ea580c" text-anchor="end">Viento Sur / Ábrego ⮨</text>
       `;
     } else if (mode === 'orographic') {
-      dynamicLayerHtml = `
+      skyDynamicHtml = `
         <g class="topo-flow-right">
-          <path d="M 65,275 Q 180,270 290,255 Q 410,240 520,205 Q 630,155 710,95 Q 760,65 795,60" fill="none" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round" />
-          <path d="M 65,245 Q 180,240 300,225 Q 420,205 530,170 Q 640,125 720,70" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" />
+          <path d="M 65,275 Q 180,270 290,255 Q 410,240 520,205 Q 630,155 710,95 Q 760,65 770,78" fill="none" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round" />
+          <path d="M 65,245 Q 180,240 300,225 Q 420,205 530,170 Q 640,125 720,75" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" />
         </g>
-        <polygon points="795,60 782,53 784,68" fill="#0284c7" />
+        <polygon points="770,78 757,71 759,86" fill="#0284c7" />
         <path d="M 360,170 Q 420,130 480,140 Q 540,110 610,120 Q 680,80 750,90 Q 790,50 830,70 L 830,140 Q 720,160 580,210 Q 450,250 360,250 Z" fill="${isDark ? 'rgba(100,116,139,0.45)' : 'rgba(203,213,225,0.75)'}" />
         <ellipse cx="520" cy="130" rx="60" ry="25" fill="${isDark ? 'rgba(148,163,184,0.35)' : 'rgba(241,245,249,0.85)'}" />
         <ellipse cx="640" cy="100" rx="70" ry="30" fill="${isDark ? 'rgba(148,163,184,0.4)' : 'rgba(241,245,249,0.9)'}" />
@@ -5202,14 +5206,17 @@
           <line x1="535" y1="150" x2="525" y2="218" />
           <line x1="570" y1="140" x2="560" y2="205" />
         </g>
-        <g transform="translate(190, 85)">
-          <rect x="0" y="0" width="230" height="30" rx="5" fill="${isDark ? 'rgba(15,23,42,0.88)' : 'rgba(240,249,255,0.95)'}" stroke="#0284c7" stroke-width="1.2" />
-          <text x="115" y="20" font-size="11" font-weight="700" text-anchor="middle" fill="${isDark ? '#bae6fd' : '#0369a1'}">Retención y condensación forzada</text>
+      `;
+
+      overlayDynamicHtml = `
+        <text x="55" y="18" font-size="11" font-weight="800" fill="#0284c7">🌊 Flujo oceánico húmedo ⮞</text>
+        <g transform="translate(190, 78)">
+          <rect x="0" y="0" width="230" height="28" rx="5" fill="${isDark ? 'rgba(15,23,42,0.92)' : 'rgba(240,249,255,0.96)'}" stroke="#0284c7" stroke-width="1.2" />
+          <text x="115" y="18" font-size="11" font-weight="700" text-anchor="middle" fill="${isDark ? '#bae6fd' : '#0369a1'}">Retención y condensación forzada</text>
         </g>
-        <text x="75" y="235" font-size="11" font-weight="700" fill="#0284c7">⮞ Flujo oceánico húmedo</text>
       `;
     } else if (mode === 'inversion') {
-      dynamicLayerHtml = `
+      skyDynamicHtml = `
         <circle cx="120" cy="55" r="14" fill="${isDark ? '#fef08a' : '#fde047'}" />
         <circle cx="126" cy="51" r="13" fill="${isDark ? '#0f172a' : '#1e1b4b'}" />
         <text x="210" y="60" fill="#fef08a" font-size="10" opacity="0.8">★</text>
@@ -5221,20 +5228,25 @@
         <polygon points="620,225 628,217 631,225" fill="#38bdf8" />
         <path d="M 590,235 Q 530,250 480,265" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3 3" />
         <polygon points="480,265 490,260 491,268" fill="#38bdf8" />
-        <path d="M 270,288 Q 350,283 430,270 Q 510,263 560,248 L 560,312 L 270,312 Z" fill="url(#cold-lake-grad)" />
-        <path d="M 300,282 Q 330,278 360,282 T 420,282 T 480,282 T 540,282" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" />
-        <path d="M 320,292 Q 350,288 380,292 T 440,292 T 500,292" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" />
-        <g transform="translate(365, 235)">
-          <rect x="0" y="0" width="130" height="24" rx="4" fill="rgba(15,23,42,0.92)" stroke="#38bdf8" stroke-width="1.2" />
-          <text x="65" y="16" font-size="10" font-weight="700" text-anchor="middle" fill="#67e8f9">❄ Fondo: -3,1 °C</text>
+        <path d="M 170,290 Q 280,284 390,270 Q 500,260 550,248 L 550,312 L 170,312 Z" fill="url(#cold-lake-grad)" />
+        <path d="M 190,282 Q 220,278 250,282 T 310,282 T 370,282" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" />
+        <path d="M 210,292 Q 240,288 270,292 T 330,292 T 390,292" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" />
+      `;
+
+      overlayDynamicHtml = `
+        <g transform="translate(260, 78)">
+          <rect x="0" y="0" width="270" height="28" rx="5" fill="rgba(15,23,42,0.94)" stroke="#6366f1" stroke-width="1.2" />
+          <text x="135" y="18" font-size="11" font-weight="700" text-anchor="middle" fill="#c7d2fe">Inversión nocturna: Lago de aire frío</text>
         </g>
-        <g transform="translate(565, 185)">
-          <rect x="0" y="0" width="130" height="24" rx="4" fill="rgba(15,23,42,0.92)" stroke="#f59e0b" stroke-width="1.2" />
+        <g transform="translate(180, 240)">
+          <rect x="0" y="0" width="125" height="24" rx="4" fill="rgba(15,23,42,0.94)" stroke="#38bdf8" stroke-width="1.2" />
+          <text x="62" y="16" font-size="10" font-weight="700" text-anchor="middle" fill="#67e8f9">❄ Fondo: -3,1 °C</text>
+        </g>
+        <g transform="translate(570, 135)">
+          <line x1="65" y1="24" x2="65" y2="46" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="2 2" />
+          <circle cx="65" cy="46" r="3" fill="#f59e0b" />
+          <rect x="0" y="0" width="130" height="24" rx="4" fill="rgba(15,23,42,0.94)" stroke="#f59e0b" stroke-width="1.2" />
           <text x="65" y="16" font-size="10" font-weight="700" text-anchor="middle" fill="#fde68a">🌡️ Ladera: +4,5 °C</text>
-        </g>
-        <g transform="translate(260, 85)">
-          <rect x="0" y="0" width="270" height="30" rx="5" fill="rgba(15,23,42,0.92)" stroke="#6366f1" stroke-width="1.2" />
-          <text x="135" y="20" font-size="11" font-weight="700" text-anchor="middle" fill="#c7d2fe">Inversión nocturna: Lago de aire frío</text>
         </g>
       `;
     }
@@ -5296,7 +5308,7 @@
         <line x1="40" y1="310" x2="870" y2="310" stroke="${gridLineColor}" />
         <text x="35" y="313" font-size="9" fill="${textMutedColor}" text-anchor="end">0m</text>
 
-        ${dynamicLayerHtml}
+        ${skyDynamicHtml}
 
         <path d="M 40,310 L 70,310 Q 130,306 180,301 Q 250,293 310,282 Q 370,274 430,270 Q 510,260 600,210 Q 690,150 770,78 Q 815,78 860,170 L 860,320 L 40,320 Z" fill="${terrainFill}" />
         <path d="M 40,310 Q 120,308 180,303 Q 250,295 310,284 Q 370,276 430,272" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0.75" />
@@ -5312,8 +5324,8 @@
         <line x1="770" y1="78" x2="770" y2="58" stroke="#f59e0b" stroke-width="1.2" />
         <text x="770" y="50" font-size="10" font-weight="700" fill="${textPrimaryColor}" text-anchor="middle">Puerto de Alisas (674 m)</text>
 
-        <text x="55" y="35" font-size="11" font-weight="700" fill="${textMutedColor}">⮜ NORTE (Hacia la costa)</text>
-        <text x="855" y="35" font-size="11" font-weight="700" fill="${textMutedColor}" text-anchor="end">SUR (Hacia la cordillera) ⮞</text>
+        <text x="55" y="34" font-size="11" font-weight="700" fill="${textMutedColor}">⮜ NORTE (Hacia la costa)</text>
+        <text x="855" y="34" font-size="11" font-weight="700" fill="${textMutedColor}" text-anchor="end">SUR (Hacia la cordillera) ⮞</text>
 
         <g transform="translate(430, 270)">
           <circle cx="0" cy="-14" r="6" fill="${mode === 'foehn' ? '#ea580c' : mode === 'orographic' ? '#0284c7' : '#06b6d4'}" class="topo-pulse-circle" />
@@ -5325,6 +5337,8 @@
             <text x="0" y="3" font-size="10" font-weight="800" text-anchor="middle" fill="${textPrimaryColor}">📍 Barrio de Arriba (115 m)</text>
           </g>
         </g>
+
+        ${overlayDynamicHtml}
       </svg>
     `;
   }
