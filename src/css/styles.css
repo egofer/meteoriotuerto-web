@@ -3293,3 +3293,64 @@ html[data-theme="dark"] .festival-tab-btn.active {
   background: rgba(220, 38, 38, 0.12);
   color: #dc2626;
 }
+
+/* ==========================================================================
+   CALENDARIO FENOLÓGICO Y AGROCLIMÁTICO DE RIOTUERTO
+   ========================================================================== */
+.phenology-box {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.pheno-badge-date {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--txt-primary);
+  background: var(--bg-elevated);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.pheno-badge-pending {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--txt-muted);
+  background: rgba(156, 163, 175, 0.12);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.pheno-tag-early {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.pheno-tag-late {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #d97706;
+  background: rgba(245, 158, 11, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.pheno-tag-ontime {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+}

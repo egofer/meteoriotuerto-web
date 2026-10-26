@@ -138,6 +138,196 @@
   }
 
   /* ------------------------------------------------------------------------
+   * Catálogo y cálculo del calendario fenológico y agroclimático de Riotuerto
+   * ------------------------------------------------------------------------ */
+  const PHENOLOGY_EVENTS = [
+    {
+      key: 'robot_start',
+      icon: '🤖',
+      name: 'Puesta en marcha del robot cortacésped',
+      subtitle: 'Reactivación del crecimiento vegetal',
+      criteria: '5 días consecutivos con T. med. ≥ 10,0 °C (cero vegetativo) desde el 1 de marzo',
+      typicalDate: '7 de marzo',
+      refDayOfYear: 66,
+    },
+    {
+      key: 'boiler_acs_mode',
+      icon: '♨️',
+      name: 'Paso de caldera a modo solo ACS (fin calefacción regular)',
+      subtitle: 'Cese de la demanda térmica continuada en viviendas',
+      criteria: '5 días consecutivos con HDD < 2,0 (T. med. ≥ 13,5 °C) entre abril y mayo',
+      typicalDate: '28 de abril',
+      refDayOfYear: 118,
+    },
+    {
+      key: 'fungal_alert',
+      icon: '🍅',
+      name: 'Alerta de primer sulfatado preventivo en huerta',
+      subtitle: 'Riesgo fúngico de mildiu y oídio tras calor y lluvia',
+      criteria: 'Primer episodio en mayo/junio con T. med. ≥ 13,0 °C, lluvia ≥ 5 mm y HR ≥ 80 %',
+      typicalDate: '9 de mayo',
+      refDayOfYear: 129,
+    },
+    {
+      key: 'first_hay_cut',
+      icon: '🚜',
+      name: 'Primer corte de hierba / forraje para ensilado',
+      subtitle: 'Ventana de siega y oreo de praderas',
+      criteria: 'Acumulación de ≥ 200 GDD (base 10 °C) desde marzo + ventana seca ≥ 3 días (< 1 mm)',
+      typicalDate: '18 de mayo',
+      refDayOfYear: 138,
+    },
+    {
+      key: 'mushroom_flush',
+      icon: '🍄',
+      name: 'Primera eclosión de setas de otoño en el monte',
+      subtitle: 'Fructificación de boletus, cantarelas y senderuelas',
+      criteria: 'Lluvia en 7 días ≥ 35 mm seguida de 5 días templados (11–18 °C) a partir de septiembre',
+      typicalDate: '29 de septiembre',
+      refDayOfYear: 272,
+    },
+    {
+      key: 'heating_season_start',
+      icon: '🔥',
+      name: 'Arranque regular de caldera en otoño',
+      subtitle: 'Inicio de la temporada de calefacción doméstica',
+      criteria: 'Primer episodio otoñal con 4 días consecutivos con HDD ≥ 4,0 (T. med. < 11,5 °C)',
+      typicalDate: '18 de noviembre',
+      refDayOfYear: 322,
+    },
+    {
+      key: 'robot_wintering',
+      icon: '❄️',
+      name: 'Retirada e invernada a resguardo de robots cortacésped',
+      subtitle: 'Letargo invernal y protección contra heladas y barro',
+      criteria: '4 días seguidos con T. med. < 10,0 °C o primera helada nocturna (T. mín. ≤ 0 °C)',
+      typicalDate: '30 de noviembre',
+      refDayOfYear: 334,
+    },
+  ];
+
+  function computePhenologicalCalendar(ds) {
+    if (!ds || !ds.dates) return {};
+    const dates = ds.dates;
+    const tmed = ds.temp_mean;
+    const tmin = ds.temp_min;
+    const rain = ds.rain_daily;
+    const hum = ds.humidity_mean;
+    const n = dates.length;
+
+    let robot_start = null;
+    let streak = 0;
+    for (let i = 0; i < n; i++) {
+      const m = parseInt(dates[i].slice(5, 7), 10);
+      if (m >= 3 && m <= 6 && tmed[i] !== null && tmed[i] !== undefined) {
+        if (tmed[i] >= 10.0) {
+          streak++;
+          if (streak === 5 && !robot_start) robot_start = dates[i - 4];
+        } else {
+          streak = 0;
+        }
+      }
+    }
+
+    let robot_end = null;
+    streak = 0;
+    for (let i = 0; i < n; i++) {
+      const m = parseInt(dates[i].slice(5, 7), 10);
+      if (m >= 10 && tmed[i] !== null && tmed[i] !== undefined) {
+        if (tmed[i] < 10.0 || (tmin[i] !== null && tmin[i] <= 0.0)) {
+          streak++;
+          if (streak === 4 && !robot_end) robot_end = dates[i - 3];
+        } else {
+          streak = 0;
+        }
+      }
+    }
+
+    let caldera_acs = null;
+    streak = 0;
+    for (let i = 0; i < n; i++) {
+      const m = parseInt(dates[i].slice(5, 7), 10);
+      const day = parseInt(dates[i].slice(8, 10), 10);
+      if ((m > 4 || (m === 4 && day >= 15)) && m <= 6 && tmed[i] !== null && tmed[i] !== undefined) {
+        const hdd = Math.max(0, 15.5 - tmed[i]);
+        if (hdd < 2.0) {
+          streak++;
+          if (streak === 5 && !caldera_acs) caldera_acs = dates[i - 4];
+        } else {
+          streak = 0;
+        }
+      }
+    }
+
+    let caldera_start = null;
+    streak = 0;
+    for (let i = 0; i < n; i++) {
+      const m = parseInt(dates[i].slice(5, 7), 10);
+      const day = parseInt(dates[i].slice(8, 10), 10);
+      if ((m > 9 || (m === 9 && day >= 15)) && tmed[i] !== null && tmed[i] !== undefined) {
+        const hdd = Math.max(0, 15.5 - tmed[i]);
+        if (hdd >= 4.0) {
+          streak++;
+          if (streak === 4 && !caldera_start) caldera_start = dates[i - 3];
+        } else {
+          streak = 0;
+        }
+      }
+    }
+
+    let gdd_cum = 0;
+    let siega_date = null;
+    for (let i = 0; i < n; i++) {
+      const m = parseInt(dates[i].slice(5, 7), 10);
+      if (m >= 3 && tmed[i] !== null && tmed[i] !== undefined) {
+        gdd_cum += Math.max(0, tmed[i] - 10.0);
+        if (gdd_cum >= 200.0 && !siega_date) {
+          if (i + 2 < n && (rain[i] || 0) < 1.0 && (rain[i + 1] || 0) < 1.0 && (rain[i + 2] || 0) < 1.0) {
+            siega_date = dates[i];
+          }
+        }
+      }
+    }
+
+    let sulfato_date = null;
+    for (let i = 0; i < n; i++) {
+      const m = parseInt(dates[i].slice(5, 7), 10);
+      if ((m === 5 || m === 6) && tmed[i] !== null && tmed[i] !== undefined) {
+        if (tmed[i] >= 13.0 && (rain[i] || 0) >= 5.0 && (hum[i] || 0) >= 80) {
+          sulfato_date = dates[i];
+          break;
+        }
+      }
+    }
+
+    let setas_date = null;
+    for (let i = 6; i < n; i++) {
+      const m = parseInt(dates[i].slice(5, 7), 10);
+      if ((m === 9 || m === 10 || m === 11) && !setas_date) {
+        let r7 = 0;
+        for (let k = i - 6; k <= i; k++) r7 += (rain[k] || 0);
+        if (r7 >= 35.0 && i + 5 < n) {
+          let ok = true;
+          for (let k = i + 1; k <= i + 5; k++) {
+            if (tmed[k] === null || tmed[k] < 11.0 || tmed[k] > 18.0) ok = false;
+          }
+          if (ok) setas_date = dates[i + 5];
+        }
+      }
+    }
+
+    return {
+      robot_start,
+      first_hay_cut: siega_date,
+      fungal_alert: sulfato_date,
+      boiler_acs_mode: caldera_acs,
+      mushroom_flush: setas_date,
+      heating_season_start: caldera_start,
+      robot_wintering: robot_end,
+    };
+  }
+
+  /* ------------------------------------------------------------------------
    * Carga de datos JSON con caché
    * ------------------------------------------------------------------------ */
   async function fetchJson(filename) {
@@ -949,6 +1139,49 @@
     const autRain = autMonths.reduce((sum, m) => sum + (m.rain_total || 0), 0);
     const autRainDays = autMonths.reduce((sum, m) => sum + (m.rain_days_02 || 0), 0);
 
+    // Cómputo del calendario fenológico y agroclimático del año
+    const pheno = computePhenologicalCalendar(alm.daily_series);
+    const phenoRowsHtml = PHENOLOGY_EVENTS.map((ev) => {
+      const iso = pheno[ev.key];
+      let dateHtml = '';
+      let diagHtml = '';
+      if (iso) {
+        dateHtml = `<span class="pheno-badge-date">${fmtDateES(iso, false)}</span>`;
+        const dObj = new Date(iso);
+        const startOfYear = new Date(dObj.getFullYear(), 0, 1);
+        const dayOfYear = Math.round((dObj - startOfYear) / 86400000) + 1;
+        const diff = dayOfYear - ev.refDayOfYear;
+        if (diff <= -5) {
+          diagHtml = `<span class="pheno-tag-early">Adelantada (${Math.abs(diff)} d.)</span>`;
+        } else if (diff >= 5) {
+          diagHtml = `<span class="pheno-tag-late">Retrasada (+${diff} d.)</span>`;
+        } else {
+          diagHtml = `<span class="pheno-tag-ontime">En fecha habitual</span>`;
+        }
+      } else {
+        if (alm.year === 2026) {
+          dateHtml = `<span class="pheno-badge-pending">Pendiente (cierre de año)</span>`;
+          diagHtml = `<span style="font-size:0.75rem; color:var(--txt-muted)">En curso</span>`;
+        } else {
+          dateHtml = `<span class="pheno-badge-pending">No alcanzado</span>`;
+          diagHtml = `<span style="font-size:0.75rem; color:var(--txt-muted)">Sin registro continuo</span>`;
+        }
+      }
+
+      return `
+        <tr>
+          <td>
+            <strong>${ev.icon} ${escapeHtml(ev.name)}</strong>
+            <span style="display:block; font-size:0.75rem; color:var(--txt-muted)">${escapeHtml(ev.subtitle)}</span>
+          </td>
+          <td style="font-size:0.82rem; color:var(--txt-secondary)">${escapeHtml(ev.criteria)}</td>
+          <td>${dateHtml}</td>
+          <td style="font-size:0.88rem; font-weight:600; color:var(--txt-secondary)">${escapeHtml(ev.typicalDate)}</td>
+          <td>${diagHtml}</td>
+        </tr>
+      `;
+    }).join('');
+
     // EVO-007: Percentiles térmicos y bandas de confort
     const tp = alm.stats.thermal_percentiles || {
       temp_mean: { P05: 0, P10: 0, P25: 0, P50: 0, P75: 0, P90: 0, P95: 0 },
@@ -1545,6 +1778,34 @@
               <div class="practical-card-stat">
                 Horas de sol anuales: <strong>${stA.estimated_sunshine_hours !== null && stA.estimated_sunshine_hours !== undefined ? `${fmtNum(stA.estimated_sunshine_hours, 0)} h` : '—'}</strong> (Pico: ${stA.solar_max_wm2 !== null && stA.solar_max_wm2 !== undefined ? `${fmtNum(stA.solar_max_wm2, 1)} W/m²` : '—'})
               </div>
+            </div>
+          </div>
+
+          <!-- Calendario fenológico y agroclimático del año -->
+          <div class="phenology-box">
+            <div class="phenology-header">
+              <h5 style="margin: 0 0 4px 0; font-size: 1.15rem; font-family: var(--font-serif); color: var(--txt-primary);">
+                📅 Calendario fenológico y agroclimático de Riotuerto (${alm.year})
+              </h5>
+              <p style="margin: 0; font-size: 0.85rem; color: var(--txt-muted);">
+                Fechas exactas del año en que se alcanzaron los umbrales bioclimáticos para calderas, siegas, robots cortacésped, huerta y setas frente a la media habitual
+              </p>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Labor o actividad cotidiana</th>
+                    <th>Criterio agroclimático</th>
+                    <th>Fecha observada en ${alm.year}</th>
+                    <th>Fecha media habitual</th>
+                    <th>Diagnóstico</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${phenoRowsHtml}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -2759,6 +3020,54 @@
     }, 'meteoriotuerto_auditoria_calidad.xlsx');
   }
 
+  function exportPhenologyCalendarToExcel(allAlmanacs) {
+    const years = [2022, 2023, 2024, 2025, 2026];
+    const phenoByYear = {};
+    years.forEach((y) => {
+      phenoByYear[y] = computePhenologicalCalendar(allAlmanacs[y]?.daily_series);
+    });
+
+    const headers = [
+      'Labor o actividad cotidiana',
+      'Criterio agroclimático',
+      'Fecha media habitual',
+      '2022',
+      '2023',
+      '2024',
+      '2025',
+      '2026 (Avance)'
+    ];
+    const rows = [headers];
+
+    PHENOLOGY_EVENTS.forEach((ev) => {
+      const r = [
+        ev.name,
+        ev.criteria,
+        ev.typicalDate
+      ];
+      years.forEach((y) => {
+        const val = phenoByYear[y]?.[ev.key];
+        r.push(val ? fmtDateES(val, false) : (y === 2026 ? 'Pendiente' : '—'));
+      });
+      rows.push(r);
+    });
+
+    const metaHeaders = ['Clave', 'Información'];
+    const metaRows = [
+      metaHeaders,
+      ['Título', 'Calendario histórico de labores cotidianas y fenología de Riotuerto (2022–2026)'],
+      ['Estación', 'Barrio de Arriba (Riotuerto, Cantabria, 115 m s. n. m.)'],
+      ['Periodo', '2022–2026 (5 años documentados)'],
+      ['Metodología', 'Cálculo algorítmico continuo sobre series diarias: temperatura media, grados día (HDD/GDD), cero vegetativo (10 °C), precipitación y humedad relativa.'],
+      ['Fecha de exportación', new Date().toISOString()]
+    ];
+
+    exportWorkbookToXLSX({
+      'Calendario_Agroclimatico': rows,
+      'Ficha_Metodologica': metaRows
+    }, 'meteoriotuerto_calendario_agroclimatico_2022_2026.xlsx');
+  }
+
   /* ------------------------------------------------------------------------
    * VISTA 3: EXPLORADOR DE DATOS HISTÓRICOS
    * ------------------------------------------------------------------------ */
@@ -3347,13 +3656,45 @@
    * VISTA 5: COMPARATIVAS ENTRE AÑOS
    * ------------------------------------------------------------------------ */
   async function renderComparativas() {
-    const [comp] = await Promise.all([
+    const [comp, almanacs] = await Promise.all([
       ensureComparisonsLoaded(),
       ensureAllAlmanacsLoaded(),
     ]);
     const container = document.getElementById('view-comparativas');
     const ref = comp.reference_baseline;
     const rows = comp.yearly_table;
+
+    // Cómputo del calendario fenológico multianual
+    const compYears = [2022, 2023, 2024, 2025, 2026];
+    const phenoByYear = {};
+    compYears.forEach((y) => {
+      phenoByYear[y] = computePhenologicalCalendar(almanacs[y]?.daily_series);
+    });
+
+    const phenoCompRowsHtml = PHENOLOGY_EVENTS.map((ev) => {
+      const cellsHtml = compYears.map((y) => {
+        const val = phenoByYear[y]?.[ev.key];
+        if (val) {
+          return `<td><span class="pheno-badge-date">${fmtDateES(val, false)}</span></td>`;
+        }
+        if (y === 2026) {
+          return `<td><span class="pheno-badge-pending">Pendiente</span></td>`;
+        }
+        return `<td><span class="pheno-badge-pending">—</span></td>`;
+      }).join('');
+
+      return `
+        <tr>
+          <td>
+            <strong>${ev.icon} ${escapeHtml(ev.name)}</strong>
+            <span style="display:block; font-size:0.75rem; color:var(--txt-muted)">${escapeHtml(ev.subtitle)}</span>
+          </td>
+          <td style="font-size:0.82rem; color:var(--txt-secondary)">${escapeHtml(ev.criteria)}</td>
+          ${cellsHtml}
+          <td style="font-weight:700; color:var(--txt-primary)">${escapeHtml(ev.typicalDate)}</td>
+        </tr>
+      `;
+    }).join('');
 
     const tableRowsHtml = rows.map((r) => `
       <tr>
@@ -3603,6 +3944,44 @@
           </table>
         </div>
       </section>
+
+      <!-- Calendario histórico agroclimático y fenológico de Riotuerto -->
+      <section class="section-block" aria-labelledby="sec-phenology-title">
+        <div class="section-header">
+          <div>
+            <div class="editorial-kicker">FENOLOGÍA Y RITMOS DEL VALLE · SERIE HISTÓRICA 2022–2026</div>
+            <h3 id="sec-phenology-title" class="section-title">Calendario histórico de labores cotidianas y agroclimatología</h3>
+            <p class="section-subtitle">
+              Comparativa interanual de fechas exactas en que se alcanzaron los umbrales biofísicos para calderas, huertas, siegas, robots cortacésped y setas
+            </p>
+          </div>
+          <div>
+            <button type="button" id="btn-export-phenology-xlsx" class="btn btn-excel">
+              📊 Exportar calendario agroclimático (.xlsx)
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Labor o actividad cotidiana</th>
+                <th>Criterio agroclimático</th>
+                <th>2022</th>
+                <th>2023</th>
+                <th>2024</th>
+                <th>2025</th>
+                <th>2026 (Avance)</th>
+                <th>Fecha media habitual</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${phenoCompRowsHtml}
+            </tbody>
+          </table>
+        </div>
+      </section>
     `;
 
     document.getElementById('chk-include-2026')?.addEventListener('change', (e) => {
@@ -3612,6 +3991,10 @@
 
     document.getElementById('btn-export-synoptic-xlsx')?.addEventListener('click', () => {
       exportComparisonsSynopticToExcel(comp);
+    });
+
+    document.getElementById('btn-export-phenology-xlsx')?.addEventListener('click', () => {
+      exportPhenologyCalendarToExcel(almanacs);
     });
 
     renderHeadToHeadComparator(comp);

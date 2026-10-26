@@ -564,6 +564,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             "function exportRankingsToExcel",
             "function exportMonthlyRecordsToExcel",
             "function exportAuditQualityToExcel",
+            "function exportPhenologyCalendarToExcel",
         ]
         for fn in required_functions:
             self.assertIn(fn, app_js, f"Falta función '{fn}' en src/js/app.js")
@@ -578,6 +579,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             "btn-export-rankings-xlsx",
             "btn-export-records-monthly-xlsx",
             "btn-export-audit-xlsx",
+            "btn-export-phenology-xlsx",
         ]
         for btn in required_buttons:
             self.assertIn(btn, app_js, f"Falta botón de exportación '{btn}' en src/js/app.js")
@@ -599,6 +601,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("function exportFestivalsToExcel", app_js, "Falta función exportFestivalsToExcel en app.js")
         self.assertIn("btn-export-festivals-xlsx", app_js, "Falta botón btn-export-festivals-xlsx en app.js")
         self.assertIn("practical-guide-box", app_js, "Falta bloque practical-guide-box en app.js")
+        self.assertIn("computePhenologicalCalendar", app_js, "Falta computePhenologicalCalendar en app.js")
+        self.assertIn("PHENOLOGY_EVENTS", app_js, "Falta PHENOLOGY_EVENTS en app.js")
+        self.assertIn("phenology-box", app_js, "Falta bloque phenology-box en app.js")
 
         # Verificar presencia de las 8 fiestas requeridas en el catálogo JS
         expected_festivals = [
