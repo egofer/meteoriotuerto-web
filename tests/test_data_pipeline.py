@@ -518,6 +518,10 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             "gdd_10_0",
         ]
         for y, alm in self.almanacs.items():
+            self.assertIn("coverage", alm, f"[{y}] Falta clave 'coverage'")
+            self.assertIn("valid_days", alm["coverage"], f"[{y}] Falta 'valid_days' en coverage")
+            self.assertIn("editorial", alm, f"[{y}] Falta clave 'editorial'")
+            self.assertIn("character", alm["editorial"], f"[{y}] Falta 'character' en editorial")
             self.assertEqual(len(alm["monthly"]), 12, f"[{y}] Debe tener 12 meses en alm['monthly']")
             for m_obj in alm["monthly"]:
                 for k in required_monthly_keys:
@@ -527,6 +531,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("function extractH2HProfile", app_js)
         self.assertIn("function renderHeadToHeadComparator", app_js)
         self.assertIn("h2h-comparator-container", app_js)
+        self.assertNotIn("alm.chronicle", app_js, "No debe usarse 'alm.chronicle' ya que el campo editorial se denomina 'editorial'")
 
 
 

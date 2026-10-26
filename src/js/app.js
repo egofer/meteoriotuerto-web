@@ -2930,7 +2930,7 @@
         mode: 'yearly',
         label: `Año ${y}${alm.is_provisional ? ' (prov.)' : ''}`,
         shortLabel: `${y}`,
-        sublabel: `${alm.chronicle.character} · ${alm.coverage.valid_days}/${alm.coverage.observed_span_days} días observados`,
+        sublabel: `${alm.editorial?.character ? `${alm.editorial.character} · ` : ''}${alm.coverage.valid_days}/${alm.coverage.observed_span_days} días observados`,
         hasData: alm.coverage.valid_days > 0,
         isProvisional: alm.is_provisional,
         validDays: alm.coverage.valid_days,
