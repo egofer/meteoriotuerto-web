@@ -160,6 +160,16 @@
       "uvi_max": 11,
       "uvi_max_raw": 14,
       "estimated_sunshine_hours": 2372.0
+    },
+    "degree_days": {
+      "hdd_15_5": 959.2,
+      "cdd_21_0": 46.6,
+      "gdd_10_0": 1718.9,
+      "description": {
+        "hdd": "Grados día de calefacción (base 15,5 °C): cuantifica la demanda de energía para calentar edificios.",
+        "cdd": "Grados día de refrigeración (base 21,0 °C): cuantifica la necesidad de refrigeración por calor.",
+        "gdd": "Grados día de desarrollo agrícola (base 10,0 °C): mide la energía térmica acumulada para crecimiento vegetal."
+      }
     }
   },
   "wind_analysis": {
@@ -499,7 +509,10 @@
       "frost_days": 2,
       "hot_days_30": 0,
       "tropical_nights": 0,
-      "foehn_days": 2
+      "foehn_days": 2,
+      "hdd_15_5": 237.3,
+      "cdd_21_0": 0.0,
+      "gdd_10_0": 21.6
     },
     {
       "month": 2,
@@ -528,7 +541,10 @@
       "frost_days": 8,
       "hot_days_30": 0,
       "tropical_nights": 0,
-      "foehn_days": 1
+      "foehn_days": 1,
+      "hdd_15_5": 214.0,
+      "cdd_21_0": 0.0,
+      "gdd_10_0": 16.5
     },
     {
       "month": 3,
@@ -557,7 +573,10 @@
       "frost_days": 1,
       "hot_days_30": 0,
       "tropical_nights": 0,
-      "foehn_days": 7
+      "foehn_days": 7,
+      "hdd_15_5": 100.6,
+      "cdd_21_0": 2.7,
+      "gdd_10_0": 117.0
     },
     {
       "month": 4,
@@ -586,7 +605,10 @@
       "frost_days": 1,
       "hot_days_30": 0,
       "tropical_nights": 0,
-      "foehn_days": 0
+      "foehn_days": 0,
+      "hdd_15_5": 87.8,
+      "cdd_21_0": 0.0,
+      "gdd_10_0": 88.1
     },
     {
       "month": 5,
@@ -615,7 +637,10 @@
       "frost_days": 0,
       "hot_days_30": 1,
       "tropical_nights": 0,
-      "foehn_days": 1
+      "foehn_days": 1,
+      "hdd_15_5": 45.5,
+      "cdd_21_0": 0.0,
+      "gdd_10_0": 147.4
     },
     {
       "month": 6,
@@ -644,7 +669,10 @@
       "frost_days": 0,
       "hot_days_30": 1,
       "tropical_nights": 0,
-      "foehn_days": 0
+      "foehn_days": 0,
+      "hdd_15_5": 0.0,
+      "cdd_21_0": 4.8,
+      "gdd_10_0": 279.2
     },
     {
       "month": 7,
@@ -673,7 +701,10 @@
       "frost_days": 0,
       "hot_days_30": 1,
       "tropical_nights": 0,
-      "foehn_days": 0
+      "foehn_days": 0,
+      "hdd_15_5": 0.0,
+      "cdd_21_0": 2.7,
+      "gdd_10_0": 285.9
     },
     {
       "month": 8,
@@ -702,7 +733,10 @@
       "frost_days": 0,
       "hot_days_30": 6,
       "tropical_nights": 0,
-      "foehn_days": 1
+      "foehn_days": 1,
+      "hdd_15_5": 0.0,
+      "cdd_21_0": 15.9,
+      "gdd_10_0": 300.4
     },
     {
       "month": 9,
@@ -731,7 +765,10 @@
       "frost_days": 0,
       "hot_days_30": 4,
       "tropical_nights": 0,
-      "foehn_days": 3
+      "foehn_days": 3,
+      "hdd_15_5": 0.0,
+      "cdd_21_0": 14.1,
+      "gdd_10_0": 225.0
     },
     {
       "month": 10,
@@ -760,7 +797,10 @@
       "frost_days": 0,
       "hot_days_30": 0,
       "tropical_nights": 1,
-      "foehn_days": 2
+      "foehn_days": 2,
+      "hdd_15_5": 9.8,
+      "cdd_21_0": 5.2,
+      "gdd_10_0": 105.2
     },
     {
       "month": 11,
@@ -789,7 +829,10 @@
       "frost_days": 0,
       "hot_days_30": 0,
       "tropical_nights": 0,
-      "foehn_days": 0
+      "foehn_days": 0,
+      "hdd_15_5": 89.0,
+      "cdd_21_0": 1.2,
+      "gdd_10_0": 94.4
     },
     {
       "month": 12,
@@ -818,7 +861,10 @@
       "frost_days": 2,
       "hot_days_30": 0,
       "tropical_nights": 0,
-      "foehn_days": 1
+      "foehn_days": 1,
+      "hdd_15_5": 175.2,
+      "cdd_21_0": 0.0,
+      "gdd_10_0": 38.2
     }
   ],
   "daily_series": {

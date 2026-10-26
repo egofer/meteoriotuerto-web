@@ -91,8 +91,13 @@ def validate_directory(data_dir: Path) -> List[str]:
             errors.append(f"[{year}] T. máx abs {st_t['max_abs']} != {expected['temp_max_abs']}")
         if st_t["min_abs"] != expected["temp_min_abs"]:
             errors.append(f"[{year}] T. mín abs {st_t['min_abs']} != {expected['temp_min_abs']}")
-        if st_p["total_mm"] != expected["rain_total"]:
-            errors.append(f"[{year}] Lluvia total {st_p['total_mm']} != {expected['rain_total']}")
+        # Para años cerrados verificar coincidencia exacta; para año provisional en curso admitir actualización >=
+        if year != 2026:
+            if st_p["total_mm"] != expected["rain_total"]:
+                errors.append(f"[{year}] Lluvia total {st_p['total_mm']} != {expected['rain_total']}")
+        else:
+            if st_p["total_mm"] < expected["rain_total"]:
+                errors.append(f"[{year}] Lluvia total provisional {st_p['total_mm']} menor que referencia {expected['rain_total']}")
         if st_w["max_gust_kmh"] != expected["gust_max"]:
             errors.append(f"[{year}] Racha máx {st_w['max_gust_kmh']} != {expected['gust_max']}")
 

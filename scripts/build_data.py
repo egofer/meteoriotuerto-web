@@ -1029,6 +1029,9 @@ def compute_year_almanac(
                 "hot_days_30": None,
                 "tropical_nights": None,
                 "foehn_days": None,
+                "hdd_15_5": None,
+                "cdd_21_0": None,
+                "gdd_10_0": None,
             })
             continue
 
@@ -1065,6 +1068,9 @@ def compute_year_almanac(
             "hot_days_30": int((sub["temp_max"] >= 30.0).sum()),
             "tropical_nights": int((sub["temp_min"] >= 20.0).sum()),
             "foehn_days": int(sub["foehn_flag"].sum()),
+            "hdd_15_5": safe_round((15.5 - sub["temp_mean"]).clip(lower=0.0).sum(), 1) if sub["temp_mean"].notna().any() else None,
+            "cdd_21_0": safe_round((sub["temp_mean"] - 21.0).clip(lower=0.0).sum(), 1) if sub["temp_mean"].notna().any() else None,
+            "gdd_10_0": safe_round((sub["temp_mean"] - 10.0).clip(lower=0.0).sum(), 1) if sub["temp_mean"].notna().any() else None,
         })
 
     # Serie diaria columnar completa del año (rellenando todos los días del calendario hasta el último día observado)
@@ -1197,6 +1203,16 @@ def compute_year_almanac(
                 "uvi_max": uvi_max_qc,
                 "uvi_max_raw": uvi_max_raw,
                 "estimated_sunshine_hours": sunshine_hours_est,
+            },
+            "degree_days": {
+                "hdd_15_5": safe_round((15.5 - df_d["temp_mean"]).clip(lower=0.0).sum(), 1),
+                "cdd_21_0": safe_round((df_d["temp_mean"] - 21.0).clip(lower=0.0).sum(), 1),
+                "gdd_10_0": safe_round((df_d["temp_mean"] - 10.0).clip(lower=0.0).sum(), 1),
+                "description": {
+                    "hdd": "Grados día de calefacción (base 15,5 °C): cuantifica la demanda de energía para calentar edificios.",
+                    "cdd": "Grados día de refrigeración (base 21,0 °C): cuantifica la necesidad de refrigeración por calor.",
+                    "gdd": "Grados día de desarrollo agrícola (base 10,0 °C): mide la energía térmica acumulada para crecimiento vegetal.",
+                },
             },
         },
         "wind_analysis": wind_analysis,
@@ -1432,6 +1448,15 @@ def build_records_and_comparisons(
     ref_rain_days_mean = round(
         float(np.mean([almanacs[y]["stats"]["precipitation"]["days_ge_02mm"] for y in complete_years])), 1
     )
+    ref_hdd_mean = round(
+        float(np.mean([almanacs[y]["stats"]["degree_days"]["hdd_15_5"] for y in complete_years])), 1
+    )
+    ref_cdd_mean = round(
+        float(np.mean([almanacs[y]["stats"]["degree_days"]["cdd_21_0"] for y in complete_years])), 1
+    )
+    ref_gdd_mean = round(
+        float(np.mean([almanacs[y]["stats"]["degree_days"]["gdd_10_0"] for y in complete_years])), 1
+    )
 
     yearly_comparison_table: List[Dict[str, Any]] = []
     for y in sorted(almanacs.keys()):
@@ -1486,6 +1511,9 @@ def build_records_and_comparisons(
             "foehn_days": st_w["foehn_days"],
             "wind_foehn_days": st_w["wind_foehn_days"],
             "thermal_foehn_days": st_w["thermal_foehn_days"],
+            "hdd_15_5": alm["stats"]["degree_days"]["hdd_15_5"],
+            "cdd_21_0": alm["stats"]["degree_days"]["cdd_21_0"],
+            "gdd_10_0": alm["stats"]["degree_days"]["gdd_10_0"],
             "humidity_mean_pct": st_a["humidity_mean_pct"],
             "pressure_mean_hpa": st_a["pressure_mean_hpa"],
             "solar_max_wm2": st_a["solar_max_wm2"],
@@ -1503,6 +1531,9 @@ def build_records_and_comparisons(
         "rain_days_02": {},
         "wind_gust_max": {},
         "foehn_days": {},
+        "hdd_15_5": {},
+        "cdd_21_0": {},
+        "gdd_10_0": {},
     }
     for y, alm in sorted(almanacs.items()):
         monthly_matrices["temp_mean"][str(y)] = [m["temp_mean"] for m in alm["monthly"]]
@@ -1512,6 +1543,9 @@ def build_records_and_comparisons(
         monthly_matrices["rain_days_02"][str(y)] = [m["rain_days_02"] for m in alm["monthly"]]
         monthly_matrices["wind_gust_max"][str(y)] = [m["wind_gust_max"] for m in alm["monthly"]]
         monthly_matrices["foehn_days"][str(y)] = [m["foehn_days"] for m in alm["monthly"]]
+        monthly_matrices["hdd_15_5"][str(y)] = [m["hdd_15_5"] for m in alm["monthly"]]
+        monthly_matrices["cdd_21_0"][str(y)] = [m["cdd_21_0"] for m in alm["monthly"]]
+        monthly_matrices["gdd_10_0"][str(y)] = [m["gdd_10_0"] for m in alm["monthly"]]
 
     # Medias mensuales de referencia (2022–2025)
     ref_monthly_temp = []
@@ -1589,6 +1623,9 @@ def build_records_and_comparisons(
             "mean_annual_temp_c": ref_temp_mean,
             "mean_annual_rain_mm": ref_rain_mean,
             "mean_annual_rain_days": ref_rain_days_mean,
+            "mean_annual_hdd_15_5": ref_hdd_mean,
+            "mean_annual_cdd_21_0": ref_cdd_mean,
+            "mean_annual_gdd_10_0": ref_gdd_mean,
             "monthly_mean_temp_c": ref_monthly_temp,
             "monthly_mean_rain_mm": ref_monthly_rain,
         },

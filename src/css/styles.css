@@ -1066,6 +1066,98 @@ html[data-theme="dark"] .year-pill.active {
   color: var(--txt-secondary);
 }
 
+/* EVO-006: Grados día de calefacción, refrigeración y desarrollo agrícola */
+.degree-days-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.degree-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.degree-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.degree-card.accent-hdd { border-top: 4px solid var(--accent-heat); }
+.degree-card.accent-cdd { border-top: 4px solid var(--accent-cold); }
+.degree-card.accent-gdd { border-top: 4px solid var(--accent-forest); }
+
+.degree-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.degree-icon {
+  font-size: 1.85rem;
+  line-height: 1;
+}
+
+.degree-title {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+  margin: 0;
+}
+
+.degree-base {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--txt-muted);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.degree-value {
+  font-family: var(--font-mono);
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--txt-primary);
+  margin-bottom: 8px;
+}
+
+.degree-card.accent-hdd .degree-value { color: var(--accent-heat); }
+.degree-card.accent-cdd .degree-value { color: var(--accent-cold); }
+.degree-card.accent-gdd .degree-value { color: var(--accent-forest); }
+
+.degree-unit {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--txt-muted);
+}
+
+.degree-meta {
+  font-size: 0.84rem;
+  color: var(--txt-secondary);
+  background: var(--bg-subtle);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+
+.degree-desc {
+  font-size: 0.88rem;
+  color: var(--txt-secondary);
+  line-height: 1.55;
+  margin: 0;
+  margin-top: auto;
+}
+
 /* Contenedores de gráficos */
 .charts-grid-2 {
   display: grid;
@@ -1654,6 +1746,24 @@ html[data-theme="dark"] .btn-primary {
   }
 
   .kpi-value {
+    font-size: 14pt !important;
+  }
+
+  .degree-days-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+    break-inside: avoid;
+  }
+
+  .degree-card {
+    padding: 10px 12px !important;
+    box-shadow: none !important;
+    font-size: 8.5pt !important;
+    break-inside: avoid;
+  }
+
+  .degree-value {
     font-size: 14pt !important;
   }
 

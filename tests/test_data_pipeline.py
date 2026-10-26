@@ -263,6 +263,58 @@ class TestMeteorologicalCalculations(unittest.TestCase):
                 f"Coordenada doméstica de alta precisión detectada en {rel_path}",
             )
 
+    def test_degree_days_consistency(self) -> None:
+        """
+        EVO-006: Verifica la consistencia de los Grados Día de Calefacción (HDD 15,5 °C),
+        Refrigeración (CDD 21,0 °C) y Desarrollo Agrícola (GDD 10,0 °C) en almanaques
+        y tablas comparativas.
+        """
+        for y in [2022, 2023, 2024, 2025, 2026]:
+            alm_path = self.data_dir / f"almanac_{y}.json"
+            self.assertTrue(alm_path.exists())
+            with open(alm_path, "r", encoding="utf-8") as f:
+                alm = json.load(f)
+
+            self.assertIn("degree_days", alm["stats"])
+            dd = alm["stats"]["degree_days"]
+            self.assertIn("hdd_15_5", dd)
+            self.assertIn("cdd_21_0", dd)
+            self.assertIn("gdd_10_0", dd)
+            self.assertGreaterEqual(dd["hdd_15_5"], 0.0)
+            self.assertGreaterEqual(dd["cdd_21_0"], 0.0)
+            self.assertGreaterEqual(dd["gdd_10_0"], 0.0)
+
+            # Suma mensual vs anual (ignorando meses no observados / None)
+            sum_hdd = sum(m["hdd_15_5"] for m in alm["monthly"] if m["hdd_15_5"] is not None)
+            sum_cdd = sum(m["cdd_21_0"] for m in alm["monthly"] if m["cdd_21_0"] is not None)
+            sum_gdd = sum(m["gdd_10_0"] for m in alm["monthly"] if m["gdd_10_0"] is not None)
+            self.assertAlmostEqual(sum_hdd, dd["hdd_15_5"], delta=0.5)
+            self.assertAlmostEqual(sum_cdd, dd["cdd_21_0"], delta=0.5)
+            self.assertAlmostEqual(sum_gdd, dd["gdd_10_0"], delta=0.5)
+
+        # Comparativas
+        comp_path = self.data_dir / "comparisons.json"
+        with open(comp_path, "r", encoding="utf-8") as f:
+            comp = json.load(f)
+
+        ref = comp["reference_baseline"]
+        self.assertIn("mean_annual_hdd_15_5", ref)
+        self.assertIn("mean_annual_cdd_21_0", ref)
+        self.assertIn("mean_annual_gdd_10_0", ref)
+        self.assertGreater(ref["mean_annual_hdd_15_5"], 700.0)
+        self.assertGreater(ref["mean_annual_gdd_10_0"], 1500.0)
+
+        for row in comp["yearly_table"]:
+            self.assertIn("hdd_15_5", row)
+            self.assertIn("cdd_21_0", row)
+            self.assertIn("gdd_10_0", row)
+
+        for var in ["hdd_15_5", "cdd_21_0", "gdd_10_0"]:
+            self.assertIn(var, comp["monthly_matrices"])
+            for y_str in ["2022", "2023", "2024", "2025", "2026"]:
+                self.assertEqual(len(comp["monthly_matrices"][var][y_str]), 12)
+
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

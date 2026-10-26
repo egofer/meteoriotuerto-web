@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25 21:05:23",
+  "generated_at": "2026-10-26 10:20:19",
   "station": {
     "name": "MeteoRiotuerto",
     "Title": "MeteoRiotuerto — Almanaque meteorológico y climatológico digital de Riotuerto",
@@ -67,9 +67,9 @@
     "provisional_years": [
       2026
     ],
-    "total_observed_days": 1726,
+    "total_observed_days": 1727,
     "first_consolidated_date": "2022-01-01",
-    "last_consolidated_date": "2026-10-25",
+    "last_consolidated_date": "2026-10-26",
     "reference_2022_2025": {
       "years_included": [
         2022,
@@ -84,6 +84,9 @@
       "mean_annual_temp_c": 14.53,
       "mean_annual_rain_mm": 1875.0,
       "mean_annual_rain_days": 218.8,
+      "mean_annual_hdd_15_5": 921.1,
+      "mean_annual_cdd_21_0": 51.1,
+      "mean_annual_gdd_10_0": 1794.5,
       "monthly_mean_temp_c": [
         8.8,
         9.8,
@@ -246,6 +249,9 @@
       "foehn_days": 35,
       "wind_foehn_days": 19,
       "thermal_foehn_days": 20,
+      "hdd_15_5": 965.1,
+      "cdd_21_0": 87.9,
+      "gdd_10_0": 1934.6,
       "humidity_mean_pct": 82.3,
       "pressure_mean_hpa": 1019.8,
       "solar_max_wm2": 1279.3,
@@ -291,6 +297,9 @@
       "foehn_days": 18,
       "wind_foehn_days": 11,
       "thermal_foehn_days": 11,
+      "hdd_15_5": 959.2,
+      "cdd_21_0": 46.6,
+      "gdd_10_0": 1718.9,
       "humidity_mean_pct": 84.6,
       "pressure_mean_hpa": 1025.1,
       "solar_max_wm2": 1350.5,
@@ -336,6 +345,9 @@
       "foehn_days": 24,
       "wind_foehn_days": 18,
       "thermal_foehn_days": 10,
+      "hdd_15_5": 884.7,
+      "cdd_21_0": 25.8,
+      "gdd_10_0": 1670.7,
       "humidity_mean_pct": 85.5,
       "pressure_mean_hpa": 1020.5,
       "solar_max_wm2": 1084.9,
@@ -381,6 +393,9 @@
       "foehn_days": 27,
       "wind_foehn_days": 19,
       "thermal_foehn_days": 12,
+      "hdd_15_5": 875.5,
+      "cdd_21_0": 44.2,
+      "gdd_10_0": 1854.0,
       "humidity_mean_pct": 84.6,
       "pressure_mean_hpa": 1020.6,
       "solar_max_wm2": 1040.2,
@@ -389,7 +404,7 @@
     {
       "year": 2026,
       "is_provisional": true,
-      "valid_days": 298,
+      "valid_days": 299,
       "coverage_pct": 100.0,
       "character": "Provisional (año en curso: cálido y húmedo hasta octubre)",
       "temp_mean": 15.8,
@@ -406,10 +421,10 @@
       "intense_heat_35": 11,
       "extreme_heat_40": 1,
       "tropical_nights": 4,
-      "rain_total_mm": 1504.3,
+      "rain_total_mm": 1505.2,
       "rain_anomaly_mm": null,
       "rain_anomaly_pct": null,
-      "rain_days_02": 154,
+      "rain_days_02": 155,
       "rain_days_1": 112,
       "rain_days_10": 46,
       "rain_days_30": 8,
@@ -426,10 +441,13 @@
       "foehn_days": 16,
       "wind_foehn_days": 7,
       "thermal_foehn_days": 12,
+      "hdd_15_5": 599.2,
+      "cdd_21_0": 94.2,
+      "gdd_10_0": 1818.4,
       "humidity_mean_pct": 85.7,
       "pressure_mean_hpa": 1020.7,
       "solar_max_wm2": 1028.1,
-      "estimated_sunshine_hours": 2191.5
+      "estimated_sunshine_hours": 2198.0
     }
   ]
 }

@@ -891,8 +891,19 @@
     const stP = alm.stats.precipitation;
     const stW = alm.stats.wind;
     const stA = alm.stats.atmosphere_and_solar;
+    const dd = alm.stats.degree_days || { hdd_15_5: 0, cdd_21_0: 0, gdd_10_0: 0 };
     const cov = alm.coverage;
     const ed = alm.editorial || {};
+
+    const validMonths = (alm.monthly || []).filter((m) => m.valid_days > 0);
+    const maxHddMonthObj = validMonths.reduce((prev, curr) => (curr.hdd_15_5 || 0) > (prev?.hdd_15_5 || 0) ? curr : prev, null);
+    const maxHddStr = maxHddMonthObj && maxHddMonthObj.hdd_15_5 > 0 ? `${maxHddMonthObj.name} (${fmtNum(maxHddMonthObj.hdd_15_5, 1)} HDD)` : '—';
+
+    const maxCddMonthObj = validMonths.reduce((prev, curr) => (curr.cdd_21_0 || 0) > (prev?.cdd_21_0 || 0) ? curr : prev, null);
+    const maxCddStr = maxCddMonthObj && maxCddMonthObj.cdd_21_0 > 0 ? `${maxCddMonthObj.name} (${fmtNum(maxCddMonthObj.cdd_21_0, 1)} CDD)` : 'Sin demanda apreciable';
+
+    const maxGddMonthObj = validMonths.reduce((prev, curr) => (curr.gdd_10_0 || 0) > (prev?.gdd_10_0 || 0) ? curr : prev, null);
+    const maxGddStr = maxGddMonthObj && maxGddMonthObj.gdd_10_0 > 0 ? `${maxGddMonthObj.name} (${fmtNum(maxGddMonthObj.gdd_10_0, 1)} GDD)` : '—';
 
     const curIdx = yearsAvailable.indexOf(alm.year);
     const prevYear = curIdx > 0 ? yearsAvailable[curIdx - 1] : null;
@@ -959,7 +970,7 @@
         return `
           <tr>
             <td><strong>${m.name}</strong></td>
-            <td class="num" colspan="11" style="text-align:center;color:var(--txt-muted)">Mes aún no observado o sin registros</td>
+            <td class="num" colspan="14" style="text-align:center;color:var(--txt-muted)">Mes aún no observado o sin registros</td>
           </tr>
         `;
       }
@@ -979,6 +990,9 @@
           <td class="num">${fmtNum(m.rain_max_day, 1)} <small>(${fmtDateShortMonth(m.rain_max_date)})</small></td>
           <td class="num">${fmtNum(m.wind_gust_max, 1)}</td>
           <td class="num">${fmtNum(m.foehn_days ?? 0, 0)}</td>
+          <td class="num">${m.hdd_15_5 !== null && m.hdd_15_5 !== undefined ? fmtNum(m.hdd_15_5, 1) : '—'}</td>
+          <td class="num">${m.cdd_21_0 !== null && m.cdd_21_0 !== undefined ? fmtNum(m.cdd_21_0, 1) : '—'}</td>
+          <td class="num">${m.gdd_10_0 !== null && m.gdd_10_0 !== undefined ? fmtNum(m.gdd_10_0, 1) : '—'}</td>
           <td class="num">${fmtNum(m.humidity_mean, 1)}%</td>
         </tr>
       `;
@@ -1286,6 +1300,71 @@
         </div>
       </section>
 
+      <!-- EVO-006: Grados día de calefacción, refrigeración y desarrollo agrícola -->
+      <section class="section-block" aria-labelledby="sec-degree-days-title">
+        <div class="section-header">
+          <div>
+            <h3 id="sec-degree-days-title" class="section-title">🌱 Grados día: Energía, confort en el hogar y ciclo agrícola (${alm.year})</h3>
+            <p class="section-subtitle">
+              Indicadores agroclimáticos y energéticos calculados día a día: cuantifican la demanda de calefacción doméstica, el confort estival y la energía térmica acumulada para praderas y huertas
+            </p>
+          </div>
+        </div>
+
+        <div class="degree-days-grid">
+          <div class="degree-card accent-hdd">
+            <div class="degree-card-header">
+              <span class="degree-icon">🏠</span>
+              <div>
+                <h4 class="degree-title">Calefacción en el hogar (HDD)</h4>
+                <span class="degree-base">Base de confort térmico: 15,5 °C</span>
+              </div>
+            </div>
+            <div class="degree-value">${fmtNum(dd.hdd_15_5, 1)} <span class="degree-unit">HDD</span></div>
+            <div class="degree-meta">
+              <div><strong>Mes de mayor demanda:</strong> ${maxHddStr}</div>
+            </div>
+            <p class="degree-desc">
+              Cuantifica la necesidad real de calentar las viviendas. Cuando la temperatura media diaria en Riotuerto desciende de 15,5 °C, las edificaciones pierden calor hacia el exterior y precisan calefacción. Cada grado por debajo suma un grado día. Refleja de forma fidedigna el gasto en leña, pellets o combustible en los hogares del municipio.
+            </p>
+          </div>
+
+          <div class="degree-card accent-cdd">
+            <div class="degree-card-header">
+              <span class="degree-icon">❄️</span>
+              <div>
+                <h4 class="degree-title">Demanda de refrigeración (CDD)</h4>
+                <span class="degree-base">Base de sobrecalentamiento: 21,0 °C</span>
+              </div>
+            </div>
+            <div class="degree-value">${fmtNum(dd.cdd_21_0, 1)} <span class="degree-unit">CDD</span></div>
+            <div class="degree-meta">
+              <div><strong>Mes de mayor demanda:</strong> ${maxCddStr}</div>
+            </div>
+            <p class="degree-desc">
+              Evalúa el sobrecalentamiento interior en verano. En el fondo de valle de Riotuerto, las casas disfrutan de refrigeración pasiva natural gracias al clima oceánico; cifras elevadas señalan tardes de bochorno o noches tropicales en las que abrir ventanas no basta para disipar el calor acumulado en las estancias.
+            </p>
+          </div>
+
+          <div class="degree-card accent-gdd">
+            <div class="degree-card-header">
+              <span class="degree-icon">🌾</span>
+              <div>
+                <h4 class="degree-title">Desarrollo agrícola y praderas (GDD)</h4>
+                <span class="degree-base">Cero vegetativo: 10,0 °C</span>
+              </div>
+            </div>
+            <div class="degree-value">${fmtNum(dd.gdd_10_0, 1)} <span class="degree-unit">GDD</span></div>
+            <div class="degree-meta">
+              <div><strong>Pico de actividad biológica:</strong> ${maxGddStr}</div>
+            </div>
+            <p class="degree-desc">
+              Mide la energía térmica útil acumulada para el desarrollo vegetal. Por encima de 10 °C, el pasto de las praderas y los cultivos despiertan e impulsan su fotosíntesis. Permite a ganaderos y hortelanos seguir el ritmo de rebrote de la hierba, los cortes de forraje y las cosechas de huerta.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <!-- Ficha estadística exhaustiva del año -->
       <section class="section-block">
         <div class="section-header">
@@ -1323,6 +1402,9 @@
                 <tr><td>Días de calor intenso (T. máx. ≥ 35 °C)</td><td class="num">${stT.intense_heat_days_ge_35} días</td><td></td></tr>
                 <tr><td>Días de calor extremo (T. máx. ≥ 40 °C)</td><td class="num">${stT.extreme_heat_days_ge_40} días</td><td></td></tr>
                 <tr><td>Noches tropicales (T. mín. ≥ 20 °C)</td><td class="num">${stT.tropical_nights_ge_20} días</td><td>Noches ecuatoriales (≥25 °C): ${stT.torrid_nights_ge_25}</td></tr>
+                <tr><td>Grados día de calefacción (HDD 15,5 °C)</td><td class="num"><strong>${fmtNum(dd.hdd_15_5, 1)} HDD</strong></td><td>Demanda térmica · Pico: ${maxHddStr}</td></tr>
+                <tr><td>Grados día de refrigeración (CDD 21,0 °C)</td><td class="num"><strong>${fmtNum(dd.cdd_21_0, 1)} CDD</strong></td><td>Estrés estival · Pico: ${maxCddStr}</td></tr>
+                <tr><td>Grados día desarrollo agrícola (GDD 10,0 °C)</td><td class="num"><strong>${fmtNum(dd.gdd_10_0, 1)} GDD</strong></td><td>Energía biológica · Pico: ${maxGddStr}</td></tr>
               </tbody>
             </table>
           </div>
@@ -1379,6 +1461,9 @@
                 <th class="num">Máx. 24h (mm)</th>
                 <th class="num">Racha máx. (km/h)</th>
                 <th class="num">Días Foehn</th>
+                <th class="num" title="Grados día de calefacción base 15,5 °C">HDD (15,5 °C)</th>
+                <th class="num" title="Grados día de refrigeración base 21,0 °C">CDD (21 °C)</th>
+                <th class="num" title="Grados día de desarrollo agrícola base 10,0 °C">GDD (10 °C)</th>
                 <th class="num">Humedad med.</th>
               </tr>
             </thead>
@@ -1398,6 +1483,9 @@
                 <td class="num">${fmtNum(stP.max_daily_mm, 1)}</td>
                 <td class="num">${fmtNum(stW.max_gust_kmh, 1)}</td>
                 <td class="num">${fmtNum(foehn.total_foehn_days, 0)}</td>
+                <td class="num"><strong>${fmtNum(dd.hdd_15_5, 1)}</strong></td>
+                <td class="num"><strong>${fmtNum(dd.cdd_21_0, 1)}</strong></td>
+                <td class="num"><strong>${fmtNum(dd.gdd_10_0, 1)}</strong></td>
                 <td class="num">${fmtNum(stA.humidity_mean_pct, 1)}%</td>
               </tr>
             </tfoot>
@@ -2469,6 +2557,9 @@
         <td class="num">${r.hot_days_30}</td>
         <td class="num">${r.tropical_nights}</td>
         <td class="num"><strong>${r.foehn_days ?? '—'}</strong></td>
+        <td class="num">${fmtNum(r.hdd_15_5, 1)}</td>
+        <td class="num">${fmtNum(r.cdd_21_0, 1)}</td>
+        <td class="num" style="color:var(--accent-forest)"><strong>${fmtNum(r.gdd_10_0, 1)}</strong></td>
         <td class="num">${fmtNum(r.wind_gust_max_kmh, 1)} km/h</td>
       </tr>
     `).join('');
@@ -2595,6 +2686,21 @@
         </div>
       </div>
 
+      <!-- Gráfico comparativo de Grados Día (EVO-006) -->
+      <div class="chart-panel" style="margin-bottom:28px">
+        <div class="chart-panel-header">
+          <div>
+            <h4 class="chart-panel-title">🌱 Grados día anuales comparados (Calefacción HDD, Refrigeración CDD y Crecimiento GDD)</h4>
+            <p class="chart-panel-subtitle">
+              Demanda de calefacción en viviendas (HDD base 15,5 °C), sobrecalentamiento estival (CDD base 21,0 °C) y acumulación de energía biológica para praderas y huertas (GDD base 10,0 °C)
+            </p>
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:360px">
+          <canvas id="chart-comp-degree-days"></canvas>
+        </div>
+      </div>
+
       <section class="section-block">
         <div class="section-header">
           <div>
@@ -2620,6 +2726,9 @@
                 <th class="num">Días ≥30 °C</th>
                 <th class="num">Noches trop.</th>
                 <th class="num">Días Foehn</th>
+                <th class="num">HDD (15,5 °C)</th>
+                <th class="num">CDD (21 °C)</th>
+                <th class="num">GDD (10 °C)</th>
                 <th class="num">Racha máx.</th>
               </tr>
             </thead>
@@ -2642,6 +2751,9 @@
                 <td class="num">15,3</td>
                 <td class="num">0,3</td>
                 <td class="num">26,0</td>
+                <td class="num">${fmtNum(ref.mean_annual_hdd_15_5, 1)}</td>
+                <td class="num">${fmtNum(ref.mean_annual_cdd_21_0, 1)}</td>
+                <td class="num" style="color:var(--accent-forest)">${fmtNum(ref.mean_annual_gdd_10_0, 1)}</td>
                 <td class="num">97,2 km/h (máx.)</td>
               </tr>
             </tfoot>
@@ -2897,6 +3009,56 @@
           x: { ticks: { color: pal.text }, grid: { color: pal.grid } },
           y: {
             title: { display: true, text: 'Temperatura media (°C)', color: pal.text },
+            ticks: { color: pal.text },
+            grid: { color: pal.grid },
+          },
+        },
+      },
+    });
+
+    // 5. Grados día anuales comparados (EVO-006)
+    createChart('comp_degree_days', 'chart-comp-degree-days', {
+      type: 'bar',
+      data: {
+        labels: rows.map((r) => (r.is_provisional ? `${r.year} (prov.)` : String(r.year))),
+        datasets: [
+          {
+            label: 'Calefacción doméstica (HDD 15,5 °C)',
+            data: rows.map((r) => r.hdd_15_5),
+            backgroundColor: 'rgba(194, 65, 12, 0.85)',
+            borderRadius: 4,
+          },
+          {
+            label: 'Refrigeración estival (CDD 21,0 °C)',
+            data: rows.map((r) => r.cdd_21_0),
+            backgroundColor: 'rgba(14, 116, 144, 0.85)',
+            borderRadius: 4,
+          },
+          {
+            label: 'Desarrollo agrícola / praderas (GDD 10,0 °C)',
+            data: rows.map((r) => r.gdd_10_0),
+            backgroundColor: 'rgba(27, 67, 50, 0.85)',
+            borderRadius: 4,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: pal.text } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${fmtNum(ctx.parsed.y, 1)} grados día`,
+            },
+          },
+        },
+        scales: {
+          x: { ticks: { color: pal.text }, grid: { color: pal.grid } },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Grados día acumulados', color: pal.text },
             ticks: { color: pal.text },
             grid: { color: pal.grid },
           },
