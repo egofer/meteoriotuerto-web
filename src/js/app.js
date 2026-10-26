@@ -905,6 +905,39 @@
     const maxGddMonthObj = validMonths.reduce((prev, curr) => (curr.gdd_10_0 || 0) > (prev?.gdd_10_0 || 0) ? curr : prev, null);
     const maxGddStr = maxGddMonthObj && maxGddMonthObj.gdd_10_0 > 0 ? `${maxGddMonthObj.name} (${fmtNum(maxGddMonthObj.gdd_10_0, 1)} GDD)` : '—';
 
+    // EVO-007: Percentiles térmicos y bandas de confort
+    const tp = alm.stats.thermal_percentiles || {
+      temp_mean: { P05: 0, P10: 0, P25: 0, P50: 0, P75: 0, P90: 0, P95: 0 },
+      temp_max: { P05: 0, P10: 0, P25: 0, P50: 0, P75: 0, P90: 0, P95: 0 },
+      temp_min: { P05: 0, P10: 0, P25: 0, P50: 0, P75: 0, P90: 0, P95: 0 },
+    };
+    const tBands = alm.stats.thermal_comfort_bands || [];
+    const comfortDays = tBands
+      .filter((b) => b.key === 'comfort_mild' || b.key === 'pleasant_warm')
+      .reduce((sum, b) => sum + b.days, 0);
+    const comfortPct = tBands
+      .filter((b) => b.key === 'comfort_mild' || b.key === 'pleasant_warm')
+      .reduce((sum, b) => sum + b.pct, 0);
+
+    const thermalBarHtml = tBands.map((b) => {
+      const showPct = b.pct >= 5.5 ? `${fmtNum(b.pct, 1)}%` : '';
+      return `<div class="thermal-bar-segment" style="width:${b.pct}%;background-color:${b.color}" title="${escapeHtml(b.name)} (${b.range}): ${b.days} días (${fmtNum(b.pct, 1)}%)">${showPct}</div>`;
+    }).join('');
+
+    const thermalCardsHtml = tBands.map((b) => `
+      <div class="thermal-band-card" style="border-top-color:${b.color}">
+        <div class="thermal-band-icon" aria-hidden="true">${b.icon}</div>
+        <div class="thermal-band-body">
+          <h4 class="thermal-band-name">${escapeHtml(b.name)}</h4>
+          <span class="thermal-band-range">${escapeHtml(b.range)}</span>
+          <div class="thermal-band-count">
+            <strong>${b.days}</strong> <span class="unit">d</span>
+            <span class="thermal-band-pct">(${fmtNum(b.pct, 1)}%)</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
     const curIdx = yearsAvailable.indexOf(alm.year);
     const prevYear = curIdx > 0 ? yearsAvailable[curIdx - 1] : null;
     const nextYear = curIdx >= 0 && curIdx < yearsAvailable.length - 1 ? yearsAvailable[curIdx + 1] : null;
@@ -1365,6 +1398,54 @@
         </div>
       </section>
 
+      <!-- EVO-007: Matriz de percentiles térmicos y distribución de días por bandas de confort -->
+      <section class="section-block" aria-labelledby="sec-thermal-bands-title">
+        <div class="section-header">
+          <div>
+            <h3 id="sec-thermal-bands-title" class="section-title">📊 Estructura térmica, percentiles y bandas de confort (${alm.year})</h3>
+            <p class="section-subtitle">
+              Distribución de los ${cov.valid_days} días observados en categorías de confort según la temperatura máxima diaria y umbrales no paramétricos estándar
+            </p>
+          </div>
+        </div>
+
+        <!-- Barra apilada continua 100% -->
+        <div class="thermal-bar-container">
+          <div class="thermal-stacked-bar" role="progressbar" aria-label="Distribución térmica anual">
+            ${thermalBarHtml}
+          </div>
+        </div>
+
+        <!-- Tarjetas de las 6 bandas -->
+        <div class="thermal-bands-grid">
+          ${thermalCardsHtml}
+        </div>
+
+        <!-- Indicadores de percentiles y rango central -->
+        <div class="kpi-grid">
+          <div class="kpi-card accent-forest">
+            <div class="kpi-label">Mediana anual (P50)</div>
+            <div class="kpi-value">${fmtNum(tp.temp_mean.P50, 1)} <span class="kpi-unit">°C</span></div>
+            <div class="kpi-meta">Media aritmética: ${fmtNum(stT.mean, 1)} °C · Insensible a valores atípicos</div>
+          </div>
+          <div class="kpi-card accent-solar">
+            <div class="kpi-label">Rango central del 50 % (P25 – P75)</div>
+            <div class="kpi-value">${fmtNum(tp.temp_mean.P25, 1)} <span class="kpi-unit">a</span> ${fmtNum(tp.temp_mean.P75, 1)} <span class="kpi-unit">°C</span></div>
+            <div class="kpi-meta">Amplitud intercuartílica (IQR): ${fmtNum(tp.temp_mean.P75 - tp.temp_mean.P25, 1)} °C</div>
+          </div>
+          <div class="kpi-card accent-forest">
+            <div class="kpi-label">Zona de confort (15 a 25 °C)</div>
+            <div class="kpi-value">${comfortDays} <span class="kpi-unit">días</span></div>
+            <div class="kpi-meta">${fmtNum(comfortPct, 1)} % del año en temperaturas óptimas</div>
+          </div>
+          <div class="kpi-card accent-heat">
+            <div class="kpi-label">Extremos no paramétricos (P05 / P95)</div>
+            <div class="kpi-value">${fmtNum(tp.temp_mean.P05, 1)} <span class="kpi-unit">/</span> ${fmtNum(tp.temp_mean.P95, 1)} <span class="kpi-unit">°C</span></div>
+            <div class="kpi-meta">Solo el 5 % fue más frío que P05 o más cálido que P95</div>
+          </div>
+        </div>
+      </section>
+
       <!-- Ficha estadística exhaustiva del año -->
       <section class="section-block">
         <div class="section-header">
@@ -1405,6 +1486,9 @@
                 <tr><td>Grados día de calefacción (HDD 15,5 °C)</td><td class="num"><strong>${fmtNum(dd.hdd_15_5, 1)} HDD</strong></td><td>Demanda térmica · Pico: ${maxHddStr}</td></tr>
                 <tr><td>Grados día de refrigeración (CDD 21,0 °C)</td><td class="num"><strong>${fmtNum(dd.cdd_21_0, 1)} CDD</strong></td><td>Estrés estival · Pico: ${maxCddStr}</td></tr>
                 <tr><td>Grados día desarrollo agrícola (GDD 10,0 °C)</td><td class="num"><strong>${fmtNum(dd.gdd_10_0, 1)} GDD</strong></td><td>Energía biológica · Pico: ${maxGddStr}</td></tr>
+                <tr><td>Mediana térmica del año (P50)</td><td class="num"><strong>${fmtNum(tp.temp_mean.P50, 1)} °C</strong></td><td>P25: ${fmtNum(tp.temp_mean.P25, 1)} °C · P75: ${fmtNum(tp.temp_mean.P75, 1)} °C</td></tr>
+                <tr><td>Días en zona de confort (15 a 25 °C)</td><td class="num"><strong>${comfortDays} días</strong></td><td>${fmtNum(comfortPct, 1)} % de los días observados</td></tr>
+                <tr><td>Extremos del 5 % (P05 / P95)</td><td class="num">${fmtNum(tp.temp_mean.P05, 1)} / ${fmtNum(tp.temp_mean.P95, 1)} °C</td><td>P10: ${fmtNum(tp.temp_mean.P10, 1)} °C · P90: ${fmtNum(tp.temp_mean.P90, 1)} °C</td></tr>
               </tbody>
             </table>
           </div>
@@ -2547,8 +2631,10 @@
         <td>${escapeHtml(r.character)}</td>
         <td class="num"><strong>${fmtNum(r.temp_mean, 1)} °C</strong></td>
         <td class="num">${r.is_provisional ? '—' : fmtSignNum(r.temp_anomaly_vs_series, 2, '°C')}</td>
+        <td class="num">${fmtNum(r.temp_median, 1)} °C</td>
         <td class="num" style="color:var(--accent-heat)">${fmtNum(r.temp_max_abs, 1)} °C</td>
         <td class="num" style="color:var(--accent-cold)">${fmtNum(r.temp_min_abs, 1)} °C</td>
+        <td class="num" style="color:var(--accent-forest)"><strong>${r.comfort_days_15_25}</strong> <small>(${fmtNum(r.comfort_pct_15_25, 1)}%)</small></td>
         <td class="num" style="color:var(--accent-rain)"><strong>${fmtNum(r.rain_total_mm, 1)} mm</strong></td>
         <td class="num">${r.is_provisional ? '—' : fmtSignNum(r.rain_anomaly_pct, 1, '%')}</td>
         <td class="num">${r.rain_days_02}</td>
@@ -2701,6 +2787,21 @@
         </div>
       </div>
 
+      <!-- Gráfico comparativo de distribución térmica por bandas (EVO-007) -->
+      <div class="chart-panel" style="margin-bottom:28px">
+        <div class="chart-panel-header">
+          <div>
+            <h4 class="chart-panel-title">🌡️ Reparto de días por bandas térmicas y de confort (2022–2026)</h4>
+            <p class="chart-panel-subtitle">
+              Distribución porcentual acumulada (100 %) de los días de cada año según la temperatura máxima diaria: frío riguroso, fresco, templado, agradable, cálido y calor intenso
+            </p>
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:320px">
+          <canvas id="chart-comp-thermal-distribution"></canvas>
+        </div>
+      </div>
+
       <section class="section-block">
         <div class="section-header">
           <div>
@@ -2716,8 +2817,10 @@
                 <th>Carácter sinóptico</th>
                 <th class="num">T. media</th>
                 <th class="num">Anom. T.</th>
+                <th class="num" title="Mediana de temperatura media diaria">Mediana (P50)</th>
                 <th class="num">T. máx. abs.</th>
                 <th class="num">T. mín. abs.</th>
+                <th class="num" title="Días con máxima entre 15 y 25 °C">Confort (15–25 °C)</th>
                 <th class="num">Lluvia anual</th>
                 <th class="num">Anom. lluvia</th>
                 <th class="num">Días ≥0,2 mm</th>
@@ -2741,8 +2844,10 @@
                 <td>Referencia interna (4 años cerrados)</td>
                 <td class="num">${fmtNum(ref.mean_annual_temp_c, 2)} °C</td>
                 <td class="num">0,00 °C</td>
+                <td class="num">14,7 °C</td>
                 <td class="num">42,1 °C (máx.)</td>
                 <td class="num">-3,1 °C (mín.)</td>
+                <td class="num" style="color:var(--accent-forest)"><strong>216,0</strong> (59,2 %)</td>
                 <td class="num">${fmtNum(ref.mean_annual_rain_mm, 1)} mm</td>
                 <td class="num">0,0 %</td>
                 <td class="num">${fmtNum(ref.mean_annual_rain_days, 1)}</td>
@@ -3065,6 +3170,60 @@
         },
       },
     });
+
+    // 6. Reparto de días por bandas térmicas y de confort (EVO-007)
+    const tDist = comp.thermal_distribution;
+    if (tDist && tDist.bands) {
+      const yearsList = rows.map((r) => String(r.year));
+      const datasets = tDist.bands.map((band, bIdx) => ({
+        label: `${band.name} (${band.range})`,
+        data: yearsList.map((y) => (tDist.years_pct[y] ? tDist.years_pct[y][bIdx] : 0)),
+        backgroundColor: band.color,
+        borderRadius: 2,
+      }));
+
+      createChart('comp_thermal_distribution', 'chart-comp-thermal-distribution', {
+        type: 'bar',
+        data: {
+          labels: rows.map((r) => (r.is_provisional ? `${r.year} (prov.)` : String(r.year))),
+          datasets: datasets,
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { color: pal.text, boxWidth: 12, usePointStyle: true },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const y = yearsList[ctx.dataIndex];
+                  const days = tDist.years[y] ? tDist.years[y][ctx.datasetIndex] : 0;
+                  return `${ctx.dataset.label}: ${fmtNum(ctx.parsed.x, 1)}% (${days} días)`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              stacked: true,
+              max: 100,
+              title: { display: true, text: 'Distribución porcentual del año (%)', color: pal.text },
+              ticks: { color: pal.text, callback: (v) => `${v}%` },
+              grid: { color: pal.grid },
+            },
+            y: {
+              stacked: true,
+              ticks: { color: pal.text, font: { weight: 'bold' } },
+              grid: { display: false },
+            },
+          },
+        },
+      });
+    }
   }
 
   /* ------------------------------------------------------------------------

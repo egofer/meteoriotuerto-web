@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-26 10:20:19",
+  "generated_at": "2026-10-26 11:11:26",
   "reference_baseline": {
     "years_included": [
       2022,
@@ -90,6 +90,19 @@
       "hdd_15_5": 965.1,
       "cdd_21_0": 87.9,
       "gdd_10_0": 1934.6,
+      "temp_median": 14.8,
+      "temp_p10": 7.0,
+      "temp_p90": 21.6,
+      "comfort_days_15_25": 205,
+      "comfort_pct_15_25": 56.2,
+      "thermal_bands": {
+        "cold_severe": 1,
+        "cool_fresh": 75,
+        "comfort_mild": 96,
+        "pleasant_warm": 109,
+        "warm_hot": 56,
+        "heat_intense": 28
+      },
       "humidity_mean_pct": 82.3,
       "pressure_mean_hpa": 1019.8,
       "solar_max_wm2": 1279.3,
@@ -138,6 +151,19 @@
       "hdd_15_5": 959.2,
       "cdd_21_0": 46.6,
       "gdd_10_0": 1718.9,
+      "temp_median": 14.6,
+      "temp_p10": 6.6,
+      "temp_p90": 20.6,
+      "comfort_days_15_25": 197,
+      "comfort_pct_15_25": 57.9,
+      "thermal_bands": {
+        "cold_severe": 10,
+        "cool_fresh": 64,
+        "comfort_mild": 94,
+        "pleasant_warm": 103,
+        "warm_hot": 56,
+        "heat_intense": 13
+      },
       "humidity_mean_pct": 84.6,
       "pressure_mean_hpa": 1025.1,
       "solar_max_wm2": 1350.5,
@@ -186,6 +212,19 @@
       "hdd_15_5": 884.7,
       "cdd_21_0": 25.8,
       "gdd_10_0": 1670.7,
+      "temp_median": 14.5,
+      "temp_p10": 8.7,
+      "temp_p90": 19.9,
+      "comfort_days_15_25": 230,
+      "comfort_pct_15_25": 64.1,
+      "thermal_bands": {
+        "cold_severe": 3,
+        "cool_fresh": 60,
+        "comfort_mild": 117,
+        "pleasant_warm": 113,
+        "warm_hot": 61,
+        "heat_intense": 5
+      },
       "humidity_mean_pct": 85.5,
       "pressure_mean_hpa": 1020.5,
       "solar_max_wm2": 1084.9,
@@ -234,6 +273,19 @@
       "hdd_15_5": 875.5,
       "cdd_21_0": 44.2,
       "gdd_10_0": 1854.0,
+      "temp_median": 14.9,
+      "temp_p10": 7.9,
+      "temp_p90": 20.6,
+      "comfort_days_15_25": 232,
+      "comfort_pct_15_25": 63.7,
+      "thermal_bands": {
+        "cold_severe": 0,
+        "cool_fresh": 60,
+        "comfort_mild": 107,
+        "pleasant_warm": 125,
+        "warm_hot": 56,
+        "heat_intense": 16
+      },
       "humidity_mean_pct": 84.6,
       "pressure_mean_hpa": 1020.6,
       "solar_max_wm2": 1040.2,
@@ -282,6 +334,19 @@
       "hdd_15_5": 599.2,
       "cdd_21_0": 94.2,
       "gdd_10_0": 1818.4,
+      "temp_median": 16.0,
+      "temp_p10": 9.2,
+      "temp_p90": 22.4,
+      "comfort_days_15_25": 147,
+      "comfort_pct_15_25": 49.1,
+      "thermal_bands": {
+        "cold_severe": 1,
+        "cool_fresh": 48,
+        "comfort_mild": 71,
+        "pleasant_warm": 76,
+        "warm_hot": 72,
+        "heat_intense": 31
+      },
       "humidity_mean_pct": 85.7,
       "pressure_mean_hpa": 1020.7,
       "solar_max_wm2": 1028.1,
@@ -3990,6 +4055,283 @@
         null,
         null
       ]
+    }
+  },
+  "thermal_distribution": {
+    "bands": [
+      {
+        "key": "cold_severe",
+        "name": "Frío riguroso",
+        "range": "< 8 °C",
+        "color": "#0284c7",
+        "icon": "❄️"
+      },
+      {
+        "key": "cool_fresh",
+        "name": "Fresco / húmedo",
+        "range": "8–15 °C",
+        "color": "#0d9488",
+        "icon": "🧥"
+      },
+      {
+        "key": "comfort_mild",
+        "name": "Templado / confort",
+        "range": "15–20 °C",
+        "color": "#10b981",
+        "icon": "🍃"
+      },
+      {
+        "key": "pleasant_warm",
+        "name": "Agradable estival",
+        "range": "20–25 °C",
+        "color": "#f59e0b",
+        "icon": "☀️"
+      },
+      {
+        "key": "warm_hot",
+        "name": "Cálido",
+        "range": "25–30 °C",
+        "color": "#ea580c",
+        "icon": "🌡️"
+      },
+      {
+        "key": "heat_intense",
+        "name": "Calor intenso / canícula",
+        "range": "≥ 30 °C",
+        "color": "#b91c1c",
+        "icon": "🔥"
+      }
+    ],
+    "years": {
+      "2022": [
+        1,
+        75,
+        96,
+        109,
+        56,
+        28
+      ],
+      "2023": [
+        10,
+        64,
+        94,
+        103,
+        56,
+        13
+      ],
+      "2024": [
+        3,
+        60,
+        117,
+        113,
+        61,
+        5
+      ],
+      "2025": [
+        0,
+        60,
+        107,
+        125,
+        56,
+        16
+      ],
+      "2026": [
+        1,
+        48,
+        71,
+        76,
+        72,
+        31
+      ]
+    },
+    "years_pct": {
+      "2022": [
+        0.3,
+        20.5,
+        26.3,
+        29.9,
+        15.3,
+        7.7
+      ],
+      "2023": [
+        2.9,
+        18.8,
+        27.6,
+        30.3,
+        16.5,
+        3.8
+      ],
+      "2024": [
+        0.8,
+        16.7,
+        32.6,
+        31.5,
+        17.0,
+        1.4
+      ],
+      "2025": [
+        0.0,
+        16.5,
+        29.4,
+        34.3,
+        15.4,
+        4.4
+      ],
+      "2026": [
+        0.3,
+        16.1,
+        23.7,
+        25.4,
+        24.1,
+        10.4
+      ]
+    },
+    "percentiles": {
+      "2022": {
+        "temp_mean": {
+          "P05": 5.2,
+          "P10": 7.0,
+          "P25": 10.8,
+          "P50": 14.8,
+          "P75": 18.8,
+          "P90": 21.6,
+          "P95": 22.7
+        },
+        "temp_max": {
+          "P05": 11.1,
+          "P10": 12.5,
+          "P25": 16.1,
+          "P50": 20.3,
+          "P75": 24.6,
+          "P90": 28.6,
+          "P95": 31.9
+        },
+        "temp_min": {
+          "P05": -0.2,
+          "P10": 2.2,
+          "P25": 5.9,
+          "P50": 9.8,
+          "P75": 13.8,
+          "P90": 16.0,
+          "P95": 17.4
+        }
+      },
+      "2023": {
+        "temp_mean": {
+          "P05": 5.1,
+          "P10": 6.6,
+          "P25": 10.5,
+          "P50": 14.6,
+          "P75": 18.8,
+          "P90": 20.6,
+          "P95": 22.3
+        },
+        "temp_max": {
+          "P05": 9.5,
+          "P10": 12.6,
+          "P25": 15.7,
+          "P50": 20.1,
+          "P75": 24.1,
+          "P90": 27.7,
+          "P95": 29.2
+        },
+        "temp_min": {
+          "P05": 0.9,
+          "P10": 2.1,
+          "P25": 5.3,
+          "P50": 9.9,
+          "P75": 13.9,
+          "P90": 15.8,
+          "P95": 17.0
+        }
+      },
+      "2024": {
+        "temp_mean": {
+          "P05": 7.2,
+          "P10": 8.7,
+          "P25": 10.8,
+          "P50": 14.5,
+          "P75": 17.6,
+          "P90": 19.9,
+          "P95": 20.7
+        },
+        "temp_max": {
+          "P05": 11.3,
+          "P10": 13.3,
+          "P25": 16.2,
+          "P50": 19.9,
+          "P75": 24.1,
+          "P90": 26.3,
+          "P95": 27.9
+        },
+        "temp_min": {
+          "P05": 2.4,
+          "P10": 3.5,
+          "P25": 5.9,
+          "P50": 9.5,
+          "P75": 12.9,
+          "P90": 15.1,
+          "P95": 16.8
+        }
+      },
+      "2025": {
+        "temp_mean": {
+          "P05": 6.9,
+          "P10": 7.9,
+          "P25": 11.3,
+          "P50": 14.9,
+          "P75": 18.3,
+          "P90": 20.6,
+          "P95": 21.6
+        },
+        "temp_max": {
+          "P05": 12.1,
+          "P10": 13.5,
+          "P25": 16.5,
+          "P50": 20.5,
+          "P75": 23.7,
+          "P90": 27.8,
+          "P95": 29.5
+        },
+        "temp_min": {
+          "P05": 1.2,
+          "P10": 3.2,
+          "P25": 6.1,
+          "P50": 9.3,
+          "P75": 13.7,
+          "P90": 15.8,
+          "P95": 16.8
+        }
+      },
+      "2026": {
+        "temp_mean": {
+          "P05": 8.1,
+          "P10": 9.2,
+          "P25": 11.5,
+          "P50": 16.0,
+          "P75": 20.1,
+          "P90": 22.4,
+          "P95": 23.0
+        },
+        "temp_max": {
+          "P05": 11.8,
+          "P10": 13.2,
+          "P25": 17.0,
+          "P50": 21.9,
+          "P75": 26.3,
+          "P90": 30.4,
+          "P95": 33.3
+        },
+        "temp_min": {
+          "P05": 3.2,
+          "P10": 4.7,
+          "P25": 7.2,
+          "P50": 10.8,
+          "P75": 15.0,
+          "P90": 16.8,
+          "P95": 18.4
+        }
+      }
     }
   }
 }

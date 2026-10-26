@@ -323,6 +323,55 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             for y_str in ["2022", "2023", "2024", "2025", "2026"]:
                 self.assertEqual(len(comp["monthly_matrices"][var][y_str]), 12)
 
+    def test_thermal_percentiles_and_comfort_bands(self) -> None:
+        """
+        EVO-007: Verifica la matriz de percentiles térmicos (P05 a P95) y la distribución
+        de días por bandas de confort en almanaques y comparativas.
+        """
+        for y in [2022, 2023, 2024, 2025, 2026]:
+            alm_path = self.data_dir / f"almanac_{y}.json"
+            self.assertTrue(alm_path.exists())
+            with open(alm_path, "r", encoding="utf-8") as f:
+                alm = json.load(f)
+
+            stats = alm["stats"]
+            self.assertIn("thermal_percentiles", stats)
+            self.assertIn("thermal_comfort_bands", stats)
+
+            tp = stats["thermal_percentiles"]
+            for col in ["temp_mean", "temp_max", "temp_min"]:
+                self.assertIn(col, tp)
+                q_vals = [tp[col][q] for q in ["P05", "P10", "P25", "P50", "P75", "P90", "P95"]]
+                for i in range(len(q_vals) - 1):
+                    self.assertLessEqual(q_vals[i], q_vals[i + 1])
+
+            bands = stats["thermal_comfort_bands"]
+            self.assertEqual(len(bands), 6)
+            total_band_days = sum(b["days"] for b in bands)
+            self.assertEqual(total_band_days, alm["coverage"]["valid_days"])
+            total_band_pct = sum(b["pct"] for b in bands)
+            self.assertAlmostEqual(total_band_pct, 100.0, delta=0.5)
+
+        # En comparisons.json
+        comp_path = self.data_dir / "comparisons.json"
+        with open(comp_path, "r", encoding="utf-8") as f:
+            comp = json.load(f)
+
+        self.assertIn("thermal_distribution", comp)
+        td = comp["thermal_distribution"]
+        self.assertEqual(len(td["bands"]), 6)
+        for y_str in ["2022", "2023", "2024", "2025", "2026"]:
+            self.assertIn(y_str, td["years"])
+            self.assertIn(y_str, td["years_pct"])
+            self.assertEqual(len(td["years"][y_str]), 6)
+            self.assertEqual(len(td["years_pct"][y_str]), 6)
+
+        for row in comp["yearly_table"]:
+            self.assertIn("temp_median", row)
+            self.assertIn("comfort_days_15_25", row)
+            self.assertIn("comfort_pct_15_25", row)
+
+
 
 
 if __name__ == "__main__":

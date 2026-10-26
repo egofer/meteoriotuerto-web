@@ -170,7 +170,104 @@
         "cdd": "Grados día de refrigeración (base 21,0 °C): cuantifica la necesidad de refrigeración por calor.",
         "gdd": "Grados día de desarrollo agrícola (base 10,0 °C): mide la energía térmica acumulada para crecimiento vegetal."
       }
-    }
+    },
+    "thermal_percentiles": {
+      "temp_mean": {
+        "P05": 5.1,
+        "P10": 6.6,
+        "P25": 10.5,
+        "P50": 14.6,
+        "P75": 18.8,
+        "P90": 20.6,
+        "P95": 22.3
+      },
+      "temp_max": {
+        "P05": 9.5,
+        "P10": 12.6,
+        "P25": 15.7,
+        "P50": 20.1,
+        "P75": 24.1,
+        "P90": 27.7,
+        "P95": 29.2
+      },
+      "temp_min": {
+        "P05": 0.9,
+        "P10": 2.1,
+        "P25": 5.3,
+        "P50": 9.9,
+        "P75": 13.9,
+        "P90": 15.8,
+        "P95": 17.0
+      }
+    },
+    "thermal_comfort_bands": [
+      {
+        "key": "cold_severe",
+        "name": "Frío riguroso",
+        "range": "< 8 °C",
+        "low": null,
+        "high": 8.0,
+        "days": 10,
+        "pct": 2.9,
+        "color": "#0284c7",
+        "icon": "❄️"
+      },
+      {
+        "key": "cool_fresh",
+        "name": "Fresco / húmedo",
+        "range": "8–15 °C",
+        "low": 8.0,
+        "high": 15.0,
+        "days": 64,
+        "pct": 18.8,
+        "color": "#0d9488",
+        "icon": "🧥"
+      },
+      {
+        "key": "comfort_mild",
+        "name": "Templado / confort",
+        "range": "15–20 °C",
+        "low": 15.0,
+        "high": 20.0,
+        "days": 94,
+        "pct": 27.6,
+        "color": "#10b981",
+        "icon": "🍃"
+      },
+      {
+        "key": "pleasant_warm",
+        "name": "Agradable estival",
+        "range": "20–25 °C",
+        "low": 20.0,
+        "high": 25.0,
+        "days": 103,
+        "pct": 30.3,
+        "color": "#f59e0b",
+        "icon": "☀️"
+      },
+      {
+        "key": "warm_hot",
+        "name": "Cálido",
+        "range": "25–30 °C",
+        "low": 25.0,
+        "high": 30.0,
+        "days": 56,
+        "pct": 16.5,
+        "color": "#ea580c",
+        "icon": "🌡️"
+      },
+      {
+        "key": "heat_intense",
+        "name": "Calor intenso / canícula",
+        "range": "≥ 30 °C",
+        "low": 30.0,
+        "high": null,
+        "days": 13,
+        "pct": 3.8,
+        "color": "#b91c1c",
+        "icon": "🔥"
+      }
+    ]
   },
   "wind_analysis": {
     "source_resolution": "30min",

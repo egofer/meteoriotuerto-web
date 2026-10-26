@@ -907,6 +907,53 @@ def compute_year_almanac(
     tropical_nights_20 = int((df_d["temp_min"] >= 20.0).sum())
     torrid_nights_25 = int((df_d["temp_min"] >= 25.0).sum())
 
+    # EVO-007: Percentiles térmicos y distribución por bandas de confort
+    percentile_keys = [("P05", 5), ("P10", 10), ("P25", 25), ("P50", 50), ("P75", 75), ("P90", 90), ("P95", 95)]
+
+    def calc_percentiles(col: str) -> Dict[str, Optional[float]]:
+        vals = df_d[col].dropna()
+        if len(vals) == 0:
+            return {k: None for k, _ in percentile_keys}
+        return {k: safe_round(float(np.percentile(vals, q)), 1) for k, q in percentile_keys}
+
+    thermal_percentiles = {
+        "temp_mean": calc_percentiles("temp_mean"),
+        "temp_max": calc_percentiles("temp_max"),
+        "temp_min": calc_percentiles("temp_min"),
+    }
+
+    tmax_series = df_d["temp_max"].dropna()
+    total_valid_tmax = len(tmax_series)
+    bands_defs = [
+        ("cold_severe", "Frío riguroso", "< 8 °C", -999.0, 8.0, "#0284c7", "❄️"),
+        ("cool_fresh", "Fresco / húmedo", "8–15 °C", 8.0, 15.0, "#0d9488", "🧥"),
+        ("comfort_mild", "Templado / confort", "15–20 °C", 15.0, 20.0, "#10b981", "🍃"),
+        ("pleasant_warm", "Agradable estival", "20–25 °C", 20.0, 25.0, "#f59e0b", "☀️"),
+        ("warm_hot", "Cálido", "25–30 °C", 25.0, 30.0, "#ea580c", "🌡️"),
+        ("heat_intense", "Calor intenso / canícula", "≥ 30 °C", 30.0, 999.0, "#b91c1c", "🔥"),
+    ]
+
+    thermal_comfort_bands = []
+    for key, name, range_label, low, high, color, icon in bands_defs:
+        if high == 999.0:
+            count = int((tmax_series >= low).sum())
+        elif low == -999.0:
+            count = int((tmax_series < high).sum())
+        else:
+            count = int(((tmax_series >= low) & (tmax_series < high)).sum())
+        pct = round((count / total_valid_tmax * 100.0), 1) if total_valid_tmax > 0 else 0.0
+        thermal_comfort_bands.append({
+            "key": key,
+            "name": name,
+            "range": range_label,
+            "low": low if low != -999.0 else None,
+            "high": high if high != 999.0 else None,
+            "days": count,
+            "pct": pct,
+            "color": color,
+            "icon": icon,
+        })
+
     # Precipitaciones
     rain_total = safe_round(df_d["rain_daily"].sum(), 1) or 0.0
     rain_days_02 = int((df_d["rain_daily"] >= 0.2).sum())
@@ -1214,6 +1261,8 @@ def compute_year_almanac(
                     "gdd": "Grados día de desarrollo agrícola (base 10,0 °C): mide la energía térmica acumulada para crecimiento vegetal.",
                 },
             },
+            "thermal_percentiles": thermal_percentiles,
+            "thermal_comfort_bands": thermal_comfort_bands,
         },
         "wind_analysis": wind_analysis,
         "foehn_analysis": foehn_analysis,
@@ -1514,6 +1563,12 @@ def build_records_and_comparisons(
             "hdd_15_5": alm["stats"]["degree_days"]["hdd_15_5"],
             "cdd_21_0": alm["stats"]["degree_days"]["cdd_21_0"],
             "gdd_10_0": alm["stats"]["degree_days"]["gdd_10_0"],
+            "temp_median": alm["stats"]["thermal_percentiles"]["temp_mean"]["P50"],
+            "temp_p10": alm["stats"]["thermal_percentiles"]["temp_mean"]["P10"],
+            "temp_p90": alm["stats"]["thermal_percentiles"]["temp_mean"]["P90"],
+            "comfort_days_15_25": sum(b["days"] for b in alm["stats"]["thermal_comfort_bands"] if b["key"] in ("comfort_mild", "pleasant_warm")),
+            "comfort_pct_15_25": round(sum(b["pct"] for b in alm["stats"]["thermal_comfort_bands"] if b["key"] in ("comfort_mild", "pleasant_warm")), 1),
+            "thermal_bands": {b["key"]: b["days"] for b in alm["stats"]["thermal_comfort_bands"]},
             "humidity_mean_pct": st_a["humidity_mean_pct"],
             "pressure_mean_hpa": st_a["pressure_mean_hpa"],
             "solar_max_wm2": st_a["solar_max_wm2"],
@@ -1609,6 +1664,25 @@ def build_records_and_comparisons(
         "years": cum_rain_by_year,
     }
 
+    thermal_distribution = {
+        "bands": [
+            {"key": b["key"], "name": b["name"], "range": b["range"], "color": b["color"], "icon": b["icon"]}
+            for b in almanacs[complete_years[0]]["stats"]["thermal_comfort_bands"]
+        ],
+        "years": {
+            str(y): [b["days"] for b in almanacs[y]["stats"]["thermal_comfort_bands"]]
+            for y in sorted(almanacs.keys())
+        },
+        "years_pct": {
+            str(y): [b["pct"] for b in almanacs[y]["stats"]["thermal_comfort_bands"]]
+            for y in sorted(almanacs.keys())
+        },
+        "percentiles": {
+            str(y): almanacs[y]["stats"]["thermal_percentiles"]
+            for y in sorted(almanacs.keys())
+        },
+    }
+
     comparisons_payload = {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "reference_baseline": {
@@ -1632,6 +1706,7 @@ def build_records_and_comparisons(
         "yearly_table": yearly_comparison_table,
         "monthly_matrices": monthly_matrices,
         "cumulative_precipitation": cumulative_precipitation,
+        "thermal_distribution": thermal_distribution,
     }
 
     return records_payload, comparisons_payload
