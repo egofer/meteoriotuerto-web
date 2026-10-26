@@ -36,6 +36,13 @@
       categoryFilter: 'all',
       searchQuery: '',
     },
+    headToHead: {
+      mode: 'yearly', // 'yearly' | 'monthly'
+      yearA: 2023,
+      monthA: 8,
+      yearB: 2025,
+      monthB: 8,
+    },
     cache: {
       index: null,
       records: null,
@@ -2632,7 +2639,10 @@
    * VISTA 5: COMPARATIVAS ENTRE AÑOS
    * ------------------------------------------------------------------------ */
   async function renderComparativas() {
-    const comp = await ensureComparisonsLoaded();
+    const [comp] = await Promise.all([
+      ensureComparisonsLoaded(),
+      ensureAllAlmanacsLoaded(),
+    ]);
     const container = document.getElementById('view-comparativas');
     const ref = comp.reference_baseline;
     const rows = comp.yearly_table;
@@ -2685,6 +2695,9 @@
           Según los estándares de la Organización Meteorológica Mundial (OMM), la definición de normales climatológicas requiere un mínimo de 30 años de registros homogéneos. Las anomalías mostradas a continuación se calculan exclusivamente respecto al promedio de los años completos disponibles en este archivo local (2022–2025: <strong>${fmtNum(ref.mean_annual_temp_c, 2)} °C</strong> y <strong>${fmtNum(ref.mean_annual_rain_mm, 1)} mm/año</strong>), con fines divulgativos y de comparación entre ejercicios recientes.
         </p>
       </div>
+
+      <!-- EVO-011: Comparador cara a cara (head-to-head) entre dos años o meses -->
+      <section class="section-block h2h-section" id="h2h-comparator-container" aria-labelledby="h2h-heading"></section>
 
       <div class="section-header">
         <div>
@@ -2884,7 +2897,557 @@
       renderComparisonCharts(comp);
     });
 
+    renderHeadToHeadComparator(comp);
     renderComparisonCharts(comp);
+  }
+
+  /* ------------------------------------------------------------------------
+   * EVO-011: Comparador cara a cara (head-to-head) entre dos años o meses
+   * ------------------------------------------------------------------------ */
+  function computeMedianValue(arr) {
+    const valid = arr.filter((v) => v !== null && v !== undefined && !Number.isNaN(Number(v))).map(Number).sort((a, b) => a - b);
+    if (!valid.length) return null;
+    const mid = Math.floor(valid.length / 2);
+    return valid.length % 2 === 1 ? valid[mid] : Number(((valid[mid - 1] + valid[mid]) / 2).toFixed(1));
+  }
+
+  function extractH2HProfile(mode, year, month, comp) {
+    const y = Number(year);
+    const m = Number(month);
+    const alm = STATE.cache.almanacs[y];
+    const compRow = comp.yearly_table.find((r) => r.year === y);
+    if (!alm) return null;
+
+    if (mode === 'yearly') {
+      const stT = alm.stats.temperature;
+      const stP = alm.stats.precipitation;
+      const stW = alm.stats.wind;
+      const stA = alm.stats.atmosphere_and_solar;
+      const dd = alm.stats.degree_days || {};
+      const p50 = alm.stats.thermal_percentiles?.temp_mean?.P50 ?? compRow?.temp_median ?? null;
+
+      return {
+        mode: 'yearly',
+        label: `Año ${y}${alm.is_provisional ? ' (prov.)' : ''}`,
+        shortLabel: `${y}`,
+        sublabel: `${alm.chronicle.character} · ${alm.coverage.valid_days}/${alm.coverage.observed_span_days} días observados`,
+        hasData: alm.coverage.valid_days > 0,
+        isProvisional: alm.is_provisional,
+        validDays: alm.coverage.valid_days,
+        tempMean: stT.mean,
+        tempMedian: p50,
+        tempMaxMean: stT.max_mean,
+        tempMinMean: stT.min_mean,
+        tempAmpMean: stT.mean_daily_amplitude,
+        tempMaxAbs: stT.max_abs,
+        tempMaxDate: stT.max_abs_date,
+        tempMinAbs: stT.min_abs,
+        tempMinDate: stT.min_abs_date,
+        frostDays: stT.frost_days_le_0,
+        warmDays25: stT.warm_days_ge_25,
+        hotDays30: stT.hot_days_ge_30,
+        tropicalNights: stT.tropical_nights_ge_20,
+        comfortDays1525: compRow ? compRow.comfort_days_15_25 : null,
+        rainTotal: stP.total_mm,
+        rainDays02: stP.days_ge_02mm,
+        rainHeavyDays: stP.days_ge_30mm,
+        rainHeavyLabel: 'Días de lluvia muy fuerte (≥30 mm)',
+        rainMaxDay: stP.max_daily_mm,
+        rainMaxDate: stP.max_daily_date,
+        windSpeedMean: stW.mean_speed_kmh,
+        windGustMax: stW.max_gust_kmh,
+        windGustDate: stW.max_gust_date,
+        foehnDays: stW.foehn_days ?? alm.foehn_analysis?.total_foehn_days ?? 0,
+        hdd: dd.hdd_15_5 ?? null,
+        cdd: dd.cdd_21_0 ?? null,
+        gdd: dd.gdd_10_0 ?? null,
+        humidityMean: stA.humidity_mean_pct,
+        pressureMean: stA.pressure_mean_hpa,
+        seriesLabels: MONTH_SHORT_ES,
+        seriesTemp: alm.monthly.map((mo) => mo.temp_mean),
+        seriesRain: alm.monthly.map((mo) => mo.rain_total),
+      };
+    }
+
+    // Modo mensual: extraer mes m del año y
+    const mObj = alm.monthly.find((mo) => mo.month === m);
+    const prefix = `${y}-${String(m).padStart(2, '0')}-`;
+    const ds = alm.daily_series;
+    const dayMeans = [];
+    const dayAmps = [];
+    let warm25 = 0;
+    let comfort1525 = 0;
+    const seriesTemp = new Array(31).fill(null);
+    const seriesRain = new Array(31).fill(null);
+
+    for (let i = 0; i < ds.dates.length; i += 1) {
+      const dStr = ds.dates[i];
+      if (!dStr.startsWith(prefix)) continue;
+      const dayNum = Number(dStr.slice(8, 10));
+      const tMean = ds.temp_mean[i];
+      const tMax = ds.temp_max[i];
+      const tAmp = ds.temp_amp[i];
+      const rain = ds.rain_daily[i];
+
+      if (dayNum >= 1 && dayNum <= 31) {
+        seriesTemp[dayNum - 1] = tMean;
+        seriesRain[dayNum - 1] = rain;
+      }
+      if (tMean !== null && tMean !== undefined) dayMeans.push(tMean);
+      if (tAmp !== null && tAmp !== undefined) dayAmps.push(tAmp);
+      if (tMax !== null && tMax !== undefined) {
+        if (tMax >= 25.0) warm25 += 1;
+        if (tMax >= 15.0 && tMax < 25.0) comfort1525 += 1;
+      }
+    }
+
+    const validDays = mObj ? mObj.valid_days : 0;
+    const calDays = mObj ? mObj.calendar_days : 30;
+    const avgAmp = dayAmps.length ? Number((dayAmps.reduce((a, b) => a + b, 0) / dayAmps.length).toFixed(1)) : null;
+
+    return {
+      mode: 'monthly',
+      label: `${MONTH_NAMES_ES[m - 1]} de ${y}`,
+      shortLabel: `${MONTH_SHORT_ES[m - 1]} ${y}`,
+      sublabel: validDays > 0
+        ? `${validDays}/${calDays} días registrados en ${MONTH_NAMES_ES[m - 1].toLowerCase()} de ${y}`
+        : `Mes aún no observado en ${y}`,
+      hasData: validDays > 0,
+      isProvisional: alm.is_provisional,
+      validDays,
+      tempMean: mObj ? mObj.temp_mean : null,
+      tempMedian: computeMedianValue(dayMeans),
+      tempMaxMean: mObj ? mObj.temp_max_mean : null,
+      tempMinMean: mObj ? mObj.temp_min_mean : null,
+      tempAmpMean: avgAmp,
+      tempMaxAbs: mObj ? mObj.temp_max_abs : null,
+      tempMaxDate: mObj ? mObj.temp_max_date : null,
+      tempMinAbs: mObj ? mObj.temp_min_abs : null,
+      tempMinDate: mObj ? mObj.temp_min_date : null,
+      frostDays: mObj ? mObj.frost_days : null,
+      warmDays25: validDays > 0 ? warm25 : null,
+      hotDays30: mObj ? mObj.hot_days_30 : null,
+      tropicalNights: mObj ? mObj.tropical_nights : null,
+      comfortDays1525: validDays > 0 ? comfort1525 : null,
+      rainTotal: mObj ? mObj.rain_total : null,
+      rainDays02: mObj ? mObj.rain_days_02 : null,
+      rainHeavyDays: mObj ? mObj.rain_days_10 : null,
+      rainHeavyLabel: 'Días de lluvia abundante (≥10 mm)',
+      rainMaxDay: mObj ? mObj.rain_max_day : null,
+      rainMaxDate: mObj ? mObj.rain_max_date : null,
+      windSpeedMean: mObj ? mObj.wind_speed_mean : null,
+      windGustMax: mObj ? mObj.wind_gust_max : null,
+      windGustDate: mObj ? mObj.wind_gust_date : null,
+      foehnDays: mObj ? mObj.foehn_days : null,
+      hdd: mObj ? mObj.hdd_15_5 : null,
+      cdd: mObj ? mObj.cdd_21_0 : null,
+      gdd: mObj ? mObj.gdd_10_0 : null,
+      humidityMean: mObj ? mObj.humidity_mean : null,
+      pressureMean: mObj ? mObj.pressure_mean : null,
+      seriesLabels: Array.from({ length: 31 }, (_, idx) => `Día ${idx + 1}`),
+      seriesTemp,
+      seriesRain,
+    };
+  }
+
+  function renderHeadToHeadComparator(comp) {
+    const h2hContainer = document.getElementById('h2h-comparator-container');
+    if (!h2hContainer) return;
+
+    const { mode, yearA, monthA, yearB, monthB } = STATE.headToHead;
+    const years = [2022, 2023, 2024, 2025, 2026];
+    const profA = extractH2HProfile(mode, yearA, monthA, comp);
+    const profB = extractH2HProfile(mode, yearB, monthB, comp);
+    if (!profA || !profB) return;
+
+    const yearOptionsA = years.map((y) => `<option value="${y}" ${y === Number(yearA) ? 'selected' : ''}>${y}${y === 2026 ? ' (prov.)' : ''}</option>`).join('');
+    const yearOptionsB = years.map((y) => `<option value="${y}" ${y === Number(yearB) ? 'selected' : ''}>${y}${y === 2026 ? ' (prov.)' : ''}</option>`).join('');
+    const monthOptionsA = MONTH_NAMES_ES.map((name, idx) => `<option value="${idx + 1}" ${idx + 1 === Number(monthA) ? 'selected' : ''}>${name}</option>`).join('');
+    const monthOptionsB = MONTH_NAMES_ES.map((name, idx) => `<option value="${idx + 1}" ${idx + 1 === Number(monthB) ? 'selected' : ''}>${name}</option>`).join('');
+
+    // Construir veredicto narrativo automático
+    let verdictHtml = '';
+    if (!profA.hasData || !profB.hasData) {
+      verdictHtml = `
+        <div class="h2h-verdict-box">
+          <strong>⚠️ Periodo sin observaciones consolidadas:</strong> Uno de los meses seleccionados pertenece a la parte aún no transcurrida del año en curso 2026. Seleccione un mes entre enero y octubre para contrastar datos observados.
+        </div>
+      `;
+    } else {
+      const dTemp = Number((profB.tempMean - profA.tempMean).toFixed(1));
+      const dRain = Number((profB.rainTotal - profA.rainTotal).toFixed(1));
+      const pctRain = profA.rainTotal > 0 ? Number(((dRain / profA.rainTotal) * 100).toFixed(1)) : null;
+      const dHdd = profA.hdd !== null && profB.hdd !== null ? Number((profB.hdd - profA.hdd).toFixed(1)) : null;
+
+      const tempPhrase = dTemp === 0
+        ? `registró exactamente la misma temperatura media (<strong>${fmtNum(profB.tempMean, 1)} °C</strong>)`
+        : dTemp > 0
+          ? `fue <strong>+${fmtNum(dTemp, 1)} °C más cálido</strong> en promedio (${fmtNum(profB.tempMean, 1)} °C frente a ${fmtNum(profA.tempMean, 1)} °C)`
+          : `fue <strong>${fmtNum(dTemp, 1)} °C más fresco</strong> en promedio (${fmtNum(profB.tempMean, 1)} °C frente a ${fmtNum(profA.tempMean, 1)} °C)`;
+
+      const rainPhrase = dRain === 0
+        ? `acumuló idéntica precipitación (${fmtNum(profB.rainTotal, 1)} mm)`
+        : dRain > 0
+          ? `recogió <strong>+${fmtNum(dRain, 1)} mm más de lluvia</strong> (${pctRain !== null ? `+${fmtNum(pctRain, 1)} %` : ''})`
+          : `recogió <strong>${fmtNum(Math.abs(dRain), 1)} mm menos de lluvia</strong> (${pctRain !== null ? `${fmtNum(pctRain, 1)} %` : ''})`;
+
+      const hddPhrase = dHdd !== null && Math.abs(dHdd) >= 1
+        ? ` En términos energéticos domésticos, supuso <strong>${dHdd > 0 ? `+${fmtNum(dHdd, 1)} HDD más` : `${fmtNum(Math.abs(dHdd), 1)} HDD menos`}</strong> de demanda de calefacción.`
+        : '';
+
+      verdictHtml = `
+        <div class="h2h-verdict-box">
+          <span class="h2h-verdict-kicker">⚖️ SÍNTESIS DEL CONTRASTE (${escapeHtml(profB.shortLabel)} FRENTE A ${escapeHtml(profA.shortLabel)}):</span>
+          <p class="h2h-verdict-text">
+            En comparación con <strong>${escapeHtml(profA.label)}</strong>, el periodo <strong>${escapeHtml(profB.label)}</strong>
+            ${tempPhrase} y ${rainPhrase}.${hddPhrase}
+          </p>
+        </div>
+      `;
+    }
+
+    // Filas del marcador comparativo (Scoreboard)
+    const metricDefs = [
+      { label: 'Temperatura media', key: 'tempMean', unit: '°C', dec: 1, category: '🌡️ Termometría' },
+      { label: 'Mediana térmica diaria (P50)', key: 'tempMedian', unit: '°C', dec: 1 },
+      { label: 'Media de las máximas diarias', key: 'tempMaxMean', unit: '°C', dec: 1 },
+      { label: 'Media de las mínimas diarias', key: 'tempMinMean', unit: '°C', dec: 1 },
+      { label: 'Amplitud térmica media diaria', key: 'tempAmpMean', unit: '°C', dec: 1 },
+      { label: 'Temperatura máxima absoluta', key: 'tempMaxAbs', unit: '°C', dec: 1, dateKey: 'tempMaxDate' },
+      { label: 'Temperatura mínima absoluta', key: 'tempMinAbs', unit: '°C', dec: 1, dateKey: 'tempMinDate' },
+      { label: 'Días en confort térmico (15–25 °C)', key: 'comfortDays1525', unit: 'días', dec: 0 },
+      { label: 'Días de calor (≥30 °C)', key: 'hotDays30', unit: 'días', dec: 0 },
+      { label: 'Días de helada (≤0 °C)', key: 'frostDays', unit: 'días', dec: 0 },
+      { label: 'Noches tropicales (mín. ≥20 °C)', key: 'tropicalNights', unit: 'noches', dec: 0 },
+      { label: 'Precipitación total acumulada', key: 'rainTotal', unit: 'mm', dec: 1, category: '💧 Pluviometría' },
+      { label: 'Días de lluvia apreciable (≥0,2 mm)', key: 'rainDays02', unit: 'días', dec: 0 },
+      { label: profA.rainHeavyLabel, key: 'rainHeavyDays', unit: 'días', dec: 0 },
+      { label: 'Precipitación máxima en 24 h', key: 'rainMaxDay', unit: 'mm', dec: 1, dateKey: 'rainMaxDate' },
+      { label: 'Velocidad media del viento', key: 'windSpeedMean', unit: 'km/h', dec: 1, category: '💨 Viento, Foehn y energía' },
+      { label: 'Racha máxima de viento', key: 'windGustMax', unit: 'km/h', dec: 1, dateKey: 'windGustDate' },
+      { label: 'Días con patrón Foehn / surada', key: 'foehnDays', unit: 'días', dec: 0 },
+      { label: 'Grados día de calefacción (HDD 15,5 °C)', key: 'hdd', unit: 'HDD', dec: 1 },
+      { label: 'Grados día de refrigeración (CDD 21 °C)', key: 'cdd', unit: 'CDD', dec: 1 },
+      { label: 'Grados día de crecimiento vegetal (GDD 10 °C)', key: 'gdd', unit: 'GDD', dec: 1 },
+    ];
+
+    const scoreboardRowsHtml = metricDefs.map((mDef) => {
+      const valA = profA[mDef.key];
+      const valB = profB[mDef.key];
+      const hasBoth = valA !== null && valA !== undefined && valB !== null && valB !== undefined;
+      const diff = hasBoth ? Number((valB - valA).toFixed(mDef.dec)) : null;
+
+      // Porcentaje para barra proporcional
+      let pctA = 50;
+      let pctB = 50;
+      if (hasBoth) {
+        const absA = Math.max(0, Number(valA));
+        const absB = Math.max(0, Number(valB));
+        const sum = absA + absB;
+        if (sum > 0) {
+          pctA = Math.round((absA / sum) * 100);
+          pctB = 100 - pctA;
+        }
+      }
+
+      const dateAStr = mDef.dateKey && profA[mDef.dateKey] ? ` <small class="mono" style="color:var(--txt-muted)">(${fmtDateES(profA[mDef.dateKey], false)})</small>` : '';
+      const dateBStr = mDef.dateKey && profB[mDef.dateKey] ? ` <small class="mono" style="color:var(--txt-muted)">(${fmtDateES(profB[mDef.dateKey], false)})</small>` : '';
+
+      const catRow = mDef.category
+        ? `<tr class="h2h-cat-row"><td colspan="5">${mDef.category}</td></tr>`
+        : '';
+
+      const diffClass = diff === null || diff === 0 ? '' : diff > 0 ? 'h2h-diff-pos' : 'h2h-diff-neg';
+
+      return `
+        ${catRow}
+        <tr>
+          <td><strong>${escapeHtml(mDef.label)}</strong></td>
+          <td class="num"><span class="h2h-val-a">${fmtNum(valA, mDef.dec, mDef.unit)}</span>${dateAStr}</td>
+          <td class="h2h-bar-cell">
+            <div class="h2h-dual-bar" title="${escapeHtml(profA.shortLabel)}: ${fmtNum(valA, mDef.dec)} vs ${escapeHtml(profB.shortLabel)}: ${fmtNum(valB, mDef.dec)}">
+              <div class="h2h-bar-a" style="width:${pctA}%"></div>
+              <div class="h2h-bar-b" style="width:${pctB}%"></div>
+            </div>
+          </td>
+          <td class="num"><span class="h2h-val-b">${fmtNum(valB, mDef.dec, mDef.unit)}</span>${dateBStr}</td>
+          <td class="num ${diffClass}"><strong>${diff !== null ? fmtSignNum(diff, mDef.dec, mDef.unit) : '—'}</strong></td>
+        </tr>
+      `;
+    }).join('');
+
+    const dTemp = profA.hasData && profB.hasData ? Number((profB.tempMean - profA.tempMean).toFixed(1)) : null;
+    const dRain = profA.hasData && profB.hasData ? Number((profB.rainTotal - profA.rainTotal).toFixed(1)) : null;
+    const dRainPct = profA.hasData && profB.hasData && profA.rainTotal > 0
+      ? Number(((dRain / profA.rainTotal) * 100).toFixed(1))
+      : null;
+    const dHdd = profA.hasData && profB.hasData && profA.hdd !== null && profB.hdd !== null
+      ? Number((profB.hdd - profA.hdd).toFixed(1))
+      : null;
+    const dFoehn = profA.hasData && profB.hasData && profA.foehnDays !== null && profB.foehnDays !== null
+      ? profB.foehnDays - profA.foehnDays
+      : null;
+
+    h2hContainer.innerHTML = `
+      <div class="section-header">
+        <div>
+          <h3 id="h2h-heading" class="section-title">⚔️ Comparador cara a cara (Periodo A frente a Periodo B)</h3>
+          <p class="section-subtitle">
+            Seleccione dos años completos o dos meses específicos para calcular sus diferencias exactas (Δ = B − A) y superponer sus curvas
+          </p>
+        </div>
+        <div class="h2h-mode-switch" role="group" aria-label="Modo de comparación cara a cara">
+          <button type="button" class="btn ${mode === 'yearly' ? 'btn-primary' : ''}" id="btn-h2h-mode-yearly">📅 Año vs. Año</button>
+          <button type="button" class="btn ${mode === 'monthly' ? 'btn-primary' : ''}" id="btn-h2h-mode-monthly">🗓️ Mes vs. Mes</button>
+        </div>
+      </div>
+
+      <div class="h2h-controls-grid">
+        <div class="h2h-period-card h2h-period-a">
+          <div class="h2h-period-badge">PERIODO A (REFERENCIA)</div>
+          <div class="h2h-selectors-row">
+            ${mode === 'monthly' ? `
+              <label class="h2h-select-label">
+                <span>Mes A</span>
+                <select id="sel-h2h-month-a" class="form-select">${monthOptionsA}</select>
+              </label>
+            ` : ''}
+            <label class="h2h-select-label">
+              <span>Año A</span>
+              <select id="sel-h2h-year-a" class="form-select">${yearOptionsA}</select>
+            </label>
+          </div>
+          <div class="h2h-period-summary">${escapeHtml(profA.sublabel)}</div>
+        </div>
+
+        <div class="h2h-swap-col">
+          <button type="button" class="btn h2h-swap-btn" id="btn-h2h-swap" title="Intercambiar Periodo A y Periodo B">
+            ⇄ Invertir A / B
+          </button>
+        </div>
+
+        <div class="h2h-period-card h2h-period-b">
+          <div class="h2h-period-badge">PERIODO B (CONTRASTE)</div>
+          <div class="h2h-selectors-row">
+            ${mode === 'monthly' ? `
+              <label class="h2h-select-label">
+                <span>Mes B</span>
+                <select id="sel-h2h-month-b" class="form-select">${monthOptionsB}</select>
+              </label>
+            ` : ''}
+            <label class="h2h-select-label">
+              <span>Año B</span>
+              <select id="sel-h2h-year-b" class="form-select">${yearOptionsB}</select>
+            </label>
+          </div>
+          <div class="h2h-period-summary">${escapeHtml(profB.sublabel)}</div>
+        </div>
+      </div>
+
+      <div class="h2h-presets-row">
+        <span class="h2h-presets-label">Cruces destacados:</span>
+        <button type="button" class="term-chip-link" data-h2h-preset="yearly:2023:8:2025:8">2023 (récord lluvia) vs. 2025</button>
+        <button type="button" class="term-chip-link" data-h2h-preset="yearly:2022:8:2024:8">2022 vs. 2024 (récord calor/viento)</button>
+        <button type="button" class="term-chip-link" data-h2h-preset="monthly:2023:8:2024:8">Agosto 2023 vs. Agosto 2024 (>40 °C)</button>
+        <button type="button" class="term-chip-link" data-h2h-preset="monthly:2023:1:2025:1">Enero 2023 vs. Enero 2025</button>
+        <button type="button" class="term-chip-link" data-h2h-preset="monthly:2025:10:2026:10">Octubre 2025 vs. Octubre 2026</button>
+      </div>
+
+      ${verdictHtml}
+
+      <div class="kpi-grid-4" style="margin-bottom:20px">
+        <div class="kpi-card">
+          <div class="kpi-label">Δ Temperatura media (B − A)</div>
+          <div class="kpi-value" style="color:${dTemp > 0 ? 'var(--accent-heat)' : dTemp < 0 ? 'var(--accent-cold)' : 'var(--txt-primary)'}">
+            ${dTemp !== null ? fmtSignNum(dTemp, 1, '°C') : '—'}
+          </div>
+          <div class="kpi-meta">${escapeHtml(profA.shortLabel)}: <strong>${fmtNum(profA.tempMean, 1)} °C</strong> · ${escapeHtml(profB.shortLabel)}: <strong>${fmtNum(profB.tempMean, 1)} °C</strong></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Δ Precipitación acumulada (B − A)</div>
+          <div class="kpi-value" style="color:var(--accent-rain)">
+            ${dRain !== null ? fmtSignNum(dRain, 1, 'mm') : '—'}
+          </div>
+          <div class="kpi-meta">${dRainPct !== null ? `Variación: <strong>${fmtSignNum(dRainPct, 1, '%')}</strong> · ` : ''}${profA.rainDays02 ?? '—'} vs. ${profB.rainDays02 ?? '—'} días de lluvia</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Δ Demanda calefacción (HDD)</div>
+          <div class="kpi-value" style="color:var(--accent-forest)">
+            ${dHdd !== null ? fmtSignNum(dHdd, 1, 'HDD') : '—'}
+          </div>
+          <div class="kpi-meta">GDD agrícola: <strong>${fmtNum(profA.gdd, 0)}</strong> vs. <strong>${fmtNum(profB.gdd, 0)}</strong></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Δ Días patrón Foehn / surada</div>
+          <div class="kpi-value" style="color:var(--accent-solar)">
+            ${dFoehn !== null ? fmtSignNum(dFoehn, 0, 'días') : '—'}
+          </div>
+          <div class="kpi-meta">Racha máx.: <strong>${fmtNum(profA.windGustMax, 1)}</strong> vs. <strong>${fmtNum(profB.windGustMax, 1)} km/h</strong></div>
+        </div>
+      </div>
+
+      <div class="chart-panel" style="margin-bottom:22px">
+        <div class="chart-panel-header">
+          <div>
+            <h4 class="chart-panel-title">📈 Superposición directa: ${escapeHtml(profA.label)} vs. ${escapeHtml(profB.label)}</h4>
+            <p class="chart-panel-subtitle">
+              ${mode === 'yearly'
+                ? 'Evolución mensual comparada de temperatura media (líneas, eje izquierdo) y precipitación acumulada (barras, eje derecho)'
+                : 'Evolución diaria (días 1 al 31) de temperatura media diaria (líneas) y lluvia diaria (barras)'}
+            </p>
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:340px">
+          <canvas id="chart-h2h-comparison"></canvas>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table h2h-table">
+          <thead>
+            <tr>
+              <th>Indicador climatológico</th>
+              <th class="num" style="color:#2563eb">Periodo A (${escapeHtml(profA.shortLabel)})</th>
+              <th style="width:180px;text-align:center">Proporción A vs. B</th>
+              <th class="num" style="color:#d97706">Periodo B (${escapeHtml(profB.shortLabel)})</th>
+              <th class="num">Diferencia (B − A)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${scoreboardRowsHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    // Renderizar gráfico superpuesto A vs B
+    const pal = chartPalette();
+    mountChart('comp-h2h-dual', 'chart-h2h-comparison', {
+      data: {
+        labels: profA.seriesLabels,
+        datasets: [
+          {
+            type: 'line',
+            label: `T. media ${profA.shortLabel} (°C)`,
+            data: profA.seriesTemp,
+            borderColor: '#2563eb',
+            backgroundColor: '#2563eb',
+            borderWidth: 2.5,
+            pointRadius: mode === 'yearly' ? 4 : 2.5,
+            tension: 0.25,
+            yAxisID: 'yTemp',
+          },
+          {
+            type: 'line',
+            label: `T. media ${profB.shortLabel} (°C)`,
+            data: profB.seriesTemp,
+            borderColor: '#d97706',
+            backgroundColor: '#d97706',
+            borderWidth: 2.5,
+            pointRadius: mode === 'yearly' ? 4 : 2.5,
+            tension: 0.25,
+            yAxisID: 'yTemp',
+          },
+          {
+            type: 'bar',
+            label: `Lluvia ${profA.shortLabel} (mm)`,
+            data: profA.seriesRain,
+            backgroundColor: 'rgba(37, 99, 235, 0.32)',
+            borderColor: '#2563eb',
+            borderWidth: 1,
+            borderRadius: 3,
+            yAxisID: 'yRain',
+          },
+          {
+            type: 'bar',
+            label: `Lluvia ${profB.shortLabel} (mm)`,
+            data: profB.seriesRain,
+            backgroundColor: 'rgba(217, 119, 6, 0.36)',
+            borderColor: '#d97706',
+            borderWidth: 1,
+            borderRadius: 3,
+            yAxisID: 'yRain',
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: pal.text } },
+        },
+        scales: {
+          x: {
+            ticks: { color: pal.text },
+            grid: { color: pal.grid },
+          },
+          yTemp: {
+            type: 'linear',
+            position: 'left',
+            title: { display: true, text: 'Temperatura media (°C)', color: pal.text },
+            ticks: { color: pal.text },
+            grid: { color: pal.grid },
+          },
+          yRain: {
+            type: 'linear',
+            position: 'right',
+            beginAtZero: true,
+            title: { display: true, text: 'Precipitación (mm)', color: pal.rain },
+            ticks: { color: pal.rain },
+            grid: { drawOnChartArea: false },
+          },
+        },
+      },
+    });
+
+    // Eventos de interacción del comparador cara a cara
+    document.getElementById('btn-h2h-mode-yearly')?.addEventListener('click', () => {
+      STATE.headToHead.mode = 'yearly';
+      renderHeadToHeadComparator(comp);
+    });
+    document.getElementById('btn-h2h-mode-monthly')?.addEventListener('click', () => {
+      STATE.headToHead.mode = 'monthly';
+      renderHeadToHeadComparator(comp);
+    });
+    document.getElementById('sel-h2h-year-a')?.addEventListener('change', (e) => {
+      STATE.headToHead.yearA = Number(e.target.value);
+      renderHeadToHeadComparator(comp);
+    });
+    document.getElementById('sel-h2h-year-b')?.addEventListener('change', (e) => {
+      STATE.headToHead.yearB = Number(e.target.value);
+      renderHeadToHeadComparator(comp);
+    });
+    document.getElementById('sel-h2h-month-a')?.addEventListener('change', (e) => {
+      STATE.headToHead.monthA = Number(e.target.value);
+      renderHeadToHeadComparator(comp);
+    });
+    document.getElementById('sel-h2h-month-b')?.addEventListener('change', (e) => {
+      STATE.headToHead.monthB = Number(e.target.value);
+      renderHeadToHeadComparator(comp);
+    });
+    document.getElementById('btn-h2h-swap')?.addEventListener('click', () => {
+      const tmpY = STATE.headToHead.yearA;
+      const tmpM = STATE.headToHead.monthA;
+      STATE.headToHead.yearA = STATE.headToHead.yearB;
+      STATE.headToHead.monthA = STATE.headToHead.monthB;
+      STATE.headToHead.yearB = tmpY;
+      STATE.headToHead.monthB = tmpM;
+      renderHeadToHeadComparator(comp);
+    });
+    h2hContainer.querySelectorAll('[data-h2h-preset]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const parts = (btn.getAttribute('data-h2h-preset') || '').split(':');
+        if (parts.length === 5) {
+          STATE.headToHead.mode = parts[0];
+          STATE.headToHead.yearA = Number(parts[1]);
+          STATE.headToHead.monthA = Number(parts[2]);
+          STATE.headToHead.yearB = Number(parts[3]);
+          STATE.headToHead.monthB = Number(parts[4]);
+          renderHeadToHeadComparator(comp);
+        }
+      });
+    });
   }
 
   function renderComparisonCharts(comp) {

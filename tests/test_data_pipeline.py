@@ -487,6 +487,47 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("AlmanacDocument", sch["$defs"])
         self.assertIn("StationGeoJSON", sch["$defs"])
 
+    def test_head_to_head_comparator_data_readiness(self) -> None:
+        """
+        EVO-011: Verifica que todos los almanaques anuales y objetos mensuales contengan
+        las propiedades requeridas por el comparador cara a cara (head-to-head) y que
+        el controlador esté integrado en src/js/app.js.
+        """
+        required_monthly_keys = [
+            "month",
+            "name",
+            "valid_days",
+            "calendar_days",
+            "temp_mean",
+            "temp_max_mean",
+            "temp_min_mean",
+            "temp_max_abs",
+            "temp_min_abs",
+            "rain_total",
+            "rain_days_02",
+            "rain_days_10",
+            "rain_max_day",
+            "wind_speed_mean",
+            "wind_gust_max",
+            "frost_days",
+            "hot_days_30",
+            "tropical_nights",
+            "foehn_days",
+            "hdd_15_5",
+            "cdd_21_0",
+            "gdd_10_0",
+        ]
+        for y, alm in self.almanacs.items():
+            self.assertEqual(len(alm["monthly"]), 12, f"[{y}] Debe tener 12 meses en alm['monthly']")
+            for m_obj in alm["monthly"]:
+                for k in required_monthly_keys:
+                    self.assertIn(k, m_obj, f"[{y} mes {m_obj.get('month')}] Falta clave '{k}' para EVO-011")
+
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("function extractH2HProfile", app_js)
+        self.assertIn("function renderHeadToHeadComparator", app_js)
+        self.assertIn("h2h-comparator-container", app_js)
+
 
 
 
