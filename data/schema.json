@@ -1,0 +1,317 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://egofer.github.io/meteoriotuerto-web/data/schema.json",
+  "title": "Esquema y diccionario de datos abiertos de MeteoRiotuerto",
+  "description": "Contrato técnico formal (JSON Schema Draft 2020-12) y diccionario de variables meteorológicas, bioclimáticas y estadísticas del archivo histórico MeteoRiotuerto (Barrio de Arriba, Riotuerto, Cantabria, España; 115 m s. n. m.).",
+  "version": "1.1.0",
+  "license": "CC BY 4.0 (Atribución 4.0 Internacional — citar fuente 'MeteoRiotuerto')",
+  "crs": "WGS84 (EPSG:4326)",
+  "timezone": "Europe/Madrid",
+  "static_api_endpoints": [
+    {
+      "file": "data/index.json",
+      "format": "JSON",
+      "description": "Metadatos de la estación, cobertura temporal, línea base 2022–2025, récords principales y tabla resumen interanual."
+    },
+    {
+      "file": "data/almanac_{YYYY}.json",
+      "years": [
+        2022,
+        2023,
+        2024,
+        2025,
+        2026
+      ],
+      "format": "JSON",
+      "description": "Anuario climatológico completo del año YYYY: crónica sinóptica, estadísticas, percentiles P05–P95, bandas de confort, grados día, análisis Foehn, rosa de vientos, desglose mensual y serie diaria íntegra."
+    },
+    {
+      "file": "data/records.json",
+      "format": "JSON",
+      "description": "Catálogo de récords históricos absolutos, rankings Top 10 por variable y efemérides extremas por año y mes."
+    },
+    {
+      "file": "data/comparisons.json",
+      "format": "JSON",
+      "description": "Matrices comparativas multianuales (mensuales, estacionales y diarias acumuladas), anomalías frente a 2022–2025 y distribución térmica interanual."
+    },
+    {
+      "file": "data/glossary.json",
+      "format": "JSON",
+      "description": "Glosario enciclopédico estructurado con 36 conceptos meteorológicos y microclimáticos en 6 categorías temáticas."
+    },
+    {
+      "file": "data/station.geojson",
+      "format": "GeoJSON (RFC 7946)",
+      "description": "Capa vectorial de puntos (WGS84 / EPSG:4326) con la estación meteorológica, sus atributos climáticos y las referencias orográficas del valle, lista para QGIS/ArcGIS."
+    },
+    {
+      "file": "data/schema.json",
+      "format": "JSON Schema (Draft 2020-12)",
+      "description": "Este documento: diccionario de variables físicas, unidades de medida y esquema formal de validación."
+    }
+  ],
+  "variables_dictionary": {
+    "temp_mean": {
+      "label": "Temperatura media diaria",
+      "unit": "°C",
+      "type": "number | null",
+      "precision_decimals": 1,
+      "sensor": "Termohigrómetro exterior ventilado (Sainlogic WS3500)",
+      "wmo_note": "Promedio aritmético de las lecturas semihorarias (48 registros/día) o resumen diario consolidado."
+    },
+    "temp_max": {
+      "label": "Temperatura máxima diaria",
+      "unit": "°C",
+      "type": "number | null",
+      "precision_decimals": 1,
+      "invariant": "temp_max >= temp_mean >= temp_min"
+    },
+    "temp_min": {
+      "label": "Temperatura mínima diaria",
+      "unit": "°C",
+      "type": "number | null",
+      "precision_decimals": 1,
+      "invariant": "temp_min <= temp_mean <= temp_max"
+    },
+    "temp_amp": {
+      "label": "Amplitud u oscilación térmica diaria",
+      "unit": "°C",
+      "type": "number | null",
+      "formula": "temp_max - temp_min",
+      "precision_decimals": 1
+    },
+    "dew_point_mean": {
+      "label": "Punto de rocío medio diario",
+      "unit": "°C",
+      "type": "number | null",
+      "precision_decimals": 1
+    },
+    "feels_like_max": {
+      "label": "Sensación térmica máxima diaria",
+      "unit": "°C",
+      "type": "number | null",
+      "precision_decimals": 1
+    },
+    "feels_like_min": {
+      "label": "Sensación térmica mínima diaria",
+      "unit": "°C",
+      "type": "number | null",
+      "precision_decimals": 1
+    },
+    "rain_daily": {
+      "label": "Precipitación diaria acumulada",
+      "unit": "mm (l/m²)",
+      "type": "number | null",
+      "precision_decimals": 1,
+      "invariant": "rain_daily >= 0.0",
+      "wmo_note": "Día de lluvia apreciable cuando rain_daily >= 0.2 mm."
+    },
+    "rain_rate_max": {
+      "label": "Intensidad máxima de precipitación diaria",
+      "unit": "mm/h",
+      "type": "number | null",
+      "precision_decimals": 1,
+      "invariant": "rain_rate_max >= 0.0"
+    },
+    "humidity_mean": {
+      "label": "Humedad relativa exterior media",
+      "unit": "%",
+      "type": "number | null",
+      "precision_decimals": 1,
+      "valid_range": [
+        1.0,
+        100.0
+      ]
+    },
+    "wind_speed": {
+      "label": "Velocidad media diaria del viento",
+      "unit": "km/h",
+      "type": "number | null",
+      "precision_decimals": 1,
+      "invariant": "wind_speed >= 0.0"
+    },
+    "wind_gust": {
+      "label": "Racha máxima diaria de viento",
+      "unit": "km/h",
+      "type": "number | null",
+      "precision_decimals": 1,
+      "invariant": "wind_gust >= wind_speed >= 0.0"
+    },
+    "wind_dir": {
+      "label": "Dirección vectorial dominante del viento",
+      "unit": "grados acimutales (°)",
+      "type": "number | null",
+      "valid_range": [
+        0,
+        360
+      ],
+      "wmo_note": "Rosa de 16 rumbos (N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)."
+    },
+    "pressure_rel": {
+      "label": "Presión atmosférica relativa (reducida al nivel del mar)",
+      "unit": "hPa",
+      "type": "number | null",
+      "precision_decimals": 1
+    },
+    "solar_max": {
+      "label": "Irradiancia solar global máxima diaria",
+      "unit": "W/m²",
+      "type": "number | null",
+      "precision_decimals": 1,
+      "wmo_note": "Umbral OMM de insolación directa fijado en >= 120 W/m² sobre el archivo semihorario."
+    },
+    "uv_max": {
+      "label": "Índice ultravioleta (UVI) máximo diario",
+      "unit": "índice adimensional",
+      "type": "number | null",
+      "precision_decimals": 0
+    },
+    "hdd_15_5": {
+      "label": "Grados día de calefacción (Heating Degree Days)",
+      "unit": "°C·día (HDD)",
+      "type": "number",
+      "formula": "max(0.0, 15.5 - temp_mean)",
+      "base_threshold_c": 15.5
+    },
+    "cdd_21_0": {
+      "label": "Grados día de refrigeración (Cooling Degree Days)",
+      "unit": "°C·día (CDD)",
+      "type": "number",
+      "formula": "max(0.0, temp_mean - 21.0)",
+      "base_threshold_c": 21.0
+    },
+    "gdd_10_0": {
+      "label": "Grados día de desarrollo vegetativo (Growing Degree Days)",
+      "unit": "°C·día (GDD)",
+      "type": "number",
+      "formula": "max(0.0, temp_mean - 10.0)",
+      "base_threshold_c": 10.0
+    }
+  },
+  "$defs": {
+    "AlmanacDocument": {
+      "type": "object",
+      "required": [
+        "year",
+        "is_provisional",
+        "coverage",
+        "chronicle",
+        "stats",
+        "foehn_analysis",
+        "wind_rose",
+        "beaufort",
+        "monthly",
+        "daily_series"
+      ],
+      "properties": {
+        "year": {
+          "type": "integer",
+          "minimum": 2020,
+          "maximum": 2100
+        },
+        "is_provisional": {
+          "type": "boolean"
+        },
+        "first_observed_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "last_observed_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "coverage": {
+          "type": "object",
+          "required": [
+            "calendar_days",
+            "observed_span_days",
+            "valid_days",
+            "coverage_pct"
+          ]
+        },
+        "stats": {
+          "type": "object",
+          "required": [
+            "temperature",
+            "thermal_percentiles",
+            "thermal_comfort_bands",
+            "precipitation",
+            "wind",
+            "atmosphere_and_solar",
+            "degree_days"
+          ]
+        },
+        "daily_series": {
+          "type": "object",
+          "required": [
+            "dates",
+            "temp_mean",
+            "temp_max",
+            "temp_min",
+            "temp_amp",
+            "rain_daily",
+            "wind_speed",
+            "wind_gust"
+          ]
+        }
+      }
+    },
+    "StationGeoJSON": {
+      "type": "object",
+      "required": [
+        "type",
+        "features"
+      ],
+      "properties": {
+        "type": {
+          "const": "FeatureCollection"
+        },
+        "features": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "id",
+              "geometry",
+              "properties"
+            ],
+            "properties": {
+              "type": {
+                "const": "Feature"
+              },
+              "id": {
+                "type": "string"
+              },
+              "geometry": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "coordinates"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "Point"
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 3,
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "properties": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

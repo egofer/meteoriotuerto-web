@@ -3458,16 +3458,61 @@
         </div>
       </section>
 
-      <!-- Descarga directa de todos los productos JSON -->
-      <section class="section-block">
+      <!-- EVO-010: Interoperabilidad SIG (GeoJSON), JSON Schema y Datos Abiertos -->
+      <section class="section-block" aria-labelledby="sec-opendata-sig">
         <div class="section-header">
           <div>
-            <h3 class="section-title">Descarga de productos de datos y repositorio fuente</h3>
-            <p class="section-subtitle">Archivos JSON estáticos generados reproducibles y auditados</p>
+            <h3 id="sec-opendata-sig" class="section-title">🗺️ Interoperabilidad SIG (GeoJSON), esquema técnico y datos abiertos</h3>
+            <p class="section-subtitle">
+              Recursos estandarizados para Sistemas de Información Geográfica (QGIS, ArcGIS) y análisis científico en Python o R
+            </p>
+          </div>
+        </div>
+
+        <div class="chronicle-grid" style="margin-bottom: 18px;">
+          <div class="chronicle-card">
+            <h3>1. Capa vectorial GeoJSON para SIG (<code>station.geojson</code>)</h3>
+            <p>
+              Publicada bajo el estándar internacional <strong>RFC 7946 (GeoJSON)</strong> en coordenadas geodésicas
+              <strong>WGS84 (<code>EPSG:4326</code>)</strong>. Contiene la entidad puntual de la estación de Barrio de Arriba
+              (<code>[-3.670, 43.341, 115]</code>) con una tabla de atributos completa (promedios 2022–2025, mediana térmica,
+              pluviosidad, grados día <code>HDD/CDD/GDD</code> y récords absolutos), acompañada de los hitos fisiográficos
+              que modulan el valle (divisoria del <strong>puerto de Alisas</strong> a 674 m s. n. m. y vega del Miera en
+              <strong>La Cavada</strong> a 62 m s. n. m.). Puede arrastrarse directamente sobre <strong>QGIS</strong> o abrirse
+              en el visor cartográfico nativo de GitHub.
+            </p>
+            <div class="btn-group" style="margin-top: 12px;">
+              <a href="./data/station.geojson" download="meteoriotuerto_station.geojson" class="btn btn-primary">⬇ Descargar ficha SIG (station.geojson)</a>
+              <a href="https://github.com/egofer/meteoriotuerto-web/blob/main/data/station.geojson" target="_blank" rel="noopener noreferrer" class="btn">Ver mapa GeoJSON en GitHub ↗</a>
+            </div>
+          </div>
+
+          <div class="chronicle-card">
+            <h3>2. Contrato y diccionario JSON Schema (<code>schema.json</code>)</h3>
+            <p>
+              Especificación formal <strong>JSON Schema (Draft 2020-12)</strong> que documenta la estructura de los 11 archivos
+              de la API estática, los invariantes físicos de validación y el diccionario completo de las <strong>19 variables
+              meteorológicas y bioclimáticas</strong> (unidades en el SI/OMM, precisión decimal, sensores y fórmulas de cálculo).
+              Facilita la ingesta directa y validación automática desde cuadernos <strong>Jupyter, Python (<code>pandas</code> /
+              <code>geopandas</code>) y R</strong>.
+            </p>
+            <div class="btn-group" style="margin-top: 12px;">
+              <a href="./data/schema.json" download="meteoriotuerto_schema.json" class="btn btn-primary">⬇ Descargar esquema técnico (schema.json)</a>
+              <a href="./data/schema.json" target="_blank" rel="noopener" class="btn">Explorar diccionario JSON ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header" style="margin-top: 24px;">
+          <div>
+            <h3 class="section-title">Descarga completa de productos de datos y repositorio fuente</h3>
+            <p class="section-subtitle">Archivos JSON y GeoJSON estáticos generados de forma reproducible y auditada</p>
           </div>
         </div>
         <div class="btn-group">
           <a href="./data/index.json" download="meteoriotuerto_index.json" class="btn btn-primary">⬇ Índice general (index.json)</a>
+          <a href="./data/station.geojson" download="meteoriotuerto_station.geojson" class="btn">⬇ Capa SIG (station.geojson)</a>
+          <a href="./data/schema.json" download="meteoriotuerto_schema.json" class="btn">⬇ Esquema (schema.json)</a>
           <a href="./data/records.json" download="meteoriotuerto_records.json" class="btn">⬇ Récords e históricos (records.json)</a>
           <a href="./data/comparisons.json" download="meteoriotuerto_comparisons.json" class="btn">⬇ Comparativas (comparisons.json)</a>
           <a href="./data/glossary.json" download="meteoriotuerto_glossary.json" class="btn">⬇ Glosario y conceptos (glossary.json)</a>

@@ -67,7 +67,7 @@ def snapshot_json_dir(data_dir: Path) -> Dict[str, Tuple[str, Dict[str, Any]]]:
     snap: Dict[str, Tuple[str, Dict[str, Any]]] = {}
     if not data_dir.exists():
         return snap
-    for fpath in sorted(data_dir.glob("*.json")):
+    for fpath in sorted(list(data_dir.glob("*.json")) + list(data_dir.glob("*.geojson"))):
         try:
             raw = fpath.read_text(encoding="utf-8")
             parsed = json.loads(raw)

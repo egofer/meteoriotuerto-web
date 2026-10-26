@@ -25,6 +25,8 @@ REQUIRED_FILES = [
     "records.json",
     "comparisons.json",
     "glossary.json",
+    "station.geojson",
+    "schema.json",
     "almanac_2022.json",
     "almanac_2023.json",
     "almanac_2024.json",
@@ -156,7 +158,31 @@ def validate_directory(data_dir: Path) -> List[str]:
             if sa not in term_ids:
                 errors.append(f"Término '{t.get('id')}' referencia a término inexistente en see_also: '{sa}'")
 
-    # 4. Salvaguarda de seguridad, privacidad doméstica e identificadores físicos en los JSONs
+    # 4. Validar ficha GeoJSON (station.geojson) y esquema JSON Schema (schema.json) — EVO-010
+    geojson = loaded.get("station.geojson", {})
+    if geojson.get("type") != "FeatureCollection":
+        errors.append(f"station.geojson debe ser FeatureCollection, encontrado: {geojson.get('type')}")
+    g_features = geojson.get("features", [])
+    if len(g_features) < 3:
+        errors.append(f"station.geojson debe incluir al menos 3 entidades (estación + hitos), encontradas: {len(g_features)}")
+    else:
+        main_feat = g_features[0]
+        coords = main_feat.get("geometry", {}).get("coordinates", [])
+        if coords != [-3.67, 43.341, 115]:
+            errors.append(f"Coordenadas GeoJSON inesperadas en estación principal: {coords}")
+        props = main_feat.get("properties", {})
+        if props.get("record_temp_max_c") != 42.1 or props.get("record_temp_min_c") != -3.1:
+            errors.append("Atributos de récords en station.geojson no coinciden con los valores verificados.")
+
+    schema_doc = loaded.get("schema.json", {})
+    if "2020-12/schema" not in str(schema_doc.get("$schema", "")):
+        errors.append("schema.json no declara JSON Schema Draft 2020-12.")
+    if len(schema_doc.get("variables_dictionary", {})) < 15:
+        errors.append("schema.json tiene un diccionario de variables incompleto.")
+    if "$defs" not in schema_doc:
+        errors.append("schema.json carece del bloque $defs de definiciones formales.")
+
+    # 5. Salvaguarda de seguridad, privacidad doméstica e identificadores físicos en los JSONs
     forbidden_json_patterns = [
         ("Credencial o token expuesto", re.compile(r"(?:ghp_[A-Za-z0-9]+|github_pat_[A-Za-z0-9_]+|APPLICATION_KEY|API_KEY|PASSKEY)")),
         ("Dirección MAC de hardware expuesta", re.compile(r"\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b")),

@@ -30,8 +30,10 @@ import pandas as pd
 
 try:
     from scripts.glossary_data import get_glossary_payload
+    from scripts.open_data_catalog import build_open_data_schema, build_station_geojson
 except ImportError:
     from glossary_data import get_glossary_payload
+    from open_data_catalog import build_open_data_schema, build_station_geojson
 
 # -----------------------------------------------------------------------------
 # Constantes geográficas, meteorológicas y editoriales
@@ -1778,6 +1780,8 @@ def build_all(source_dir: Optional[Path], output_dir: Path, cache_dir: Path) -> 
             "records.json": records_payload,
             "comparisons.json": comparisons_payload,
             "glossary.json": get_glossary_payload(),
+            "station.geojson": build_station_geojson(index_payload, records_payload, comparisons_payload),
+            "schema.json": build_open_data_schema(),
         }
         for y, alm in almanacs.items():
             files_to_write[f"almanac_{y}.json"] = alm

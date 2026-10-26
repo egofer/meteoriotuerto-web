@@ -163,6 +163,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             ROOT_DIR / "docs" / "METODOLOGIA.md",
             ROOT_DIR / "docs" / "GUIA_DESPLIEGUE.md",
             ROOT_DIR / "data" / "glossary.json",
+            ROOT_DIR / "data" / "station.geojson",
+            ROOT_DIR / "data" / "schema.json",
         ]
         for p in required_paths:
             self.assertTrue(p.exists(), f"Falta el archivo requerido: {p}")
@@ -210,6 +212,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
                     "/data/records.json",
                     "/data/comparisons.json",
                     "/data/glossary.json",
+                    "/data/station.geojson",
+                    "/data/schema.json",
                     "/data/almanac_2022.json",
                     "/data/almanac_2025.json",
                 ]:
@@ -444,6 +448,44 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             self.assertTrue(wf_path.exists(), f"Falta el archivo de workflow: {wf_rel}")
             wf_txt = wf_path.read_text(encoding="utf-8")
             self.assertIn("meteoriotuerto_data_updated", wf_txt)
+
+    def test_geojson_and_open_data_schema_integrity(self) -> None:
+        """
+        EVO-010: Verifica la ficha cartográfica GeoJSON (RFC 7946) y el contrato
+        formal JSON Schema (Draft 2020-12) en data/station.geojson y data/schema.json.
+        """
+        geojson_path = self.data_dir / "station.geojson"
+        schema_path = self.data_dir / "schema.json"
+        self.assertTrue(geojson_path.exists())
+        self.assertTrue(schema_path.exists())
+
+        with open(geojson_path, "r", encoding="utf-8") as f:
+            gj = json.load(f)
+
+        self.assertEqual(gj["type"], "FeatureCollection")
+        self.assertEqual(len(gj["bbox"]), 6)
+        self.assertGreaterEqual(len(gj["features"]), 3)
+
+        station_feat = gj["features"][0]
+        self.assertEqual(station_feat["id"], "meteoriotuerto-station")
+        self.assertEqual(station_feat["geometry"]["type"], "Point")
+        self.assertEqual(station_feat["geometry"]["coordinates"], [-3.67, 43.341, 115])
+
+        props = station_feat["properties"]
+        self.assertEqual(props["municipality"], "Riotuerto")
+        self.assertEqual(props["record_temp_max_c"], 42.1)
+        self.assertEqual(props["record_temp_min_c"], -3.1)
+        self.assertEqual(props["record_daily_rain_mm"], 125.9)
+        self.assertEqual(props["record_wind_gust_kmh"], 97.2)
+
+        with open(schema_path, "r", encoding="utf-8") as f:
+            sch = json.load(f)
+
+        self.assertEqual(sch["$schema"], "https://json-schema.org/draft/2020-12/schema")
+        self.assertGreaterEqual(len(sch["static_api_endpoints"]), 7)
+        self.assertGreaterEqual(len(sch["variables_dictionary"]), 18)
+        self.assertIn("AlmanacDocument", sch["$defs"])
+        self.assertIn("StationGeoJSON", sch["$defs"])
 
 
 
