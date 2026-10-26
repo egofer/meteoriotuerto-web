@@ -66,11 +66,26 @@ git push -u origin main
 
 ---
 
-## 4. Proceso de actualización automática de los datos (EVO-009)
+## 4. Proceso de actualización automática de los datos
 
-Existen dos mecanismos complementarios, atómicos e idempotentes para mantener actualizado el almanaque digital tras cada descarga de `ecowitt_downloader`:
+Existen tres formas complementarias e idempotentes de mantener actualizado el ecosistema de datos de MeteoRiotuerto:
 
-### Opción A: Sincronización atómica desde el flujo diario local (`scripts/sync_data.py` y `run_daily.sh`)
+### Opción 1: Automatización 100 % Cloud en GitHub Actions (Recomendada)
+Toda la cadena de descarga, procesado, sincronización y despliegue web se ejecuta de manera autónoma en la nube de GitHub sin depender de tener encendido ningún ordenador ni NAS:
+1. **Flujo de origen en `egofer/ecowitt_downloader` (`.github/workflows/daily_sync.yml`):**
+   - Se ejecuta diariamente a las 05:00 UTC (06:00/07:00 hora peninsular) o bajo demanda mediante *workflow_dispatch*.
+   - Utiliza secretos seguros de GitHub (`ECOWITT_APPLICATION_KEY`, `ECOWITT_API_KEY`, `ECOWITT_DEVICE_MAC`, `GH_PAT`).
+   - Descarga los datos de la estación con `ecowitt_downloader.py`.
+   - Genera resúmenes y gráficos con `sync_meteoriotuerto.py`.
+   - Realiza `git commit` y `push` automático al repositorio de datos `egofer/meteoriotuerto`.
+   - Dispara un evento `repository_dispatch` hacia `egofer/meteoriotuerto-web`.
+2. **Flujo receptor en `egofer/meteoriotuerto-web` (`.github/workflows/deploy.yml`):**
+   - Recibe el evento `meteoriotuerto_data_updated`.
+   - Compila los productos JSON optimizados (`scripts/sync_data.py`).
+   - Ejecuta la batería de validaciones y tests automatizados (21 tests).
+   - Publica los cambios y despliega automáticamente la nueva versión en GitHub Pages.
+
+### Opción 2: Sincronización atómica desde el flujo diario local (`scripts/sync_data.py` y `run_daily.sh`)
 El script `scripts/sync_data.py` orquesta en un solo paso la compilación (`build_data.py`), la auditoría de invariantes (`validate_data.py`), las pruebas unitarias (`unittest`), la comparación semántica de cambios (ignorando marcas de tiempo efímeras si no hay datos nuevos) y la publicación en GitHub:
 ```bash
 python3 scripts/sync_data.py --push
