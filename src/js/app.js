@@ -5102,6 +5102,307 @@
   }
 
   /* ------------------------------------------------------------------------
+   * MODELO TOPOCLIMÁTICO Y PERFIL OROGRÁFICO INTERACTIVO (EVO-018)
+   * ------------------------------------------------------------------------ */
+  const TOPOGRAPHY_DATA = {
+    foehn: {
+      id: 'foehn',
+      title: 'Viento Sur y Efecto Foehn («La Surada cántabra»)',
+      kicker: 'DINÁMICA 1: ADVECCIÓN DEL SUR Y SOTAVENTO ADIABÁTICO',
+      color: '#ea580c',
+      badge: '🔥 Efecto Foehn',
+      physicalDescription: 'Cuando las borrascas o frentes atlánticos se aproximan por el oeste, se canaliza un potente flujo del sector Sur-Sudoeste sobre la cordillera cantábrica. El aire húmedo se ve forzado a ascender por la vertiente sur perdiendo humedad por condensación. Al rebasar las cumbres de Peña Pelada (686 m) y Alto de Brenas (579 m) y desplomarse hacia el fondo del valle del Covadal (115 m), experimenta compresión adiabática seca: se recalienta a un ritmo de +1 °C por cada 100 m de descenso y su humedad relativa se desploma violentamente.',
+      territorialImpact: 'Provoca desecación repentina de praderas y vegetación arbórea, aceleración eólica canalizada por el desfiladero con rachas huracanadas en Barrio de Arriba y riesgo extremo de incendios forestales. Históricamente se conoce como «el viento de las castañas» por favorecer su caída en otoño, y altera el biorritmo vecinal por ionización positiva y subidas térmicas fulgurantes en pleno invierno.',
+      records: [
+        { label: 'Racha máxima histórica', val: '86,4 km/h', sub: 'SW · 27 de marzo de 2024' },
+        { label: 'Desplome de humedad', val: '22 %', sub: 'Mínimo del registro con Surada' },
+        { label: 'Salto térmico en 3h', val: '+12,8 °C', sub: 'Típico amanecer con viento sur' },
+        { label: 'Noches tropicales', val: '4 noches', sub: 'Tª mín ≥20 °C en el año 2026' },
+      ],
+    },
+    orographic: {
+      id: 'orographic',
+      title: 'Frentes del Noroeste y Retención Orográfica',
+      kicker: 'DINÁMICA 2: ADVECCIÓN CANTÁBRICA Y ASCENSO FORZADO',
+      color: '#0284c7',
+      badge: '🌧️ Lluvia orográfica',
+      physicalDescription: 'Tras el paso de frentes fríos o con vientos marítimos del noroeste («gallego»), masas de aire polar marítimo muy húmedas procedentes del golfo de Bizkaia penetran tierra adentro por el curso bajo del río Miera desde la ría de Cubas (a solo 14 km de Riotuerto). Al encontrarse con la rampa orográfica del valle del Covadal y la barrera frontal de Peña Pelada y la sierra de Alisas, el aire no puede rodear el relieve y asciende forzado. El enfriamiento por expansión adiabática satura la masa de aire, generando densas nubes estratiformes encajonadas y precipitaciones orográficas copiosas.',
+      territorialImpact: 'Explica por qué Riotuerto registra pluviometrías anuales extraordinarias (entre 1.600 y más de 2.100 mm), superando con creces los acumulados de la franja costera de Santander. Proporciona una productividad forrajera excepcional para los pastizales cántabros y alimenta el caudal ininterrumpido del río Covadal y los acuíferos kársticos, aunque incrementa el riesgo de encharcamiento en vegas llanas en temporales de invierno.',
+      records: [
+        { label: 'Precipitación anual récord', val: '2.124,4 mm', sub: 'Año histórico 2024' },
+        { label: 'Máxima lluvia en 24h', val: '83,8 mm', sub: '7 de octubre de 2026' },
+        { label: 'Días de lluvia apreciable', val: '184 días', sub: 'Promedio anual ≥0,2 mm' },
+        { label: 'Humedad relativa media', val: '82,5 %', sub: 'Régimen oceánico hiperhúmedo' },
+      ],
+    },
+    inversion: {
+      id: 'inversion',
+      title: 'Noches Anticiclónicas e Inversión Térmica en Fondo de Valle',
+      kicker: 'DINÁMICA 3: DRENAJE CATABÁTICO Y LAGO DE AIRE FRÍO',
+      color: '#6366f1',
+      badge: '❄️ Inversión térmica',
+      physicalDescription: 'Bajo situaciones de alta presión invernal (anticiclón) con cielos completamente despejados y calma total de viento, el suelo de Riotuerto pierde calor de forma masiva por emisión de radiación infrarroja hacia el espacio exterior. El aire en contacto directo con las laderas y pastos se enfría bruscamente, haciéndose más denso y pesado. Por pura gravedad, este aire gélido drena lentamente laderas abajo («viento catabático») y se embalsa en el fondo cóncavo del valle en Barrio de Arriba (115 m) y La Cavada (80 m). Se invierte el gradiente térmico habitual.',
+      territorialImpact: 'Genera las heladas más intensas del año en el fondo de valle (alcanzando hasta -3,1 °C) y formación de densa escarcha blanca sobre prados y techados, mientras que las viviendas situadas a media ladera (Monte, Rucandio) registran valores varios grados más suaves. Con frecuencia favorece la aparición de nieblas de irradiación matinales que se disipan rápidamente con el calentamiento solar.',
+      records: [
+        { label: 'Mínima absoluta del valle', val: '-3,1 °C', sub: '20 de enero de 2024' },
+        { label: 'Días de helada al año', val: '8 a 14 días', sub: 'Tª mín ≤0 °C en Barrio de Arriba' },
+        { label: 'Diferencial térmico fondo/ladera', val: '3 a 5 °C', sub: 'Más frío en el valle que en cumbres' },
+        { label: 'Calma eólica nocturna', val: '<1,0 km/h', sub: 'Ausencia de turbulencia' },
+      ],
+    },
+  };
+
+  function generateTopographySVG(mode, isDark) {
+    const skyFill = mode === 'foehn'
+      ? (isDark ? 'url(#sky-grad-foehn-dark)' : 'url(#sky-grad-foehn)')
+      : mode === 'orographic'
+      ? (isDark ? 'url(#sky-grad-orographic-dark)' : 'url(#sky-grad-orographic)')
+      : 'url(#sky-grad-inversion)';
+
+    const terrainFill = isDark ? 'url(#terrain-grad-dark)' : 'url(#terrain-grad)';
+    const gridLineColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.07)';
+    const textMutedColor = isDark ? '#94a3b8' : '#64748b';
+    const textPrimaryColor = isDark ? '#f8fafc' : '#0f172a';
+
+    let dynamicLayerHtml = '';
+
+    if (mode === 'foehn') {
+      dynamicLayerHtml = `
+        <g class="topo-flow-left">
+          <path d="M 855,105 Q 805,45 745,80 Q 640,155 540,215 Q 470,248 430,265" fill="none" stroke="#ea580c" stroke-width="3.5" stroke-linecap="round" />
+          <path d="M 865,135 Q 815,75 765,100 Q 660,175 565,230 Q 495,258 440,270" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" />
+          <path d="M 845,75 Q 795,25 730,60 Q 625,135 525,200 Q 455,235 395,255" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" />
+        </g>
+        <polygon points="425,268 440,260 435,275" fill="#ea580c" />
+        <ellipse cx="800" cy="50" rx="35" ry="12" fill="${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.85)'}" />
+        <ellipse cx="785" cy="48" rx="20" ry="9" fill="${isDark ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.95)'}" />
+        <g transform="translate(480, 135)">
+          <rect x="0" y="0" width="220" height="30" rx="5" fill="${isDark ? 'rgba(30,10,5,0.88)' : 'rgba(255,247,237,0.95)'}" stroke="#ea580c" stroke-width="1.2" />
+          <text x="110" y="20" font-size="11" font-weight="700" text-anchor="middle" fill="${isDark ? '#fed7aa' : '#9a3412'}">Descenso adiabático (+1 °C/100m)</text>
+        </g>
+        <text x="830" y="35" font-size="11" font-weight="700" fill="#ea580c" text-anchor="end">Viento Sur / Ábrego ⮨</text>
+      `;
+    } else if (mode === 'orographic') {
+      dynamicLayerHtml = `
+        <g class="topo-flow-right">
+          <path d="M 65,275 Q 180,270 290,255 Q 410,240 520,205 Q 630,155 710,95 Q 760,65 795,60" fill="none" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round" />
+          <path d="M 65,245 Q 180,240 300,225 Q 420,205 530,170 Q 640,125 720,70" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" />
+        </g>
+        <polygon points="795,60 782,53 784,68" fill="#0284c7" />
+        <path d="M 360,170 Q 420,130 480,140 Q 540,110 610,120 Q 680,80 750,90 Q 790,50 830,70 L 830,140 Q 720,160 580,210 Q 450,250 360,250 Z" fill="${isDark ? 'rgba(100,116,139,0.45)' : 'rgba(203,213,225,0.75)'}" />
+        <ellipse cx="520" cy="130" rx="60" ry="25" fill="${isDark ? 'rgba(148,163,184,0.35)' : 'rgba(241,245,249,0.85)'}" />
+        <ellipse cx="640" cy="100" rx="70" ry="30" fill="${isDark ? 'rgba(148,163,184,0.4)' : 'rgba(241,245,249,0.9)'}" />
+        <ellipse cx="740" cy="75" rx="55" ry="22" fill="${isDark ? 'rgba(148,163,184,0.45)' : 'rgba(241,245,249,0.95)'}" />
+        <g stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="4 6" opacity="0.85">
+          <line x1="390" y1="180" x2="380" y2="245" />
+          <line x1="420" y1="170" x2="410" y2="240" />
+          <line x1="445" y1="165" x2="435" y2="242" />
+          <line x1="470" y1="160" x2="460" y2="235" />
+          <line x1="500" y1="155" x2="490" y2="228" />
+          <line x1="535" y1="150" x2="525" y2="218" />
+          <line x1="570" y1="140" x2="560" y2="205" />
+        </g>
+        <g transform="translate(190, 85)">
+          <rect x="0" y="0" width="230" height="30" rx="5" fill="${isDark ? 'rgba(15,23,42,0.88)' : 'rgba(240,249,255,0.95)'}" stroke="#0284c7" stroke-width="1.2" />
+          <text x="115" y="20" font-size="11" font-weight="700" text-anchor="middle" fill="${isDark ? '#bae6fd' : '#0369a1'}">Retención y condensación forzada</text>
+        </g>
+        <text x="75" y="235" font-size="11" font-weight="700" fill="#0284c7">⮞ Flujo oceánico húmedo</text>
+      `;
+    } else if (mode === 'inversion') {
+      dynamicLayerHtml = `
+        <circle cx="120" cy="55" r="14" fill="${isDark ? '#fef08a' : '#fde047'}" />
+        <circle cx="126" cy="51" r="13" fill="${isDark ? '#0f172a' : '#1e1b4b'}" />
+        <text x="210" y="60" fill="#fef08a" font-size="10" opacity="0.8">★</text>
+        <text x="340" y="45" fill="#fef08a" font-size="8" opacity="0.6">★</text>
+        <text x="510" y="55" fill="#fef08a" font-size="12" opacity="0.85">★</text>
+        <text x="670" y="40" fill="#fef08a" font-size="9" opacity="0.7">★</text>
+        <text x="770" y="48" fill="#fef08a" font-size="11" opacity="0.8">★</text>
+        <path d="M 720,135 Q 670,180 620,225" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3 3" />
+        <polygon points="620,225 628,217 631,225" fill="#38bdf8" />
+        <path d="M 590,235 Q 530,250 480,265" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3 3" />
+        <polygon points="480,265 490,260 491,268" fill="#38bdf8" />
+        <path d="M 270,288 Q 350,283 430,270 Q 510,263 560,248 L 560,312 L 270,312 Z" fill="url(#cold-lake-grad)" />
+        <path d="M 300,282 Q 330,278 360,282 T 420,282 T 480,282 T 540,282" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" />
+        <path d="M 320,292 Q 350,288 380,292 T 440,292 T 500,292" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" />
+        <g transform="translate(365, 235)">
+          <rect x="0" y="0" width="130" height="24" rx="4" fill="rgba(15,23,42,0.92)" stroke="#38bdf8" stroke-width="1.2" />
+          <text x="65" y="16" font-size="10" font-weight="700" text-anchor="middle" fill="#67e8f9">❄ Fondo: -3,1 °C</text>
+        </g>
+        <g transform="translate(565, 185)">
+          <rect x="0" y="0" width="130" height="24" rx="4" fill="rgba(15,23,42,0.92)" stroke="#f59e0b" stroke-width="1.2" />
+          <text x="65" y="16" font-size="10" font-weight="700" text-anchor="middle" fill="#fde68a">🌡️ Ladera: +4,5 °C</text>
+        </g>
+        <g transform="translate(260, 85)">
+          <rect x="0" y="0" width="270" height="30" rx="5" fill="rgba(15,23,42,0.92)" stroke="#6366f1" stroke-width="1.2" />
+          <text x="135" y="20" font-size="11" font-weight="700" text-anchor="middle" fill="#c7d2fe">Inversión nocturna: Lago de aire frío</text>
+        </g>
+      `;
+    }
+
+    return `
+      <svg class="topography-svg" viewBox="0 0 900 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Perfil orográfico y modelo microclimático del valle de Riotuerto">
+        <defs>
+          <linearGradient id="sky-grad-foehn" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fffbeb" />
+            <stop offset="60%" stop-color="#fef3c7" />
+            <stop offset="100%" stop-color="#fed7aa" />
+          </linearGradient>
+          <linearGradient id="sky-grad-foehn-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1c100c" />
+            <stop offset="60%" stop-color="#2d130a" />
+            <stop offset="100%" stop-color="#4a1809" />
+          </linearGradient>
+          <linearGradient id="sky-grad-orographic" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#f1f5f9" />
+            <stop offset="50%" stop-color="#cbd5e1" />
+            <stop offset="100%" stop-color="#94a3b8" />
+          </linearGradient>
+          <linearGradient id="sky-grad-orographic-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0b1120" />
+            <stop offset="50%" stop-color="#1e293b" />
+            <stop offset="100%" stop-color="#334155" />
+          </linearGradient>
+          <linearGradient id="sky-grad-inversion" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#020617" />
+            <stop offset="50%" stop-color="#0f172a" />
+            <stop offset="100%" stop-color="#1e1b4b" />
+          </linearGradient>
+          <linearGradient id="terrain-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#15803d" />
+            <stop offset="45%" stop-color="#166534" />
+            <stop offset="80%" stop-color="#475569" />
+            <stop offset="100%" stop-color="#334155" />
+          </linearGradient>
+          <linearGradient id="terrain-grad-dark" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#14532d" />
+            <stop offset="45%" stop-color="#166534" />
+            <stop offset="80%" stop-color="#334155" />
+            <stop offset="100%" stop-color="#1e293b" />
+          </linearGradient>
+          <linearGradient id="cold-lake-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.1" />
+            <stop offset="70%" stop-color="#0284c7" stop-opacity="0.38" />
+            <stop offset="100%" stop-color="#0369a1" stop-opacity="0.65" />
+          </linearGradient>
+        </defs>
+
+        <rect x="40" y="15" width="830" height="300" rx="8" fill="${skyFill}" />
+        <line x1="40" y1="104" x2="870" y2="104" stroke="${gridLineColor}" stroke-dasharray="3 3" />
+        <text x="35" y="107" font-size="9" fill="${textMutedColor}" text-anchor="end">600m</text>
+        <line x1="40" y1="173" x2="870" y2="173" stroke="${gridLineColor}" stroke-dasharray="3 3" />
+        <text x="35" y="176" font-size="9" fill="${textMutedColor}" text-anchor="end">400m</text>
+        <line x1="40" y1="241" x2="870" y2="241" stroke="${gridLineColor}" stroke-dasharray="3 3" />
+        <text x="35" y="244" font-size="9" fill="${textMutedColor}" text-anchor="end">200m</text>
+        <line x1="40" y1="310" x2="870" y2="310" stroke="${gridLineColor}" />
+        <text x="35" y="313" font-size="9" fill="${textMutedColor}" text-anchor="end">0m</text>
+
+        ${dynamicLayerHtml}
+
+        <path d="M 40,310 L 70,310 Q 130,306 180,301 Q 250,293 310,282 Q 370,274 430,270 Q 480,265 540,248 Q 585,235 630,220 Q 675,170 720,111 Q 760,85 800,75 Q 835,90 860,156 L 860,320 L 40,320 Z" fill="${terrainFill}" />
+        <path d="M 40,310 Q 120,308 180,303 Q 250,295 310,284 Q 370,276 430,272" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0.75" />
+
+        <circle cx="70" cy="310" r="3" fill="#38bdf8" />
+        <text x="70" y="328" font-size="10" font-weight="600" fill="${textMutedColor}" text-anchor="middle">Mar Cantábrico (0 m)</text>
+
+        <circle cx="310" cy="282" r="3" fill="${textPrimaryColor}" />
+        <line x1="310" y1="282" x2="310" y2="295" stroke="${textMutedColor}" stroke-width="1" />
+        <text x="310" y="307" font-size="10" font-weight="600" fill="${textPrimaryColor}" text-anchor="middle">La Cavada (80 m)</text>
+
+        <circle cx="720" cy="111" r="3.5" fill="#f59e0b" />
+        <line x1="720" y1="111" x2="720" y2="95" stroke="#f59e0b" stroke-width="1" />
+        <text x="720" y="88" font-size="10" font-weight="700" fill="${textPrimaryColor}" text-anchor="middle">Alto de Brenas (579 m)</text>
+
+        <circle cx="800" cy="75" r="4" fill="#dc2626" />
+        <line x1="800" y1="75" x2="800" y2="58" stroke="#dc2626" stroke-width="1" />
+        <text x="800" y="52" font-size="10" font-weight="700" fill="${textPrimaryColor}" text-anchor="middle">Peña Pelada (686 m)</text>
+
+        <text x="55" y="35" font-size="11" font-weight="700" fill="${textMutedColor}">⮜ NORTE (Hacia la costa)</text>
+        <text x="855" y="35" font-size="11" font-weight="700" fill="${textMutedColor}" text-anchor="end">SUR (Hacia la cordillera) ⮞</text>
+
+        <g transform="translate(430, 270)">
+          <circle cx="0" cy="-14" r="6" fill="${mode === 'foehn' ? '#ea580c' : mode === 'orographic' ? '#0284c7' : '#06b6d4'}" class="topo-pulse-circle" />
+          <line x1="0" y1="0" x2="0" y2="-14" stroke="${textPrimaryColor}" stroke-width="2" />
+          <circle cx="0" cy="-14" r="3.5" fill="${mode === 'foehn' ? '#ea580c' : mode === 'orographic' ? '#0284c7' : '#06b6d4'}" stroke="#ffffff" stroke-width="1.2" />
+          <line x1="-5" y1="-14" x2="5" y2="-14" stroke="#ffffff" stroke-width="1.2" />
+          <g transform="translate(0, -32)">
+            <rect x="-85" y="-12" width="170" height="22" rx="4" fill="${isDark ? 'rgba(15,23,42,0.92)' : 'rgba(255,255,255,0.95)'}" stroke="${mode === 'foehn' ? '#ea580c' : mode === 'orographic' ? '#0284c7' : '#06b6d4'}" stroke-width="1.5" />
+            <text x="0" y="3" font-size="10" font-weight="800" text-anchor="middle" fill="${textPrimaryColor}">📍 Barrio de Arriba (115 m)</text>
+          </g>
+        </g>
+      </svg>
+    `;
+  }
+
+  function renderTopographyModule(mode) {
+    const topoMode = mode || STATE.topographyMode || 'foehn';
+    STATE.topographyMode = topoMode;
+    const isDark = STATE.theme === 'dark';
+    const data = TOPOGRAPHY_DATA[topoMode] || TOPOGRAPHY_DATA.foehn;
+
+    ['foehn', 'orographic', 'inversion'].forEach((m) => {
+      const btn = document.getElementById(`btn-topo-${m}`);
+      if (btn) {
+        if (m === topoMode) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      }
+    });
+
+    const svgContainer = document.getElementById('topography-svg-container');
+    if (svgContainer) {
+      svgContainer.innerHTML = generateTopographySVG(topoMode, isDark);
+    }
+
+    const explanationPanel = document.getElementById('topography-explanation-panel');
+    if (explanationPanel) {
+      const pillsHtml = data.records.map((r) => `
+        <div class="topo-metric-pill">
+          <span class="topo-metric-val">${escapeHtml(r.val)}</span>
+          <span class="topo-metric-lbl">${escapeHtml(r.label)}</span>
+          <span style="font-size:0.68rem;color:var(--txt-muted);margin-top:2px">${escapeHtml(r.sub)}</span>
+        </div>
+      `).join('');
+
+      explanationPanel.innerHTML = `
+        <div class="topo-explanation-card">
+          <h4 class="topo-card-title">
+            <span style="color:${data.color}">${data.badge}</span> ${escapeHtml(data.title)}
+          </h4>
+          <p class="topo-card-desc">
+            ${data.physicalDescription}
+          </p>
+        </div>
+
+        <div class="topo-explanation-card">
+          <h4 class="topo-card-title">
+            🌿 Impacto en el territorio y la vida cotidiana
+          </h4>
+          <p class="topo-card-desc">
+            ${data.territorialImpact}
+          </p>
+          <div class="topo-metrics-grid">
+            ${pillsHtml}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function initTopographyModule() {
+    ['foehn', 'orographic', 'inversion'].forEach((m) => {
+      const btn = document.getElementById(`btn-topo-${m}`);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          renderTopographyModule(m);
+        });
+      }
+    });
+    renderTopographyModule(STATE.topographyMode || 'foehn');
+  }
+
+  /* ------------------------------------------------------------------------
    * VISTA 6: METODOLOGÍA Y CALIDAD DE LOS DATOS
    * ------------------------------------------------------------------------ */
   async function renderMetodologia() {
@@ -5204,6 +5505,33 @@
           </p>
         </div>
       </div>
+
+      <!-- Modelo topoclimático y perfil orográfico interactivo del valle del Covadal (EVO-018) -->
+      <section class="section-block topography-section" id="topography-section">
+        <div class="section-header">
+          <div>
+            <div class="editorial-kicker">MODELO TOPOCLIMÁTICO Y PERFIL TRANSVERSAL DEL MUNICIPIO</div>
+            <h3 class="section-title">Perfil orográfico y dinámicas atmosféricas de Riotuerto</h3>
+            <p class="section-subtitle">Visualización interactiva: cómo el relieve del valle del Covadal modula la Surada (efecto Foehn), las lluvias cantábricas y las inversiones térmicas</p>
+          </div>
+          <div class="topography-mode-selector" id="topography-mode-selector">
+            <button type="button" class="topography-mode-btn active" data-topo-mode="foehn" id="btn-topo-foehn">
+              🔥 1. Viento Sur (Efecto Foehn)
+            </button>
+            <button type="button" class="topography-mode-btn" data-topo-mode="orographic" id="btn-topo-orographic">
+              🌧️ 2. Frentes del NO (Lluvia orográfica)
+            </button>
+            <button type="button" class="topography-mode-btn" data-topo-mode="inversion" id="btn-topo-inversion">
+              ❄️ 3. Noche anticiclónica (Inversión térmica)
+            </button>
+          </div>
+        </div>
+
+        <div class="topography-card">
+          <div class="topography-svg-wrap" id="topography-svg-container"></div>
+          <div class="topography-explanation-panel" id="topography-explanation-panel"></div>
+        </div>
+      </section>
 
       <div class="callout callout-warning" style="margin-top:24px; margin-bottom:28px; border-left-width:5px; padding:18px 22px">
         <h4 style="font-size:1rem; font-weight:700; margin-bottom:8px; color:var(--txt-primary)">
@@ -5392,6 +5720,8 @@
     document.getElementById('btn-export-audit-xlsx')?.addEventListener('click', () => {
       exportAuditQualityToExcel(STATE.cache.almanacs, idx.series_overview);
     });
+
+    initTopographyModule();
   }
 
   /* ------------------------------------------------------------------------

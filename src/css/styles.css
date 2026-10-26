@@ -3663,3 +3663,167 @@ html[data-theme="dark"] .festival-tab-btn.active {
   padding: 2px 6px;
   border-radius: 4px;
 }
+
+/* ==========================================================================
+   MODELO TOPOCLIMÁTICO Y PERFIL OROGRÁFICO INTERACTIVO (EVO-018)
+   ========================================================================== */
+.topography-section {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-top: 28px;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.topography-mode-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topography-mode-btn {
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--txt-secondary);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topography-mode-btn:hover {
+  background: var(--surface-hover);
+  color: var(--txt-primary);
+  border-color: var(--border-strong);
+}
+
+.topography-mode-btn.active {
+  background: var(--brand-forest);
+  color: #ffffff;
+  border-color: var(--brand-forest);
+  box-shadow: 0 2px 6px rgba(27, 67, 50, 0.25);
+}
+
+.topography-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.topography-svg-wrap {
+  width: 100%;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.topography-svg {
+  width: 100%;
+  height: auto;
+  min-height: 280px;
+  max-height: 400px;
+  display: block;
+}
+
+.topography-explanation-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 16px;
+}
+
+.topo-explanation-card {
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.topo-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.topo-card-desc {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--txt-secondary);
+  margin: 0;
+}
+
+.topo-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.topo-metric-pill {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.topo-metric-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--brand-forest);
+}
+
+.topo-metric-lbl {
+  font-size: 0.72rem;
+  color: var(--txt-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Animaciones del modelo topoclimático */
+@keyframes topoPulseBeacon {
+  0% { r: 5; opacity: 1; }
+  50% { r: 12; opacity: 0.4; }
+  100% { r: 18; opacity: 0; }
+}
+
+@keyframes topoWindFlowLeft {
+  0% { stroke-dashoffset: 40; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes topoWindFlowRight {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 40; }
+}
+
+.topo-pulse-circle {
+  animation: topoPulseBeacon 1.8s infinite ease-out;
+}
+
+.topo-flow-right {
+  stroke-dasharray: 8 6;
+  animation: topoWindFlowRight 1.4s infinite linear;
+}
+
+.topo-flow-left {
+  stroke-dasharray: 8 6;
+  animation: topoWindFlowLeft 1.4s infinite linear;
+}

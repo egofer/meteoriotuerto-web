@@ -652,6 +652,27 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".windrose-legend-bar", css_text, "Falta .windrose-legend-bar en styles.css")
         self.assertIn(".windrose-dot", css_text, "Falta .windrose-dot en styles.css")
 
+    def test_topography_interactive_module_readiness(self):
+        """
+        EVO-018: Verifica el modelo topoclimático y perfil orográfico interactivo,
+        el catálogo de dinámicas (Foehn, Lluvia orográfica, Inversión) y sus estilos.
+        """
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("TOPOGRAPHY_DATA", app_js, "Falta TOPOGRAPHY_DATA en app.js")
+        self.assertIn("generateTopographySVG", app_js, "Falta generateTopographySVG en app.js")
+        self.assertIn("initTopographyModule", app_js, "Falta initTopographyModule en app.js")
+        self.assertIn("Alto de Brenas (579 m)", app_js, "Falta hito Alto de Brenas en app.js")
+        self.assertIn("Peña Pelada (686 m)", app_js, "Falta hito Peña Pelada en app.js")
+        self.assertIn("btn-topo-foehn", app_js, "Falta botón Foehn en app.js")
+        self.assertIn("btn-topo-orographic", app_js, "Falta botón orográfico en app.js")
+        self.assertIn("btn-topo-inversion", app_js, "Falta botón inversión en app.js")
+
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".topography-section", css_text, "Falta .topography-section en styles.css")
+        self.assertIn(".topography-svg-wrap", css_text, "Falta .topography-svg-wrap en styles.css")
+        self.assertIn(".topography-mode-btn", css_text, "Falta .topography-mode-btn en styles.css")
+        self.assertIn(".topo-pulse-circle", css_text, "Falta .topo-pulse-circle en styles.css")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
