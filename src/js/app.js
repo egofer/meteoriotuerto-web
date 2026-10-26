@@ -2513,7 +2513,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          startAngle: -101.25,
+          startAngle: -11.25,
           animation: { duration: 500 },
           plugins: {
             legend: { display: false },
@@ -2543,7 +2543,7 @@
           },
           scales: {
             r: {
-              startAngle: -101.25,
+              startAngle: -11.25,
               grid: {
                 circular: true,
                 color: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.07)',
@@ -2595,6 +2595,7 @@
           ],
         },
         options: {
+          indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
@@ -2617,11 +2618,19 @@
             },
           },
           scales: {
-            x: { ticks: { color: pal.text }, grid: { color: pal.grid } },
-            y: {
+            x: {
               beginAtZero: true,
               title: { display: true, text: 'Frecuencia (%)', color: pal.text },
               ticks: { color: pal.text },
+              grid: { color: pal.grid },
+            },
+            y: {
+              ticks: {
+                color: pal.text,
+                font: {
+                  weight: (ctx) => (['N', 'E', 'S', 'W'].includes(ctx.tick?.label) ? '700' : '500'),
+                },
+              },
               grid: { color: pal.grid },
             },
           },
