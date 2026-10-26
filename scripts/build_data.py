@@ -1539,6 +1539,303 @@ def compute_seasonal_climatology(
     }
 
 
+def compute_extreme_episodes_catalog(
+    df_all: pd.DataFrame, complete_years: List[int], provisional_years: List[int]
+) -> Dict[str, Any]:
+    """
+    EVO-020 (EVO-D): Detector algorítmico y catálogo cronológico de episodios climáticos extremos:
+    - Olas de calor: >= 3 días consecutivos con T. máx >= 30,0 °C.
+    - Olas de frío: >= 3 días consecutivos con helada (T. mín <= 0,0 °C).
+    - Rachas de lluvia persistente (wet spells): >= 7 días consecutivos con lluvia >= 0,2 mm.
+    - Rachas secas (dry spells): >= 7 días consecutivos con lluvia < 0,2 mm.
+    - Suradas continuadas (foehn spells): >= 2 días consecutivos con viento sur / Foehn activo.
+    """
+    df = df_all.sort_values("date").reset_index(drop=True).copy()
+
+    # Asegurar banderas booleanas
+    df["is_heatwave_day"] = df["temp_max"] >= 30.0
+    df["is_coldwave_day"] = df["temp_min"] <= 0.0
+    df["is_wet_day"] = df["rain_daily"] >= 0.2
+    df["is_dry_day"] = df["rain_daily"] < 0.2
+    if "foehn_flag" not in df.columns:
+        df["foehn_flag"] = False
+    df["is_foehn_day"] = df["foehn_flag"].astype(bool)
+
+    dates = pd.to_datetime(df["date"]).tolist()
+
+    def find_spells_indices(flags: List[bool], min_len: int) -> List[Tuple[int, int, int]]:
+        spells = []
+        c = 0
+        s_idx = None
+        prev_d = None
+        for idx, (f, d) in enumerate(zip(flags, dates)):
+            is_consec = (prev_d is not None) and ((d - prev_d).days == 1)
+            if not is_consec:
+                if c >= min_len and s_idx is not None:
+                    spells.append((s_idx, idx - 1, c))
+                c = 0
+                s_idx = None
+            if f:
+                if c == 0:
+                    s_idx = idx
+                c += 1
+            else:
+                if c >= min_len and s_idx is not None:
+                    spells.append((s_idx, idx - 1, c))
+                c = 0
+                s_idx = None
+            prev_d = d
+        if c >= min_len and s_idx is not None:
+            spells.append((s_idx, len(flags) - 1, c))
+        return spells
+
+    episodes: List[Dict[str, Any]] = []
+
+    # 1. Olas de calor
+    hw_indices = find_spells_indices(df["is_heatwave_day"].tolist(), 3)
+    for s, e, l in hw_indices:
+        sub = df.iloc[s : e + 1]
+        peak_idx = sub["temp_max"].idxmax()
+        peak_val = safe_round(sub.loc[peak_idx, "temp_max"], 1)
+        peak_date = str(sub.loc[peak_idx, "date"])
+        start_d = str(sub.iloc[0]["date"])
+        end_d = str(sub.iloc[-1]["date"])
+        y = int(sub.iloc[0]["dt"].year)
+        episodes.append({
+            "id": f"hw-{start_d}",
+            "type": "heatwave",
+            "type_label": "Ola de calor",
+            "type_icon": "🔥",
+            "type_color": "#ea580c",
+            "start_date": start_d,
+            "end_date": end_d,
+            "duration_days": int(l),
+            "year": y,
+            "is_provisional": bool(y in provisional_years),
+            "peak_value": peak_val,
+            "peak_value_unit": "°C",
+            "peak_date": peak_date,
+            "mean_primary": safe_round(sub["temp_max"].mean(), 1),
+            "mean_primary_label": "Media máx.",
+            "mean_temp": safe_round(sub["temp_mean"].mean(), 1),
+            "extra_count": int((sub["temp_min"] >= 20.0).sum()),
+            "extra_label": "Noches trop.",
+            "summary": f"Ola de calor de {l} días consecutivos con pico de {peak_val} °C el {peak_date} y media diurna de {safe_round(sub['temp_max'].mean(), 1)} °C.",
+        })
+
+    # 2. Olas de frío
+    cw_indices = find_spells_indices(df["is_coldwave_day"].tolist(), 3)
+    for s, e, l in cw_indices:
+        sub = df.iloc[s : e + 1]
+        peak_idx = sub["temp_min"].idxmin()
+        peak_val = safe_round(sub.loc[peak_idx, "temp_min"], 1)
+        peak_date = str(sub.loc[peak_idx, "date"])
+        start_d = str(sub.iloc[0]["date"])
+        end_d = str(sub.iloc[-1]["date"])
+        y = int(sub.iloc[0]["dt"].year)
+        episodes.append({
+            "id": f"cw-{start_d}",
+            "type": "coldwave",
+            "type_label": "Ola de frío",
+            "type_icon": "❄️",
+            "type_color": "#0284c7",
+            "start_date": start_d,
+            "end_date": end_d,
+            "duration_days": int(l),
+            "year": y,
+            "is_provisional": bool(y in provisional_years),
+            "peak_value": peak_val,
+            "peak_value_unit": "°C",
+            "peak_date": peak_date,
+            "mean_primary": safe_round(sub["temp_min"].mean(), 1),
+            "mean_primary_label": "Media mín.",
+            "mean_temp": safe_round(sub["temp_mean"].mean(), 1),
+            "extra_count": int((sub["temp_max"] <= 0.0).sum()),
+            "extra_label": "Días de hielo",
+            "summary": f"Ola de frío de {l} días consecutivos de heladas con mínima de {peak_val} °C el {peak_date} y media nocturna de {safe_round(sub['temp_min'].mean(), 1)} °C.",
+        })
+
+    # 3. Rachas de lluvia persistente
+    wet_indices = find_spells_indices(df["is_wet_day"].tolist(), 7)
+    for s, e, l in wet_indices:
+        sub = df.iloc[s : e + 1]
+        peak_idx = sub["rain_daily"].idxmax()
+        peak_val = safe_round(sub.loc[peak_idx, "rain_daily"], 1)
+        peak_date = str(sub.loc[peak_idx, "date"])
+        start_d = str(sub.iloc[0]["date"])
+        end_d = str(sub.iloc[-1]["date"])
+        y = int(sub.iloc[0]["dt"].year)
+        tot_rain = safe_round(sub["rain_daily"].sum(), 1)
+        episodes.append({
+            "id": f"wet-{start_d}",
+            "type": "wet_spell",
+            "type_label": "Racha de lluvia",
+            "type_icon": "🌧️",
+            "type_color": "#2563eb",
+            "start_date": start_d,
+            "end_date": end_d,
+            "duration_days": int(l),
+            "year": y,
+            "is_provisional": bool(y in provisional_years),
+            "peak_value": peak_val,
+            "peak_value_unit": "mm (24h)",
+            "peak_date": peak_date,
+            "total_rain_mm": tot_rain,
+            "mean_primary": safe_round(sub["rain_daily"].mean(), 1),
+            "mean_primary_label": "Media diaria",
+            "extra_count": int((sub["rain_daily"] >= 30.0).sum()),
+            "extra_label": "Días ≥30 mm",
+            "summary": f"Racha ininterrumpida de {l} días de lluvia acumulando {tot_rain} mm con máximo en 24h de {peak_val} mm el {peak_date}.",
+        })
+
+    # 4. Rachas secas
+    dry_indices = find_spells_indices(df["is_dry_day"].tolist(), 7)
+    for s, e, l in dry_indices:
+        sub = df.iloc[s : e + 1]
+        peak_idx = sub["temp_max"].idxmax()
+        peak_val = safe_round(sub.loc[peak_idx, "temp_max"], 1)
+        peak_date = str(sub.loc[peak_idx, "date"])
+        start_d = str(sub.iloc[0]["date"])
+        end_d = str(sub.iloc[-1]["date"])
+        y = int(sub.iloc[0]["dt"].year)
+        episodes.append({
+            "id": f"dry-{start_d}",
+            "type": "dry_spell",
+            "type_label": "Racha seca",
+            "type_icon": "☀️",
+            "type_color": "#d97706",
+            "start_date": start_d,
+            "end_date": end_d,
+            "duration_days": int(l),
+            "year": y,
+            "is_provisional": bool(y in provisional_years),
+            "peak_value": 0.0,
+            "peak_value_unit": "mm",
+            "peak_date": peak_date,
+            "max_tmax": peak_val,
+            "mean_primary": safe_round(sub["temp_max"].mean(), 1),
+            "mean_primary_label": "Media máx.",
+            "extra_count": 0,
+            "extra_label": "Lluvia (0 mm)",
+            "summary": f"Racha seca de {l} días consecutivos sin lluvia apreciable con máxima térmica de {peak_val} °C ({peak_date}).",
+        })
+
+    # 5. Suradas continuadas (efecto Foehn)
+    foehn_indices = find_spells_indices(df["is_foehn_day"].tolist(), 2)
+    for s, e, l in foehn_indices:
+        sub = df.iloc[s : e + 1]
+        peak_idx = sub["wind_gust"].idxmax()
+        peak_val = safe_round(sub.loc[peak_idx, "wind_gust"], 1)
+        peak_date = str(sub.loc[peak_idx, "date"])
+        start_d = str(sub.iloc[0]["date"])
+        end_d = str(sub.iloc[-1]["date"])
+        y = int(sub.iloc[0]["dt"].year)
+        episodes.append({
+            "id": f"foehn-{start_d}",
+            "type": "foehn_spell",
+            "type_label": "Surada persistente",
+            "type_icon": "💨",
+            "type_color": "#b45309",
+            "start_date": start_d,
+            "end_date": end_d,
+            "duration_days": int(l),
+            "year": y,
+            "is_provisional": bool(y in provisional_years),
+            "peak_value": peak_val,
+            "peak_value_unit": "km/h",
+            "peak_date": peak_date,
+            "mean_primary": safe_round(sub["wind_speed"].mean(), 1),
+            "mean_primary_label": "Viento medio",
+            "max_tmax": safe_round(sub["temp_max"].max(), 1),
+            "extra_count": int((sub["wind_gust"] >= 50.0).sum()),
+            "extra_label": "Rachas ≥50 km/h",
+            "summary": f"Surada continuada de {l} días consecutivos de efecto Foehn con racha máxima de {peak_val} km/h el {peak_date}.",
+        })
+
+    # Orden cronológico descendente (los más recientes primero)
+    episodes.sort(key=lambda x: x["start_date"], reverse=True)
+
+    # Agrupaciones por tipo
+    by_type = {
+        "heatwave": [e for e in episodes if e["type"] == "heatwave"],
+        "coldwave": [e for e in episodes if e["type"] == "coldwave"],
+        "wet_spell": [e for e in episodes if e["type"] == "wet_spell"],
+        "dry_spell": [e for e in episodes if e["type"] == "dry_spell"],
+        "foehn_spell": [e for e in episodes if e["type"] == "foehn_spell"],
+    }
+
+    # Hitos y récords de episodios extremos
+    def find_best(eps: List[Dict[str, Any]], key: str, reverse: bool = True) -> Optional[Dict[str, Any]]:
+        if not eps:
+            return None
+        valid = [e for e in eps if e.get(key) is not None]
+        if not valid:
+            return None
+        return sorted(valid, key=lambda x: x[key], reverse=reverse)[0]
+
+    longest_heatwave = find_best(by_type["heatwave"], "duration_days")
+    hottest_heatwave = find_best(by_type["heatwave"], "peak_value")
+    longest_coldwave = find_best(by_type["coldwave"], "duration_days")
+    coldest_coldwave = find_best(by_type["coldwave"], "peak_value", reverse=False)
+    longest_wet_spell = find_best(by_type["wet_spell"], "duration_days")
+    most_copious_wet_spell = find_best(by_type["wet_spell"], "total_rain_mm")
+    longest_dry_spell = find_best(by_type["dry_spell"], "duration_days")
+    longest_foehn_spell = find_best(by_type["foehn_spell"], "duration_days")
+
+    summary_kpis = {
+        "longest_heatwave": longest_heatwave,
+        "hottest_heatwave": hottest_heatwave,
+        "longest_coldwave": longest_coldwave,
+        "coldest_coldwave": coldest_coldwave,
+        "longest_wet_spell": longest_wet_spell,
+        "most_copious_wet_spell": most_copious_wet_spell,
+        "longest_dry_spell": longest_dry_spell,
+        "longest_foehn_spell": longest_foehn_spell,
+    }
+
+    criteria = {
+        "heatwave": {
+            "name": "Ola de calor",
+            "icon": "🔥",
+            "threshold": "≥3 días consecutivos con T. máxima ≥30,0 °C",
+            "description": "Episodios caniculares donde la temperatura máxima diurna supera de forma persistente los 30 °C.",
+        },
+        "coldwave": {
+            "name": "Ola de frío",
+            "icon": "❄️",
+            "threshold": "≥3 días consecutivos con helada (T. mínima ≤0,0 °C)",
+            "description": "Secuencias prolongadas de noches con helada bajo cero por inversión térmica en el fondo del valle o advección polar.",
+        },
+        "wet_spell": {
+            "name": "Racha de lluvia persistente",
+            "icon": "🌧️",
+            "threshold": "≥7 días consecutivos con precipitación apreciable (≥0,2 mm)",
+            "description": "Temporales atlánticos u oclusiones de noroeste que dejan aportación hídrica continuada en Riotuerto.",
+        },
+        "dry_spell": {
+            "name": "Racha seca",
+            "icon": "☀️",
+            "threshold": "≥7 días consecutivos sin lluvia apreciable (<0,2 mm)",
+            "description": "Periodos estables anticiclónicos prolongados sin precipitaciones, infrecuentes en el clima hiperhúmedo cantábrico.",
+        },
+        "foehn_spell": {
+            "name": "Surada persistente",
+            "icon": "💨",
+            "threshold": "≥2 días consecutivos con viento sur / efecto Foehn activo",
+            "description": "Bloqueos sinópticos del sur que encadenan jornadas continuadas de viento seco, racheado y recalentamiento adiabático.",
+        },
+    }
+
+    return {
+        "criteria": criteria,
+        "summary_kpis": summary_kpis,
+        "total_episodes_count": len(episodes),
+        "counts_by_type": {k: len(v) for k, v in by_type.items()},
+        "by_type": by_type,
+        "episodes": episodes,
+    }
+
+
 def build_records_and_comparisons(
     almanacs: Dict[int, Dict[str, Any]],
     all_daily_df: pd.DataFrame,
@@ -1553,12 +1850,35 @@ def build_records_and_comparisons(
     df_all["month"] = df_all["dt"].dt.month
     df_all["amp"] = df_all["temp_max"] - df_all["temp_min"]
 
-    # EVO-019 (EVO-C): Climatología estacional canónica (DJF, MAM, JJA, SON)
     complete_years = STATION_META["hardware"]["complete_years"]
     provisional_years = STATION_META["hardware"]["provisional_years"]
+
+    # EVO-019 (EVO-C): Climatología estacional canónica (DJF, MAM, JJA, SON)
     seasonal_payload = compute_seasonal_climatology(df_all, complete_years, provisional_years)
     for y, alm in almanacs.items():
         alm["seasons"] = [r for r in seasonal_payload["table"] if r["year"] == y]
+
+    # EVO-020 (EVO-D): Detector algorítmico y catálogo de episodios climáticos extremos
+    episodes_catalog = compute_extreme_episodes_catalog(df_all, complete_years, provisional_years)
+    for y, alm in almanacs.items():
+        year_eps = [e for e in episodes_catalog["episodes"] if e["year"] == y]
+        alm["extreme_episodes"] = {
+            "counts": {
+                "heatwaves": len([e for e in year_eps if e["type"] == "heatwave"]),
+                "coldwaves": len([e for e in year_eps if e["type"] == "coldwave"]),
+                "wet_spells": len([e for e in year_eps if e["type"] == "wet_spell"]),
+                "dry_spells": len([e for e in year_eps if e["type"] == "dry_spell"]),
+                "foehn_spells": len([e for e in year_eps if e["type"] == "foehn_spell"]),
+            },
+            "max_durations": {
+                "heatwave_days": max([e["duration_days"] for e in year_eps if e["type"] == "heatwave"], default=0),
+                "coldwave_days": max([e["duration_days"] for e in year_eps if e["type"] == "coldwave"], default=0),
+                "wet_spell_days": max([e["duration_days"] for e in year_eps if e["type"] == "wet_spell"], default=0),
+                "dry_spell_days": max([e["duration_days"] for e in year_eps if e["type"] == "dry_spell"], default=0),
+                "foehn_spell_days": max([e["duration_days"] for e in year_eps if e["type"] == "foehn_spell"], default=0),
+            },
+            "episodes": year_eps,
+        }
 
     def top_n_days(col: str, n: int = 10, ascending: bool = False) -> List[Dict[str, Any]]:
         sub = df_all.dropna(subset=[col]).sort_values(col, ascending=ascending).head(n)
@@ -1757,6 +2077,7 @@ def build_records_and_comparisons(
             "top_warmest_min_days": warmest_min,
         },
         "monthly_records": monthly_records,
+        "extreme_episodes": episodes_catalog,
     }
 
     # -------------------------------------------------------------------------

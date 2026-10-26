@@ -4105,3 +4105,244 @@ html[data-theme="dark"] .seasonal-tab-btn.active {
   color: var(--txt-secondary);
   margin: 0;
 }
+
+/* ==========================================================================
+   CATÁLOGO DE EPISODIOS CLIMÁTICOS EXTREMOS (EVO-020 / EVO-D)
+   ========================================================================== */
+.extreme-episodes-section {
+  margin-top: 36px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 28px;
+}
+
+.episodes-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+.episode-kpi-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s ease;
+}
+
+.episode-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.episode-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.episode-kpi-card.kpi-heat::before { background: #ea580c; }
+.episode-kpi-card.kpi-cold::before { background: #0284c7; }
+.episode-kpi-card.kpi-wet::before { background: #2563eb; }
+.episode-kpi-card.kpi-dry::before { background: #d97706; }
+.episode-kpi-card.kpi-foehn::before { background: #b45309; }
+
+.episode-kpi-label {
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--txt-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.episode-kpi-val {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+  line-height: 1.15;
+  margin-top: 2px;
+}
+
+.episode-kpi-sub {
+  font-size: 0.77rem;
+  color: var(--txt-secondary);
+  line-height: 1.35;
+}
+
+.episodes-controls-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.episodes-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.episodes-filter-btn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 0.81rem;
+  font-weight: 600;
+  color: var(--txt-secondary);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.episodes-filter-btn:hover {
+  background: var(--bg-surface);
+  color: var(--txt-primary);
+}
+
+.episodes-filter-btn.active {
+  background: var(--accent-forest) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-forest) !important;
+  box-shadow: 0 2px 6px rgba(27, 67, 50, 0.25);
+}
+
+html[data-theme="dark"] .episodes-filter-btn.active {
+  background: var(--accent-forest-hover) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-forest-hover) !important;
+}
+
+.episode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.02em;
+}
+
+.episode-badge-heatwave {
+  background: rgba(234, 88, 12, 0.14);
+  color: #c2410c;
+  border: 1px solid rgba(234, 88, 12, 0.3);
+}
+
+.episode-badge-coldwave {
+  background: rgba(2, 132, 199, 0.14);
+  color: #0369a1;
+  border: 1px solid rgba(2, 132, 199, 0.3);
+}
+
+.episode-badge-wet_spell {
+  background: rgba(37, 99, 235, 0.14);
+  color: #1d4ed8;
+  border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+.episode-badge-dry_spell {
+  background: rgba(217, 119, 6, 0.14);
+  color: #b45309;
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+.episode-badge-foehn_spell {
+  background: rgba(180, 83, 9, 0.14);
+  color: #92400e;
+  border: 1px solid rgba(180, 83, 9, 0.3);
+}
+
+html[data-theme="dark"] .episode-badge-heatwave {
+  background: rgba(234, 88, 12, 0.25);
+  color: #fdba74;
+}
+
+html[data-theme="dark"] .episode-badge-coldwave {
+  background: rgba(2, 132, 199, 0.25);
+  color: #7dd3fc;
+}
+
+html[data-theme="dark"] .episode-badge-wet_spell {
+  background: rgba(37, 99, 235, 0.25);
+  color: #93c5fd;
+}
+
+html[data-theme="dark"] .episode-badge-dry_spell {
+  background: rgba(217, 119, 6, 0.25);
+  color: #fcd34d;
+}
+
+html[data-theme="dark"] .episode-badge-foehn_spell {
+  background: rgba(180, 83, 9, 0.25);
+  color: #fde68a;
+}
+
+/* Ficha de episodios anuales en el almanaque */
+.almanac-episodes-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-top: 20px;
+}
+
+.almanac-episodes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.almanac-episodes-title {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.almanac-episodes-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.almanac-episode-chip {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--txt-secondary);
+}
+
+.almanac-episode-chip strong {
+  color: var(--txt-primary);
+}

@@ -732,6 +732,68 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".seasonal-tabs-bar", css_text)
         self.assertIn(".seasonal-pill", css_text)
 
+    def test_extreme_episodes_detector_readiness(self):
+        """
+        EVO-020 (EVO-D): Verifica el detector algorítmico y catálogo cronológico de episodios climáticos extremos
+        (olas de calor, olas de frío, rachas de lluvia, rachas secas y suradas continuadas).
+        """
+        # 1. Catálogo histórico en records.json
+        rec_path = self.data_dir / "records.json"
+        self.assertTrue(rec_path.exists())
+        with open(rec_path, "r", encoding="utf-8") as f:
+            rec = json.load(f)
+
+        self.assertIn("extreme_episodes", rec)
+        ee = rec["extreme_episodes"]
+        self.assertIn("summary_kpis", ee)
+        self.assertIn("counts_by_type", ee)
+        self.assertIn("episodes", ee)
+        self.assertIn("criteria", ee)
+
+        kpis = ee["summary_kpis"]
+        for expected_kpi in [
+            "longest_heatwave", "hottest_heatwave",
+            "longest_coldwave", "coldest_coldwave",
+            "longest_wet_spell", "most_copious_wet_spell",
+            "longest_dry_spell", "longest_foehn_spell"
+        ]:
+            self.assertIn(expected_kpi, kpis)
+            self.assertIsNotNone(kpis[expected_kpi])
+
+        counts = ee["counts_by_type"]
+        self.assertEqual(len(counts), 5)
+        self.assertGreaterEqual(counts.get("heatwave", 0), 5)
+        self.assertGreaterEqual(counts.get("coldwave", 0), 4)
+        self.assertGreaterEqual(counts.get("wet_spell", 0), 20)
+        self.assertGreaterEqual(counts.get("dry_spell", 0), 5)
+        self.assertGreaterEqual(counts.get("foehn_spell", 0), 10)
+        self.assertGreaterEqual(len(ee["episodes"]), 80)
+
+        # 2. Resumen anual en cada almanac_YYYY.json
+        for year in [2022, 2023, 2024, 2025, 2026]:
+            alm_path = self.data_dir / f"almanac_{year}.json"
+            self.assertTrue(alm_path.exists())
+            with open(alm_path, "r", encoding="utf-8") as f:
+                alm = json.load(f)
+            self.assertIn("extreme_episodes", alm)
+            alm_ee = alm["extreme_episodes"]
+            self.assertIn("counts", alm_ee)
+            self.assertIn("max_durations", alm_ee)
+            self.assertIn("episodes", alm_ee)
+
+        # 3. Frontend y exportación Excel
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("renderExtremeEpisodesTable", app_js)
+        self.assertIn("initExtremeEpisodes", app_js)
+        self.assertIn("exportExtremeEpisodesToExcel", app_js)
+        self.assertIn("renderAlmanacExtremeEpisodesHtml", app_js)
+
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".extreme-episodes-section", css_text)
+        self.assertIn(".episodes-kpis-grid", css_text)
+        self.assertIn(".episodes-tabs-bar", css_text)
+        self.assertIn(".episode-badge", css_text)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

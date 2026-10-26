@@ -133,6 +133,11 @@ def validate_directory(data_dir: Path) -> List[str]:
             if s_ids != ["winter", "spring", "summer", "autumn"]:
                 errors.append(f"[{year}] Estaciones inesperadas en almanac_{year}.json: {s_ids}")
 
+        # Validar episodios extremos (EVO-020 / EVO-D)
+        alm_ee = alm.get("extreme_episodes")
+        if not alm_ee or "counts" not in alm_ee or "episodes" not in alm_ee:
+            errors.append(f"[{year}] almanac_{year}.json carece del objeto 'extreme_episodes' (EVO-D)")
+
     comp = loaded.get("comparisons.json", {})
     sc = comp.get("seasonal_comparison", {})
     if not sc:
@@ -142,6 +147,17 @@ def validate_directory(data_dir: Path) -> List[str]:
             errors.append(f"Tabla estacional incompleta en comparisons.json: {len(sc.get('table', []))} < 20 filas.")
         if len(sc.get("baseline_reference_2022_2025", {})) != 4:
             errors.append("Referencia climática estacional incompleta en comparisons.json.")
+
+    # Validar catálogo de episodios extremos en records.json (EVO-020 / EVO-D)
+    rec = loaded.get("records.json", {})
+    rec_ee = rec.get("extreme_episodes", {})
+    if not rec_ee or "summary_kpis" not in rec_ee or "episodes" not in rec_ee:
+        errors.append("records.json carece del catálogo 'extreme_episodes' (EVO-D).")
+    else:
+        if len(rec_ee.get("episodes", [])) < 80:
+            errors.append(f"Catálogo de episodios extremos incompleto: {len(rec_ee.get('episodes', []))} < 80.")
+        if len(rec_ee.get("counts_by_type", {})) != 5:
+            errors.append("Faltan categorías en counts_by_type de extreme_episodes.")
 
     # 3. Validar glosario meteorológico y divulgativo (glossary.json)
     glo = loaded.get("glossary.json", {})

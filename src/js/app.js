@@ -47,6 +47,10 @@
       seasonFilter: 'all', // 'all' | 'winter' | 'spring' | 'summer' | 'autumn'
       metric: 'temp', // 'temp' | 'rain' | 'extremes' | 'foehn'
     },
+    episodes: {
+      filterType: 'all', // 'all' | 'heatwave' | 'coldwave' | 'wet_spell' | 'dry_spell' | 'foehn_spell'
+      yearFilter: 'all', // 'all' | '2022' | '2023' | '2024' | '2025' | '2026'
+    },
     festivalSelectedId: 'san_juan',
     cache: {
       index: null,
@@ -1210,6 +1214,84 @@
     `;
   }
 
+  function renderAlmanacExtremeEpisodesHtml(alm) {
+    const ee = alm.extreme_episodes;
+    if (!ee) return '';
+    const counts = ee.counts || {};
+    const maxDur = ee.max_durations || {};
+    const episodes = ee.episodes || [];
+
+    const chips = [
+      {
+        icon: '🔥',
+        label: 'Olas de calor',
+        count: counts.heatwaves || 0,
+        sub: maxDur.heatwave_days ? `máx. ${maxDur.heatwave_days} d.` : 'ninguna'
+      },
+      {
+        icon: '❄️',
+        label: 'Olas de frío',
+        count: counts.coldwaves || 0,
+        sub: maxDur.coldwave_days ? `máx. ${maxDur.coldwave_days} d.` : 'ninguna'
+      },
+      {
+        icon: '🌧️',
+        label: 'Rachas lluvia (≥7 d.)',
+        count: counts.wet_spells || 0,
+        sub: maxDur.wet_spell_days ? `máx. ${maxDur.wet_spell_days} d.` : 'ninguna'
+      },
+      {
+        icon: '☀️',
+        label: 'Rachas secas (≥7 d.)',
+        count: counts.dry_spells || 0,
+        sub: maxDur.dry_spell_days ? `máx. ${maxDur.dry_spell_days} d.` : 'ninguna'
+      },
+      {
+        icon: '💨',
+        label: 'Suradas (≥2 d.)',
+        count: counts.foehn_spells || 0,
+        sub: maxDur.foehn_spell_days ? `máx. ${maxDur.foehn_spell_days} d.` : 'ninguna'
+      }
+    ];
+
+    const chipsHtml = chips.map((c) => `
+      <div class="almanac-episode-chip">
+        <span>${c.icon}</span>
+        <span><strong>${c.count}</strong> ${escapeHtml(c.label)}</span>
+        <span style="font-size:0.75rem; color:var(--txt-muted); margin-left:2px">(${escapeHtml(c.sub)})</span>
+      </div>
+    `).join('');
+
+    const recentItems = episodes.slice(0, 4).map((e) => `
+      <li style="font-size:0.83rem; color:var(--txt-secondary); margin-bottom:4px">
+        <span class="episode-badge episode-badge-${e.type}" style="padding:1px 6px; font-size:0.72rem; margin-right:5px">
+          ${e.type_icon} ${escapeHtml(e.type_label)}
+        </span>
+        <strong>${fmtDateES(e.start_date, false)} al ${fmtDateES(e.end_date, false)}</strong> (${e.duration_days} días):
+        <span>${escapeHtml(e.summary)}</span>
+      </li>
+    `).join('');
+
+    return `
+      <div class="almanac-episodes-box">
+        <div class="almanac-episodes-header">
+          <h4 class="almanac-episodes-title">⚡ Episodios climáticos extremos observados en ${alm.year}</h4>
+          <a href="#records" class="btn btn-secondary" style="font-size:0.78rem; padding:4px 10px">
+            Ver catálogo completo histórico →
+          </a>
+        </div>
+        <div class="almanac-episodes-chips">
+          ${chipsHtml}
+        </div>
+        ${recentItems ? `
+          <ul style="margin: 12px 0 0 0; padding-left: 18px; list-style-type: disc">
+            ${recentItems}
+          </ul>
+        ` : ''}
+      </div>
+    `;
+  }
+
   async function renderAlmanaque(year) {
     const [idx, alm] = await Promise.all([
       ensureIndexLoaded(),
@@ -2051,6 +2133,9 @@
 
       <!-- Desglose estacional en 4 trimestres canónicos OMM (EVO-019 / EVO-C) -->
       ${renderAlmanacSeasonsHtml(alm)}
+
+      <!-- Catálogo de episodios climáticos extremos del año (EVO-020 / EVO-D) -->
+      ${renderAlmanacExtremeEpisodesHtml(alm)}
 
       <!-- Desglose mensual en tabla -->
       <section class="section-block">
@@ -3426,6 +3511,90 @@
     }, 'meteoriotuerto_climatologia_estacional_2022_2026.xlsx');
   }
 
+  function exportExtremeEpisodesToExcel(extremeEpisodes) {
+    if (!extremeEpisodes) return;
+    const episodes = extremeEpisodes.episodes || [];
+    const headers = [
+      'ID Episodio', 'Tipo de episodio', 'Fecha inicio', 'Fecha fin', 'Duración (días)',
+      'Año', 'Estado', 'Intensidad / Pico', 'Unidad pico', 'Fecha pico',
+      'Lluvia total (mm)', 'Métrica media', 'Etiqueta métrica', 'T. media (°C)',
+      'Indicador complementario', 'Etiqueta indicador', 'Descripción y resumen'
+    ];
+    const rows = [headers];
+    episodes.forEach((e) => {
+      rows.push([
+        e.id,
+        e.type_label,
+        e.start_date,
+        e.end_date,
+        e.duration_days,
+        e.year,
+        e.is_provisional ? 'Provisional' : 'Consolidado',
+        e.peak_value,
+        e.peak_value_unit,
+        e.peak_date,
+        e.total_rain_mm !== undefined ? e.total_rain_mm : '',
+        e.mean_primary !== undefined ? e.mean_primary : '',
+        e.mean_primary_label || '',
+        e.mean_temp !== undefined ? e.mean_temp : '',
+        e.extra_count !== undefined ? e.extra_count : '',
+        e.extra_label || '',
+        e.summary || ''
+      ]);
+    });
+
+    const critHeaders = ['Tipo de episodio', 'Icono', 'Criterio umbral de detección', 'Descripción climatológica'];
+    const critRows = [critHeaders];
+    const criteria = extremeEpisodes.criteria || {};
+    Object.values(criteria).forEach((c) => {
+      critRows.push([c.name, c.icon, c.threshold, c.description]);
+    });
+
+    const kpiHeaders = ['Hito extremo histórico', 'Tipo', 'Duración / Valor récord', 'Fechas'];
+    const kpiRows = [kpiHeaders];
+    const kpis = extremeEpisodes.summary_kpis || {};
+    if (kpis.longest_heatwave) {
+      kpiRows.push(['Ola de calor más prolongada', 'Ola de calor', `${kpis.longest_heatwave.duration_days} días (pico ${kpis.longest_heatwave.peak_value} °C)`, `${kpis.longest_heatwave.start_date} a ${kpis.longest_heatwave.end_date}`]);
+    }
+    if (kpis.hottest_heatwave) {
+      kpiRows.push(['Ola de calor más tórrida', 'Ola de calor', `Pico ${kpis.hottest_heatwave.peak_value} °C (${kpis.hottest_heatwave.duration_days} días)`, `${kpis.hottest_heatwave.start_date} a ${kpis.hottest_heatwave.end_date}`]);
+    }
+    if (kpis.longest_coldwave) {
+      kpiRows.push(['Ola de frío más prolongada', 'Ola de frío', `${kpis.longest_coldwave.duration_days} días (mín. ${kpis.longest_coldwave.peak_value} °C)`, `${kpis.longest_coldwave.start_date} a ${kpis.longest_coldwave.end_date}`]);
+    }
+    if (kpis.coldest_coldwave) {
+      kpiRows.push(['Ola de frío más gélida', 'Ola de frío', `Mínima ${kpis.coldest_coldwave.peak_value} °C (${kpis.coldest_coldwave.duration_days} días)`, `${kpis.coldest_coldwave.start_date} a ${kpis.coldest_coldwave.end_date}`]);
+    }
+    if (kpis.longest_wet_spell) {
+      kpiRows.push(['Racha de lluvia más prolongada', 'Racha de lluvia', `${kpis.longest_wet_spell.duration_days} días seguidos (${kpis.longest_wet_spell.total_rain_mm} mm)`, `${kpis.longest_wet_spell.start_date} a ${kpis.longest_wet_spell.end_date}`]);
+    }
+    if (kpis.most_copious_wet_spell) {
+      kpiRows.push(['Racha de lluvia más copiosa', 'Racha de lluvia', `${kpis.most_copious_wet_spell.total_rain_mm} mm acumulados (${kpis.most_copious_wet_spell.duration_days} días)`, `${kpis.most_copious_wet_spell.start_date} a ${kpis.most_copious_wet_spell.end_date}`]);
+    }
+    if (kpis.longest_dry_spell) {
+      kpiRows.push(['Racha seca más prolongada', 'Racha seca', `${kpis.longest_dry_spell.duration_days} días sin lluvia (<0,2 mm)`, `${kpis.longest_dry_spell.start_date} a ${kpis.longest_dry_spell.end_date}`]);
+    }
+    if (kpis.longest_foehn_spell) {
+      kpiRows.push(['Surada / Foehn más persistente', 'Surada persistente', `${kpis.longest_foehn_spell.duration_days} días seguidos (racha ${kpis.longest_foehn_spell.peak_value} km/h)`, `${kpis.longest_foehn_spell.start_date} a ${kpis.longest_foehn_spell.end_date}`]);
+    }
+
+    const metaRows = [
+      ['Clave', 'Información'],
+      ['Título', 'Catálogo cronológico de episodios climáticos extremos de Riotuerto (2022–2026)'],
+      ['Estación', 'Barrio de Arriba, Riotuerto (Cantabria, 115 m s. n. m.)'],
+      ['Criterios de detección', 'Adaptación local de normas OMM / AEMET para Riotuerto'],
+      ['Total de episodios catalogados', episodes.length],
+      ['Fecha de exportación', new Date().toISOString()]
+    ];
+
+    exportWorkbookToXLSX({
+      'Episodios_Extremos': rows,
+      'Criterios_Deteccion': critRows,
+      'Hitos_Historicos': kpiRows,
+      'Metadatos': metaRows
+    }, 'meteoriotuerto_catalogo_episodios_extremos_2022_2026.xlsx');
+  }
+
   /* ------------------------------------------------------------------------
    * VISTA 3: EXPLORADOR DE DATOS HISTÓRICOS
    * ------------------------------------------------------------------------ */
@@ -3854,6 +4023,52 @@
       </tr>
     `).join('');
 
+    const ee = rec.extreme_episodes || {};
+    const kpis = ee.summary_kpis || {};
+    const counts = ee.counts_by_type || {};
+    const totalEpisodesCount = ee.total_episodes_count || 0;
+
+    const kpiCards = [
+      {
+        kpiClass: 'kpi-heat',
+        label: '🔥 Ola de calor récord',
+        val: kpis.longest_heatwave ? `${kpis.longest_heatwave.duration_days} días` : '—',
+        sub: kpis.longest_heatwave ? `Pico: ${fmtNum(kpis.longest_heatwave.peak_value, 1)} °C · ${fmtDateES(kpis.longest_heatwave.start_date, false)} al ${fmtDateES(kpis.longest_heatwave.end_date, false)}` : ''
+      },
+      {
+        kpiClass: 'kpi-cold',
+        label: '❄️ Ola de frío récord',
+        val: kpis.longest_coldwave ? `${kpis.longest_coldwave.duration_days} días` : '—',
+        sub: kpis.longest_coldwave ? `Mínima: ${fmtNum(kpis.longest_coldwave.peak_value, 1)} °C · ${fmtDateES(kpis.longest_coldwave.start_date, false)} al ${fmtDateES(kpis.longest_coldwave.end_date, false)}` : ''
+      },
+      {
+        kpiClass: 'kpi-wet',
+        label: '🌧️ Racha de lluvia récord',
+        val: kpis.longest_wet_spell ? `${kpis.longest_wet_spell.duration_days} días` : '—',
+        sub: kpis.longest_wet_spell ? `Total: ${fmtNum(kpis.longest_wet_spell.total_rain_mm, 1)} mm · ${fmtDateES(kpis.longest_wet_spell.start_date, false)} al ${fmtDateES(kpis.longest_wet_spell.end_date, false)}` : ''
+      },
+      {
+        kpiClass: 'kpi-dry',
+        label: '☀️ Racha seca récord',
+        val: kpis.longest_dry_spell ? `${kpis.longest_dry_spell.duration_days} días` : '—',
+        sub: kpis.longest_dry_spell ? `Sin lluvia apreciable (<0,2 mm) · ${fmtDateES(kpis.longest_dry_spell.start_date, false)} al ${fmtDateES(kpis.longest_dry_spell.end_date, false)}` : ''
+      },
+      {
+        kpiClass: 'kpi-foehn',
+        label: '💨 Surada más prolongada',
+        val: kpis.longest_foehn_spell ? `${kpis.longest_foehn_spell.duration_days} días` : '—',
+        sub: kpis.longest_foehn_spell ? `Racha: ${fmtNum(kpis.longest_foehn_spell.peak_value, 1)} km/h · ${fmtDateES(kpis.longest_foehn_spell.start_date, false)} al ${fmtDateES(kpis.longest_foehn_spell.end_date, false)}` : ''
+      }
+    ];
+
+    const kpiCardsHtml = kpiCards.map((c) => `
+      <div class="episode-kpi-card ${c.kpiClass}">
+        <span class="episode-kpi-label">${c.label}</span>
+        <div class="episode-kpi-val">${c.val}</div>
+        <div class="episode-kpi-sub">${escapeHtml(c.sub)}</div>
+      </div>
+    `).join('');
+
     container.innerHTML = `
       <article class="editorial-hero">
         <div class="editorial-kicker">EFEMÉRIDES Y EXTREMOS INSTRUMENTALES</div>
@@ -3957,6 +4172,73 @@
           </table>
         </div>
       </section>
+
+      <!-- EVO-020 (EVO-D): Catálogo cronológico de episodios climáticos extremos -->
+      <section class="section-block extreme-episodes-section" id="extreme-episodes-section" aria-labelledby="episodes-heading">
+        <div class="section-header">
+          <div>
+            <h3 id="episodes-heading" class="section-title">⚡ Catálogo cronológico de episodios climáticos extremos (2022–2026)</h3>
+            <p class="section-subtitle">
+              Detección algorítmica de olas de calor, olas de frío, rachas de lluvia persistente, periodos secos y suradas continuadas
+            </p>
+          </div>
+          <div>
+            <button type="button" id="btn-export-episodes-xlsx" class="btn btn-excel">
+              📊 Exportar catálogo de episodios extremos a Excel (.xlsx)
+            </button>
+          </div>
+        </div>
+
+        <!-- Hitos récord del catálogo -->
+        <div class="episodes-kpis-grid">
+          ${kpiCardsHtml}
+        </div>
+
+        <!-- Controles de filtrado por categoría y por año -->
+        <div class="episodes-controls-bar">
+          <div class="episodes-tabs-bar" role="tablist" aria-label="Filtro de tipo de episodio extremo">
+            <button type="button" class="episodes-filter-btn active" data-type="all">🌐 Todos (${totalEpisodesCount})</button>
+            <button type="button" class="episodes-filter-btn" data-type="heatwave">🔥 Olas de calor (${counts.heatwave || 0})</button>
+            <button type="button" class="episodes-filter-btn" data-type="coldwave">❄️ Olas de frío (${counts.coldwave || 0})</button>
+            <button type="button" class="episodes-filter-btn" data-type="wet_spell">🌧️ Rachas de lluvia (${counts.wet_spell || 0})</button>
+            <button type="button" class="episodes-filter-btn" data-type="dry_spell">☀️ Rachas secas (${counts.dry_spell || 0})</button>
+            <button type="button" class="episodes-filter-btn" data-type="foehn_spell">💨 Suradas (${counts.foehn_spell || 0})</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px">
+            <label for="select-episodes-year" style="font-size:0.82rem; font-weight:600; color:var(--txt-secondary)">Filtrar año:</label>
+            <select id="select-episodes-year" class="form-select" style="padding:5px 10px; font-size:0.82rem">
+              <option value="all">Todos los años (2022–2026)</option>
+              <option value="2022">2022</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026 (En curso)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tabla detallada del catálogo -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tipo de episodio</th>
+                <th>Periodo (Inicio — Fin)</th>
+                <th class="num">Duración</th>
+                <th>Año</th>
+                <th class="num">Intensidad máxima</th>
+                <th>Fecha pico</th>
+                <th class="num">Métrica media / total</th>
+                <th>Indicador complementario</th>
+                <th>Descripción y síntesis del episodio</th>
+              </tr>
+            </thead>
+            <tbody id="episodes-table-body">
+              <!-- Renderizado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </section>
     `;
 
     document.getElementById('btn-export-abs-records-xlsx')?.addEventListener('click', () => {
@@ -3978,6 +4260,7 @@
       });
     }
     renderRankingRows(rec);
+    initExtremeEpisodes(rec);
   }
 
   function renderRankingRows(rec) {
@@ -4008,6 +4291,103 @@
         <td class="num">${fmtNum(r.wind_gust, 1)}</td>
       </tr>
     `).join('');
+  }
+
+  /* ------------------------------------------------------------------------
+   * EVO-020 (EVO-D): Funciones auxiliares de episodios climáticos extremos
+   * ------------------------------------------------------------------------ */
+  function renderExtremeEpisodesTable(rec) {
+    const ee = rec.extreme_episodes || {};
+    const tbody = document.getElementById('episodes-table-body');
+    if (!tbody) return;
+
+    let list = ee.episodes || [];
+    const filterType = STATE.episodes.filterType;
+    const yearFilter = STATE.episodes.yearFilter;
+
+    if (filterType && filterType !== 'all') {
+      list = list.filter((e) => e.type === filterType);
+    }
+    if (yearFilter && yearFilter !== 'all') {
+      list = list.filter((e) => String(e.year) === yearFilter);
+    }
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:24px; color:var(--txt-muted)">No se han registrado episodios con los filtros seleccionados.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map((e) => {
+      const yearHtml = e.is_provisional
+        ? `<a href="#almanaque/${e.year}">${e.year}</a> <span class="badge badge-provisional" style="font-size:0.65rem">prov.</span>`
+        : `<a href="#almanaque/${e.year}"><strong>${e.year}</strong></a>`;
+
+      let metricHtml = '';
+      if (e.total_rain_mm !== undefined) {
+        metricHtml = `<strong>${fmtNum(e.total_rain_mm, 1)} mm</strong> <small style="display:block; color:var(--txt-muted)">total acumulado</small>`;
+      } else if (e.mean_primary !== undefined) {
+        const u = e.peak_value_unit === 'km/h' ? 'km/h' : '°C';
+        metricHtml = `<strong>${fmtNum(e.mean_primary, 1)} ${u}</strong> <small style="display:block; color:var(--txt-muted)">${escapeHtml(e.mean_primary_label || '')}</small>`;
+      } else {
+        metricHtml = '—';
+      }
+
+      let extraHtml = '';
+      if (e.extra_count !== undefined && e.extra_count > 0) {
+        extraHtml = `<strong>${e.extra_count}</strong> <small style="color:var(--txt-muted)">${escapeHtml(e.extra_label || '')}</small>`;
+      } else {
+        extraHtml = `<span style="color:var(--txt-muted)">—</span>`;
+      }
+
+      return `
+        <tr>
+          <td>
+            <span class="episode-badge episode-badge-${e.type}">
+              ${e.type_icon} ${escapeHtml(e.type_label)}
+            </span>
+          </td>
+          <td>
+            <strong>${fmtDateES(e.start_date, false)}</strong> al <strong>${fmtDateES(e.end_date, false)}</strong>
+          </td>
+          <td class="num mono"><strong>${e.duration_days} días</strong></td>
+          <td class="mono">${yearHtml}</td>
+          <td class="num mono">
+            <strong style="color:${e.type_color || 'var(--txt-primary)'}">${fmtNum(e.peak_value, 1)} ${escapeHtml(e.peak_value_unit || '')}</strong>
+          </td>
+          <td><small>${fmtDateES(e.peak_date, false)}</small></td>
+          <td class="num mono">${metricHtml}</td>
+          <td>${extraHtml}</td>
+          <td><small style="line-height:1.35; display:block">${escapeHtml(e.summary)}</small></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function initExtremeEpisodes(rec) {
+    renderExtremeEpisodesTable(rec);
+
+    const filterBtns = document.querySelectorAll('.episodes-filter-btn');
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        STATE.episodes.filterType = btn.dataset.type || 'all';
+        renderExtremeEpisodesTable(rec);
+      });
+    });
+
+    const yearSelect = document.getElementById('select-episodes-year');
+    if (yearSelect) {
+      yearSelect.value = STATE.episodes.yearFilter;
+      yearSelect.addEventListener('change', (e) => {
+        STATE.episodes.yearFilter = e.target.value;
+        renderExtremeEpisodesTable(rec);
+      });
+    }
+
+    document.getElementById('btn-export-episodes-xlsx')?.addEventListener('click', () => {
+      exportExtremeEpisodesToExcel(rec.extreme_episodes);
+    });
   }
 
   /* ------------------------------------------------------------------------
