@@ -8108,6 +8108,12 @@
             </div>
             <div class="practical-cards-grid">
               <div class="practical-card">
+                <div class="practical-card-media">
+                  <picture>
+                    <source srcset="./assets/img/labor-calefaccion-lena.webp" type="image/webp">
+                    <img src="./assets/img/labor-calefaccion-lena.jpg" alt="Acopio de leña y calefacción en vivienda tradicional montañesa" class="practical-card-img" loading="lazy" width="800" height="450">
+                  </picture>
+                </div>
                 <div class="practical-card-top">
                   <span class="practical-card-icon">🔥</span>
                   <div>
@@ -8124,6 +8130,12 @@
               </div>
 
               <div class="practical-card">
+                <div class="practical-card-media">
+                  <picture>
+                    <source srcset="./assets/img/labor-robot-cortacesped.webp" type="image/webp">
+                    <img src="./assets/img/labor-robot-cortacesped.jpg" alt="Robot cortacésped trabajando sobre pradera verde cuidada" class="practical-card-img" loading="lazy" width="800" height="450">
+                  </picture>
+                </div>
                 <div class="practical-card-top">
                   <span class="practical-card-icon">🤖</span>
                   <div>
@@ -8140,6 +8152,12 @@
               </div>
 
               <div class="practical-card">
+                <div class="practical-card-media">
+                  <picture>
+                    <source srcset="./assets/img/labor-siega-forraje.webp" type="image/webp">
+                    <img src="./assets/img/labor-siega-forraje.jpg" alt="Tractor agrícola realizando la siega de hierba para forraje en praderas" class="practical-card-img" loading="lazy" width="800" height="450">
+                  </picture>
+                </div>
                 <div class="practical-card-top">
                   <span class="practical-card-icon">🚜</span>
                   <div>
@@ -8156,6 +8174,12 @@
               </div>
 
               <div class="practical-card">
+                <div class="practical-card-media">
+                  <picture>
+                    <source srcset="./assets/img/labor-huerta-tratamientos.webp" type="image/webp">
+                    <img src="./assets/img/labor-huerta-tratamientos.jpg" alt="Huerta tradicional con tomateras y cultivos hortícolas cuidados" class="practical-card-img" loading="lazy" width="800" height="450">
+                  </picture>
+                </div>
                 <div class="practical-card-top">
                   <span class="practical-card-icon">🍅</span>
                   <div>
@@ -8172,6 +8196,12 @@
               </div>
 
               <div class="practical-card">
+                <div class="practical-card-media">
+                  <picture>
+                    <source srcset="./assets/img/labor-setas-micologia.webp" type="image/webp">
+                    <img src="./assets/img/labor-setas-micologia.jpg" alt="Setas silvestres boletus edulis brotando en robledal y castañar húmedo" class="practical-card-img" loading="lazy" width="800" height="450">
+                  </picture>
+                </div>
                 <div class="practical-card-top">
                   <span class="practical-card-icon">🍄</span>
                   <div>
@@ -8188,6 +8218,12 @@
               </div>
 
               <div class="practical-card">
+                <div class="practical-card-media">
+                  <picture>
+                    <source srcset="./assets/img/labor-solar-fotovoltaica.webp" type="image/webp">
+                    <img src="./assets/img/labor-solar-fotovoltaica.jpg" alt="Paneles solares fotovoltaicos sobre tejado de teja tradicional para autoconsumo" class="practical-card-img" loading="lazy" width="800" height="450">
+                  </picture>
+                </div>
                 <div class="practical-card-top">
                   <span class="practical-card-icon">☀️</span>
                   <div>

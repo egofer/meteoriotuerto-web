@@ -3598,6 +3598,28 @@ html[data-theme="dark"] .cotidiano-subnav-btn.active {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
+.practical-card-media {
+  margin: -18px -20px 14px -20px;
+  overflow: hidden;
+  border-top-left-radius: calc(var(--radius-sm) - 1px);
+  border-top-right-radius: calc(var(--radius-sm) - 1px);
+  position: relative;
+  background: var(--bg-subtle);
+  aspect-ratio: 16 / 9;
+}
+
+.practical-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.practical-card:hover .practical-card-img {
+  transform: scale(1.04);
+}
+
 .practical-card-top {
   display: flex;
   align-items: center;
@@ -3675,6 +3697,10 @@ html[data-theme="dark"] .cotidiano-subnav-btn.active {
     padding: 15px 14px;
   }
 
+  .practical-card-media {
+    margin: -15px -14px 12px -14px;
+  }
+
   .practical-card-title {
     font-size: 1rem;
     line-height: 1.3;
@@ -3715,6 +3741,10 @@ html[data-theme="dark"] .cotidiano-subnav-btn.active {
 
   .practical-card {
     padding: 13px 11px;
+  }
+
+  .practical-card-media {
+    margin: -13px -11px 10px -11px;
   }
 
   .practical-card-top {

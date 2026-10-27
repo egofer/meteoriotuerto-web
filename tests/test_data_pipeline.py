@@ -215,6 +215,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
                     "/src/js/vendor/xlsx.mini.min.js",
                     "/assets/img/estacion-meteorologica-barrio-de-arriba.jpg",
                     "/assets/img/estacion-meteorologica-barrio-de-arriba.webp",
+                    "/assets/img/labor-calefaccion-lena.webp",
+                    "/assets/img/labor-robot-cortacesped.webp",
+                    "/assets/img/labor-siega-forraje.webp",
+                    "/assets/img/labor-huerta-tratamientos.webp",
+                    "/assets/img/labor-setas-micologia.webp",
+                    "/assets/img/labor-solar-fotovoltaica.webp",
                     "/data/index.json",
                     "/data/records.json",
                     "/data/comparisons.json",
@@ -680,6 +686,26 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("minmax(min(100%, 300px), 1fr)", css_text)
         self.assertIn("@media (max-width: 768px)", css_text)
         self.assertIn("grid-template-columns: 1fr;", css_text)
+        self.assertIn(".practical-card-media", css_text)
+        self.assertIn(".practical-card-img", css_text)
+
+        # Comprobar presencia de las 6 imágenes ilustrativas de labores en assets/img
+        expected_images = [
+            "labor-calefaccion-lena",
+            "labor-robot-cortacesped",
+            "labor-siega-forraje",
+            "labor-huerta-tratamientos",
+            "labor-setas-micologia",
+            "labor-solar-fotovoltaica",
+        ]
+        for base in expected_images:
+            jpg_file = ROOT_DIR / "assets" / "img" / f"{base}.jpg"
+            webp_file = ROOT_DIR / "assets" / "img" / f"{base}.webp"
+            self.assertTrue(jpg_file.exists(), f"Falta archivo {jpg_file.name}")
+            self.assertTrue(webp_file.exists(), f"Falta archivo {webp_file.name}")
+            self.assertGreater(jpg_file.stat().st_size, 30_000, f"Tamaño insuficiente en {jpg_file.name}")
+            self.assertGreater(webp_file.stat().st_size, 30_000, f"Tamaño insuficiente en {webp_file.name}")
+            self.assertIn(f"{base}.webp", app_js, f"Falta referencia a {base}.webp en app.js")
 
     def test_station_photo_and_instrumentation_readiness(self):
         """
