@@ -494,6 +494,11 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("AlmanacDocument", sch["$defs"])
         self.assertIn("StationGeoJSON", sch["$defs"])
 
+        # Verificar aviso de licencia abierta CC BY (Atribución) en footer de index.html
+        html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn("CC BY", html_text, "Falta mención a licencia CC BY en index.html")
+        self.assertIn("Atribución", html_text, "Falta mención a Atribución en index.html")
+
     def test_head_to_head_comparator_data_readiness(self) -> None:
         """
         EVO-011: Verifica que todos los almanaques anuales y objetos mensuales contengan

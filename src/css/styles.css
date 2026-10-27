@@ -1895,6 +1895,16 @@ html[data-theme="dark"] .btn-excel:hover {
   color: rgba(233, 242, 238, 0.68);
 }
 
+.footer-bottom a {
+  color: #a7f3d0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer-bottom a:hover {
+  color: #ffffff;
+}
+
 /* Indicadores de lluvia acumulada (EVO-001) */
 .cum-rain-kpis {
   display: grid;

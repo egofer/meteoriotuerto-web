@@ -70,4 +70,4 @@ Consulte [`docs/METODOLOGIA.md`](./docs/METODOLOGIA.md) para el detalle de los c
 
 - **Repositorio primario de datos abiertos:** [https://github.com/egofer/meteoriotuerto/](https://github.com/egofer/meteoriotuerto/)
 - **Panel en tiempo real de la estación:** [https://www.ecowitt.net/home/index?id=33161](https://www.ecowitt.net/home/index?id=33161)
-- **Atribución:** Los datos y análisis se comparten con fines divulgativos, educativos y científicos citando al proyecto **MeteoRiotuerto**.
+- **Licencia y atribución:** Los datos y análisis se comparten bajo licencia **Creative Commons Atribución 4.0 Internacional (CC BY 4.0)** con fines divulgativos, educativos y científicos citando al proyecto **MeteoRiotuerto**.
