@@ -9,7 +9,7 @@
     "missing_days": 25,
     "coverage_pct": 93.2,
     "has_30min_series": true,
-    "clean_30min_records": 15631,
+    "clean_30min_records": 15629,
     "quality_audit": {
       "daily_anomalies_corrected": [
         "2023-11-18: Radiación diaria máxima bruta 1533.5 W/m² supera la constante solar (1361 W/m²); marcada como pico espurio/efecto borde de nube.",
@@ -23,11 +23,11 @@
       ],
       "intraday_meta": {
         "available": true,
-        "raw_rows": 15919,
-        "clean_rows": 15631,
-        "duplicates_removed": 0,
+        "raw_rows": 16445,
+        "clean_rows": 15629,
+        "duplicates_removed": 188,
         "out_of_year_removed": 288,
-        "embedded_daily_removed": 0,
+        "embedded_daily_removed": 340,
         "glitches_filtered": []
       }
     }
@@ -159,7 +159,7 @@
       "solar_max_raw_date": "2023-11-18",
       "uvi_max": 11,
       "uvi_max_raw": 14,
-      "estimated_sunshine_hours": 2372.0
+      "estimated_sunshine_hours": 2373.0
     },
     "degree_days": {
       "hdd_15_5": 959.2,
@@ -285,7 +285,7 @@
   },
   "wind_analysis": {
     "source_resolution": "30min",
-    "total_direction_observations": 15577,
+    "total_direction_observations": 15575,
     "predominant_sector": "SSE",
     "rose_16": [
       {
@@ -297,15 +297,15 @@
       },
       {
         "sector": "NNE",
-        "count": 237,
-        "frequency_pct": 1.52,
+        "count": 238,
+        "frequency_pct": 1.53,
         "mean_speed_kmh": 1.0,
         "max_gust_kmh": 18.3
       },
       {
         "sector": "NE",
         "count": 250,
-        "frequency_pct": 1.6,
+        "frequency_pct": 1.61,
         "mean_speed_kmh": 0.9,
         "max_gust_kmh": 21.9
       },
@@ -332,15 +332,15 @@
       },
       {
         "sector": "SE",
-        "count": 2070,
-        "frequency_pct": 13.29,
+        "count": 2069,
+        "frequency_pct": 13.28,
         "mean_speed_kmh": 0.7,
         "max_gust_kmh": 46.0
       },
       {
         "sector": "SSE",
-        "count": 2260,
-        "frequency_pct": 14.51,
+        "count": 2259,
+        "frequency_pct": 14.5,
         "mean_speed_kmh": 0.8,
         "max_gust_kmh": 34.9
       },
@@ -353,7 +353,7 @@
       },
       {
         "sector": "SSW",
-        "count": 890,
+        "count": 889,
         "frequency_pct": 5.71,
         "mean_speed_kmh": 6.5,
         "max_gust_kmh": 73.4
@@ -367,8 +367,8 @@
       },
       {
         "sector": "WSW",
-        "count": 475,
-        "frequency_pct": 3.05,
+        "count": 476,
+        "frequency_pct": 3.06,
         "mean_speed_kmh": 2.0,
         "max_gust_kmh": 56.8
       },
@@ -381,22 +381,22 @@
       },
       {
         "sector": "WNW",
-        "count": 1365,
-        "frequency_pct": 8.76,
+        "count": 1366,
+        "frequency_pct": 8.77,
         "mean_speed_kmh": 3.8,
         "max_gust_kmh": 51.5
       },
       {
         "sector": "NW",
-        "count": 2013,
-        "frequency_pct": 12.92,
+        "count": 2015,
+        "frequency_pct": 12.94,
         "mean_speed_kmh": 4.0,
         "max_gust_kmh": 49.7
       },
       {
         "sector": "NNW",
-        "count": 1182,
-        "frequency_pct": 7.59,
+        "count": 1178,
+        "frequency_pct": 7.56,
         "mean_speed_kmh": 2.9,
         "max_gust_kmh": 42.2
       }

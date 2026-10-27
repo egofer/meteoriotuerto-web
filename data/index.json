@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-26 20:07:10",
+  "generated_at": "2026-10-27 10:03:11",
   "station": {
     "name": "MeteoRiotuerto",
     "Title": "MeteoRiotuerto — Almanaque meteorológico y climatológico digital de Riotuerto",
@@ -67,9 +67,9 @@
     "provisional_years": [
       2026
     ],
-    "total_observed_days": 1727,
+    "total_observed_days": 1728,
     "first_consolidated_date": "2022-01-01",
-    "last_consolidated_date": "2026-10-26",
+    "last_consolidated_date": "2026-10-27",
     "reference_2022_2025": {
       "years_included": [
         2022,
@@ -370,7 +370,7 @@
       "humidity_mean_pct": 84.6,
       "pressure_mean_hpa": 1025.1,
       "solar_max_wm2": 1350.5,
-      "estimated_sunshine_hours": 2372.0
+      "estimated_sunshine_hours": 2373.0
     },
     {
       "year": 2024,
@@ -507,11 +507,11 @@
     {
       "year": 2026,
       "is_provisional": true,
-      "valid_days": 299,
+      "valid_days": 300,
       "coverage_pct": 100.0,
       "character": "Provisional (año en curso: cálido y húmedo hasta octubre)",
       "temp_mean": 15.8,
-      "temp_max_mean": 21.9,
+      "temp_max_mean": 22.0,
       "temp_min_mean": 10.9,
       "temp_anomaly_vs_series": 1.27,
       "temp_max_abs": 41.3,
@@ -519,7 +519,7 @@
       "temp_min_abs": -1.4,
       "temp_min_date": "2026-01-04",
       "frost_days": 2,
-      "warm_days_25": 103,
+      "warm_days_25": 104,
       "hot_days_30": 31,
       "intense_heat_35": 11,
       "extreme_heat_40": 1,
@@ -527,10 +527,10 @@
       "rain_total_mm": 1505.2,
       "rain_anomaly_mm": null,
       "rain_anomaly_pct": null,
-      "eto_total_mm": 968.5,
-      "water_balance_mm": 536.7,
+      "eto_total_mm": 971.6,
+      "water_balance_mm": 533.6,
       "summer_balance_mm": -182.3,
-      "water_deficit_days": 207,
+      "water_deficit_days": 208,
       "water_surplus_days": 92,
       "rain_days_02": 155,
       "rain_days_1": 112,
@@ -546,29 +546,29 @@
       "wind_gust_max_kmh": 73.4,
       "wind_gust_max_date": "2026-01-21",
       "wind_days_40": 30,
-      "foehn_days": 16,
+      "foehn_days": 17,
       "wind_foehn_days": 7,
-      "thermal_foehn_days": 12,
-      "hdd_15_5": 599.2,
+      "thermal_foehn_days": 13,
+      "hdd_15_5": 597.9,
       "cdd_21_0": 94.2,
-      "gdd_10_0": 1818.4,
-      "temp_median": 16.0,
+      "gdd_10_0": 1827.5,
+      "temp_median": 16.1,
       "temp_p10": 9.2,
       "temp_p90": 22.4,
       "comfort_days_15_25": 147,
-      "comfort_pct_15_25": 49.1,
+      "comfort_pct_15_25": 49.0,
       "thermal_bands": {
         "cold_severe": 1,
         "cool_fresh": 48,
-        "comfort_mild": 71,
-        "pleasant_warm": 76,
-        "warm_hot": 72,
+        "comfort_mild": 70,
+        "pleasant_warm": 77,
+        "warm_hot": 73,
         "heat_intense": 31
       },
       "humidity_mean_pct": 85.7,
       "pressure_mean_hpa": 1020.7,
       "solar_max_wm2": 1028.1,
-      "estimated_sunshine_hours": 2198.0
+      "estimated_sunshine_hours": 2205.5
     }
   ]
 }
