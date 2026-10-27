@@ -7607,7 +7607,7 @@
       dateLabel: '1 de mayo',
       icon: '🌸',
       description: 'Festividad primaveral del barrio de Monte que abre el calendario anual de fiestas en Riotuerto.',
-      culturalNotes: 'Celebración tradicional en la ermita y praderas de Monte con misa solemne, aperitivo popular y juegos tradicionales cántabros en un privilegiado mirador hacia los valles pasiegos y Trasmiera.'
+      culturalNotes: 'Celebración tradicional en la ermita y praderas de Monte con misa solemne, danzas populares y parrillada.'
     },
     {
       id: 'san_juan',
@@ -7630,7 +7630,7 @@
       dateLabel: '16 de julio',
       icon: '⛵',
       description: 'Festividad mariana y romería tradicional en el Barrio de Arriba.',
-      culturalNotes: 'Romería emblemática con devoción vecinal, procesión, almuerzos compartidos en huertas y praderías del barrio y baile al atardecer bajo los tilos en un ambiente típicamente montañés y veraniego.'
+      culturalNotes: 'Romería emblemática con devoción vecinal, procesión y danzas tradicionales.'
     },
     {
       id: 'magdalena',
@@ -7641,7 +7641,7 @@
       dateLabel: '22 de julio',
       icon: '🏛️',
       description: 'Fiestas patronales del pueblo de Rucandio en un marco arquitectónico señero.',
-      culturalNotes: 'Celebración al pie de la monumental iglesia barroca de Santa María Magdalena (Bien de Interés Cultural). Destaca por su procesión con danzantes montañeses, conciertos de folclore cántabro y meriendas populares en la campa.'
+      culturalNotes: 'Celebración al pie de la monumental iglesia barroca de Santa María Magdalena (Bien de Interés Cultural). Destaca por su procesión con danzantes montañeses, mercado de productos artesanos, romería y comidas populares en la campa.'
     },
     {
       id: 'san_roque',
@@ -7652,7 +7652,7 @@
       dateLabel: '16 de agosto',
       icon: '🐕',
       description: 'Romería campestre y festividad tradicional en el pueblo de Angustina.',
-      culturalNotes: 'Cita estival muy arraigada con misa solemne en la ermita de San Roque, bendición del pan y los romeros, concurso gastronómico vecinal y baile campestre hasta la noche.'
+      culturalNotes: 'Cita estival muy arraigada con misa y comida campestre cuando el tiempo lo permite.'
     },
     {
       id: 'juventud',
@@ -7670,7 +7670,7 @@
       },
       icon: '🎉',
       description: 'Encuentro juvenil y festivo multitudinario en el casco urbano de La Cavada.',
-      culturalNotes: 'Organizada por peñas y colectivos jóvenes, congrega charangas, fiesta de la espuma, paelladas gigantes, torneos deportivos y orquestas hasta altas horas de la madrugada aprovechando el apogeo estival.'
+      culturalNotes: 'Organizada por peñas y colectivos jóvenes, congrega pasacalles y charangas, paelladas gigantes, torneos deportivos, descenso de autoslocos, concursos gastronómicos y verbena hasta altas horas de la madrugada aprovechando el apogeo estival.'
     },
     {
       id: 'brigadier',
@@ -7689,7 +7689,7 @@
       icon: '⚔️',
       badge: 'Fiesta de Interés Turístico Regional',
       description: 'Recreación histórica militar del siglo XVIII y ciclo cultural de conferencias de 5 días de duración.',
-      culturalNotes: 'Conmemora la toma de posesión del Brigadier Fernando Casado de Torres en 1787 al mando de las Reales Fábricas de Cañones de La Cavada. Declarada Fiesta de Interés Turístico Regional de Cantabria, incluye desfile de tropas con uniformes de época dieciochesca, salvas de artillería con cañones navales de tiro real, mercado barroco y cinco jornadas de conferencias históricas.'
+      culturalNotes: 'Conmemora la toma de posesión del Brigadier Fernando Casado de Torres en 1787 al mando de las Reales Fábricas de Cañones de La Cavada. Declarada Fiesta de Interés Turístico Regional de Cantabria, incluye desfile de tropas con uniformes de época dieciochesca, salva de artillería con un cañón naval de tiro real, mercado barroco y cinco jornadas de conferencias históricas.'
     },
     {
       id: 'san_cipriano',
@@ -7700,7 +7700,7 @@
       dateLabel: '16 de septiembre',
       icon: '🍂',
       description: 'Romería que despide el ciclo de fiestas veraniegas en el Barrio de Arriba.',
-      culturalNotes: 'Jornada costumbrista de hermandad vecinal previa al equinoccio de otoño, con misa solemne, procesión, romería amenizada con pitu y tambor y meriendas al aire libre en los prados del barrio.'
+      culturalNotes: 'Jornada costumbrista de hermandad vecinal previa al equinoccio de otoño, con misa solemne, procesión, romería amenizada con pitu y tambor y danzantes bailando danzas tradicionales de palos y varas.'
     }
   ];
 
