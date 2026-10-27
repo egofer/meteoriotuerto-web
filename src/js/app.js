@@ -7096,6 +7096,31 @@
             consolidan periódicamente mediante el sistema automatizado <code>ecowitt_downloader</code> y se preservan
             en el repositorio público de datos abiertos <a href="${st.links.data_repo}" target="_blank" rel="noopener">egofer/meteoriotuerto</a>.
           </p>
+
+          <figure class="station-photo-figure" style="margin-top:14px">
+            <div class="station-photo-wrap">
+              <span class="station-photo-badge">📷 29 nov. 2020 · Instalación</span>
+              <picture>
+                <source srcset="./assets/img/estacion-meteorologica-barrio-de-arriba.webp" type="image/webp">
+                <img
+                  src="./assets/img/estacion-meteorologica-barrio-de-arriba.jpg"
+                  alt="Estación meteorológica Sainlogic WS3500 instalada en Barrio de Arriba (Riotuerto, Cantabria)"
+                  class="station-photo-img"
+                  loading="lazy"
+                  width="1600"
+                  height="1200"
+                >
+              </picture>
+            </div>
+            <figcaption class="station-photo-caption">
+              <strong>Estación Sainlogic WS3500 en Barrio de Arriba (115 m s. n. m.).</strong> Fotografía documental tomada el 29 de noviembre de 2020 a las 12:40 h durante el izado del mástil e inicio formal de la serie histórica de observaciones en Riotuerto.
+            </figcaption>
+            <div class="station-photo-link-bar">
+              <a href="./assets/img/estacion-meteorologica-barrio-de-arriba.jpg" target="_blank" rel="noopener noreferrer">
+                Ver fotografía original en alta resolución (1600×1200) ↗
+              </a>
+            </div>
+          </figure>
         </div>
       </div>
 

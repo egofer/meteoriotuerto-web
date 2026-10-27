@@ -166,6 +166,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             ROOT_DIR / "data" / "glossary.json",
             ROOT_DIR / "data" / "station.geojson",
             ROOT_DIR / "data" / "schema.json",
+            ROOT_DIR / "assets" / "img" / "estacion-meteorologica-barrio-de-arriba.jpg",
+            ROOT_DIR / "assets" / "img" / "estacion-meteorologica-barrio-de-arriba.webp",
         ]
         for p in required_paths:
             self.assertTrue(p.exists(), f"Falta el archivo requerido: {p}")
@@ -186,7 +188,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # Verificar ausencia de credenciales o claves privadas
         for p in required_paths:
-            if p.suffix in (".ico", ".png"):
+            if p.suffix in (".ico", ".png", ".jpg", ".webp"):
                 continue
             txt = p.read_text(encoding="utf-8")
             self.assertIsNone(re.search(r"APPLICATION_KEY\s*=\s*['\"][A-Za-z0-9]{16,}", txt))
@@ -211,6 +213,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
                     "/src/css/styles.css",
                     "/src/js/app.js",
                     "/src/js/vendor/xlsx.mini.min.js",
+                    "/assets/img/estacion-meteorologica-barrio-de-arriba.jpg",
+                    "/assets/img/estacion-meteorologica-barrio-de-arriba.webp",
                     "/data/index.json",
                     "/data/records.json",
                     "/data/comparisons.json",
@@ -656,6 +660,27 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
         self.assertIn(".cotidiano-subnav", css_text, "Falta .cotidiano-subnav en styles.css")
         self.assertIn(".cotidiano-subnav-btn", css_text, "Falta .cotidiano-subnav-btn en styles.css")
+
+    def test_station_photo_and_instrumentation_readiness(self):
+        """
+        Verifica la incorporación de la fotografía original de la estación en Barrio de Arriba
+        (29 de noviembre de 2020) en la ficha de instrumentación de Metodología.
+        """
+        img_jpg = ROOT_DIR / "assets" / "img" / "estacion-meteorologica-barrio-de-arriba.jpg"
+        img_webp = ROOT_DIR / "assets" / "img" / "estacion-meteorologica-barrio-de-arriba.webp"
+        self.assertTrue(img_jpg.exists(), "Falta imagen JPG de la estación")
+        self.assertTrue(img_webp.exists(), "Falta imagen WebP de la estación")
+        self.assertGreater(img_jpg.stat().st_size, 100_000, "Tamaño JPG de la estación insuficiente")
+        self.assertGreater(img_webp.stat().st_size, 100_000, "Tamaño WebP de la estación insuficiente")
+
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("station-photo-figure", app_js, "Falta station-photo-figure en app.js")
+        self.assertIn("estacion-meteorologica-barrio-de-arriba.jpg", app_js, "Falta ruta jpg en app.js")
+        self.assertIn("estacion-meteorologica-barrio-de-arriba.webp", app_js, "Falta ruta webp en app.js")
+
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".station-photo-figure", css_text, "Falta .station-photo-figure en styles.css")
+        self.assertIn(".station-photo-img", css_text, "Falta .station-photo-img en styles.css")
 
     def test_circular_polar_windrose_readiness(self):
         """
