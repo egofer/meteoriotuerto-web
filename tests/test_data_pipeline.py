@@ -424,6 +424,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         for local_id in ["efecto_foehn", "surada", "inversion_termica", "hdd", "cdd", "gdd", "mediana_p50"]:
             self.assertIn(local_id, term_ids)
 
+        # Verificar contención visual de las fórmulas y umbrales en el glosario
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".glossary-card-threshold", css_text)
+        self.assertNotIn("white-space: nowrap;", css_text.split(".glossary-card-threshold")[1].split("}")[0],
+                         "Las fórmulas del glosario no deben tener white-space: nowrap para no sobresalir de las tarjetas")
+
     def test_sync_data_pipeline_and_workflows(self) -> None:
         """
         EVO-009: Verifica la detección idempotente de cambios en sync_data.py y la
