@@ -3348,6 +3348,58 @@ html[data-theme="dark"] .btn-excel:hover {
 }
 
 /* ==========================================================================
+   RIOTUERTO COTIDIANO: SUBNAVEGACIÓN PRINCIPAL
+   ========================================================================== */
+.cotidiano-nav-wrap {
+  margin-bottom: 24px;
+}
+
+.cotidiano-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-top: 16px;
+}
+
+.cotidiano-subnav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--txt-secondary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cotidiano-subnav-btn:hover {
+  background: var(--bg-elevated);
+  color: var(--txt-primary);
+  border-color: var(--border-color);
+}
+
+.cotidiano-subnav-btn.active {
+  background: var(--accent-forest);
+  border-color: var(--accent-forest);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+}
+
+html[data-theme="dark"] .cotidiano-subnav-btn.active {
+  color: #081c15;
+  font-weight: 700;
+}
+
+/* ==========================================================================
    GUÍA PRÁCTICA COTIDIANA (VECINOS, GANADERÍA, HUERTA) (EVO-013)
    ========================================================================== */
 .practical-guide-box {

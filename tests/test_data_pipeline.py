@@ -635,6 +635,28 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             context = terms_by_id[term_id].get("riotuerto_context", "")
             self.assertGreater(len(context), 50, f"Contexto de '{term_id}' demasiado breve")
 
+    def test_riotuerto_cotidiano_menu_reorganization(self):
+        """
+        Verifica la reorganización del menú «Riotuerto cotidiano», agrupando la información
+        práctica vecinal (labores, fenología y fiestas locales) en un único menú principal.
+        """
+        html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="#cotidiano"', html_text, "Falta enlace a #cotidiano en index.html")
+        self.assertIn('data-route="cotidiano"', html_text, "Falta data-route cotidiano en index.html")
+        self.assertIn('id="view-cotidiano"', html_text, "Falta id view-cotidiano en index.html")
+        self.assertIn('Riotuerto cotidiano', html_text, "Falta texto Riotuerto cotidiano en index.html")
+
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("function renderCotidiano", app_js, "Falta función renderCotidiano en app.js")
+        self.assertIn("cotidianoTab", app_js, "Falta estado cotidianoTab en app.js")
+        self.assertIn("btn-export-phenology-cotidiano-xlsx", app_js, "Falta botón Excel en labores cotidianas")
+        self.assertIn("btn-export-festivals-xlsx", app_js, "Falta botón Excel en fiestas")
+
+        # Comprobar estilos de subnavegación en styles.css
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".cotidiano-subnav", css_text, "Falta .cotidiano-subnav en styles.css")
+        self.assertIn(".cotidiano-subnav-btn", css_text, "Falta .cotidiano-subnav-btn en styles.css")
+
     def test_circular_polar_windrose_readiness(self):
         """
         EVO-017: Verifica la rosa de los vientos circular polar náutica (360°),

@@ -51,6 +51,8 @@
       filterType: 'all', // 'all' | 'heatwave' | 'coldwave' | 'wet_spell' | 'dry_spell' | 'foehn_spell'
       yearFilter: 'all', // 'all' | '2022' | '2023' | '2024' | '2025' | '2026'
     },
+    cotidianoTab: 'labores',
+    cotidianoYear: 2025,
     festivalSelectedId: 'san_juan',
     cache: {
       index: null,
@@ -649,20 +651,21 @@
         </div>
       </section>
 
-      <!-- Banner costumbrista: El tiempo en las fiestas de Riotuerto (EVO-013) -->
-      <section class="section-block" style="background: linear-gradient(135deg, rgba(37,99,235,0.06), rgba(16,185,129,0.05)); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 22px;">
+      <!-- Banner costumbrista y vecinal: Riotuerto cotidiano -->
+      <section class="section-block" style="background: linear-gradient(135deg, rgba(16,185,129,0.07), rgba(37,99,235,0.06)); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 22px;">
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
           <div style="max-width: 720px;">
-            <span class="guide-badge">🎉 Crónica costumbrista de Riotuerto</span>
+            <span class="guide-badge">🚜 Información práctica para el vecindario</span>
             <h3 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 6px 0; color: var(--txt-primary);">
-              El tiempo en las festividades y tradiciones del municipio
+              Riotuerto cotidiano: labores del campo, el hogar y fiestas locales
             </h3>
             <p style="color: var(--txt-secondary); margin: 0; font-size: 0.92rem; line-height: 1.55;">
-              Descubra qué tiempo hizo en San José Obrero (Monte), San Juan (La Cavada), El Carmen y San Cipriano (Barrio de Arriba), Santa María Magdalena (Rucandio), San Roque (Angustina), la Fiesta de la Juventud y la Toma de Posesión del Brigadier Casado Torres en las Reales Fábricas (Fiesta de Interés Turístico Regional).
+              Información clara y sin tecnicismos para el día a día en el municipio: orientación para el encendido de calderas, fechas de siega de praderas, alertas de mildiu en la huerta, temporada de setas y la memoria meteorológica de nuestras 8 fiestas y tradiciones.
             </p>
           </div>
-          <div>
-            <a href="#fiestas" class="btn btn-primary" style="white-space: nowrap;">Consultar fiestas locales →</a>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="#cotidiano" class="btn btn-primary" style="white-space: nowrap;">Abrir Riotuerto cotidiano →</a>
+            <a href="#cotidiano/fiestas" class="btn btn-secondary" style="white-space: nowrap;">Ver fiestas locales</a>
           </div>
         </div>
       </section>
@@ -1443,55 +1446,6 @@
 
     const maxGddMonthObj = validMonths.reduce((prev, curr) => (curr.gdd_10_0 || 0) > (prev?.gdd_10_0 || 0) ? curr : prev, null);
     const maxGddStr = maxGddMonthObj && maxGddMonthObj.gdd_10_0 > 0 ? `${maxGddMonthObj.name} (${fmtNum(maxGddMonthObj.gdd_10_0, 1)} GDD)` : '—';
-    const vegDaysCount = alm.daily_series?.temp_mean
-      ? alm.daily_series.temp_mean.filter((t) => t !== null && t !== undefined && t >= 10.0).length
-      : '—';
-    const autMonths = (alm.monthly || []).filter((m) => [9, 10, 11].includes(m.month) && m.valid_days > 0);
-    const autRain = autMonths.reduce((sum, m) => sum + (m.rain_total || 0), 0);
-    const autRainDays = autMonths.reduce((sum, m) => sum + (m.rain_days_02 || 0), 0);
-
-    // Cómputo del calendario fenológico y agroclimático del año
-    const pheno = computePhenologicalCalendar(alm.daily_series);
-    const phenoRowsHtml = PHENOLOGY_EVENTS.map((ev) => {
-      const iso = pheno[ev.key];
-      let dateHtml = '';
-      let diagHtml = '';
-      if (iso) {
-        dateHtml = `<span class="pheno-badge-date">${fmtDateES(iso, false)}</span>`;
-        const dObj = new Date(iso);
-        const startOfYear = new Date(dObj.getFullYear(), 0, 1);
-        const dayOfYear = Math.round((dObj - startOfYear) / 86400000) + 1;
-        const diff = dayOfYear - ev.refDayOfYear;
-        if (diff <= -5) {
-          diagHtml = `<span class="pheno-tag-early">Adelantada (${Math.abs(diff)} d.)</span>`;
-        } else if (diff >= 5) {
-          diagHtml = `<span class="pheno-tag-late">Retrasada (+${diff} d.)</span>`;
-        } else {
-          diagHtml = `<span class="pheno-tag-ontime">En fecha habitual</span>`;
-        }
-      } else {
-        if (alm.year === 2026) {
-          dateHtml = `<span class="pheno-badge-pending">Pendiente (cierre de año)</span>`;
-          diagHtml = `<span style="font-size:0.75rem; color:var(--txt-muted)">En curso</span>`;
-        } else {
-          dateHtml = `<span class="pheno-badge-pending">No alcanzado</span>`;
-          diagHtml = `<span style="font-size:0.75rem; color:var(--txt-muted)">Sin registro continuo</span>`;
-        }
-      }
-
-      return `
-        <tr>
-          <td>
-            <strong>${ev.icon} ${escapeHtml(ev.name)}</strong>
-            <span style="display:block; font-size:0.75rem; color:var(--txt-muted)">${escapeHtml(ev.subtitle)}</span>
-          </td>
-          <td style="font-size:0.82rem; color:var(--txt-secondary)">${escapeHtml(ev.criteria)}</td>
-          <td>${dateHtml}</td>
-          <td style="font-size:0.88rem; font-weight:600; color:var(--txt-secondary)">${escapeHtml(ev.typicalDate)}</td>
-          <td>${diagHtml}</td>
-        </tr>
-      `;
-    }).join('');
 
     // EVO-007: Percentiles térmicos y bandas de confort
     const tp = alm.stats.thermal_percentiles || {
@@ -1994,140 +1948,13 @@
           </div>
         </div>
 
-        <!-- Guía de utilidad cotidiana en Riotuerto (EVO-013) -->
-        <div class="practical-guide-box">
-          <div class="practical-guide-header">
-            <span class="guide-badge">🚜 Riotuerto cotidiano</span>
-            <h4 class="guide-title">Guía de utilidad práctica para vecinos, huertas y praderas</h4>
-            <p class="guide-subtitle">
-              Cómo trasladar los indicadores de grados día e índices bioclimáticos del año ${alm.year} a las tareas habituales del municipio
-            </p>
+        <!-- Enlace a la sección Riotuerto cotidiano (EVO-013) -->
+        <div class="callout callout-info" style="margin-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+          <div>
+            <strong>🚜 Aplicación en la vida práctica de Riotuerto:</strong>
+            Las recomendaciones cotidianas basadas en estos indicadores bioclimáticos (calefacción, huerta, siega, robots cortacésped y fenología de ${alm.year}) se encuentran agrupadas para todos los vecinos en la sección dedicada.
           </div>
-          <div class="practical-cards-grid">
-            <div class="practical-card">
-              <div class="practical-card-top">
-                <span class="practical-card-icon">🔥</span>
-                <div>
-                  <h5 class="practical-card-title">Calefacción y acopio de leña / pellets</h5>
-                  <span class="practical-card-meta">Basado en Grados Día de Calefacción (HDD)</span>
-                </div>
-              </div>
-              <p class="practical-card-body">
-                Cada punto de HDD refleja demanda térmica de las viviendas. Permite planificar el acopio de combustible y saber cuándo arrancar la caldera en otoño al encadenarse días con más de 4–5 HDD (medias diarias por debajo de 11 °C). En primavera, cuando los HDD caen persistentemente por debajo de 2 HDD/día, es el momento idóneo para pasar la caldera a modo solo agua caliente (ACS).
-              </p>
-              <div class="practical-card-stat">
-                Acumulado en ${alm.year}: <strong>${fmtNum(dd.hdd_15_5, 1)} HDD</strong> (Mes pico: ${maxHddStr})
-              </div>
-            </div>
-
-            <div class="practical-card">
-              <div class="practical-card-top">
-                <span class="practical-card-icon">🤖</span>
-                <div>
-                  <h5 class="practical-card-title">Robots cortacésped e invernada de aperos</h5>
-                  <span class="practical-card-meta">Basado en el Cero Vegetativo (10,0 °C)</span>
-                </div>
-              </div>
-              <p class="practical-card-body">
-                El césped y las praderas detienen su crecimiento activo por debajo de 10,0 °C. Indica cuándo retirar a resguardo los robots cortacésped y aperos para invernar a finales de otoño (protegiendo baterías y evitando apelmazar el terreno enfangado) y cuándo volver a ponerlos en marcha en primavera al consolidarse medias diarias &gt;10 °C de forma regular.
-              </p>
-              <div class="practical-card-stat">
-                Jornadas de crecimiento biológico (&ge;10 °C): <strong>${vegDaysCount} días</strong>
-              </div>
-            </div>
-
-            <div class="practical-card">
-              <div class="practical-card-top">
-                <span class="practical-card-icon">🚜</span>
-                <div>
-                  <h5 class="practical-card-title">Siega de prados y cortes de forraje</h5>
-                  <span class="practical-card-meta">Basado en Grados Día Agrícolas (GDD)</span>
-                </div>
-              </div>
-              <p class="practical-card-body">
-                Las praderas trasmeranas (raigrás, trébol y festuca) acumulan grados día para alcanzar su punto óptimo de biomasa y digestibilidad. El primer corte de forraje suele programarse al alcanzar ~200–250 GDD desde marzo, buscando ventanas sinópticas de 3 a 4 jornadas consecutivas secas con viento sur o brisa de ladera para garantizar un buen curado o ensilado.
-              </p>
-              <div class="practical-card-stat">
-                Energía biológica acumulada en ${alm.year}: <strong>${fmtNum(dd.gdd_10_0, 1)} GDD</strong> (Pico: ${maxGddStr})
-              </div>
-            </div>
-
-            <div class="practical-card">
-              <div class="practical-card-top">
-                <span class="practical-card-icon">🍅</span>
-                <div>
-                  <h5 class="practical-card-title">Huerta y sulfatos contra plagas (mildiu y oídio)</h5>
-                  <span class="practical-card-meta">Combinación de Temperatura + Humedad relativa</span>
-                </div>
-              </div>
-              <p class="practical-card-body">
-                Las esporas de hongos proliferan cuando la temperatura media supera los 10–12 °C (crecimiento activo) combinada con humedad relativa sostenida (&gt;85 %) o rocío matinal denso tras jornadas de lluvia. Este indicador señala las fechas críticas para aplicar tratamientos preventivos de cobre o azufre en tomateras y frutales antes de que aparezcan las manchas foliares.
-              </p>
-              <div class="practical-card-stat">
-                Humedad media anual: <strong>${fmtNum(stA.humidity_mean_pct, 1)} %</strong> · Precipitación: <strong>${fmtNum(stP.total_mm, 1)} mm</strong>
-              </div>
-            </div>
-
-            <div class="practical-card">
-              <div class="practical-card-top">
-                <span class="practical-card-icon">🍄</span>
-                <div>
-                  <h5 class="practical-card-title">Temporada de setas y eclosión micológica</h5>
-                  <span class="practical-card-meta">Humedad del suelo + Ventanas térmicas en monte</span>
-                </div>
-              </div>
-              <p class="practical-card-body">
-                Las setas de otoño en los robledales, castañares y pinares de Riotuerto (boletus, cantarelas y senderuelas) requieren una secuencia precisa: un «riego abundante previo» (&gt;40–50 mm acumulados) seguido de 7 a 10 días de temperaturas medias templadas (11–17 °C) sin suradas resecantes que marchiten el micelio. Permite seguir las mejores semanas para la recogida en el monte antes de las primeras heladas invernales.
-              </p>
-              <div class="practical-card-stat">
-                Lluvia otoñal (sep.–nov.): <strong>${fmtNum(autRain, 1)} mm</strong> (${autRainDays} días con lluvia)
-              </div>
-            </div>
-
-            <div class="practical-card">
-              <div class="practical-card-top">
-                <span class="practical-card-icon">☀️</span>
-                <div>
-                  <h5 class="practical-card-title">Autoconsumo solar fotovoltaico y térmico</h5>
-                  <span class="practical-card-meta">Radiación solar global + Horas de sol</span>
-                </div>
-              </div>
-              <p class="practical-card-body">
-                Para viviendas y explotaciones con placas solares en tejados o cubiertas. La persistente nubosidad orográfica matinal del fondo de valle modula la captación invernal, pero en primavera y verano y con viento sur la radiación supera los 950–1.050 W/m². Permite estimar el balance energético estacional, dimensionar baterías o acumuladores de agua y maximizar el autoconsumo en horas centrales.
-              </p>
-              <div class="practical-card-stat">
-                Horas de sol anuales: <strong>${stA.estimated_sunshine_hours !== null && stA.estimated_sunshine_hours !== undefined ? `${fmtNum(stA.estimated_sunshine_hours, 0)} h` : '—'}</strong> (Pico: ${stA.solar_max_wm2 !== null && stA.solar_max_wm2 !== undefined ? `${fmtNum(stA.solar_max_wm2, 1)} W/m²` : '—'})
-              </div>
-            </div>
-          </div>
-
-          <!-- Calendario fenológico y agroclimático del año -->
-          <div class="phenology-box">
-            <div class="phenology-header">
-              <h5 style="margin: 0 0 4px 0; font-size: 1.15rem; font-family: var(--font-serif); color: var(--txt-primary);">
-                📅 Calendario fenológico y agroclimático de Riotuerto (${alm.year})
-              </h5>
-              <p style="margin: 0; font-size: 0.85rem; color: var(--txt-muted);">
-                Fechas exactas del año en que se alcanzaron los umbrales bioclimáticos para calderas, siegas, robots cortacésped, huerta y setas frente a la media habitual
-              </p>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Labor o actividad cotidiana</th>
-                    <th>Criterio agroclimático</th>
-                    <th>Fecha observada en ${alm.year}</th>
-                    <th>Fecha media habitual</th>
-                    <th>Diagnóstico</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${phenoRowsHtml}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <a href="#cotidiano" class="btn btn-sm btn-primary" style="white-space:nowrap">Consultar Riotuerto cotidiano →</a>
         </div>
       </section>
 
@@ -8022,22 +7849,141 @@
     }, 'meteoriotuerto_fiestas_tradiciones_2022_2026.xlsx');
   }
 
-  async function renderFiestas(param) {
+  /* ------------------------------------------------------------------------
+   * VISTA UNIFICADA: RIOTUERTO COTIDIANO (LABORES Y FIESTAS)
+   * ------------------------------------------------------------------------ */
+  async function renderCotidiano(param, subparam) {
     const almanacs = await ensureAllAlmanacsLoaded();
-    const container = document.getElementById('view-fiestas');
+    const container = document.getElementById('view-cotidiano') || document.getElementById('view-fiestas');
     if (!container) return;
 
-    if (param && FESTIVALS_CATALOG.some((f) => f.id === param)) {
-      STATE.festivalSelectedId = param;
-    } else if (!STATE.festivalSelectedId) {
-      STATE.festivalSelectedId = 'san_juan';
+    // Determinar la subpestaña activa: 'labores' o 'fiestas'
+    let activeTab = 'labores';
+    let targetFestId = STATE.festivalSelectedId || 'san_juan';
+
+    if (param === 'fiestas' || param === 'tradiciones') {
+      activeTab = 'fiestas';
+      if (subparam && FESTIVALS_CATALOG.some((f) => f.id === subparam)) {
+        targetFestId = subparam;
+      }
+    } else if (param && FESTIVALS_CATALOG.some((f) => f.id === param)) {
+      activeTab = 'fiestas';
+      targetFestId = param;
+    } else if (param === 'labores') {
+      activeTab = 'labores';
+      if (subparam && [2022, 2023, 2024, 2025, 2026].includes(Number(subparam))) {
+        STATE.cotidianoYear = Number(subparam);
+      }
     }
 
+    STATE.cotidianoTab = activeTab;
+    STATE.festivalSelectedId = targetFestId;
+
+    const years = [2022, 2023, 2024, 2025, 2026];
+    const selYear = STATE.cotidianoYear && years.includes(Number(STATE.cotidianoYear))
+      ? Number(STATE.cotidianoYear)
+      : (STATE.selectedYear && years.includes(Number(STATE.selectedYear)) ? Number(STATE.selectedYear) : 2025);
+    STATE.cotidianoYear = selYear;
+    const alm = almanacs[selYear] || almanacs[2025] || almanacs[2024];
+
+    // Cálculos para la pestaña de labores cotidianas
+    const dd = alm.degree_days || { hdd_15_5: 0, cdd_21_0: 0, gdd_10_0: 0 };
+    const stA = alm.stats?.air_temperature || {};
+    const stP = alm.stats?.precipitation || {};
+    const validMonths = (alm.monthly || []).filter((m) => m.valid_days > 0);
+    const maxHddMonthObj = validMonths.reduce((prev, curr) => (curr.hdd_15_5 || 0) > (prev?.hdd_15_5 || 0) ? curr : prev, null);
+    const maxHddStr = maxHddMonthObj && maxHddMonthObj.hdd_15_5 > 0 ? `${maxHddMonthObj.name} (${fmtNum(maxHddMonthObj.hdd_15_5, 1)} HDD)` : '—';
+    const maxGddMonthObj = validMonths.reduce((prev, curr) => (curr.gdd_10_0 || 0) > (prev?.gdd_10_0 || 0) ? curr : prev, null);
+    const maxGddStr = maxGddMonthObj && maxGddMonthObj.gdd_10_0 > 0 ? `${maxGddMonthObj.name} (${fmtNum(maxGddMonthObj.gdd_10_0, 1)} GDD)` : '—';
+    const vegDaysCount = alm.daily_series?.temp_mean
+      ? alm.daily_series.temp_mean.filter((t) => t !== null && t !== undefined && t >= 10.0).length
+      : '—';
+    const autMonths = (alm.monthly || []).filter((m) => [9, 10, 11].includes(m.month) && m.valid_days > 0);
+    const autRain = autMonths.reduce((sum, m) => sum + (m.rain_total || 0), 0);
+    const autRainDays = autMonths.reduce((sum, m) => sum + (m.rain_days_02 || 0), 0);
+
+    // Calendario fenológico del año seleccionado
+    const pheno = computePhenologicalCalendar(alm.daily_series);
+    const phenoRowsHtml = PHENOLOGY_EVENTS.map((ev) => {
+      const iso = pheno[ev.key];
+      let dateHtml = '';
+      let diagHtml = '';
+      if (iso) {
+        dateHtml = `<span class="pheno-badge-date">${fmtDateES(iso, false)}</span>`;
+        const dObj = new Date(iso);
+        const startOfYear = new Date(dObj.getFullYear(), 0, 1);
+        const dayOfYear = Math.round((dObj - startOfYear) / 86400000) + 1;
+        const diff = dayOfYear - ev.refDayOfYear;
+        if (diff <= -5) {
+          diagHtml = `<span class="pheno-tag-early">Adelantada (${Math.abs(diff)} d.)</span>`;
+        } else if (diff >= 5) {
+          diagHtml = `<span class="pheno-tag-late">Retrasada (+${diff} d.)</span>`;
+        } else {
+          diagHtml = `<span class="pheno-tag-ontime">En fecha habitual</span>`;
+        }
+      } else {
+        if (alm.year === 2026) {
+          dateHtml = `<span class="pheno-badge-pending">Pendiente (cierre de año)</span>`;
+          diagHtml = `<span style="font-size:0.75rem; color:var(--txt-muted)">En curso</span>`;
+        } else {
+          dateHtml = `<span class="pheno-badge-pending">No alcanzado</span>`;
+          diagHtml = `<span style="font-size:0.75rem; color:var(--txt-muted)">Sin registro continuo</span>`;
+        }
+      }
+      return `
+        <tr>
+          <td>
+            <strong>${ev.icon} ${escapeHtml(ev.name)}</strong>
+            <span style="display:block; font-size:0.78rem; color:var(--txt-muted); margin-top:2px">${escapeHtml(ev.subtitle)}</span>
+          </td>
+          <td style="font-size:0.82rem; color:var(--txt-secondary)">${escapeHtml(ev.criteria)}</td>
+          <td>${dateHtml}</td>
+          <td style="font-size:0.85rem">${escapeHtml(ev.typicalDate)}</td>
+          <td>${diagHtml}</td>
+        </tr>
+      `;
+    }).join('');
+
+    // Histórico multianual de labores cotidianas (2022-2026)
+    const phenoByYear = {};
+    years.forEach((y) => {
+      phenoByYear[y] = computePhenologicalCalendar(almanacs[y]?.daily_series);
+    });
+    const phenoCompRowsHtml = PHENOLOGY_EVENTS.map((ev) => {
+      const yearCells = years.map((y) => {
+        const val = phenoByYear[y]?.[ev.key];
+        if (val) {
+          return `<td><span class="pheno-badge-date">${fmtDateES(val, false)}</span></td>`;
+        }
+        if (y === 2026) {
+          return `<td><span class="pheno-badge-pending">Pendiente</span></td>`;
+        }
+        return `<td><span class="pheno-badge-pending">—</span></td>`;
+      }).join('');
+      return `
+        <tr>
+          <td>
+            <strong>${ev.icon} ${escapeHtml(ev.name)}</strong>
+            <span style="display:block; font-size:0.78rem; color:var(--txt-muted); margin-top:2px">${escapeHtml(ev.subtitle)}</span>
+          </td>
+          <td style="font-size:0.82rem; color:var(--txt-secondary)">${escapeHtml(ev.criteria)}</td>
+          ${yearCells}
+          <td style="font-size:0.85rem"><strong>${escapeHtml(ev.typicalDate)}</strong></td>
+        </tr>
+      `;
+    }).join('');
+
+    // Botones selectores de año para labores
+    const yearButtonsHtml = years.map((y) => {
+      const isCur = y === selYear;
+      return `<button type="button" class="year-pill ${isCur ? 'active' : ''}" data-cotidiano-year="${y}">${y}${y === 2026 ? ' *' : ''}</button>`;
+    }).join('');
+
+    // Cálculos para la pestaña de Fiestas locales
     const festStatsList = FESTIVALS_CATALOG.map((f) => computeFestivalStats(f, almanacs)).filter(Boolean);
     const activeStat = festStatsList.find((s) => s.fest.id === STATE.festivalSelectedId) || festStatsList[0];
     const f = activeStat.fest;
 
-    // Fila de botones de pestañas
     const tabsHtml = FESTIVALS_CATALOG.map((item) => {
       const isActive = item.id === f.id;
       return `
@@ -8048,7 +7994,6 @@
       `;
     }).join('');
 
-    // Filas de la tabla histórica de la festividad activa
     const detailRowsHtml = activeStat.records.map((r) => {
       return `
         <tr>
@@ -8066,14 +8011,13 @@
       `;
     }).join('');
 
-    // Filas del cuadro sinóptico de las 8 fiestas
     const summaryRowsHtml = festStatsList.map((fs) => {
       const isCur = fs.fest.id === f.id;
       const rainBadgeClass = fs.rainProbPct <= 25 ? 'fest-badge-dry' : (fs.rainProbPct >= 50 ? 'fest-badge-rain' : '');
       return `
         <tr style="${isCur ? 'background: rgba(37,99,235,0.06); font-weight: 600;' : ''}">
           <td>
-            <a href="#fiestas/${fs.fest.id}" class="data-link" data-jump-fest="${fs.fest.id}">
+            <a href="#cotidiano/fiestas/${fs.fest.id}" class="data-link" data-jump-fest="${fs.fest.id}">
               ${fs.fest.icon} ${escapeHtml(fs.fest.name)}
             </a>
             ${fs.fest.badge ? `<span style="display:block; font-size:0.75rem; color:var(--txt-muted); font-weight:normal;">${escapeHtml(fs.fest.badge)}</span>` : ''}
@@ -8090,184 +8034,447 @@
     }).join('');
 
     container.innerHTML = `
-      <section class="section-block">
+      <section class="section-block" style="padding-bottom: 0;">
         <div class="section-header">
           <div>
-            <div class="editorial-kicker">COSTUMBRISMO Y METEOROLOGÍA DE RIOTUERTO · SERIE 2022–2026</div>
-            <h2 id="fiestas-heading" class="section-title">El tiempo en las festividades y tradiciones del municipio</h2>
+            <div class="editorial-kicker">INFORMACIÓN METEOROLÓGICA PRÁCTICA · RIOTUERTO</div>
+            <h2 id="cotidiano-heading" class="section-title">Riotuerto cotidiano</h2>
             <p class="section-subtitle">
-              Crónica meteorológica retrospectiva, estabilidad y extremos históricos en las 8 celebraciones patronales y eventos de Riotuerto
+              El tiempo al servicio de nuestros vecinos: pautas claras para las tareas cotidianas del hogar, la huerta y los prados, junto con la memoria climática de nuestras ocho fiestas patronales
             </p>
           </div>
-          <div class="btn-group">
-            <button type="button" class="btn btn-primary btn-excel" id="btn-export-festivals-xlsx">
-              📥 Descargar monografía de festividades (.xlsx)
+        </div>
+
+        <!-- Subnavegación de la sección -->
+        <div class="cotidiano-nav-wrap">
+          <div class="cotidiano-subnav" role="tablist" aria-label="Secciones de Riotuerto cotidiano">
+            <button type="button" class="cotidiano-subnav-btn ${activeTab === 'labores' ? 'active' : ''}" data-cotidiano-tab="labores" role="tab" aria-selected="${activeTab === 'labores'}">
+              <span aria-hidden="true">🌾</span> Labores y vida cotidiana
+            </button>
+            <button type="button" class="cotidiano-subnav-btn ${activeTab === 'fiestas' ? 'active' : ''}" data-cotidiano-tab="fiestas" role="tab" aria-selected="${activeTab === 'fiestas'}">
+              <span aria-hidden="true">🎉</span> Fiestas y tradiciones locales
             </button>
           </div>
         </div>
+      </section>
 
-        <!-- Selector de festividades -->
-        <div class="festivals-tabs-wrap" role="tablist" aria-label="Festividades de Riotuerto">
-          ${tabsHtml}
-        </div>
-
-        <!-- Tarjeta Hero de la festividad seleccionada -->
-        <div class="festival-card-hero">
-          <div class="festival-hero-header">
-            <span class="festival-hero-icon">${f.icon}</span>
+      <!-- SUBPESTAÑA 1: LABORES Y VIDA COTIDIANA -->
+      <div id="cotidiano-tab-labores" ${activeTab !== 'labores' ? 'hidden' : ''}>
+        <section class="section-block" style="padding-top: 6px;">
+          <!-- Selector de año -->
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 22px; background: var(--bg-surface); padding: 14px 18px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
             <div>
-              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <h3 class="festival-hero-title">${escapeHtml(f.name)}</h3>
-                ${f.badge ? `<span class="badge badge-complete">${escapeHtml(f.badge)}</span>` : ''}
-              </div>
-              <div class="festival-hero-place">
-                📍 <strong>${escapeHtml(f.place)}</strong> · ${f.dateRule ? `Regla: ${escapeHtml(f.dateRule)}` : `Fecha fija: ${escapeHtml(f.dateLabel)}`}
-              </div>
+              <span style="font-weight: 700; font-size: 0.95rem; color: var(--txt-primary);">Año de consulta para labores cotidianas:</span>
+              <span style="font-size: 0.85rem; color: var(--txt-muted); display: block;">Consulte cómo influyó el clima en cada ejercicio agrario del municipio</span>
+            </div>
+            <div class="year-pills" role="group" aria-label="Seleccionar año de consulta para labores">
+              ${yearButtonsHtml}
             </div>
           </div>
 
-          <p class="festival-chronicle-p">
-            ${escapeHtml(f.culturalNotes)}
-          </p>
+          <!-- Guía práctica con las 6 tarjetas -->
+          <div class="practical-guide-box" style="margin-top: 0;">
+            <div class="practical-guide-header">
+              <span class="guide-badge">🚜 Guía práctica para vecinos (${alm.year})</span>
+              <h3 class="guide-title">Orientación para el hogar, la huerta y el campo</h3>
+              <p class="guide-subtitle">
+                Cómo trasladar los registros de temperatura, humedad, lluvia y sol del año ${alm.year} a las decisiones y tareas habituales en Riotuerto
+              </p>
+            </div>
+            <div class="practical-cards-grid">
+              <div class="practical-card">
+                <div class="practical-card-top">
+                  <span class="practical-card-icon">🔥</span>
+                  <div>
+                    <h5 class="practical-card-title">Calefacción y acopio de leña / pellets</h5>
+                    <span class="practical-card-meta">Basado en Grados Día de Calefacción (HDD)</span>
+                  </div>
+                </div>
+                <p class="practical-card-body">
+                  Cada punto de HDD refleja demanda térmica de las viviendas. Permite planificar el acopio de combustible y saber cuándo arrancar la caldera en otoño al encadenarse días con más de 4–5 HDD (medias diarias por debajo de 11 °C). En primavera, cuando los HDD caen persistentemente por debajo de 2 HDD/día, es el momento idóneo para pasar la caldera a modo solo agua caliente (ACS).
+                </p>
+                <div class="practical-card-stat">
+                  Demanda en ${alm.year}: <strong>${fmtNum(dd.hdd_15_5, 1)} HDD</strong> (Mes pico: ${maxHddStr})
+                </div>
+              </div>
 
-          <div class="festival-stats-strip">
-            <div class="fest-stat-box">
-              <div class="fest-stat-label">T. Media histórica</div>
-              <div class="fest-stat-val">${fmtNum(activeStat.avgTmean, 1)} °C</div>
+              <div class="practical-card">
+                <div class="practical-card-top">
+                  <span class="practical-card-icon">🤖</span>
+                  <div>
+                    <h5 class="practical-card-title">Robots cortacésped e invernada de aperos</h5>
+                    <span class="practical-card-meta">Basado en el Cero Vegetativo (10,0 °C)</span>
+                  </div>
+                </div>
+                <p class="practical-card-body">
+                  El césped y las praderas detienen su crecimiento activo por debajo de 10,0 °C. Indica cuándo retirar a resguardo los robots cortacésped y aperos para invernar a finales de otoño (protegiendo baterías y evitando apelmazar el terreno enfangado) y cuándo volver a ponerlos en marcha en primavera al consolidarse medias diarias &gt;10 °C de forma regular.
+                </p>
+                <div class="practical-card-stat">
+                  Jornadas de crecimiento biológico (&ge;10 °C): <strong>${vegDaysCount} días</strong>
+                </div>
+              </div>
+
+              <div class="practical-card">
+                <div class="practical-card-top">
+                  <span class="practical-card-icon">🚜</span>
+                  <div>
+                    <h5 class="practical-card-title">Siega de prados y cortes de forraje</h5>
+                    <span class="practical-card-meta">Basado en Grados Día Agrícolas (GDD)</span>
+                  </div>
+                </div>
+                <p class="practical-card-body">
+                  Las praderas trasmeranas (raigrás, trébol y festuca) acumulan grados día para alcanzar su punto óptimo de biomasa y digestibilidad. El primer corte de forraje suele programarse al alcanzar ~200–250 GDD desde marzo, buscando ventanas sinópticas de 3 a 4 jornadas consecutivas secas con viento sur o brisa de ladera para garantizar un buen curado o ensilado.
+                </p>
+                <div class="practical-card-stat">
+                  Energía biológica acumulada en ${alm.year}: <strong>${fmtNum(dd.gdd_10_0, 1)} GDD</strong> (Pico: ${maxGddStr})
+                </div>
+              </div>
+
+              <div class="practical-card">
+                <div class="practical-card-top">
+                  <span class="practical-card-icon">🍅</span>
+                  <div>
+                    <h5 class="practical-card-title">Huerta y sulfatos contra plagas (mildiu y oídio)</h5>
+                    <span class="practical-card-meta">Combinación de Temperatura + Humedad relativa</span>
+                  </div>
+                </div>
+                <p class="practical-card-body">
+                  Las esporas de hongos proliferan cuando la temperatura media supera los 10–12 °C (crecimiento activo) combinada con humedad relativa sostenida (&gt;85 %) o rocío matinal denso tras jornadas de lluvia. Este indicador señala las fechas críticas para aplicar tratamientos preventivos de cobre o azufre en tomateras y frutales antes de que aparezcan las manchas foliares.
+                </p>
+                <div class="practical-card-stat">
+                  Humedad media anual: <strong>${fmtNum(stA.humidity_mean_pct, 1)} %</strong> · Precipitación: <strong>${fmtNum(stP.total_mm, 1)} mm</strong>
+                </div>
+              </div>
+
+              <div class="practical-card">
+                <div class="practical-card-top">
+                  <span class="practical-card-icon">🍄</span>
+                  <div>
+                    <h5 class="practical-card-title">Temporada de setas y eclosión micológica</h5>
+                    <span class="practical-card-meta">Humedad del suelo + Ventanas térmicas en monte</span>
+                  </div>
+                </div>
+                <p class="practical-card-body">
+                  Las setas de otoño en los robledales, castañares y pinares de Riotuerto (boletus, cantarelas y senderuelas) requieren una secuencia precisa: un «riego abundante previo» (&gt;40–50 mm acumulados) seguido de 7 a 10 días de temperaturas medias templadas (11–17 °C) sin suradas resecantes que marchiten el micelio. Permite seguir las mejores semanas para la recogida en el monte antes de las primeras heladas invernales.
+                </p>
+                <div class="practical-card-stat">
+                  Lluvia otoñal (sep.–nov.): <strong>${fmtNum(autRain, 1)} mm</strong> (${autRainDays} días con lluvia)
+                </div>
+              </div>
+
+              <div class="practical-card">
+                <div class="practical-card-top">
+                  <span class="practical-card-icon">☀️</span>
+                  <div>
+                    <h5 class="practical-card-title">Autoconsumo solar fotovoltaico y térmico</h5>
+                    <span class="practical-card-meta">Radiación solar global + Horas de sol</span>
+                  </div>
+                </div>
+                <p class="practical-card-body">
+                  Para viviendas y explotaciones con placas solares en tejados o cubiertas. La persistente nubosidad orográfica matinal del fondo de valle modula la captación invernal, pero en primavera y verano y con viento sur la radiación supera los 950–1.050 W/m². Permite estimar el balance energético estacional, dimensionar baterías o acumuladores de agua y maximizar el autoconsumo en horas centrales.
+                </p>
+                <div class="practical-card-stat">
+                  Horas de sol anuales: <strong>${stA.estimated_sunshine_hours !== null && stA.estimated_sunshine_hours !== undefined ? `${fmtNum(stA.estimated_sunshine_hours, 0)} h` : '—'}</strong> (Pico: ${stA.solar_max_wm2 !== null && stA.solar_max_wm2 !== undefined ? `${fmtNum(stA.solar_max_wm2, 1)} W/m²` : '—'})
+                </div>
+              </div>
             </div>
-            <div class="fest-stat-box">
-              <div class="fest-stat-label">T. Máxima media</div>
-              <div class="fest-stat-val">${fmtNum(activeStat.avgTmax, 1)} °C</div>
+
+            <!-- Calendario fenológico y agroclimático del año seleccionado -->
+            <div class="phenology-box">
+              <div class="phenology-header">
+                <h4 style="margin: 0 0 4px 0; font-size: 1.15rem; font-family: var(--font-serif); color: var(--txt-primary);">
+                  📅 Calendario fenológico y agroclimático de Riotuerto (${alm.year})
+                </h4>
+                <p style="margin: 0; font-size: 0.85rem; color: var(--txt-muted);">
+                  Fechas exactas del año en que se alcanzaron los umbrales bioclimáticos para calderas, siegas, robots cortacésped, huerta y setas frente a la media habitual
+                </p>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Labor o actividad cotidiana</th>
+                      <th>Criterio agroclimático</th>
+                      <th>Fecha observada en ${alm.year}</th>
+                      <th>Fecha media habitual</th>
+                      <th>Diagnóstico</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${phenoRowsHtml}
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div class="fest-stat-box">
-              <div class="fest-stat-label">T. Mínima media</div>
-              <div class="fest-stat-val">${fmtNum(activeStat.avgTmin, 1)} °C</div>
+          </div>
+        </section>
+
+        <!-- Calendario histórico multianual de labores -->
+        <section class="section-block" aria-labelledby="sec-pheno-multi-title">
+          <div class="section-header">
+            <div>
+              <div class="editorial-kicker">FENOLOGÍA Y RITMOS DEL VALLE · SERIE 2022–2026</div>
+              <h3 id="sec-pheno-multi-title" class="section-title">Calendario histórico de labores cotidianas y agroclimatología</h3>
+              <p class="section-subtitle">
+                Comparativa interanual de fechas exactas en que se alcanzaron los umbrales biofísicos para calderas, huertas, siegas, robots cortacésped y setas
+              </p>
             </div>
-            <div class="fest-stat-box">
-              <div class="fest-stat-label">Probabilidad de lluvia</div>
-              <div class="fest-stat-val">${fmtNum(activeStat.rainProbPct, 0)} %</div>
-            </div>
-            <div class="fest-stat-box">
-              <div class="fest-stat-label">Récord de calor</div>
-              <div class="fest-stat-val" style="color:#dc2626">${fmtNum(activeStat.maxTmaxRecord?.tmax, 1)} °C <span style="font-size:0.75rem; color:var(--txt-muted);">(${activeStat.maxTmaxRecord?.year})</span></div>
-            </div>
-            <div class="fest-stat-box">
-              <div class="fest-stat-label">Lluvia máxima 24h</div>
-              <div class="fest-stat-val" style="color:#2563eb">${fmtNum(activeStat.maxRainRecord?.rain, 1)} mm <span style="font-size:0.75rem; color:var(--txt-muted);">(${activeStat.maxRainRecord?.year})</span></div>
+            <div>
+              <button type="button" id="btn-export-phenology-cotidiano-xlsx" class="btn btn-excel">
+                📊 Descargar calendario agroclimático (.xlsx)
+              </button>
             </div>
           </div>
 
-          <!-- Tabla histórica de los 5 años -->
           <div class="table-responsive">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Año</th>
-                  <th>Fecha observada</th>
-                  <th class="num">T. media</th>
-                  <th class="num">T. máx.</th>
-                  <th class="num">T. mín.</th>
-                  <th class="num">Amplitud (ΔT)</th>
-                  <th class="num">Lluvia (24h)</th>
-                  <th class="num">Racha máx.</th>
-                  <th class="num">Humedad media</th>
-                  <th>Calificación sinóptica</th>
+                  <th>Labor o actividad cotidiana</th>
+                  <th>Criterio agroclimático</th>
+                  <th>2022</th>
+                  <th>2023</th>
+                  <th>2024</th>
+                  <th>2025</th>
+                  <th>2026 (Avance)</th>
+                  <th>Fecha media habitual</th>
                 </tr>
               </thead>
               <tbody>
-                ${detailRowsHtml}
+                ${phenoCompRowsHtml}
               </tbody>
             </table>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      <!-- Cuadro comparativo de las 8 festividades -->
-      <section class="section-block" aria-labelledby="sec-all-fest-title">
-        <div class="section-header">
-          <div>
-            <h3 id="sec-all-fest-title" class="section-title">Cuadro sinóptico comparativo de las fiestas municipales</h3>
-            <p class="section-subtitle">
-              Resumen interanual conjunto para planificar visitas, romerías y actos al aire libre en Riotuerto
-            </p>
+      <!-- SUBPESTAÑA 2: FIESTAS Y TRADICIONES LOCALES -->
+      <div id="cotidiano-tab-fiestas" ${activeTab !== 'fiestas' ? 'hidden' : ''}>
+        <section class="section-block" style="padding-top: 6px;">
+          <div class="section-header">
+            <div>
+              <div class="editorial-kicker">COSTUMBRISMO Y METEOROLOGÍA DE RIOTUERTO · SERIE 2022–2026</div>
+              <h3 id="fiestas-heading" class="section-title">El tiempo en las festividades y tradiciones del municipio</h3>
+              <p class="section-subtitle">
+                Crónica meteorológica retrospectiva, estabilidad y extremos históricos en las 8 celebraciones patronales y eventos de Riotuerto
+              </p>
+            </div>
+            <div class="btn-group">
+              <button type="button" class="btn btn-primary btn-excel" id="btn-export-festivals-xlsx">
+                📥 Descargar monografía de festividades (.xlsx)
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Festividad</th>
-                <th>Localidad</th>
-                <th>Fecha habitual</th>
-                <th class="num">T. máx. media</th>
-                <th class="num">T. mín. media</th>
-                <th class="num">Probabilidad de lluvia</th>
-                <th class="num">Lluvia media</th>
-                <th class="num">Récord T. máx.</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${summaryRowsHtml}
-            </tbody>
-          </table>
-        </div>
-      </section>
+          <!-- Selector de festividades -->
+          <div class="festivals-tabs-wrap" role="tablist" aria-label="Festividades de Riotuerto">
+            ${tabsHtml}
+          </div>
+
+          <!-- Tarjeta Hero de la festividad seleccionada -->
+          <div class="festival-card-hero">
+            <div class="festival-hero-header">
+              <span class="festival-hero-icon">${f.icon}</span>
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <h3 class="festival-hero-title">${escapeHtml(f.name)}</h3>
+                  ${f.badge ? `<span class="badge badge-complete">${escapeHtml(f.badge)}</span>` : ''}
+                </div>
+                <div class="festival-hero-place">
+                  📍 <strong>${escapeHtml(f.place)}</strong> · ${f.dateRule ? `Regla: ${escapeHtml(f.dateRule)}` : `Fecha fija: ${escapeHtml(f.dateLabel)}`}
+                </div>
+              </div>
+            </div>
+
+            <p class="festival-chronicle-p">
+              ${escapeHtml(f.culturalNotes)}
+            </p>
+
+            <div class="festival-stats-strip">
+              <div class="fest-stat-box">
+                <div class="fest-stat-label">T. Media histórica</div>
+                <div class="fest-stat-val">${fmtNum(activeStat.avgTmean, 1)} °C</div>
+              </div>
+              <div class="fest-stat-box">
+                <div class="fest-stat-label">T. Máxima media</div>
+                <div class="fest-stat-val">${fmtNum(activeStat.avgTmax, 1)} °C</div>
+              </div>
+              <div class="fest-stat-box">
+                <div class="fest-stat-label">T. Mínima media</div>
+                <div class="fest-stat-val">${fmtNum(activeStat.avgTmin, 1)} °C</div>
+              </div>
+              <div class="fest-stat-box">
+                <div class="fest-stat-label">Probabilidad de lluvia</div>
+                <div class="fest-stat-val">${fmtNum(activeStat.rainProbPct, 0)} %</div>
+              </div>
+              <div class="fest-stat-box">
+                <div class="fest-stat-label">Récord de calor</div>
+                <div class="fest-stat-val" style="color:#dc2626">${fmtNum(activeStat.maxTmaxRecord?.tmax, 1)} °C <span style="font-size:0.75rem; color:var(--txt-muted);">(${activeStat.maxTmaxRecord?.year})</span></div>
+              </div>
+              <div class="fest-stat-box">
+                <div class="fest-stat-label">Lluvia máxima 24h</div>
+                <div class="fest-stat-val" style="color:#2563eb">${fmtNum(activeStat.maxRainRecord?.rain, 1)} mm <span style="font-size:0.75rem; color:var(--txt-muted);">(${activeStat.maxRainRecord?.year})</span></div>
+              </div>
+            </div>
+
+            <!-- Tabla histórica de los 5 años -->
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Año</th>
+                    <th>Fecha observada</th>
+                    <th class="num">T. media</th>
+                    <th class="num">T. máx.</th>
+                    <th class="num">T. mín.</th>
+                    <th class="num">Amplitud (ΔT)</th>
+                    <th class="num">Lluvia (24h)</th>
+                    <th class="num">Racha máx.</th>
+                    <th class="num">Humedad media</th>
+                    <th>Calificación sinóptica</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${detailRowsHtml}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Cuadro comparativo de las 8 festividades -->
+        <section class="section-block" aria-labelledby="sec-all-fest-title">
+          <div class="section-header">
+            <div>
+              <h3 id="sec-all-fest-title" class="section-title">Cuadro sinóptico comparativo de las fiestas municipales</h3>
+              <p class="section-subtitle">
+                Resumen interanual conjunto para planificar visitas, romerías y actos al aire libre en Riotuerto
+              </p>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Festividad</th>
+                  <th>Localidad</th>
+                  <th>Fecha habitual</th>
+                  <th class="num">T. máx. media</th>
+                  <th class="num">T. mín. media</th>
+                  <th class="num">Probabilidad de lluvia</th>
+                  <th class="num">Lluvia media</th>
+                  <th class="num">Récord T. máx.</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${summaryRowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     `;
 
-    // Listeners de pestañas
+    // 1. Listeners para alternar entre subpestañas 'labores' y 'fiestas'
+    container.querySelectorAll('.cotidiano-subnav-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-cotidiano-tab');
+        if (tab === 'fiestas') {
+          window.location.hash = '#cotidiano/fiestas';
+        } else {
+          window.location.hash = '#cotidiano/labores';
+        }
+      });
+    });
+
+    // 2. Selector de año para labores
+    container.querySelectorAll('[data-cotidiano-year]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const y = Number(btn.getAttribute('data-cotidiano-year'));
+        if (y) {
+          STATE.cotidianoYear = y;
+          renderCotidiano('labores', String(y));
+        }
+      });
+    });
+
+    // 3. Exportar Excel fenológico en labores cotidianas
+    document.getElementById('btn-export-phenology-cotidiano-xlsx')?.addEventListener('click', () => {
+      exportPhenologyCalendarToExcel(almanacs);
+    });
+
+    // 4. Selector de festividad
     container.querySelectorAll('.festival-tab-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const festId = btn.getAttribute('data-fest-id');
         if (festId) {
           STATE.festivalSelectedId = festId;
-          window.location.hash = `#fiestas/${festId}`;
+          window.location.hash = `#cotidiano/fiestas/${festId}`;
         }
       });
     });
 
-    // Listeners de enlaces de salto en la tabla comparativa
+    // 5. Enlaces de salto en la tabla comparativa de fiestas
     container.querySelectorAll('[data-jump-fest]').forEach((link) => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         const festId = link.getAttribute('data-jump-fest');
         if (festId) {
           STATE.festivalSelectedId = festId;
-          window.location.hash = `#fiestas/${festId}`;
+          window.location.hash = `#cotidiano/fiestas/${festId}`;
         }
       });
     });
 
-    // Listener del botón de exportación a Excel
+    // 6. Exportar Excel de festividades
     document.getElementById('btn-export-festivals-xlsx')?.addEventListener('click', () => {
       exportFestivalsToExcel(almanacs);
     });
   }
 
   /* ------------------------------------------------------------------------
-   * Enrutador SPA basado en Hash (#portada, #almanaque/2025, etc.)
+   * Delegación de compatibilidad para enlaces antiguos a #fiestas
+   * ------------------------------------------------------------------------ */
+  async function renderFiestas(param) {
+    return renderCotidiano('fiestas', param);
+  }
+
+  /* ------------------------------------------------------------------------
+   * Enrutador SPA basado en Hash (#portada, #cotidiano, #almanaque/2025, etc.)
    * ------------------------------------------------------------------------ */
   function parseHashRoute() {
     const raw = (window.location.hash || '#portada').replace(/^#/, '');
     const parts = raw.split('/');
-    const route = parts[0] || 'portada';
-    const param = parts[1] || null;
-    const validRoutes = ['portada', 'almanaque', 'explorador', 'records', 'comparativas', 'fiestas', 'metodologia', 'glosario'];
+    let route = parts[0] || 'portada';
+    let param = parts[1] || null;
+    let subparam = parts[2] || null;
+
+    // Compatibilidad y redirección para #fiestas -> #cotidiano/fiestas
+    if (route === 'fiestas') {
+      route = 'cotidiano';
+      subparam = param;
+      param = 'fiestas';
+    }
+
+    const validRoutes = ['portada', 'cotidiano', 'almanaque', 'explorador', 'records', 'comparativas', 'fiestas', 'metodologia', 'glosario'];
     return {
       route: validRoutes.includes(route) ? route : 'portada',
       param,
+      subparam,
     };
   }
 
   async function handleRouteChange() {
-    const { route, param } = parseHashRoute();
+    const { route, param, subparam } = parseHashRoute();
     STATE.route = route;
 
     // Actualizar pestaña activa en el menú principal
     document.querySelectorAll('#main-nav .nav-link').forEach((link) => {
       const r = link.getAttribute('data-route');
-      link.classList.toggle('active', r === route);
-      if (r === route) {
+      const isAct = (r === route) || (r === 'cotidiano' && (route === 'cotidiano' || route === 'fiestas'));
+      link.classList.toggle('active', isAct);
+      if (isAct) {
         link.setAttribute('aria-current', 'page');
       } else {
         link.removeAttribute('aria-current');
@@ -8298,6 +8505,8 @@
 
       if (route === 'portada') {
         await renderPortada();
+      } else if (route === 'cotidiano' || route === 'fiestas') {
+        await renderCotidiano(param, subparam);
       } else if (route === 'almanaque') {
         const targetYear = param && [2022, 2023, 2024, 2025, 2026].includes(Number(param))
           ? Number(param)
@@ -8309,8 +8518,6 @@
         await renderRecords();
       } else if (route === 'comparativas') {
         await renderComparativas();
-      } else if (route === 'fiestas') {
-        await renderFiestas(param);
       } else if (route === 'metodologia') {
         await renderMetodologia();
       } else if (route === 'glosario') {
@@ -8318,7 +8525,8 @@
       }
 
       if (loadingEl) loadingEl.hidden = true;
-      const activeSection = document.getElementById(`view-${route}`);
+      const activeSectionId = (route === 'cotidiano' || route === 'fiestas') ? 'view-cotidiano' : `view-${route}`;
+      const activeSection = document.getElementById(activeSectionId);
       if (activeSection) {
         activeSection.hidden = false;
       }
