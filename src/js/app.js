@@ -7689,7 +7689,7 @@
       icon: '⚔️',
       badge: 'Fiesta de Interés Turístico Regional',
       description: 'Recreación histórica militar del siglo XVIII y ciclo cultural de conferencias de 5 días de duración.',
-      culturalNotes: 'Conmemora la toma de posesión del Brigadier Fernando Casado de Torres en 1787 al mando de las Reales Fábricas de Cañones de La Cavada. Declarada Fiesta de Interés Turístico Regional de Cantabria, incluye desfile de tropas con uniformes de época dieciochesca, salva de artillería con un cañón naval de tiro real, mercado barroco y cinco jornadas de conferencias históricas.'
+      culturalNotes: 'Conmemora la toma de posesión del Brigadier Fernando Casado de Torres en 1787 al mando de la Real Fábrica de Cañones de La Cavada. Declarada Fiesta de Interés Turístico Regional de Cantabria, incluye desfile de tropas con uniformes de época dieciochesca, salva de artillería con un cañón naval de tiro real de 48 libras y tamborrada infantil.'
     },
     {
       id: 'san_cipriano',
