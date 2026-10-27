@@ -74,10 +74,11 @@ jobs:
       - name: Preparar artefacto limpio de producción para GitHub Pages
         run: |
           mkdir -p _site
-          cp index.html _site/
+          cp index.html sw.js _site/ 2>/dev/null || true
           cp favicon.* apple-touch-icon.png site.webmanifest _site/ 2>/dev/null || true
           cp -r src _site/
           cp -r data _site/
+          cp -r assets _site/ 2>/dev/null || true
           touch _site/.nojekyll
 
       - name: Configurar GitHub Pages

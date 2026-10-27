@@ -256,7 +256,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
                 continue
 
             full_p = ROOT_DIR / rel_path
-            if full_p.suffix in (".ico", ".png", ".jpg", ".jpeg", ".woff", ".woff2"):
+            if full_p.suffix in (".ico", ".png", ".jpg", ".jpeg", ".webp", ".woff", ".woff2"):
                 continue
 
             txt = full_p.read_text(encoding="utf-8")
