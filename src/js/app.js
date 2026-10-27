@@ -8087,7 +8087,7 @@
       <div id="cotidiano-tab-labores" ${activeTab !== 'labores' ? 'hidden' : ''}>
         <section class="section-block" style="padding-top: 6px;">
           <!-- Selector de año -->
-          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 22px; background: var(--bg-surface); padding: 14px 18px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+          <div class="cotidiano-year-bar">
             <div>
               <span style="font-weight: 700; font-size: 0.95rem; color: var(--txt-primary);">Año de consulta para labores cotidianas:</span>
               <span style="font-size: 0.85rem; color: var(--txt-muted); display: block;">Consulte cómo influyó el clima en cada ejercicio agrario del municipio</span>

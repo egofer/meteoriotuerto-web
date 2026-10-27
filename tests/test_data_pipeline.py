@@ -660,6 +660,15 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
         self.assertIn(".cotidiano-subnav", css_text, "Falta .cotidiano-subnav en styles.css")
         self.assertIn(".cotidiano-subnav-btn", css_text, "Falta .cotidiano-subnav-btn en styles.css")
+        self.assertIn(".cotidiano-year-bar", css_text, "Falta .cotidiano-year-bar en styles.css")
+
+        # Comprobar adaptabilidad móvil de las tarjetas de labores cotidianas
+        self.assertIn(".practical-cards-grid", css_text)
+        self.assertIn(".practical-card", css_text)
+        # Asegurar que practical-cards-grid usa límite adaptativo y regla móvil de 1 columna
+        self.assertIn("minmax(min(100%, 300px), 1fr)", css_text)
+        self.assertIn("@media (max-width: 768px)", css_text)
+        self.assertIn("grid-template-columns: 1fr;", css_text)
 
     def test_station_photo_and_instrumentation_readiness(self):
         """
