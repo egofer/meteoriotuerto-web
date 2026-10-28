@@ -1334,9 +1334,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.1.7", sw_js, "Falta cache v1.1.7 en sw.js")
+        self.assertIn("v1.1.8", sw_js, "Falta cache v1.1.8 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.1.7", index_html, "Falta v=1.1.7 en index.html")
+        self.assertIn("v=1.1.8", index_html, "Falta v=1.1.8 en index.html")
 
 
 if __name__ == "__main__":

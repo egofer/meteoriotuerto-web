@@ -1661,8 +1661,8 @@ html[data-theme="dark"] .year-pill.active {
 /* Rosa de los vientos náutica polar (EVO-017) */
 .windrose-toggle-group {
   display: inline-flex;
-  background: var(--surface-subtle);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   padding: 2px;
   gap: 2px;
@@ -1685,8 +1685,8 @@ html[data-theme="dark"] .year-pill.active {
 }
 
 .windrose-toggle-btn.active {
-  background: var(--surface);
-  color: var(--brand-forest);
+  background: var(--bg-surface);
+  color: var(--accent-forest);
   box-shadow: var(--shadow-sm);
 }
 
@@ -1698,7 +1698,7 @@ html[data-theme="dark"] .year-pill.active {
   gap: 14px;
   margin-top: 14px;
   padding-top: 10px;
-  border-top: 1px dashed var(--border-subtle);
+  border-top: 1px dashed var(--border-color);
   font-size: 0.77rem;
   color: var(--txt-muted);
 }
@@ -1742,8 +1742,8 @@ html[data-theme="dark"] .year-pill.active {
   gap: 10px;
   margin: 10px 0 14px 0;
   padding: 8px 12px;
-  background: var(--surface-subtle);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
 }
 
@@ -1754,28 +1754,34 @@ html[data-theme="dark"] .year-pill.active {
 }
 
 .btn-windrose-filter {
-  background: transparent;
-  border: 1px solid transparent;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  padding: 4px 9px;
+  padding: 4px 10px;
   font-size: 0.76rem;
   font-weight: 500;
-  color: var(--txt-muted);
+  color: var(--txt-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .btn-windrose-filter:hover {
   color: var(--txt-primary);
-  background: var(--surface);
+  border-color: var(--border-strong);
 }
 
 .btn-windrose-filter.active {
-  background: var(--brand-forest);
+  background: var(--accent-forest);
   color: #ffffff;
   font-weight: 600;
-  border-color: var(--brand-forest);
+  border-color: var(--accent-forest);
   box-shadow: var(--shadow-sm);
+}
+
+html[data-theme="dark"] .btn-windrose-filter.active {
+  background: var(--accent-forest);
+  color: #081c15;
+  font-weight: 700;
 }
 
 .windrose-month-selector {
@@ -1794,8 +1800,8 @@ html[data-theme="dark"] .year-pill.active {
 .select-windrose-month {
   padding: 4px 8px;
   font-size: 0.76rem;
-  background: var(--surface);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   color: var(--txt-primary);
   cursor: pointer;
@@ -1804,14 +1810,14 @@ html[data-theme="dark"] .year-pill.active {
 }
 
 .select-windrose-month:focus {
-  border-color: var(--brand-forest);
+  border-color: var(--accent-forest);
 }
 
 .windrose-pattern-note {
   margin-top: 10px;
   padding: 10px 14px;
-  background: var(--surface-subtle);
-  border-left: 3px solid var(--brand-forest);
+  background: var(--bg-subtle);
+  border-left: 3px solid var(--accent-forest);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   font-size: 0.8rem;
   line-height: 1.45;
