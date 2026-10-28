@@ -17,6 +17,8 @@ import http.server
 import json
 import re
 import socketserver
+import subprocess
+import shutil
 import sys
 import threading
 import unittest
@@ -193,6 +195,13 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             txt = p.read_text(encoding="utf-8")
             self.assertIsNone(re.search(r"APPLICATION_KEY\s*=\s*['\"][A-Za-z0-9]{16,}", txt))
             self.assertIsNone(re.search(r"API_KEY\s*=\s*['\"][A-Za-z0-9\-]{16,}", txt))
+
+        # Verificar sintaxis estricta de JavaScript en src/js/app.js y sw.js
+        node_bin = shutil.which("node")
+        if node_bin:
+            for js_file in [ROOT_DIR / "src" / "js" / "app.js", ROOT_DIR / "sw.js"]:
+                res = subprocess.run([node_bin, "-c", str(js_file)], capture_output=True, text=True)
+                self.assertEqual(res.returncode, 0, f"Error de sintaxis en {js_file.name}: {res.stderr}")
 
         # Levantar servidor HTTP efímero y comprobar respuestas HTTP 200
         handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(ROOT_DIR))
@@ -1334,9 +1343,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.0", sw_js, "Falta cache v1.2.0 en sw.js")
+        self.assertIn("v1.2.1", sw_js, "Falta cache v1.2.1 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.2.0", index_html, "Falta v=1.2.0 en index.html")
+        self.assertIn("v=1.2.1", index_html, "Falta v=1.2.1 en index.html")
 
     def test_weather_underground_realtime_integration(self):
         """

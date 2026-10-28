@@ -606,7 +606,6 @@
     const hum = live.humidity_pct !== null ? `${fmtNum(live.humidity_pct, 0)}%` : '';
     el.innerHTML = `Barrio de Arriba: <strong>${t} °C</strong>${hum ? ` · ${hum} HR` : ''} ↗`;
   }
-  }
 
   /* ------------------------------------------------------------------------
    * Gestión de instancias de Chart.js y paleta dinámica según tema
