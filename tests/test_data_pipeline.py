@@ -1030,6 +1030,35 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".wb-days-bar", css_text)
         self.assertIn(".wb-assessment-callout", css_text)
 
+    def test_streamlined_hero_and_geographic_relocation_readiness(self):
+        """Verifica que el evolutivo EVO-026 (Hero ágil y traslado cartográfico a Metodología) esté operativo."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. En Portada: hero ágil con pastilla sintética y botones de salto
+        self.assertIn("hero-geo-pill", app_js)
+        self.assertIn("hero-actions", app_js)
+        self.assertIn("data-scroll-to=\"sec-almanaques-title\"", app_js)
+        self.assertIn("data-scroll-to=\"sec-records-portada\"", app_js)
+
+        # 2. Comprobar que en renderPortada no existe el iframe ni el bloque pesado anterior
+        portada_code = app_js[app_js.find("async function renderPortada"):app_js.find("function renderOnThisDayWidget")]
+        self.assertNotIn("<iframe", portada_code)
+        self.assertNotIn("station-location-block", portada_code)
+
+        # 3. Comprobar que en Metodología se ubica la cartografía completa y los hitos del valle
+        metodologia_code = app_js[app_js.find("async function renderMetodologia"):app_js.find("function renderGlossaryView")]
+        self.assertIn("<iframe", metodologia_code)
+        self.assertIn("station-location-map-wrap", metodologia_code)
+        self.assertIn("Retención orográfica Cantábrica", metodologia_code)
+        self.assertIn("Efecto Foehn", metodologia_code)
+
+        # 4. Comprobar reglas CSS para la pastilla y los accesos rápidos
+        self.assertIn(".hero-geo-pill", css_text)
+        self.assertIn(".hero-actions", css_text)
+        self.assertIn(".hero-btn", css_text)
+        self.assertIn(".hero-btn-live", css_text)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

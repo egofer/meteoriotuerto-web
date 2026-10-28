@@ -496,7 +496,7 @@
     }).join('');
 
     container.innerHTML = `
-      <!-- Bloque editorial de presentación -->
+      <!-- Bloque editorial de bienvenida simplificado y de carga ágil (EVO-026) -->
       <article class="editorial-hero">
         <div class="editorial-kicker">NOTARIO DEL CLIMA DE RIOTUERTO · ARCHIVO HISTÓRICO VERIFICADO</div>
         <h2 id="portada-heading" class="editorial-title">
@@ -504,78 +504,38 @@
         </h2>
         <p class="editorial-lead">
           <strong>MeteoRiotuerto</strong> documenta, analiza y conserva el registro instrumental de las condiciones
-          atmosféricas observadas en <strong>Barrio de Arriba (municipio de Riotuerto, Cantabria, 115 m s. n. m.)</strong>.
-          Organizado como un almanaque anual, transforma las lecturas de la estación automática en crónicas sinópticas,
-          series verificadas, efemérides y comparativas interanuales abiertas a vecinos, docentes e investigadores.
+          atmosféricas observadas en <strong>Barrio de Arriba (municipio de Riotuerto, Cantabria)</strong>.
+          Concebido como un almanaque anual riguroso y abierto, transforma las lecturas de la estación automática
+          en crónicas sinópticas, efemérides y series históricas al servicio del vecindario, aficionados e investigadores.
         </p>
 
-        <div class="editorial-columns">
-          <div class="notary-manifesto">
-            <p>
-              Situada en las estribaciones de la Cordillera Cantábrica, a 14 km del mar Cantábrico y a 5 km del puerto de Alisas,
-              la estación captura un microclima de valle muy definido: <strong>elevada <abbr class="glossary-term" data-term="lluvia_orografica">pluviosidad orográfica</abbr></strong> cuando los
-              frentes del noroeste remontan la cuenca del Miera (superando habitualmente los 1.600–2.100 mm anuales) y
-              <strong>marcadas <abbr class="glossary-term" data-term="surada">suradas</abbr> por <abbr class="glossary-term" data-term="efecto_foehn">efecto Foehn</abbr></strong> que desploman la humedad y disparan súbitamente la temperatura.
-            </p>
-            <p>
-              Cada cifra publicada en este archivo procede directamente de los registros instrumentales validados,
-              distinguiendo con rigor entre observaciones directas, indicadores derivados y contexto sinóptico.
-              El archivo ofrece <strong>comparaciones anuales muy útiles</strong> para examinar la variabilidad meteorológica reciente en Riotuerto,
-              pero <strong>todavía no permite establecer <abbr class="glossary-term" data-term="normal_climatologica">normales climatológicas de 30 años</abbr> ni atribuir tendencias climáticas sólidas con garantías</strong>.
-            </p>
-          </div>
-          <aside class="complement-box" aria-label="Nota sobre consulta en tiempo real">
-            <h3>¿Busca el dato meteorológico de este instante?</h3>
-            <p style="margin-bottom:10px;color:var(--txt-secondary)">
-              Esta publicación no es un portal de predicción meteorológica ni un monitor en vivo. Su función es explicar
-              <strong>qué ocurrió, cómo fue cada año y qué patrones muestra el registro</strong>.
-            </p>
-            <a href="${idx.station.links.weathercloud || 'https://app.weathercloud.net/d6619283754'}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width:100%">
-              Abrir panel en tiempo real en WeatherCloud ↗
-            </a>
-          </aside>
+        <!-- Pastilla de localización geográfica sintética -->
+        <div class="hero-geo-pill mono" aria-label="Emplazamiento de la estación">
+          <span>📍 Barrio de Arriba · Riotuerto (Cantabria)</span>
+          <span class="geo-divider" aria-hidden="true">·</span>
+          <span><a href="${idx.station.links.openstreetmap || 'https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670'}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline" title="Ver coordenadas en OpenStreetMap">43.341° N, 3.670° W</a></span>
+          <span class="geo-divider" aria-hidden="true">·</span>
+          <span>115 m s. n. m.</span>
         </div>
 
-        <!-- Tarjeta de localización geográfica y mapa de Riotuerto -->
-        <div class="station-location-block" aria-label="Localización geográfica de Riotuerto">
-          <div class="station-location-info">
-            <h3 class="location-title">📍 Situación geográfica: ¿Dónde está Riotuerto y la estación?</h3>
-            <p class="location-desc">
-              El municipio de <strong>Riotuerto</strong> se sitúa en la comarca histórica de <strong>Trasmiera (Cantabria, norte de España)</strong>,
-              en el valle medio-alto de la cuenca del río Miera, entre la capital municipal (<strong>La Cavada</strong>) y las estribaciones
-              del <strong>puerto de Alisas (674 m s. n. m.)</strong>.
-            </p>
-            <p class="location-desc">
-              La estación meteorológica automática está instalada en una pradera abierta en la localidad de <strong>Barrio de Arriba</strong> (115 m s. n. m.),
-              un enclave de fondo de valle con un marcado régimen pluviométrico orográfico y acusadas oscilaciones por <abbr class="glossary-term" data-term="efecto_foehn">efecto Foehn</abbr> e <abbr class="glossary-term" data-term="inversion_termica">inversión térmica</abbr>:
-            </p>
-            <ul class="location-highlights">
-              <li><strong><abbr class="glossary-term" data-term="lluvia_orografica">Retención orográfica Cantábrica</abbr>:</strong> a solo 14 km del mar Cantábrico, las masas de aire húmedo del noroeste quedan retenidas contra la barrera montañosa, generando una elevada pluviosidad (1.600 a más de 2.100 mm anuales).</li>
-              <li><strong><abbr class="glossary-term" data-term="efecto_foehn">Efecto Foehn</abbr> (<abbr class="glossary-term" data-term="surada">«suradas»</abbr>):</strong> cuando el viento sopla del sur desciende recalentado desde la divisoria de la cordillera, disparando bruscamente las temperaturas y hundiendo la humedad relativa.</li>
-              <li><strong>Distancias clave:</strong> a 5 km de Alisas, a 7 km de Liérganes, a 16 km del aeropuerto de Santander y a 23 km de la ciudad de Santander.</li>
-            </ul>
-            <div class="location-coord-badge mono">
-              <span>Coordenadas WGS84: <a href="https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670" target="_blank" rel="noopener noreferrer" style="text-decoration:underline"><strong>43.341° N, 3.670° W</strong></a> (43.341, -3.670)</span>
-              <span>Altitud: <strong>115 m s. n. m.</strong></span>
-            </div>
-          </div>
-          <div class="station-location-map-wrap">
-            <iframe
-              class="station-osm-map"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=-3.770%2C43.295%2C-3.560%2C43.385&amp;layer=mapnik&amp;marker=43.341%2C-3.670"
-              title="Mapa de situación de Riotuerto y la estación meteorológica en Barrio de Arriba (Cantabria)"
-              loading="lazy">
-            </iframe>
-            <div class="map-link-bar">
-              <a href="https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670" target="_blank" rel="noopener noreferrer">
-                Explorar mapa en pantalla completa en OpenStreetMap ↗
-              </a>
-            </div>
-          </div>
+        <!-- Fila de accesos directos principales -->
+        <div class="hero-actions">
+          <a href="#almanaque/2025" class="btn btn-primary hero-btn" data-scroll-to="sec-almanaques-title">
+            <span>📖 Explorar almanaques anuales</span>
+            <span aria-hidden="true">↓</span>
+          </a>
+          <a href="#records" class="btn btn-secondary hero-btn" data-scroll-to="sec-records-portada">
+            <span>⚡ Hitos y extremos históricos</span>
+            <span aria-hidden="true">↓</span>
+          </a>
+          <a href="${idx.station.links.weathercloud || 'https://app.weathercloud.net/d6619283754'}" target="_blank" rel="noopener noreferrer" class="hero-btn-live" title="Consultar lecturas instantáneas en Weathercloud">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span>Tiempo actual en vivo (Weathercloud) ↗</span>
+          </a>
         </div>
       </article>
 
-      <!-- Síntesis cuantitativa del archivo -->
+      <!-- Síntesis cuantitativa del archivo (Indicadores generales en primer plano) -->
       <div class="kpi-grid" aria-label="Indicadores generales del archivo">
         <div class="kpi-card accent-forest">
           <div class="kpi-label">Cobertura consolidada</div>
@@ -7047,37 +7007,50 @@
           esta sección documenta las características geográficas del emplazamiento, el instrumental de medida,
           las definiciones matemáticas de cada indicador y los procedimientos de control de calidad aplicados.
         </p>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-color);font-size:0.92rem;color:var(--txt-secondary);line-height:1.6">
+          <p style="margin-bottom:8px">
+            Cada cifra publicada en este archivo procede directamente de los registros instrumentales validados,
+            distinguiendo con rigor entre observaciones directas, indicadores derivados y contexto sinóptico.
+          </p>
+          <p style="margin:0">
+            El archivo ofrece <strong>comparaciones anuales muy útiles</strong> para examinar la variabilidad meteorológica reciente en Riotuerto,
+            pero <strong>todavía no permite establecer <abbr class="glossary-term" data-term="normal_climatologica">normales climatológicas de 30 años</abbr> ni atribuir tendencias climáticas seculares con garantías estadísticas</strong>.
+          </p>
+        </div>
       </article>
 
       <div class="stats-two-col">
         <div class="chronicle-card">
-          <h3>📍 Emplazamiento geográfico y microclima</h3>
+          <h3>📍 Emplazamiento geográfico y microclima del valle</h3>
           <p style="margin-bottom:10px">
-            La estación está situada en la localidad de <strong>${escapeHtml(st.location.locality)}</strong>,
+            La estación está situada en una pradera abierta en la localidad de <strong>${escapeHtml(st.location.locality)}</strong>,
             perteneciente al municipio de <strong>${escapeHtml(st.location.municipality)} (${escapeHtml(st.location.region)})</strong>,
+            en la comarca histórica de <strong>Trasmiera</strong> (valle medio-alto del río Miera, entre <strong>La Cavada</strong> y el <strong>puerto de Alisas</strong>),
             en las coordenadas <a href="${idx.station.links.openstreetmap || 'https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670'}" target="_blank" rel="noopener noreferrer" title="Ver localización en OpenStreetMap"><code>43.341° N, 3.670° W</code></a> (WGS84: <code>43.341, -3.670</code>) y a una altitud de
             <strong>115 metros sobre el nivel del mar</strong>.
           </p>
-          <p>
-            Ubicada en el <strong>valle del río Covadal</strong> (afluente de la cuenca del Miera), a 14 km de la costa
-            cantábrica y a 5 km del puerto de Alisas, presenta dos rasgos topográficos determinantes:
-            <strong>1) Efecto de retención orográfica</strong> ante advecciones del noroeste, que dispara los acumulados
-            anuales por encima de los 1.600–2.100 mm; y <strong>2) Efecto Foehn en situaciones de viento sur</strong>,
-            que provoca subidas térmicas abruptas y caídas bruscas de la humedad relativa al descender el aire recalentado
-            desde la divisoria cantábrica.
+          <p style="margin-bottom:10px">
+            Ubicada en el fondo del <strong>valle del río Covadal</strong> (afluente de la cuenca del Miera), a 14 km de la costa
+            cantábrica y a 5 km del puerto de Alisas, presenta un microclima de valle muy definido condicionado por el relieve:
           </p>
+          <ul class="location-highlights" style="margin-bottom:14px">
+            <li><strong><abbr class="glossary-term" data-term="lluvia_orografica">Retención orográfica Cantábrica</abbr>:</strong> las masas de aire húmedo del noroeste procedentes del mar Cantábrico quedan retenidas contra la barrera montañosa, generando una elevada pluviosidad (habitualmente de 1.600 a más de 2.100 mm anuales).</li>
+            <li><strong><abbr class="glossary-term" data-term="efecto_foehn">Efecto Foehn</abbr> (<abbr class="glossary-term" data-term="surada">«suradas»</abbr>):</strong> cuando el viento sopla del sur desciende recalentado desde la divisoria de la cordillera, disparando bruscamente las temperaturas y hundiendo la humedad relativa.</li>
+            <li><strong><abbr class="glossary-term" data-term="inversion_termica">Inversión térmica nocturna</abbr>:</strong> en noches calmas y despejadas el aire frío drena hacia el fondo del valle, provocando heladas locales mientras las laderas permanecen más templadas.</li>
+            <li><strong>Distancias clave:</strong> a 5 km de Alisas (674 m), a 7 km de Liérganes, a 16 km del aeropuerto de Santander y a 23 km de la ciudad de Santander.</li>
+          </ul>
 
           <div class="station-location-map-wrap" style="margin-top:14px">
             <iframe
               class="station-osm-map"
-              style="height:260px"
+              style="height:280px"
               src="https://www.openstreetmap.org/export/embed.html?bbox=-3.770%2C43.295%2C-3.560%2C43.385&amp;layer=mapnik&amp;marker=43.341%2C-3.670"
               title="Mapa topográfico de localización de Barrio de Arriba (Riotuerto, Cantabria)"
               loading="lazy">
             </iframe>
             <div class="map-link-bar">
               <a href="https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670" target="_blank" rel="noopener noreferrer">
-                Ver en OpenStreetMap con curvas de nivel ↗
+                Explorar mapa en pantalla completa en OpenStreetMap ↗
               </a>
             </div>
           </div>
@@ -8770,8 +8743,19 @@
     document.getElementById('modal-term-close')?.addEventListener('click', closeTermModal);
     document.getElementById('term-modal-backdrop')?.addEventListener('click', closeTermModal);
 
-    // Escuchar clics globales en términos contextuales interactivos (.glossary-term y [data-open-term])
+    // Escuchar clics globales en accesos directos con scroll suave y términos contextuales
     document.addEventListener('click', (e) => {
+      const scrollTrigger = e.target.closest('[data-scroll-to]');
+      if (scrollTrigger) {
+        const targetId = scrollTrigger.getAttribute('data-scroll-to');
+        const targetEl = document.getElementById(targetId);
+        if (targetEl && !targetEl.closest('.view-section[hidden]')) {
+          e.preventDefault();
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
+      }
+
       const termEl = e.target.closest('.glossary-term');
       if (termEl) {
         e.preventDefault();
