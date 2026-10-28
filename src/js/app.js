@@ -577,7 +577,7 @@
       <section class="section-block" id="sec-featured-episodes" aria-labelledby="sec-featured-episodes-title">
         <div class="section-header">
           <div>
-            <div class="editorial-kicker">HISTORIA Y MEMORIA CLIMÁTICA DEL VALLE DEL COVADAL</div>
+            <div class="editorial-kicker">HISTORIA Y MEMORIA CLIMÁTICA DEL MUNICIPIO</div>
             <h2 id="sec-featured-episodes-title" class="section-title">Acontecimientos meteorológicos que marcaron Riotuerto</h2>
             <p class="section-subtitle">Episodios extraordinarios, temporales y récords documentados por la estación en Barrio de Arriba</p>
           </div>
