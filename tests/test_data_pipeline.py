@@ -1092,6 +1092,36 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".episode-kpis-strip", css_text)
         self.assertIn(".episode-narrative", css_text)
 
+    def test_on_this_day_headline_evaluator_readiness(self):
+        """Verifica que el evolutivo EVO-028 (Titular divulgativo y contexto en 'Tal día como hoy') esté operativo."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Función evaluadora y paso de datos
+        self.assertIn("function evaluateOnThisDayHeadline", app_js)
+        self.assertIn("const verdict = evaluateOnThisDayHeadline", app_js)
+
+        # 2. Componente de veredicto diario en la plantilla
+        self.assertIn("otd-verdict-box", app_js)
+        self.assertIn("otd-verdict-badge", app_js)
+        self.assertIn("otd-verdict-title", app_js)
+        self.assertIn("otd-verdict-desc", app_js)
+
+        # 3. Criterios de evaluación (Nivel 1 récords, Nivel 2 extremos, Nivel 3 anomalías, Nivel 4 fallback apacible)
+        self.assertIn("Récord histórico de la serie", app_js)
+        self.assertIn("Pico álgido de", app_js)
+        self.assertIn("Jornada de temporal de lluvia", app_js)
+        self.assertIn("Surada / Temperatura anómala", app_js)
+        self.assertIn("Jornada apacible en el histórico", app_js)
+
+        # 4. Estilos CSS para los tipos de veredicto
+        self.assertIn(".otd-verdict-box", css_text)
+        self.assertIn(".otd-verdict-box.verdict-record", css_text)
+        self.assertIn(".otd-verdict-box.verdict-extreme", css_text)
+        self.assertIn(".otd-verdict-box.verdict-anomaly", css_text)
+        self.assertIn(".otd-verdict-box.verdict-mild", css_text)
+        self.assertIn(".otd-verdict-badge", css_text)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

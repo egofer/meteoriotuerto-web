@@ -438,10 +438,11 @@
    * VISTA 1: PORTADA DEL ALMANAQUE
    * ------------------------------------------------------------------------ */
   async function renderPortada() {
-    const [idx, comparisons, almanacs] = await Promise.all([
+    const [idx, comparisons, almanacs, recordsData] = await Promise.all([
       ensureIndexLoaded(),
       ensureComparisonsLoaded(),
       ensureAllAlmanacsLoaded(),
+      ensureRecordsLoaded(),
     ]);
 
     const container = document.getElementById('view-portada');
@@ -844,14 +845,186 @@
       </section>
     `;
 
-    // Renderizar bloque «Un día como hoy en MeteoRiotuerto» (EVO-004)
-    renderOnThisDayWidget(idx, almanacs);
+    // Renderizar bloque «Un día como hoy en MeteoRiotuerto» (EVO-004 y EVO-028)
+    renderOnThisDayWidget(idx, almanacs, recordsData);
 
     // Renderizar gráficos de portada
     renderHomeCharts(comparisons);
   }
 
-  function renderOnThisDayWidget(idx, almanacs) {
+  /* ------------------------------------------------------------------------
+   * EVO-028: Evaluador algorítmico del titular divulgativo para «Tal día como hoy»
+   * Prioriza en orden:
+   *  1. Récord absoluto de la serie registrado en la fecha (MM-DD)
+   *  2. Coincidencia con pico o ventana de episodio extremo catalogado
+   *  3. Anomalía acusada del día (lluvia ≥25mm, calor ≥27°C, viento ≥60km/h, helada ≤1°C, oscilación)
+   *  4. Veredicto descriptivo apacible y representativo (fallback meteorológico)
+   * ------------------------------------------------------------------------ */
+  function evaluateOnThisDayHeadline(month, day, dayLabel, validEntries, recordsData) {
+    if (!validEntries || validEntries.length === 0) {
+      return {
+        boxClass: 'verdict-mild',
+        badgeClass: 'badge-mild',
+        badgeIcon: 'ℹ️',
+        badgeText: 'Sin registros consolidados',
+        levelLabel: 'Información del archivo',
+        title: `Sin observaciones disponibles para el ${dayLabel}`,
+        description: 'No constan observaciones validadas en esta fecha. Seleccione cualquier otro día del calendario mediante el selector superior.',
+        linkHtml: '',
+      };
+    }
+
+    const mmdd = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    // NIVEL 1: Récord absoluto de la serie en esta fecha
+    if (recordsData && recordsData.absolute_records) {
+      const absRecs = recordsData.absolute_records;
+      for (const [k, r] of Object.entries(absRecs)) {
+        if (r && r.date && r.date.endsWith(`-${mmdd}`)) {
+          const recTitle = `Efeméride destacada: Récord absoluto de ${r.label || k} (${fmtNum(r.value, 1)} ${r.unit || ''})`;
+          const recDesc = r.context || `El ${dayLabel} de ${r.year} la estación registró el valor extremo histórico de ${fmtNum(r.value, 1)} ${r.unit || ''} en Barrio de Arriba.`;
+          return {
+            boxClass: 'verdict-record',
+            badgeClass: 'badge-record',
+            badgeIcon: '🏆',
+            badgeText: 'Récord histórico de la serie',
+            levelLabel: `Récord absoluto (${r.year})`,
+            title: recTitle,
+            description: recDesc,
+            linkHtml: `<a href="#almanaque/${r.year}">Consultar crónica sinóptica del año ${r.year} →</a> · <a href="#records">Ver todos los récords ↗</a>`,
+          };
+        }
+      }
+    }
+
+    // NIVEL 2: Coincidencia con episodio extremo catalogado
+    if (recordsData && recordsData.extreme_episodes && recordsData.extreme_episodes.episodes) {
+      const episodes = recordsData.extreme_episodes.episodes;
+      for (const ep of episodes) {
+        if (ep.peak_date && ep.peak_date.endsWith(`-${mmdd}`)) {
+          return {
+            boxClass: 'verdict-extreme',
+            badgeClass: 'badge-extreme',
+            badgeIcon: ep.type_icon || '⚠️',
+            badgeText: `${ep.type_label || 'Episodio extremo'} (${ep.year})`,
+            levelLabel: 'Pico de episodio catalogado',
+            title: `Pico álgido de ${ep.type_label?.toLowerCase() || 'episodio'}: ${ep.summary || ''}`,
+            description: `El ${dayLabel} de ${ep.year} registró el momento culminante de este episodio extremo en el valle, alcanzando ${fmtNum(ep.peak_value, 1)} ${ep.peak_value_unit || ''}.`,
+            linkHtml: `<a href="#almanaque/${ep.year}">Ver crónica anual de ${ep.year} →</a> · <a href="#records">Explorar catálogo de 91 extremos ↗</a>`,
+          };
+        }
+      }
+    }
+
+    // NIVEL 3: Anomalías acusadas del día observadas en los datos
+    let maxRain = null;
+    let maxTemp = null;
+    let minTemp = null;
+    let maxGust = null;
+
+    validEntries.forEach((e) => {
+      if (!maxRain || e.rain > maxRain.rain) maxRain = e;
+      if (!maxTemp || e.tmax > maxTemp.tmax) maxTemp = e;
+      if (!minTemp || e.tmin < minTemp.tmin) minTemp = e;
+      if (!maxGust || (e.gust || 0) > (maxGust.gust || 0)) maxGust = e;
+    });
+
+    if (maxRain && maxRain.rain >= 25) {
+      return {
+        boxClass: 'verdict-anomaly',
+        badgeClass: 'badge-anomaly',
+        badgeIcon: '🌧️',
+        badgeText: 'Jornada de temporal de lluvia',
+        levelLabel: `Anomalía pluviométrica (${maxRain.year})`,
+        title: `Temporal lluvioso en ${maxRain.year}: se acumularon ${fmtNum(maxRain.rain, 1)} mm en 24 horas`,
+        description: `Con una racha máxima de viento de ${fmtNum(maxRain.gust, 1)} km/h (${maxRain.sector}), el ${dayLabel} de ${maxRain.year} fue con diferencia el más húmedo del registro reciente en Barrio de Arriba.`,
+        linkHtml: `<a href="#almanaque/${maxRain.year}">Abrir anuario de ${maxRain.year} →</a>`,
+      };
+    }
+
+    if (maxTemp && maxTemp.tmax >= 27) {
+      return {
+        boxClass: 'verdict-anomaly',
+        badgeClass: 'badge-anomaly',
+        badgeIcon: '🔥',
+        badgeText: 'Surada / Temperatura anómala',
+        levelLabel: `Anomalía térmica cálida (${maxTemp.year})`,
+        title: `Calor anómalo en ${maxTemp.year}: el termómetro trepó hasta los ${fmtNum(maxTemp.tmax, 1)} °C`,
+        description: `Un marcado flujo de componente sur (${maxTemp.sector}) descolgado desde la divisoria de Alisas disparó la temperatura y hundió la humedad relativa en el fondo del valle.`,
+        linkHtml: `<a href="#almanaque/${maxTemp.year}">Abrir anuario de ${maxTemp.year} →</a>`,
+      };
+    }
+
+    if (maxGust && maxGust.gust >= 60) {
+      return {
+        boxClass: 'verdict-anomaly',
+        badgeClass: 'badge-anomaly',
+        badgeIcon: '💨',
+        badgeText: 'Vendaval destacado en el valle',
+        levelLabel: `Racha eólica notable (${maxGust.year})`,
+        title: `Fuerte vendaval en ${maxGust.year}: racha máxima registrada de ${fmtNum(maxGust.gust, 1)} km/h`,
+        description: `Viento impetuoso de componente ${maxGust.sector} encajonado por el relieve del Covadal hacia La Cavada.`,
+        linkHtml: `<a href="#almanaque/${maxGust.year}">Abrir anuario de ${maxGust.year} →</a>`,
+      };
+    }
+
+    if (minTemp && minTemp.tmin <= 1.0) {
+      return {
+        boxClass: 'verdict-anomaly',
+        badgeClass: 'badge-anomaly',
+        badgeIcon: '❄️',
+        badgeText: 'Madrugada gélida / Helada',
+        levelLabel: `Helada en el valle (${minTemp.year})`,
+        title: `Madrugada gélida en ${minTemp.year}: el termómetro bajó hasta los ${fmtNum(minTemp.tmin, 1)} °C`,
+        description: `Inversión térmica nocturna bajo cielo despejado que provocó escarcha y temperaturas mínimas bajo cero o al borde del punto de congelación en Barrio de Arriba.`,
+        linkHtml: `<a href="#almanaque/${minTemp.year}">Abrir anuario de ${minTemp.year} →</a>`,
+      };
+    }
+
+    if (maxTemp && minTemp && (maxTemp.tmax - minTemp.tmin) >= 14) {
+      return {
+        boxClass: 'verdict-anomaly',
+        badgeClass: 'badge-anomaly',
+        badgeIcon: '🌡️',
+        badgeText: 'Marcado contraste interanual',
+        levelLabel: 'Variabilidad climática reciente',
+        title: `Gran disparidad entre años: de ${fmtNum(minTemp.tmin, 1)} °C en ${minTemp.year} a ${fmtNum(maxTemp.tmax, 1)} °C en ${maxTemp.year}`,
+        description: `Una oscilación de más de ${fmtNum(maxTemp.tmax - minTemp.tmin, 0)} °C en la misma fecha del calendario refleja la acusada alternancia entre advecciones marítimas húmedas y suradas en Riotuerto.`,
+        linkHtml: `<a href="#comparativas">Comparar todos los años en detalle →</a>`,
+      };
+    }
+
+    // NIVEL 4: Día meteorológicamente apacible y típico (Fallback descriptivo)
+    const validCount = validEntries.length;
+    const meanTempAll = validEntries.reduce((acc, e) => acc + e.tmean, 0) / validCount;
+    const rainyYearsCount = validEntries.filter((e) => e.rain >= 0.2).length;
+
+    if (rainyYearsCount >= Math.ceil(validCount * 0.6)) {
+      return {
+        boxClass: 'verdict-mild',
+        badgeClass: 'badge-mild',
+        badgeIcon: '🌦️',
+        badgeText: 'Fecha frecuentemente lluviosa',
+        levelLabel: 'Comportamiento habitual',
+        title: `Jornada típicamente húmeda: ha llovido en ${rainyYearsCount} de los ${validCount} años observados`,
+        description: `En esta fecha predominan las precipitaciones moderadas o lloviznas en el valle, con una temperatura media típica de ${fmtNum(meanTempAll, 1)} °C, sin que consten temporales destructivos.`,
+        linkHtml: `<a href="#comparativas">Ver comparativa pluviométrica interanual →</a>`,
+      };
+    }
+
+    return {
+      boxClass: 'verdict-mild',
+      badgeClass: 'badge-mild',
+      badgeIcon: '🌤️',
+      badgeText: 'Jornada apacible en el histórico',
+      levelLabel: 'Comportamiento habitual',
+      title: `Valores suaves y estables: un ${dayLabel} habitualmente tranquilo en el valle`,
+      description: `Sin registros de temporales de viento, precipitaciones torrenciales ni picos de calor extremo entre 2022 y 2026. Temperatura media habitual de ${fmtNum(meanTempAll, 1)} °C y predominio de ambiente templado.`,
+      linkHtml: `<a href="#comparativas">Ver comparativas entre años →</a>`,
+    };
+  }
+
+  function renderOnThisDayWidget(idx, almanacs, recordsData = STATE.cache.records) {
     const wrap = document.getElementById('on-this-day-widget');
     if (!wrap) return;
 
@@ -958,6 +1131,9 @@
 
     const validEntries = yearEntries.filter((e) => e.hasData);
     const validCount = validEntries.length;
+
+    // EVO-028: Evaluación algorítmica del veredicto del día
+    const verdict = evaluateOnThisDayHeadline(month, day, dayLabel, validEntries, recordsData);
 
     // Estadísticas interanuales del día seleccionado
     const meanTempAll = validCount > 0
@@ -1074,6 +1250,20 @@
           </div>
         </div>
 
+        <!-- Tarjeta cabecera con el veredicto y titular del día (EVO-028) -->
+        <div class="otd-verdict-box ${verdict.boxClass}">
+          <div class="otd-verdict-header">
+            <span class="otd-verdict-badge ${verdict.badgeClass}">
+              <span>${verdict.badgeIcon}</span>
+              <span>${verdict.badgeText}</span>
+            </span>
+            <span class="otd-verdict-level-tag">${verdict.levelLabel}</span>
+          </div>
+          <h3 class="otd-verdict-title">${verdict.title}</h3>
+          <p class="otd-verdict-desc">${verdict.description}</p>
+          ${verdict.linkHtml ? `<div class="otd-verdict-link">${verdict.linkHtml}</div>` : ''}
+        </div>
+
         <div class="otd-summary-strip">
           <div class="otd-sum-item">
             <span class="otd-sum-label">Promedio térmico del ${dayLabel}</span>
@@ -1111,7 +1301,7 @@
         month: refDate.getUTCMonth() + 1,
         day: refDate.getUTCDate(),
       };
-      renderOnThisDayWidget(idx, almanacs);
+      renderOnThisDayWidget(idx, almanacs, recordsData);
     };
 
     document.getElementById('btn-otd-prev')?.addEventListener('click', () => shiftDay(-1));
@@ -1119,18 +1309,18 @@
     document.getElementById('btn-otd-today')?.addEventListener('click', () => {
       const current = new Date();
       STATE.onThisDay = { month: current.getMonth() + 1, day: current.getDate() };
-      renderOnThisDayWidget(idx, almanacs);
+      renderOnThisDayWidget(idx, almanacs, recordsData);
     });
     document.getElementById('sel-otd-month')?.addEventListener('change', (ev) => {
       const newMonth = parseInt(ev.target.value, 10);
       const maxD = maxDaysPerMonth[newMonth - 1];
       STATE.onThisDay = { month: newMonth, day: Math.min(day, maxD) };
-      renderOnThisDayWidget(idx, almanacs);
+      renderOnThisDayWidget(idx, almanacs, recordsData);
     });
     document.getElementById('sel-otd-day')?.addEventListener('change', (ev) => {
       const newDay = parseInt(ev.target.value, 10);
       STATE.onThisDay = { month, day: newDay };
-      renderOnThisDayWidget(idx, almanacs);
+      renderOnThisDayWidget(idx, almanacs, recordsData);
     });
   }
 
