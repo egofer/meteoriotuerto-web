@@ -1334,9 +1334,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.1.9", sw_js, "Falta cache v1.1.9 en sw.js")
+        self.assertIn("v1.2.0", sw_js, "Falta cache v1.2.0 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.1.9", index_html, "Falta v=1.1.9 en index.html")
+        self.assertIn("v=1.2.0", index_html, "Falta v=1.2.0 en index.html")
 
     def test_weather_underground_realtime_integration(self):
         """
@@ -1361,7 +1361,20 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("Wunderground", app_js, "Falta enlace a Wunderground en app.js")
         self.assertIn("Ecowitt.net", app_js, "Falta enlace a Ecowitt en app.js")
         self.assertIn("degToSector16", app_js, "Falta conversión de grados a rumbos en app.js")
+        self.assertIn("speedToBeaufort", app_js, "Falta función speedToBeaufort en app.js")
+        self.assertIn("classifyUvIndex", app_js, "Falta función classifyUvIndex en app.js")
+        self.assertIn("formatRelativeTime", app_js, "Falta función formatRelativeTime en app.js")
+        self.assertIn("evaluateLiveDiagnostic", app_js, "Falta función evaluateLiveDiagnostic en app.js")
+        self.assertIn("updateTopLiveBadge", app_js, "Falta función updateTopLiveBadge en app.js")
         self.assertIn("btn-live-refresh", app_js, "Falta botón de refresco en app.js")
+
+        # 4. Estilos y enlaces en el HTML/CSS
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".live-synoptic-pill", css_text, "Falta .live-synoptic-pill en styles.css")
+
+        index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn('id="top-live-weather-link"', index_html, "Falta id top-live-weather-link en index.html")
+        self.assertIn('id="top-live-weather-text"', index_html, "Falta id top-live-weather-text en index.html")
 
 
 if __name__ == "__main__":

@@ -501,6 +501,7 @@
       const wuLive = await fetchWeatherUndergroundLive();
       STATE.liveWeather = wuLive;
       STATE.liveWeatherLastFetch = now;
+      updateTopLiveBadge(wuLive);
       return STATE.liveWeather;
     } catch (err) {
       console.warn('Weather Underground no disponible o sin conexión. Recurriendo a snapshot local data/live.json:', err);
@@ -513,12 +514,98 @@
       snap.source = snap.source || 'Estación Barrio de Arriba (archivo estático)';
       STATE.liveWeather = snap;
       STATE.liveWeatherLastFetch = now;
+      updateTopLiveBadge(snap);
       return STATE.liveWeather;
     } catch (e) {
       console.warn('No se pudo cargar live.json, recurriendo a último registro en memoria:', e);
-      if (STATE.liveWeather) return STATE.liveWeather;
+      if (STATE.liveWeather) {
+        updateTopLiveBadge(STATE.liveWeather);
+        return STATE.liveWeather;
+      }
       throw e;
     }
+  }
+
+  function speedToBeaufort(kmh) {
+    if (kmh === null || kmh === undefined || isNaN(kmh)) return null;
+    const v = Number(kmh);
+    if (v <= 1.0) return { force: 0, label: 'Calma' };
+    if (v <= 5.0) return { force: 1, label: 'Ventolina' };
+    if (v <= 11.0) return { force: 2, label: 'Flojito' };
+    if (v <= 19.0) return { force: 3, label: 'Flojo' };
+    if (v <= 28.0) return { force: 4, label: 'Bonancible' };
+    if (v <= 38.0) return { force: 5, label: 'Fresquito' };
+    if (v <= 49.0) return { force: 6, label: 'Fresco' };
+    if (v <= 61.0) return { force: 7, label: 'Frescachón' };
+    if (v <= 74.0) return { force: 8, label: 'Temporal' };
+    if (v <= 88.0) return { force: 9, label: 'Temporal fuerte' };
+    return { force: 10, label: 'Temporal duro' };
+  }
+
+  function classifyUvIndex(uvi) {
+    if (uvi === null || uvi === undefined || isNaN(uvi)) return '';
+    const v = Number(uvi);
+    if (v <= 2) return 'Bajo';
+    if (v <= 5) return 'Moderado';
+    if (v <= 7) return 'Alto';
+    if (v <= 10) return 'Muy alto';
+    return 'Extremo';
+  }
+
+  function formatRelativeTime(epochOrIso) {
+    if (!epochOrIso) return '';
+    let timeMs = 0;
+    if (typeof epochOrIso === 'number') {
+      timeMs = epochOrIso > 1e11 ? epochOrIso : epochOrIso * 1000;
+    } else {
+      timeMs = Date.parse(epochOrIso);
+    }
+    if (isNaN(timeMs)) return '';
+    const diffSec = Math.max(0, Math.floor((Date.now() - timeMs) / 1000));
+    if (diffSec < 45) return 'hace instantes';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin === 1) return 'hace 1 min';
+    if (diffMin < 60) return `hace ${diffMin} min`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours === 1) return 'hace 1 h';
+    if (diffHours < 24) return `hace ${diffHours} h`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+  }
+
+  function evaluateLiveDiagnostic(live) {
+    if (!live) return '';
+    const t = Number(live.temperature_c);
+    const hum = Number(live.humidity_pct);
+    const rainRate = Number(live.rain_rate_mm_h) || 0;
+    const rainTotal = Number(live.rain_daily_mm) || 0;
+    const gust = Number(live.wind_gust_day_max_kmh || live.wind_gust_kmh) || 0;
+    const dir = Number(live.wind_direction_deg);
+    const uvi = Number(live.uv_index) || 0;
+
+    if (rainRate >= 10.0) return '🌧️ <strong>Lluvia torrencial o muy fuerte:</strong> precipitación de alta intensidad en Barrio de Arriba.';
+    if (rainRate > 0.5) return '🌧️ <strong>Lluvia activa:</strong> precipitación en curso en el fondo del valle del Covadal.';
+    if (rainTotal >= 15.0 && rainRate === 0) return '🌦️ <strong>Jornada lluviosa:</strong> acumulación pluviométrica significativa registrada a lo largo del día.';
+
+    if (dir >= 135 && dir <= 225 && (gust >= 30 || (t >= 18 && hum <= 65))) {
+      return '🍂 <strong>Dinámica de Viento Sur (Efecto Foehn):</strong> flujo descendente de la cordillera con aire seco, racheado y calentamiento adiabático en Riotuerto.';
+    }
+
+    if (gust >= 50) return '💨 <strong>Régimen de viento fuerte o racheado:</strong> precaución en pastizales altos y arboledas del valle.';
+    if (t >= 30) return '🔥 <strong>Calor estival acusado:</strong> temperaturas elevadas en el valle del Covadal.';
+    if (t <= 2) return '❄️ <strong>Ambiente gélido:</strong> temperaturas muy bajas con probable escarcha o helada en cotas sombrías.';
+    if (uvi >= 6) return '☀️ <strong>Radiación solar intensa:</strong> cielos mayormente despejados con índice ultravioleta elevado.';
+
+    return '⛅ <strong>Condiciones estables y templadas:</strong> régimen atmosférico característico del prelitoral cantábrico.';
+  }
+
+  function updateTopLiveBadge(live) {
+    const el = document.getElementById('top-live-weather-text');
+    if (!el || !live || live.temperature_c === null) return;
+    const t = fmtNum(live.temperature_c, 1);
+    const hum = live.humidity_pct !== null ? `${fmtNum(live.humidity_pct, 0)}%` : '';
+    el.innerHTML = `Barrio de Arriba: <strong>${t} °C</strong>${hum ? ` · ${hum} HR` : ''} ↗`;
+  }
   }
 
   /* ------------------------------------------------------------------------
@@ -992,9 +1079,24 @@
       </section>
     `;
 
-    // Renderizar píldora de tiempo actual en directo (EVO-032)
+    // Renderizar píldora de tiempo actual en directo (EVO-032 y EVO-034)
     if (liveData) {
       renderLiveWeatherWidget(liveData, ref);
+      updateTopLiveBadge(liveData);
+    }
+
+    // Temporizador de refresco en segundo plano (EVO-034: cada 60s si la pestaña está activa)
+    if (!STATE.liveRefreshTimer) {
+      STATE.liveRefreshTimer = setInterval(async () => {
+        if (document.visibilityState === 'visible' && STATE.route === 'portada') {
+          try {
+            const fresh = await ensureLiveWeatherLoaded(true);
+            const freshRef = STATE.cache.index?.series_overview?.reference_2022_2025;
+            renderLiveWeatherWidget(fresh, freshRef);
+            updateTopLiveBadge(fresh);
+          } catch (_) {}
+        }
+      }, 60000);
     }
 
     // Renderizar bloque «Un día como hoy en MeteoRiotuerto» (EVO-004 y EVO-028)
@@ -1042,6 +1144,11 @@
     }
 
     // Subtítulos dinámicos enriquecidos con extremos del día
+    const relTime = formatRelativeTime(live.timestamp || live.timestamp_str);
+    const synopticPillHtml = evaluateLiveDiagnostic(live);
+    const bft = speedToBeaufort(live.wind_speed_kmh);
+    const uvCat = classifyUvIndex(live.uv_index);
+
     const tempExtremesStr = (live.temp_min_c !== null && live.temp_max_c !== null)
       ? `Mín: <strong>${fmtNum(live.temp_min_c, 1)} °C</strong> · Máx: <strong>${fmtNum(live.temp_max_c, 1)} °C</strong>`
       : 'Extremo térmico en consolidación';
@@ -1059,7 +1166,7 @@
       : 'Rumbo: —';
 
     const baroTrendStr = live.pressure_trend_hpa !== null
-      ? `Tendencia: <strong>${live.pressure_trend_hpa >= 0 ? '+' : ''}${fmtNum(live.pressure_trend_hpa, 2)} hPa</strong>`
+      ? `Tendencia: <strong>${live.pressure_trend_hpa >= 0 ? '+' : ''}${fmtNum(live.pressure_trend_hpa, 2)} hPa/3h</strong>`
       : 'Presión relativa a nivel del mar';
 
     wrap.innerHTML = `
@@ -1070,7 +1177,7 @@
             <span>${badgeText}</span>
           </span>
           <h3 id="live-weather-heading" class="live-weather-title">Tiempo actual en Barrio de Arriba</h3>
-          <span class="live-weather-time">Observación del <strong>${fmtDateES(liveDate, false)}</strong> a las <strong>${escapeHtml(liveTime)} h</strong></span>
+          <span class="live-weather-time">Observación del <strong>${fmtDateES(liveDate, false)}</strong> a las <strong>${escapeHtml(liveTime)} h</strong>${relTime ? ` <em class="live-rel-time">(${relTime})</em>` : ''}</span>
         </div>
         <div class="live-weather-actions">
           <button type="button" id="btn-live-refresh" class="btn-live-action" title="Actualizar lectura instantánea desde Weather Underground">
@@ -1087,6 +1194,8 @@
           </a>
         </div>
       </div>
+
+      ${synopticPillHtml ? `<div class="live-synoptic-pill" role="status">${synopticPillHtml}</div>` : ''}
 
       <div class="live-kpi-grid" aria-label="Condiciones meteorológicas actuales">
         <div class="live-kpi-card">
@@ -1140,6 +1249,7 @@
             ${live.wind_speed_kmh !== null ? fmtNum(live.wind_speed_kmh, 1) : '0,0'} <span class="live-kpi-unit">km/h</span>
           </div>
           <div class="live-kpi-subdetail">
+            ${bft ? `<strong>Fuerza ${bft.force} Beaufort</strong> (${bft.label})<br>` : ''}
             ${windRachaStr}<br>
             ${windDirStr}
           </div>
@@ -1154,7 +1264,7 @@
             ${live.pressure_relative_hpa !== null ? fmtNum(live.pressure_relative_hpa, 1) : '—'} <span class="live-kpi-unit">hPa</span>
           </div>
           <div class="live-kpi-subdetail">
-            Radiación: <strong>${live.solar_radiation_wm2 !== null ? fmtNum(live.solar_radiation_wm2, 0) : '0'} W/m²</strong> · UV: <strong>${live.uv_index !== null ? fmtNum(live.uv_index, 0) : '0'}</strong><br>
+            Radiación: <strong>${live.solar_radiation_wm2 !== null ? fmtNum(live.solar_radiation_wm2, 0) : '0'} W/m²</strong> · UV: <strong>${live.uv_index !== null ? `${fmtNum(live.uv_index, 0)}${uvCat ? ` (${uvCat})` : ''}` : '0'}</strong><br>
             ${baroTrendStr}
           </div>
         </div>

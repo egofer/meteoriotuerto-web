@@ -5816,3 +5816,21 @@ html[data-theme="dark"] .offline-badge.online-restored {
 .live-climatology-contrast strong {
   color: var(--txt-primary);
 }
+
+.live-synoptic-pill {
+  margin-bottom: 16px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  font-size: 0.81rem;
+  line-height: 1.45;
+  color: var(--txt-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-synoptic-pill strong {
+  color: var(--txt-primary);
+}

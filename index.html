@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Hoja de estilos principal -->
-  <link rel="stylesheet" href="./src/css/styles.css?v=1.1.9">
+  <link rel="stylesheet" href="./src/css/styles.css?v=1.2.0">
 
   <!-- Aplicar tema guardado antes del pintado para evitar parpadeo -->
   <script>
@@ -59,9 +59,9 @@
         <button type="button" id="btn-pwa-install" class="btn-pwa-install" hidden aria-label="Instalar MeteoRiotuerto como aplicación">
           📱 Instalar app
         </button>
-        <a href="https://app.weathercloud.net/d6619283754" target="_blank" rel="noopener noreferrer" class="live-ext-link" title="Consultar datos instantáneos en abierto en Weathercloud">
+        <a href="#portada" class="live-ext-link" id="top-live-weather-link" data-scroll-to="sec-live-weather" title="Consultar tiempo actual en directo de la estación en Barrio de Arriba">
           <span class="pulse-dot" aria-hidden="true"></span>
-          <span>Tiempo actual en vivo (Weathercloud) ↗</span>
+          <span id="top-live-weather-text">Tiempo actual en vivo (Wunderground) ↗</span>
         </a>
         <button type="button" id="theme-toggle" class="btn-theme" aria-label="Alternar entre tema claro y oscuro">
           <span id="theme-icon" aria-hidden="true">☾</span>
@@ -287,6 +287,6 @@
   <!-- SheetJS para exportación nativa a Excel (.xlsx) -->
   <script src="./src/js/vendor/xlsx.mini.min.js" defer></script>
   <!-- Lógica principal de la aplicación -->
-  <script src="./src/js/app.js?v=1.1.9" defer></script>
+  <script src="./src/js/app.js?v=1.2.0" defer></script>
 </body>
 </html>
