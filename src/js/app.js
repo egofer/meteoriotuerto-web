@@ -19,6 +19,8 @@
     selectedYear: 2025,
     onThisDay: null, // { month: 1..12, day: 1..31 }
     calendarMode: 'rain', // 'rain' | 'temp'
+    windRoseMode: 'polar', // 'polar' | 'bar'
+    windRoseFilter: 'annual', // 'annual' | 'winter' | 'spring' | 'summer' | 'autumn' | '1'..'12'
     include2026InComparisons: false,
     recordsRankingKey: 'top_hottest_days',
     explorer: {
@@ -2317,20 +2319,45 @@
             <div class="chart-panel-header">
               <div>
                 <h4 class="chart-panel-title">Rosa de los vientos (16 rumbos)</h4>
-                <p class="chart-panel-subtitle">Rumbo predominante: <strong>${stW.predominant_sector}</strong> · Basado en ${fmtNum(alm.wind_analysis.total_direction_observations, 0)} observaciones (${alm.wind_analysis.source_resolution})</p>
+                <p class="chart-panel-subtitle" id="windrose-subtitle-${alm.year}">Rumbo predominante: <strong>${alm.wind_analysis?.predominant_sector || stW.predominant_sector}</strong> · Basado en ${fmtNum(alm.wind_analysis?.total_direction_observations || 0, 0)} observaciones (${alm.wind_analysis?.source_resolution || '30 min'})</p>
               </div>
               <div class="windrose-toggle-group" id="windrose-tools-${alm.year}">
                 <button type="button" class="windrose-toggle-btn active" id="btn-windrose-polar-${alm.year}" title="Rosa náutica polar 360°">🧭 Circular</button>
                 <button type="button" class="windrose-toggle-btn" id="btn-windrose-bar-${alm.year}" title="Histograma de frecuencias en barras">📊 Barras</button>
               </div>
             </div>
+
+            <!-- EVO-033: Filtro interactivo estacional y mensual -->
+            <div class="windrose-filter-bar">
+              <div class="windrose-period-group" role="group" aria-label="Filtro temporal de la rosa de los vientos">
+                <button type="button" class="btn-windrose-filter ${(!STATE.windRoseFilter || STATE.windRoseFilter === 'annual') ? 'active' : ''}" data-period="annual" data-year="${alm.year}">Anual</button>
+                <button type="button" class="btn-windrose-filter ${STATE.windRoseFilter === 'winter' ? 'active' : ''}" data-period="winter" data-year="${alm.year}">❄️ Invierno</button>
+                <button type="button" class="btn-windrose-filter ${STATE.windRoseFilter === 'spring' ? 'active' : ''}" data-period="spring" data-year="${alm.year}">🌱 Primavera</button>
+                <button type="button" class="btn-windrose-filter ${STATE.windRoseFilter === 'summer' ? 'active' : ''}" data-period="summer" data-year="${alm.year}">☀️ Verano</button>
+                <button type="button" class="btn-windrose-filter ${STATE.windRoseFilter === 'autumn' ? 'active' : ''}" data-period="autumn" data-year="${alm.year}">🍂 Otoño</button>
+              </div>
+              <div class="windrose-month-selector">
+                <label for="sel-windrose-month-${alm.year}" class="windrose-month-label">Mes:</label>
+                <select id="sel-windrose-month-${alm.year}" class="select-windrose-month" data-year="${alm.year}">
+                  <option value="">Seleccionar mes...</option>
+                  ${MONTH_NAMES_ES.map((mName, idx) => {
+                    const mVal = String(idx + 1);
+                    const isSel = String(STATE.windRoseFilter) === mVal;
+                    return `<option value="${mVal}" ${isSel ? 'selected' : ''}>${mName}</option>`;
+                  }).join('')}
+                </select>
+              </div>
+            </div>
+
             <div class="chart-canvas-wrap tall">
               <canvas id="chart-alm-windrose"></canvas>
             </div>
+            <div class="windrose-pattern-note" id="windrose-pattern-note-${alm.year}"></div>
             <div class="windrose-legend-bar">
               <span class="windrose-leg-item"><span class="windrose-dot dot-south"></span> <strong>Surada / Foehn</strong> (S, SSW, SW, SSE)</span>
               <span class="windrose-leg-item"><span class="windrose-dot dot-north"></span> <strong>Cantábrico</strong> (NW, WNW, N, NNW)</span>
               <span class="windrose-leg-item"><span class="windrose-dot dot-east"></span> <strong>Brisas este</strong> (NE, ENE, E, ESE)</span>
+              <span class="windrose-leg-item"><span class="windrose-dot dot-other"></span> <strong>Otros cuadrantes</strong> (W, WSW)</span>
             </div>
           </div>
 
@@ -2755,7 +2782,7 @@
     document.getElementById('btn-print-almanac-top')?.addEventListener('click', triggerPrint);
     document.getElementById('btn-print-almanac')?.addEventListener('click', triggerPrint);
 
-    // Controles interactivos de la rosa de los vientos (EVO-017)
+    // Controles interactivos de la rosa de los vientos (EVO-017 y EVO-033)
     const btnPolar = document.getElementById(`btn-windrose-polar-${alm.year}`);
     const btnBar = document.getElementById(`btn-windrose-bar-${alm.year}`);
     if (btnPolar && btnBar) {
@@ -2770,13 +2797,46 @@
         STATE.windRoseMode = 'polar';
         btnPolar.classList.add('active');
         btnBar.classList.remove('active');
-        renderAlmanacWindRose(alm, 'polar');
+        renderAlmanacWindRose(alm, 'polar', STATE.windRoseFilter || 'annual');
       });
       btnBar.addEventListener('click', () => {
         STATE.windRoseMode = 'bar';
         btnBar.classList.add('active');
         btnPolar.classList.remove('active');
-        renderAlmanacWindRose(alm, 'bar');
+        renderAlmanacWindRose(alm, 'bar', STATE.windRoseFilter || 'annual');
+      });
+    }
+
+    // Filtros estacionales y mensuales de la rosa de los vientos (EVO-033)
+    const filterBtns = document.querySelectorAll(`.btn-windrose-filter[data-year="${alm.year}"]`);
+    const monthSelect = document.getElementById(`sel-windrose-month-${alm.year}`);
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const period = btn.getAttribute('data-period') || 'annual';
+        STATE.windRoseFilter = period;
+        filterBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (monthSelect) monthSelect.value = '';
+        renderAlmanacWindRose(alm, STATE.windRoseMode || 'polar', period);
+      });
+    });
+
+    if (monthSelect) {
+      monthSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val) {
+          STATE.windRoseFilter = val;
+          filterBtns.forEach((b) => b.classList.remove('active'));
+          renderAlmanacWindRose(alm, STATE.windRoseMode || 'polar', val);
+        } else {
+          STATE.windRoseFilter = 'annual';
+          filterBtns.forEach((b) => {
+            if (b.getAttribute('data-period') === 'annual') b.classList.add('active');
+            else b.classList.remove('active');
+          });
+          renderAlmanacWindRose(alm, STATE.windRoseMode || 'polar', 'annual');
+        }
       });
     }
 
@@ -3101,8 +3161,8 @@
       },
     });
 
-    // 5. Rosa de los vientos (16 sectores: modo polar circular náutico o histograma de barras)
-    renderAlmanacWindRose(alm, STATE.windRoseMode || 'polar');
+    // 5. Rosa de los vientos (16 sectores: modo polar circular náutico o histograma de barras con filtro estacional/mensual)
+    renderAlmanacWindRose(alm, STATE.windRoseMode || 'polar', STATE.windRoseFilter || 'annual');
 
     // 6. Distribución Beaufort
     const bft = alm.wind_analysis.beaufort_daily;
@@ -3251,11 +3311,89 @@
     return '#4f46e5';
   }
 
-  function renderAlmanacWindRose(alm, mode) {
-    const rose = alm.wind_analysis.rose_16;
+  function renderAlmanacWindRose(alm, mode, period) {
+    const chosenMode = mode || STATE.windRoseMode || 'polar';
+    const chosenPeriod = period || STATE.windRoseFilter || 'annual';
     const pal = chartPalette();
     const isDark = STATE.theme === 'dark';
-    const chosenMode = mode || STATE.windRoseMode || 'polar';
+
+    // Determinar conjunto de datos según filtro (EVO-033)
+    let rose = alm.wind_analysis?.rose_16 || [];
+    let totalObs = alm.wind_analysis?.total_direction_observations || 0;
+    let predSector = alm.wind_analysis?.predominant_sector || '—';
+    let periodLabel = `Año completo ${alm.year}`;
+
+    if (['winter', 'spring', 'summer', 'autumn'].includes(chosenPeriod)) {
+      const seasonData = alm.wind_analysis?.seasons?.[chosenPeriod];
+      if (seasonData) {
+        rose = seasonData.rose_16 || [];
+        totalObs = seasonData.total_obs || 0;
+        predSector = seasonData.predominant_sector || '—';
+      }
+      const seasonNames = {
+        winter: 'Invierno (DJF)',
+        spring: 'Primavera (MAM)',
+        summer: 'Verano (JJA)',
+        autumn: 'Otoño (SON)',
+      };
+      periodLabel = `${seasonNames[chosenPeriod]} ${alm.year}`;
+    } else if (chosenPeriod && chosenPeriod !== 'annual') {
+      const mNum = String(Number(chosenPeriod));
+      const monthData = alm.wind_analysis?.monthly?.[mNum];
+      if (monthData) {
+        rose = monthData.rose_16 || [];
+        totalObs = monthData.total_obs || 0;
+        predSector = monthData.predominant_sector || '—';
+      }
+      const mIdx = Number(chosenPeriod) - 1;
+      periodLabel = `${MONTH_NAMES_ES[mIdx] || ('Mes ' + mNum)} de ${alm.year}`;
+    }
+
+    // Calcular pesos de cuadrantes para la nota sinóptica
+    const southSectors = ['S', 'SSW', 'SW', 'SSE'];
+    const northSectors = ['NW', 'NNW', 'WNW', 'N'];
+    const eastSectors = ['NE', 'ENE', 'E', 'ESE'];
+
+    let southPct = 0;
+    let northPct = 0;
+    let eastPct = 0;
+
+    rose.forEach((r) => {
+      const f = Number(r.frequency_pct) || 0;
+      if (southSectors.includes(r.sector)) southPct += f;
+      if (northSectors.includes(r.sector)) northPct += f;
+      if (eastSectors.includes(r.sector)) eastPct += f;
+    });
+
+    southPct = Math.round(southPct * 10) / 10;
+    northPct = Math.round(northPct * 10) / 10;
+    eastPct = Math.round(eastPct * 10) / 10;
+
+    // Actualizar subtítulo y nota sinóptica en el DOM
+    const subEl = document.getElementById(`windrose-subtitle-${alm.year}`);
+    if (subEl) {
+      const predName = SECTOR_NAMES_ES[predSector] ? ` (${SECTOR_NAMES_ES[predSector]})` : '';
+      subEl.innerHTML = `Período: <strong>${periodLabel}</strong> · Rumbo dominante: <strong>${predSector}</strong>${predName} · Basado en <strong>${fmtNum(totalObs, 0)}</strong> observaciones (${alm.wind_analysis?.source_resolution || '30 min'})`;
+    }
+
+    const noteEl = document.getElementById(`windrose-pattern-note-${alm.year}`);
+    if (noteEl) {
+      if (totalObs === 0) {
+        noteEl.innerHTML = `<em>Sin registros anemométricos suficientes para este intervalo temporal en ${alm.year}.</em>`;
+      } else {
+        let patternDesc = '';
+        if (southPct >= 35) {
+          patternDesc = `Dominio marcado del cuadrante <strong>Sur / Foehn (${southPct}%)</strong>. Los vientos descendentes de la Cordillera Cantábrica canalizados por el valle generan calentamiento adiabático, desecación ambiental e intensas rachas características en Riotuerto.`;
+        } else if (northPct >= 30) {
+          patternDesc = `Predominio de advecciones marítimas del <strong>Cantábrico y Noroeste (${northPct}%)</strong>. Aportan aire oceánico húmedo, nubosidad orográfica estratiforme y un régimen térmico contenido.`;
+        } else if (eastPct >= 25 && eastPct >= southPct && eastPct >= northPct) {
+          patternDesc = `Prevalencia de <strong>brisas del Este / Nordeste (${eastPct}%)</strong>. Típicas de situaciones de estabilidad anticiclónica estival o régimen de brisas marinas de retorno.`;
+        } else {
+          patternDesc = `Régimen mixto de transición: <strong>${southPct}%</strong> componentes de Sur/Suroeste frente a <strong>${northPct}%</strong> de procedencia Cantábrico/Noroeste y <strong>${eastPct}%</strong> brisas del Este.`;
+        }
+        noteEl.innerHTML = `🧭 <strong>Análisis sinóptico local:</strong> ${patternDesc}`;
+      }
+    }
 
     if (chosenMode === 'polar') {
       createChart('alm_windrose', 'chart-alm-windrose', {

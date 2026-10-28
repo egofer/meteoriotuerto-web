@@ -1729,6 +1729,99 @@ html[data-theme="dark"] .year-pill.active {
   background: #0d9488;
 }
 
+.windrose-dot.dot-other {
+  background: #4f46e5;
+}
+
+/* Filtro estacional y mensual para rosa de los vientos (EVO-033) */
+.windrose-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 10px 0 14px 0;
+  padding: 8px 12px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.windrose-period-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.btn-windrose-filter {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 4px 9px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--txt-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-windrose-filter:hover {
+  color: var(--txt-primary);
+  background: var(--surface);
+}
+
+.btn-windrose-filter.active {
+  background: var(--brand-forest);
+  color: #ffffff;
+  font-weight: 600;
+  border-color: var(--brand-forest);
+  box-shadow: var(--shadow-sm);
+}
+
+.windrose-month-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--txt-secondary);
+}
+
+.windrose-month-label {
+  font-weight: 500;
+  font-size: 0.76rem;
+}
+
+.select-windrose-month {
+  padding: 4px 8px;
+  font-size: 0.76rem;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--txt-primary);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.select-windrose-month:focus {
+  border-color: var(--brand-forest);
+}
+
+.windrose-pattern-note {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: var(--surface-subtle);
+  border-left: 3px solid var(--brand-forest);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--txt-secondary);
+}
+
+.windrose-pattern-note strong {
+  color: var(--txt-primary);
+}
+
 /* Calendario matricial anual interactivo (12 x 31) */
 .calendar-heatmap-wrap {
   overflow-x: auto;

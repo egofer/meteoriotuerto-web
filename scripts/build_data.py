@@ -703,7 +703,8 @@ def find_exact_time_in_30min(
 
 def compute_wind_analysis(df_daily: pd.DataFrame, df_30: Optional[pd.DataFrame]) -> Dict[str, Any]:
     """
-    Calcula la rosa de los vientos (16 sectores) y la distribución de Beaufort.
+    Calcula la rosa de los vientos (16 sectores), desglose estacional (DJF, MAM, JJA, SON),
+    desglose mensual y la distribución de Beaufort.
     Utiliza la serie de 30 min cuando está disponible (y la diaria como respaldo).
     """
     source_df = df_30 if (df_30 is not None and not df_30.empty) else df_daily
@@ -711,24 +712,68 @@ def compute_wind_analysis(df_daily: pd.DataFrame, df_30: Optional[pd.DataFrame])
 
     valid_dir = source_df.dropna(subset=["wind_dir"]).copy()
     valid_dir["sector"] = valid_dir["wind_dir"].apply(deg_to_sector16)
+    if "dt" in valid_dir.columns:
+        valid_dir["month"] = valid_dir["dt"].dt.month
+    else:
+        valid_dir["month"] = pd.to_datetime(valid_dir["date"]).dt.month
+
     total_obs = len(valid_dir)
 
-    rose_16: List[Dict[str, Any]] = []
-    for sec in WIND_SECTORS_16:
-        sub = valid_dir[valid_dir["sector"] == sec]
-        cnt = len(sub)
-        freq_pct = round((cnt / total_obs) * 100.0, 2) if total_obs > 0 else 0.0
-        mean_spd = safe_round(sub["wind_speed"].mean(), 1) if cnt > 0 else 0.0
-        max_gst = safe_round(sub["wind_gust"].max(), 1) if cnt > 0 else 0.0
-        rose_16.append({
-            "sector": sec,
-            "count": int(cnt),
-            "frequency_pct": freq_pct,
-            "mean_speed_kmh": mean_spd or 0.0,
-            "max_gust_kmh": max_gst or 0.0,
-        })
+    def _calc_rose(df_sub: pd.DataFrame) -> Tuple[List[Dict[str, Any]], str, int]:
+        n_obs = len(df_sub)
+        rose: List[Dict[str, Any]] = []
+        for sec in WIND_SECTORS_16:
+            sub = df_sub[df_sub["sector"] == sec]
+            cnt = len(sub)
+            freq_pct = round((cnt / n_obs) * 100.0, 2) if n_obs > 0 else 0.0
+            mean_spd = safe_round(sub["wind_speed"].mean(), 1) if cnt > 0 else 0.0
+            max_gst = safe_round(sub["wind_gust"].max(), 1) if cnt > 0 else 0.0
+            rose.append({
+                "sector": sec,
+                "count": int(cnt),
+                "frequency_pct": freq_pct,
+                "mean_speed_kmh": mean_spd or 0.0,
+                "max_gust_kmh": max_gst or 0.0,
+            })
+        predominant = max(rose, key=lambda x: x["count"])["sector"] if n_obs > 0 else "N"
+        return rose, predominant, int(n_obs)
 
-    predominant = max(rose_16, key=lambda x: x["count"])["sector"] if total_obs > 0 else "N"
+    annual_rose, annual_predominant, annual_total = _calc_rose(valid_dir)
+
+    # Desglose por estaciones (OMM: DJF, MAM, JJA, SON)
+    seasons_def = {
+        "winter": {"name": "Invierno", "code": "DJF", "icon": "❄️", "months": [12, 1, 2]},
+        "spring": {"name": "Primavera", "code": "MAM", "icon": "🌸", "months": [3, 4, 5]},
+        "summer": {"name": "Verano", "code": "JJA", "icon": "☀️", "months": [6, 7, 8]},
+        "autumn": {"name": "Otoño", "code": "SON", "icon": "🍂", "months": [9, 10, 11]},
+    }
+    seasons_data: Dict[str, Any] = {}
+    for s_id, s_meta in seasons_def.items():
+        s_df = valid_dir[valid_dir["month"].isin(s_meta["months"])]
+        s_rose, s_pred, s_total = _calc_rose(s_df)
+        seasons_data[s_id] = {
+            "id": s_id,
+            "name": s_meta["name"],
+            "code": s_meta["code"],
+            "icon": s_meta["icon"],
+            "total_obs": s_total,
+            "predominant_sector": s_pred,
+            "rose_16": s_rose,
+        }
+
+    # Desglose mensual (1 a 12)
+    monthly_data: Dict[str, Any] = {}
+    for m in range(1, 13):
+        m_df = valid_dir[valid_dir["month"] == m]
+        m_rose, m_pred, m_total = _calc_rose(m_df)
+        monthly_data[str(m)] = {
+            "month": m,
+            "name": MONTH_NAMES_ES[m - 1],
+            "short_name": MONTH_SHORT_ES[m - 1],
+            "total_obs": m_total,
+            "predominant_sector": m_pred,
+            "rose_16": m_rose,
+        }
 
     # Escala de Beaufort sobre la velocidad media diaria (consistente con sync_meteoriotuerto.py)
     valid_bft = df_daily.dropna(subset=["wind_speed"]).copy()
@@ -748,8 +793,10 @@ def compute_wind_analysis(df_daily: pd.DataFrame, df_30: Optional[pd.DataFrame])
     return {
         "source_resolution": source_type,
         "total_direction_observations": int(total_obs),
-        "predominant_sector": predominant,
-        "rose_16": rose_16,
+        "predominant_sector": annual_predominant,
+        "rose_16": annual_rose,
+        "seasons": seasons_data,
+        "monthly": monthly_data,
         "beaufort_daily": beaufort_dist,
     }
 

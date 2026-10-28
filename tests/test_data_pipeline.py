@@ -1276,6 +1276,68 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         self.assertIn("./data/live.json", sw_js)
 
+    def test_seasonal_and_monthly_windrose_filtering(self):
+        """
+        EVO-033: Verifica el desglose estacional y mensual en la Rosa Náutica 360°,
+        los botones de filtrado interactivo (Anual, Invierno, Primavera, Verano, Otoño y Meses 1..12),
+        y las notas sinópticas de contraste orográfico (surada vs cantábrico).
+        """
+        # 1. Verificar estructura de datos en almanaque JSON
+        alm_2023_path = ROOT_DIR / "data" / "almanac_2023.json"
+        self.assertTrue(alm_2023_path.exists(), "Falta data/almanac_2023.json")
+        alm_2023 = json.loads(alm_2023_path.read_text(encoding="utf-8"))
+        wa = alm_2023.get("wind_analysis", {})
+
+        self.assertIn("seasons", wa, "Falta bloque 'seasons' en wind_analysis")
+        self.assertIn("monthly", wa, "Falta bloque 'monthly' en wind_analysis")
+
+        for s in ("winter", "spring", "summer", "autumn"):
+            self.assertIn(s, wa["seasons"], f"Falta estación {s} en wind_analysis.seasons")
+            s_obj = wa["seasons"][s]
+            self.assertIn("total_obs", s_obj)
+            self.assertIn("predominant_sector", s_obj)
+            self.assertIn("rose_16", s_obj)
+            self.assertEqual(len(s_obj["rose_16"]), 16)
+            self.assertGreater(s_obj["total_obs"], 0)
+
+        # En 2023, invierno y otoño tienen predominio de cuadrante sur (SSE/SE),
+        # mientras que primavera y verano tienen predominio del noroeste marítimo (NW).
+        self.assertIn(wa["seasons"]["winter"]["predominant_sector"], ("SSE", "SE", "S"))
+        self.assertEqual(wa["seasons"]["spring"]["predominant_sector"], "NW")
+        self.assertEqual(wa["seasons"]["summer"]["predominant_sector"], "NW")
+
+        # Comprobar meses 1 a 12
+        for m in range(1, 13):
+            m_key = str(m)
+            self.assertIn(m_key, wa["monthly"], f"Falta mes {m_key} en wind_analysis.monthly")
+            m_obj = wa["monthly"][m_key]
+            self.assertIn("total_obs", m_obj)
+            self.assertIn("predominant_sector", m_obj)
+            self.assertEqual(len(m_obj["rose_16"]), 16)
+
+        # 2. Comprobar controles y lógica en src/js/app.js
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("windRoseFilter", app_js, "Falta windRoseFilter en app.js")
+        self.assertIn("windrose-filter-bar", app_js, "Falta windrose-filter-bar en app.js")
+        self.assertIn("btn-windrose-filter", app_js, "Falta clase btn-windrose-filter en app.js")
+        self.assertIn("sel-windrose-month", app_js, "Falta selector sel-windrose-month en app.js")
+        self.assertIn("windrose-pattern-note", app_js, "Falta contenedor windrose-pattern-note en app.js")
+        self.assertIn("Análisis sinóptico local", app_js, "Falta narrativa de análisis sinóptico en app.js")
+
+        # 3. Comprobar estilos CSS en src/css/styles.css
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".windrose-filter-bar", css_text, "Falta .windrose-filter-bar en styles.css")
+        self.assertIn(".btn-windrose-filter", css_text, "Falta .btn-windrose-filter en styles.css")
+        self.assertIn(".btn-windrose-filter.active", css_text, "Falta estado activo de botón en styles.css")
+        self.assertIn(".windrose-pattern-note", css_text, "Falta .windrose-pattern-note en styles.css")
+        self.assertIn(".select-windrose-month", css_text, "Falta .select-windrose-month en styles.css")
+
+        # 4. Comprobar versión de caché en sw.js e index.html
+        sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+        self.assertIn("v1.1.7", sw_js, "Falta cache v1.1.7 en sw.js")
+        index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn("v=1.1.7", index_html, "Falta v=1.1.7 en index.html")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

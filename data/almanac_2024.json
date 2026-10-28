@@ -401,6 +401,1950 @@
         "max_gust_kmh": 43.9
       }
     ],
+    "seasons": {
+      "winter": {
+        "id": "winter",
+        "name": "Invierno",
+        "code": "DJF",
+        "icon": "❄️",
+        "total_obs": 3798,
+        "predominant_sector": "SSE",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 80,
+            "frequency_pct": 2.11,
+            "mean_speed_kmh": 1.6,
+            "max_gust_kmh": 23.8
+          },
+          {
+            "sector": "NNE",
+            "count": 31,
+            "frequency_pct": 0.82,
+            "mean_speed_kmh": 1.4,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "NE",
+            "count": 45,
+            "frequency_pct": 1.18,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "ENE",
+            "count": 66,
+            "frequency_pct": 1.74,
+            "mean_speed_kmh": 0.8,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "E",
+            "count": 115,
+            "frequency_pct": 3.03,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "ESE",
+            "count": 228,
+            "frequency_pct": 6.0,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "SE",
+            "count": 533,
+            "frequency_pct": 14.03,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 29.5
+          },
+          {
+            "sector": "SSE",
+            "count": 703,
+            "frequency_pct": 18.51,
+            "mean_speed_kmh": 0.5,
+            "max_gust_kmh": 43.9
+          },
+          {
+            "sector": "S",
+            "count": 257,
+            "frequency_pct": 6.77,
+            "mean_speed_kmh": 1.0,
+            "max_gust_kmh": 40.4
+          },
+          {
+            "sector": "SSW",
+            "count": 307,
+            "frequency_pct": 8.08,
+            "mean_speed_kmh": 9.3,
+            "max_gust_kmh": 97.2
+          },
+          {
+            "sector": "SW",
+            "count": 241,
+            "frequency_pct": 6.35,
+            "mean_speed_kmh": 9.3,
+            "max_gust_kmh": 75.3
+          },
+          {
+            "sector": "WSW",
+            "count": 89,
+            "frequency_pct": 2.34,
+            "mean_speed_kmh": 3.5,
+            "max_gust_kmh": 56.8
+          },
+          {
+            "sector": "W",
+            "count": 236,
+            "frequency_pct": 6.21,
+            "mean_speed_kmh": 3.7,
+            "max_gust_kmh": 48.0
+          },
+          {
+            "sector": "WNW",
+            "count": 306,
+            "frequency_pct": 8.06,
+            "mean_speed_kmh": 5.8,
+            "max_gust_kmh": 51.5
+          },
+          {
+            "sector": "NW",
+            "count": 396,
+            "frequency_pct": 10.43,
+            "mean_speed_kmh": 6.6,
+            "max_gust_kmh": 46.0
+          },
+          {
+            "sector": "NNW",
+            "count": 165,
+            "frequency_pct": 4.34,
+            "mean_speed_kmh": 3.7,
+            "max_gust_kmh": 43.9
+          }
+        ]
+      },
+      "spring": {
+        "id": "spring",
+        "name": "Primavera",
+        "code": "MAM",
+        "icon": "🌸",
+        "total_obs": 4031,
+        "predominant_sector": "SSE",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 95,
+            "frequency_pct": 2.36,
+            "mean_speed_kmh": 1.7,
+            "max_gust_kmh": 20.1
+          },
+          {
+            "sector": "NNE",
+            "count": 52,
+            "frequency_pct": 1.29,
+            "mean_speed_kmh": 1.2,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "NE",
+            "count": 84,
+            "frequency_pct": 2.08,
+            "mean_speed_kmh": 0.6,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "ENE",
+            "count": 108,
+            "frequency_pct": 2.68,
+            "mean_speed_kmh": 1.0,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "E",
+            "count": 134,
+            "frequency_pct": 3.32,
+            "mean_speed_kmh": 1.0,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "ESE",
+            "count": 175,
+            "frequency_pct": 4.34,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "SE",
+            "count": 335,
+            "frequency_pct": 8.31,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 27.7
+          },
+          {
+            "sector": "SSE",
+            "count": 529,
+            "frequency_pct": 13.12,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 34.9
+          },
+          {
+            "sector": "S",
+            "count": 334,
+            "frequency_pct": 8.29,
+            "mean_speed_kmh": 2.3,
+            "max_gust_kmh": 43.9
+          },
+          {
+            "sector": "SSW",
+            "count": 405,
+            "frequency_pct": 10.05,
+            "mean_speed_kmh": 8.9,
+            "max_gust_kmh": 64.4
+          },
+          {
+            "sector": "SW",
+            "count": 265,
+            "frequency_pct": 6.57,
+            "mean_speed_kmh": 8.2,
+            "max_gust_kmh": 53.3
+          },
+          {
+            "sector": "WSW",
+            "count": 109,
+            "frequency_pct": 2.7,
+            "mean_speed_kmh": 4.2,
+            "max_gust_kmh": 56.8
+          },
+          {
+            "sector": "W",
+            "count": 211,
+            "frequency_pct": 5.23,
+            "mean_speed_kmh": 3.2,
+            "max_gust_kmh": 40.4
+          },
+          {
+            "sector": "WNW",
+            "count": 379,
+            "frequency_pct": 9.4,
+            "mean_speed_kmh": 4.2,
+            "max_gust_kmh": 40.4
+          },
+          {
+            "sector": "NW",
+            "count": 496,
+            "frequency_pct": 12.3,
+            "mean_speed_kmh": 4.0,
+            "max_gust_kmh": 48.0
+          },
+          {
+            "sector": "NNW",
+            "count": 320,
+            "frequency_pct": 7.94,
+            "mean_speed_kmh": 2.8,
+            "max_gust_kmh": 27.7
+          }
+        ]
+      },
+      "summer": {
+        "id": "summer",
+        "name": "Verano",
+        "code": "JJA",
+        "icon": "☀️",
+        "total_obs": 4389,
+        "predominant_sector": "SSE",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 77,
+            "frequency_pct": 1.75,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "NNE",
+            "count": 30,
+            "frequency_pct": 0.68,
+            "mean_speed_kmh": 0.6,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "NE",
+            "count": 60,
+            "frequency_pct": 1.37,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "ENE",
+            "count": 69,
+            "frequency_pct": 1.57,
+            "mean_speed_kmh": 0.2,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "E",
+            "count": 73,
+            "frequency_pct": 1.66,
+            "mean_speed_kmh": 0.2,
+            "max_gust_kmh": 5.5
+          },
+          {
+            "sector": "ESE",
+            "count": 146,
+            "frequency_pct": 3.33,
+            "mean_speed_kmh": 0.2,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "SE",
+            "count": 473,
+            "frequency_pct": 10.78,
+            "mean_speed_kmh": 0.2,
+            "max_gust_kmh": 20.1
+          },
+          {
+            "sector": "SSE",
+            "count": 854,
+            "frequency_pct": 19.46,
+            "mean_speed_kmh": 0.4,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "S",
+            "count": 588,
+            "frequency_pct": 13.4,
+            "mean_speed_kmh": 0.4,
+            "max_gust_kmh": 23.8
+          },
+          {
+            "sector": "SSW",
+            "count": 175,
+            "frequency_pct": 3.99,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 29.5
+          },
+          {
+            "sector": "SW",
+            "count": 145,
+            "frequency_pct": 3.3,
+            "mean_speed_kmh": 1.2,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "WSW",
+            "count": 122,
+            "frequency_pct": 2.78,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 11.1
+          },
+          {
+            "sector": "W",
+            "count": 260,
+            "frequency_pct": 5.92,
+            "mean_speed_kmh": 1.8,
+            "max_gust_kmh": 21.9
+          },
+          {
+            "sector": "WNW",
+            "count": 391,
+            "frequency_pct": 8.91,
+            "mean_speed_kmh": 2.6,
+            "max_gust_kmh": 21.9
+          },
+          {
+            "sector": "NW",
+            "count": 594,
+            "frequency_pct": 13.53,
+            "mean_speed_kmh": 3.1,
+            "max_gust_kmh": 27.7
+          },
+          {
+            "sector": "NNW",
+            "count": 332,
+            "frequency_pct": 7.56,
+            "mean_speed_kmh": 2.6,
+            "max_gust_kmh": 21.9
+          }
+        ]
+      },
+      "autumn": {
+        "id": "autumn",
+        "name": "Otoño",
+        "code": "SON",
+        "icon": "🍂",
+        "total_obs": 4358,
+        "predominant_sector": "SSE",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 47,
+            "frequency_pct": 1.08,
+            "mean_speed_kmh": 1.6,
+            "max_gust_kmh": 20.1
+          },
+          {
+            "sector": "NNE",
+            "count": 28,
+            "frequency_pct": 0.64,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 21.9
+          },
+          {
+            "sector": "NE",
+            "count": 52,
+            "frequency_pct": 1.19,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 13.0
+          },
+          {
+            "sector": "ENE",
+            "count": 73,
+            "frequency_pct": 1.68,
+            "mean_speed_kmh": 0.8,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "E",
+            "count": 92,
+            "frequency_pct": 2.11,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 20.1
+          },
+          {
+            "sector": "ESE",
+            "count": 159,
+            "frequency_pct": 3.65,
+            "mean_speed_kmh": 0.8,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "SE",
+            "count": 576,
+            "frequency_pct": 13.22,
+            "mean_speed_kmh": 1.0,
+            "max_gust_kmh": 33.2
+          },
+          {
+            "sector": "SSE",
+            "count": 997,
+            "frequency_pct": 22.88,
+            "mean_speed_kmh": 0.6,
+            "max_gust_kmh": 34.9
+          },
+          {
+            "sector": "S",
+            "count": 576,
+            "frequency_pct": 13.22,
+            "mean_speed_kmh": 1.5,
+            "max_gust_kmh": 69.8
+          },
+          {
+            "sector": "SSW",
+            "count": 342,
+            "frequency_pct": 7.85,
+            "mean_speed_kmh": 6.4,
+            "max_gust_kmh": 69.8
+          },
+          {
+            "sector": "SW",
+            "count": 217,
+            "frequency_pct": 4.98,
+            "mean_speed_kmh": 4.5,
+            "max_gust_kmh": 73.4
+          },
+          {
+            "sector": "WSW",
+            "count": 177,
+            "frequency_pct": 4.06,
+            "mean_speed_kmh": 2.0,
+            "max_gust_kmh": 46.0
+          },
+          {
+            "sector": "W",
+            "count": 209,
+            "frequency_pct": 4.8,
+            "mean_speed_kmh": 2.2,
+            "max_gust_kmh": 25.6
+          },
+          {
+            "sector": "WNW",
+            "count": 237,
+            "frequency_pct": 5.44,
+            "mean_speed_kmh": 3.3,
+            "max_gust_kmh": 29.5
+          },
+          {
+            "sector": "NW",
+            "count": 377,
+            "frequency_pct": 8.65,
+            "mean_speed_kmh": 4.1,
+            "max_gust_kmh": 48.0
+          },
+          {
+            "sector": "NNW",
+            "count": 199,
+            "frequency_pct": 4.57,
+            "mean_speed_kmh": 2.9,
+            "max_gust_kmh": 29.5
+          }
+        ]
+      }
+    },
+    "monthly": {
+      "1": {
+        "month": 1,
+        "name": "Enero",
+        "short_name": "Ene",
+        "total_obs": 942,
+        "predominant_sector": "SE",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 16,
+            "frequency_pct": 1.7,
+            "mean_speed_kmh": 1.7,
+            "max_gust_kmh": 23.8
+          },
+          {
+            "sector": "NNE",
+            "count": 6,
+            "frequency_pct": 0.64,
+            "mean_speed_kmh": 1.9,
+            "max_gust_kmh": 11.1
+          },
+          {
+            "sector": "NE",
+            "count": 13,
+            "frequency_pct": 1.38,
+            "mean_speed_kmh": 1.5,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "ENE",
+            "count": 17,
+            "frequency_pct": 1.8,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 5.5
+          },
+          {
+            "sector": "E",
+            "count": 39,
+            "frequency_pct": 4.14,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "ESE",
+            "count": 84,
+            "frequency_pct": 8.92,
+            "mean_speed_kmh": 1.4,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "SE",
+            "count": 214,
+            "frequency_pct": 22.72,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 23.8
+          },
+          {
+            "sector": "SSE",
+            "count": 181,
+            "frequency_pct": 19.21,
+            "mean_speed_kmh": 0.7,
+            "max_gust_kmh": 43.9
+          },
+          {
+            "sector": "S",
+            "count": 44,
+            "frequency_pct": 4.67,
+            "mean_speed_kmh": 0.7,
+            "max_gust_kmh": 40.4
+          },
+          {
+            "sector": "SSW",
+            "count": 68,
+            "frequency_pct": 7.22,
+            "mean_speed_kmh": 11.4,
+            "max_gust_kmh": 56.8
+          },
+          {
+            "sector": "SW",
+            "count": 74,
+            "frequency_pct": 7.86,
+            "mean_speed_kmh": 10.1,
+            "max_gust_kmh": 51.5
+          },
+          {
+            "sector": "WSW",
+            "count": 18,
+            "frequency_pct": 1.91,
+            "mean_speed_kmh": 4.3,
+            "max_gust_kmh": 42.2
+          },
+          {
+            "sector": "W",
+            "count": 68,
+            "frequency_pct": 7.22,
+            "mean_speed_kmh": 2.7,
+            "max_gust_kmh": 46.0
+          },
+          {
+            "sector": "WNW",
+            "count": 36,
+            "frequency_pct": 3.82,
+            "mean_speed_kmh": 3.2,
+            "max_gust_kmh": 29.5
+          },
+          {
+            "sector": "NW",
+            "count": 36,
+            "frequency_pct": 3.82,
+            "mean_speed_kmh": 3.5,
+            "max_gust_kmh": 27.7
+          },
+          {
+            "sector": "NNW",
+            "count": 28,
+            "frequency_pct": 2.97,
+            "mean_speed_kmh": 3.1,
+            "max_gust_kmh": 16.6
+          }
+        ]
+      },
+      "2": {
+        "month": 2,
+        "name": "Febrero",
+        "short_name": "Feb",
+        "total_obs": 1368,
+        "predominant_sector": "NW",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 24,
+            "frequency_pct": 1.75,
+            "mean_speed_kmh": 1.4,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "NNE",
+            "count": 7,
+            "frequency_pct": 0.51,
+            "mean_speed_kmh": 1.2,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "NE",
+            "count": 5,
+            "frequency_pct": 0.37,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 7.2
+          },
+          {
+            "sector": "ENE",
+            "count": 17,
+            "frequency_pct": 1.24,
+            "mean_speed_kmh": 0.8,
+            "max_gust_kmh": 7.2
+          },
+          {
+            "sector": "E",
+            "count": 29,
+            "frequency_pct": 2.12,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 7.2
+          },
+          {
+            "sector": "ESE",
+            "count": 75,
+            "frequency_pct": 5.48,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "SE",
+            "count": 140,
+            "frequency_pct": 10.23,
+            "mean_speed_kmh": 0.8,
+            "max_gust_kmh": 29.5
+          },
+          {
+            "sector": "SSE",
+            "count": 191,
+            "frequency_pct": 13.96,
+            "mean_speed_kmh": 0.5,
+            "max_gust_kmh": 20.1
+          },
+          {
+            "sector": "S",
+            "count": 67,
+            "frequency_pct": 4.9,
+            "mean_speed_kmh": 2.0,
+            "max_gust_kmh": 38.5
+          },
+          {
+            "sector": "SSW",
+            "count": 128,
+            "frequency_pct": 9.36,
+            "mean_speed_kmh": 10.9,
+            "max_gust_kmh": 97.2
+          },
+          {
+            "sector": "SW",
+            "count": 113,
+            "frequency_pct": 8.26,
+            "mean_speed_kmh": 10.4,
+            "max_gust_kmh": 75.3
+          },
+          {
+            "sector": "WSW",
+            "count": 31,
+            "frequency_pct": 2.27,
+            "mean_speed_kmh": 5.3,
+            "max_gust_kmh": 56.8
+          },
+          {
+            "sector": "W",
+            "count": 94,
+            "frequency_pct": 6.87,
+            "mean_speed_kmh": 5.2,
+            "max_gust_kmh": 48.0
+          },
+          {
+            "sector": "WNW",
+            "count": 189,
+            "frequency_pct": 13.82,
+            "mean_speed_kmh": 6.7,
+            "max_gust_kmh": 51.5
+          },
+          {
+            "sector": "NW",
+            "count": 198,
+            "frequency_pct": 14.47,
+            "mean_speed_kmh": 6.9,
+            "max_gust_kmh": 46.0
+          },
+          {
+            "sector": "NNW",
+            "count": 60,
+            "frequency_pct": 4.39,
+            "mean_speed_kmh": 3.3,
+            "max_gust_kmh": 23.8
+          }
+        ]
+      },
+      "3": {
+        "month": 3,
+        "name": "Marzo",
+        "short_name": "Mar",
+        "total_obs": 1488,
+        "predominant_sector": "SSW",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 32,
+            "frequency_pct": 2.15,
+            "mean_speed_kmh": 2.2,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "NNE",
+            "count": 18,
+            "frequency_pct": 1.21,
+            "mean_speed_kmh": 1.7,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "NE",
+            "count": 24,
+            "frequency_pct": 1.61,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "ENE",
+            "count": 44,
+            "frequency_pct": 2.96,
+            "mean_speed_kmh": 1.5,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "E",
+            "count": 66,
+            "frequency_pct": 4.44,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "ESE",
+            "count": 97,
+            "frequency_pct": 6.52,
+            "mean_speed_kmh": 1.2,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "SE",
+            "count": 141,
+            "frequency_pct": 9.48,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 23.8
+          },
+          {
+            "sector": "SSE",
+            "count": 138,
+            "frequency_pct": 9.27,
+            "mean_speed_kmh": 1.2,
+            "max_gust_kmh": 27.7
+          },
+          {
+            "sector": "S",
+            "count": 89,
+            "frequency_pct": 5.98,
+            "mean_speed_kmh": 2.9,
+            "max_gust_kmh": 38.5
+          },
+          {
+            "sector": "SSW",
+            "count": 186,
+            "frequency_pct": 12.5,
+            "mean_speed_kmh": 8.5,
+            "max_gust_kmh": 64.4
+          },
+          {
+            "sector": "SW",
+            "count": 137,
+            "frequency_pct": 9.21,
+            "mean_speed_kmh": 8.9,
+            "max_gust_kmh": 51.5
+          },
+          {
+            "sector": "WSW",
+            "count": 48,
+            "frequency_pct": 3.23,
+            "mean_speed_kmh": 4.8,
+            "max_gust_kmh": 43.9
+          },
+          {
+            "sector": "W",
+            "count": 93,
+            "frequency_pct": 6.25,
+            "mean_speed_kmh": 3.9,
+            "max_gust_kmh": 40.4
+          },
+          {
+            "sector": "WNW",
+            "count": 155,
+            "frequency_pct": 10.42,
+            "mean_speed_kmh": 5.1,
+            "max_gust_kmh": 38.5
+          },
+          {
+            "sector": "NW",
+            "count": 132,
+            "frequency_pct": 8.87,
+            "mean_speed_kmh": 4.5,
+            "max_gust_kmh": 48.0
+          },
+          {
+            "sector": "NNW",
+            "count": 88,
+            "frequency_pct": 5.91,
+            "mean_speed_kmh": 3.0,
+            "max_gust_kmh": 27.7
+          }
+        ]
+      },
+      "4": {
+        "month": 4,
+        "name": "Abril",
+        "short_name": "Abr",
+        "total_obs": 1434,
+        "predominant_sector": "SSE",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 33,
+            "frequency_pct": 2.3,
+            "mean_speed_kmh": 1.7,
+            "max_gust_kmh": 20.1
+          },
+          {
+            "sector": "NNE",
+            "count": 14,
+            "frequency_pct": 0.98,
+            "mean_speed_kmh": 0.7,
+            "max_gust_kmh": 13.0
+          },
+          {
+            "sector": "NE",
+            "count": 38,
+            "frequency_pct": 2.65,
+            "mean_speed_kmh": 0.2,
+            "max_gust_kmh": 5.5
+          },
+          {
+            "sector": "ENE",
+            "count": 33,
+            "frequency_pct": 2.3,
+            "mean_speed_kmh": 0.7,
+            "max_gust_kmh": 11.1
+          },
+          {
+            "sector": "E",
+            "count": 33,
+            "frequency_pct": 2.3,
+            "mean_speed_kmh": 0.7,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "ESE",
+            "count": 42,
+            "frequency_pct": 2.93,
+            "mean_speed_kmh": 1.0,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "SE",
+            "count": 115,
+            "frequency_pct": 8.02,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 27.7
+          },
+          {
+            "sector": "SSE",
+            "count": 260,
+            "frequency_pct": 18.13,
+            "mean_speed_kmh": 1.0,
+            "max_gust_kmh": 34.9
+          },
+          {
+            "sector": "S",
+            "count": 117,
+            "frequency_pct": 8.16,
+            "mean_speed_kmh": 3.2,
+            "max_gust_kmh": 43.9
+          },
+          {
+            "sector": "SSW",
+            "count": 143,
+            "frequency_pct": 9.97,
+            "mean_speed_kmh": 9.9,
+            "max_gust_kmh": 53.3
+          },
+          {
+            "sector": "SW",
+            "count": 92,
+            "frequency_pct": 6.42,
+            "mean_speed_kmh": 8.2,
+            "max_gust_kmh": 53.3
+          },
+          {
+            "sector": "WSW",
+            "count": 29,
+            "frequency_pct": 2.02,
+            "mean_speed_kmh": 5.0,
+            "max_gust_kmh": 33.2
+          },
+          {
+            "sector": "W",
+            "count": 64,
+            "frequency_pct": 4.46,
+            "mean_speed_kmh": 3.4,
+            "max_gust_kmh": 31.4
+          },
+          {
+            "sector": "WNW",
+            "count": 128,
+            "frequency_pct": 8.93,
+            "mean_speed_kmh": 3.8,
+            "max_gust_kmh": 40.4
+          },
+          {
+            "sector": "NW",
+            "count": 169,
+            "frequency_pct": 11.79,
+            "mean_speed_kmh": 4.1,
+            "max_gust_kmh": 29.5
+          },
+          {
+            "sector": "NNW",
+            "count": 124,
+            "frequency_pct": 8.65,
+            "mean_speed_kmh": 2.9,
+            "max_gust_kmh": 23.8
+          }
+        ]
+      },
+      "5": {
+        "month": 5,
+        "name": "Mayo",
+        "short_name": "May",
+        "total_obs": 1109,
+        "predominant_sector": "NW",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 30,
+            "frequency_pct": 2.71,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 11.1
+          },
+          {
+            "sector": "NNE",
+            "count": 20,
+            "frequency_pct": 1.8,
+            "mean_speed_kmh": 1.0,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "NE",
+            "count": 22,
+            "frequency_pct": 1.98,
+            "mean_speed_kmh": 0.6,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "ENE",
+            "count": 31,
+            "frequency_pct": 2.8,
+            "mean_speed_kmh": 0.7,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "E",
+            "count": 35,
+            "frequency_pct": 3.16,
+            "mean_speed_kmh": 0.6,
+            "max_gust_kmh": 11.1
+          },
+          {
+            "sector": "ESE",
+            "count": 36,
+            "frequency_pct": 3.25,
+            "mean_speed_kmh": 0.7,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "SE",
+            "count": 79,
+            "frequency_pct": 7.12,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "SSE",
+            "count": 131,
+            "frequency_pct": 11.81,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "S",
+            "count": 128,
+            "frequency_pct": 11.54,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 34.9
+          },
+          {
+            "sector": "SSW",
+            "count": 76,
+            "frequency_pct": 6.85,
+            "mean_speed_kmh": 7.8,
+            "max_gust_kmh": 46.0
+          },
+          {
+            "sector": "SW",
+            "count": 36,
+            "frequency_pct": 3.25,
+            "mean_speed_kmh": 5.4,
+            "max_gust_kmh": 51.5
+          },
+          {
+            "sector": "WSW",
+            "count": 32,
+            "frequency_pct": 2.89,
+            "mean_speed_kmh": 2.4,
+            "max_gust_kmh": 56.8
+          },
+          {
+            "sector": "W",
+            "count": 54,
+            "frequency_pct": 4.87,
+            "mean_speed_kmh": 1.9,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "WNW",
+            "count": 96,
+            "frequency_pct": 8.66,
+            "mean_speed_kmh": 3.2,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "NW",
+            "count": 195,
+            "frequency_pct": 17.58,
+            "mean_speed_kmh": 3.6,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "NNW",
+            "count": 108,
+            "frequency_pct": 9.74,
+            "mean_speed_kmh": 2.5,
+            "max_gust_kmh": 21.9
+          }
+        ]
+      },
+      "6": {
+        "month": 6,
+        "name": "Junio",
+        "short_name": "Jun",
+        "total_obs": 1414,
+        "predominant_sector": "NW",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 30,
+            "frequency_pct": 2.12,
+            "mean_speed_kmh": 1.0,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "NNE",
+            "count": 22,
+            "frequency_pct": 1.56,
+            "mean_speed_kmh": 0.5,
+            "max_gust_kmh": 5.5
+          },
+          {
+            "sector": "NE",
+            "count": 13,
+            "frequency_pct": 0.92,
+            "mean_speed_kmh": 0.4,
+            "max_gust_kmh": 7.2
+          },
+          {
+            "sector": "ENE",
+            "count": 31,
+            "frequency_pct": 2.19,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 5.5
+          },
+          {
+            "sector": "E",
+            "count": 22,
+            "frequency_pct": 1.56,
+            "mean_speed_kmh": 0.2,
+            "max_gust_kmh": 3.5
+          },
+          {
+            "sector": "ESE",
+            "count": 46,
+            "frequency_pct": 3.25,
+            "mean_speed_kmh": 0.2,
+            "max_gust_kmh": 7.2
+          },
+          {
+            "sector": "SE",
+            "count": 129,
+            "frequency_pct": 9.12,
+            "mean_speed_kmh": 0.2,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "SSE",
+            "count": 219,
+            "frequency_pct": 15.49,
+            "mean_speed_kmh": 0.4,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "S",
+            "count": 162,
+            "frequency_pct": 11.46,
+            "mean_speed_kmh": 0.5,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "SSW",
+            "count": 49,
+            "frequency_pct": 3.47,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 23.8
+          },
+          {
+            "sector": "SW",
+            "count": 44,
+            "frequency_pct": 3.11,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "WSW",
+            "count": 39,
+            "frequency_pct": 2.76,
+            "mean_speed_kmh": 1.4,
+            "max_gust_kmh": 11.1
+          },
+          {
+            "sector": "W",
+            "count": 88,
+            "frequency_pct": 6.22,
+            "mean_speed_kmh": 1.9,
+            "max_gust_kmh": 21.9
+          },
+          {
+            "sector": "WNW",
+            "count": 149,
+            "frequency_pct": 10.54,
+            "mean_speed_kmh": 2.9,
+            "max_gust_kmh": 21.9
+          },
+          {
+            "sector": "NW",
+            "count": 258,
+            "frequency_pct": 18.25,
+            "mean_speed_kmh": 3.2,
+            "max_gust_kmh": 21.9
+          },
+          {
+            "sector": "NNW",
+            "count": 113,
+            "frequency_pct": 7.99,
+            "mean_speed_kmh": 2.7,
+            "max_gust_kmh": 18.3
+          }
+        ]
+      },
+      "7": {
+        "month": 7,
+        "name": "Julio",
+        "short_name": "Jul",
+        "total_obs": 1487,
+        "predominant_sector": "S",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 27,
+            "frequency_pct": 1.82,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "NNE",
+            "count": 4,
+            "frequency_pct": 0.27,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "NE",
+            "count": 14,
+            "frequency_pct": 0.94,
+            "mean_speed_kmh": 0.4,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "ENE",
+            "count": 19,
+            "frequency_pct": 1.28,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "E",
+            "count": 30,
+            "frequency_pct": 2.02,
+            "mean_speed_kmh": 0.1,
+            "max_gust_kmh": 5.5
+          },
+          {
+            "sector": "ESE",
+            "count": 55,
+            "frequency_pct": 3.7,
+            "mean_speed_kmh": 0.1,
+            "max_gust_kmh": 7.2
+          },
+          {
+            "sector": "SE",
+            "count": 153,
+            "frequency_pct": 10.29,
+            "mean_speed_kmh": 0.2,
+            "max_gust_kmh": 20.1
+          },
+          {
+            "sector": "SSE",
+            "count": 229,
+            "frequency_pct": 15.4,
+            "mean_speed_kmh": 0.4,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "S",
+            "count": 231,
+            "frequency_pct": 15.53,
+            "mean_speed_kmh": 0.4,
+            "max_gust_kmh": 23.8
+          },
+          {
+            "sector": "SSW",
+            "count": 65,
+            "frequency_pct": 4.37,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 29.5
+          },
+          {
+            "sector": "SW",
+            "count": 52,
+            "frequency_pct": 3.5,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 13.0
+          },
+          {
+            "sector": "WSW",
+            "count": 42,
+            "frequency_pct": 2.82,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 7.2
+          },
+          {
+            "sector": "W",
+            "count": 66,
+            "frequency_pct": 4.44,
+            "mean_speed_kmh": 1.9,
+            "max_gust_kmh": 13.0
+          },
+          {
+            "sector": "WNW",
+            "count": 140,
+            "frequency_pct": 9.41,
+            "mean_speed_kmh": 2.4,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "NW",
+            "count": 216,
+            "frequency_pct": 14.53,
+            "mean_speed_kmh": 3.2,
+            "max_gust_kmh": 25.6
+          },
+          {
+            "sector": "NNW",
+            "count": 144,
+            "frequency_pct": 9.68,
+            "mean_speed_kmh": 2.3,
+            "max_gust_kmh": 21.9
+          }
+        ]
+      },
+      "8": {
+        "month": 8,
+        "name": "Agosto",
+        "short_name": "Ago",
+        "total_obs": 1488,
+        "predominant_sector": "SSE",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 20,
+            "frequency_pct": 1.34,
+            "mean_speed_kmh": 1.4,
+            "max_gust_kmh": 13.0
+          },
+          {
+            "sector": "NNE",
+            "count": 4,
+            "frequency_pct": 0.27,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 7.2
+          },
+          {
+            "sector": "NE",
+            "count": 33,
+            "frequency_pct": 2.22,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "ENE",
+            "count": 19,
+            "frequency_pct": 1.28,
+            "mean_speed_kmh": 0.1,
+            "max_gust_kmh": 3.5
+          },
+          {
+            "sector": "E",
+            "count": 21,
+            "frequency_pct": 1.41,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 5.5
+          },
+          {
+            "sector": "ESE",
+            "count": 45,
+            "frequency_pct": 3.02,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "SE",
+            "count": 191,
+            "frequency_pct": 12.84,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 11.1
+          },
+          {
+            "sector": "SSE",
+            "count": 406,
+            "frequency_pct": 27.28,
+            "mean_speed_kmh": 0.5,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "S",
+            "count": 195,
+            "frequency_pct": 13.1,
+            "mean_speed_kmh": 0.4,
+            "max_gust_kmh": 13.0
+          },
+          {
+            "sector": "SSW",
+            "count": 61,
+            "frequency_pct": 4.1,
+            "mean_speed_kmh": 0.6,
+            "max_gust_kmh": 13.0
+          },
+          {
+            "sector": "SW",
+            "count": 49,
+            "frequency_pct": 3.29,
+            "mean_speed_kmh": 1.0,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "WSW",
+            "count": 41,
+            "frequency_pct": 2.76,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "W",
+            "count": 106,
+            "frequency_pct": 7.12,
+            "mean_speed_kmh": 1.6,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "WNW",
+            "count": 102,
+            "frequency_pct": 6.85,
+            "mean_speed_kmh": 2.4,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "NW",
+            "count": 120,
+            "frequency_pct": 8.06,
+            "mean_speed_kmh": 3.1,
+            "max_gust_kmh": 27.7
+          },
+          {
+            "sector": "NNW",
+            "count": 75,
+            "frequency_pct": 5.04,
+            "mean_speed_kmh": 2.8,
+            "max_gust_kmh": 21.9
+          }
+        ]
+      },
+      "9": {
+        "month": 9,
+        "name": "Septiembre",
+        "short_name": "Sep",
+        "total_obs": 1435,
+        "predominant_sector": "SSE",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 10,
+            "frequency_pct": 0.7,
+            "mean_speed_kmh": 1.4,
+            "max_gust_kmh": 13.0
+          },
+          {
+            "sector": "NNE",
+            "count": 9,
+            "frequency_pct": 0.63,
+            "mean_speed_kmh": 1.1,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "NE",
+            "count": 20,
+            "frequency_pct": 1.39,
+            "mean_speed_kmh": 0.6,
+            "max_gust_kmh": 13.0
+          },
+          {
+            "sector": "ENE",
+            "count": 23,
+            "frequency_pct": 1.6,
+            "mean_speed_kmh": 0.4,
+            "max_gust_kmh": 5.5
+          },
+          {
+            "sector": "E",
+            "count": 17,
+            "frequency_pct": 1.18,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "ESE",
+            "count": 49,
+            "frequency_pct": 3.41,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 13.0
+          },
+          {
+            "sector": "SE",
+            "count": 169,
+            "frequency_pct": 11.78,
+            "mean_speed_kmh": 0.5,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "SSE",
+            "count": 321,
+            "frequency_pct": 22.37,
+            "mean_speed_kmh": 0.3,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "S",
+            "count": 213,
+            "frequency_pct": 14.84,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 48.0
+          },
+          {
+            "sector": "SSW",
+            "count": 77,
+            "frequency_pct": 5.37,
+            "mean_speed_kmh": 4.0,
+            "max_gust_kmh": 56.8
+          },
+          {
+            "sector": "SW",
+            "count": 44,
+            "frequency_pct": 3.07,
+            "mean_speed_kmh": 2.3,
+            "max_gust_kmh": 42.2
+          },
+          {
+            "sector": "WSW",
+            "count": 60,
+            "frequency_pct": 4.18,
+            "mean_speed_kmh": 1.5,
+            "max_gust_kmh": 29.5
+          },
+          {
+            "sector": "W",
+            "count": 76,
+            "frequency_pct": 5.3,
+            "mean_speed_kmh": 1.9,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "WNW",
+            "count": 103,
+            "frequency_pct": 7.18,
+            "mean_speed_kmh": 3.2,
+            "max_gust_kmh": 21.9
+          },
+          {
+            "sector": "NW",
+            "count": 156,
+            "frequency_pct": 10.87,
+            "mean_speed_kmh": 3.7,
+            "max_gust_kmh": 33.2
+          },
+          {
+            "sector": "NNW",
+            "count": 88,
+            "frequency_pct": 6.13,
+            "mean_speed_kmh": 2.7,
+            "max_gust_kmh": 27.7
+          }
+        ]
+      },
+      "10": {
+        "month": 10,
+        "name": "Octubre",
+        "short_name": "Oct",
+        "total_obs": 1483,
+        "predominant_sector": "SSE",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 19,
+            "frequency_pct": 1.28,
+            "mean_speed_kmh": 2.0,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "NNE",
+            "count": 12,
+            "frequency_pct": 0.81,
+            "mean_speed_kmh": 1.5,
+            "max_gust_kmh": 18.3
+          },
+          {
+            "sector": "NE",
+            "count": 23,
+            "frequency_pct": 1.55,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "ENE",
+            "count": 29,
+            "frequency_pct": 1.96,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "E",
+            "count": 49,
+            "frequency_pct": 3.3,
+            "mean_speed_kmh": 1.2,
+            "max_gust_kmh": 20.1
+          },
+          {
+            "sector": "ESE",
+            "count": 65,
+            "frequency_pct": 4.38,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "SE",
+            "count": 188,
+            "frequency_pct": 12.68,
+            "mean_speed_kmh": 1.0,
+            "max_gust_kmh": 25.6
+          },
+          {
+            "sector": "SSE",
+            "count": 288,
+            "frequency_pct": 19.42,
+            "mean_speed_kmh": 0.7,
+            "max_gust_kmh": 23.8
+          },
+          {
+            "sector": "S",
+            "count": 195,
+            "frequency_pct": 13.15,
+            "mean_speed_kmh": 2.6,
+            "max_gust_kmh": 69.8
+          },
+          {
+            "sector": "SSW",
+            "count": 157,
+            "frequency_pct": 10.59,
+            "mean_speed_kmh": 7.1,
+            "max_gust_kmh": 69.8
+          },
+          {
+            "sector": "SW",
+            "count": 83,
+            "frequency_pct": 5.6,
+            "mean_speed_kmh": 4.4,
+            "max_gust_kmh": 73.4
+          },
+          {
+            "sector": "WSW",
+            "count": 52,
+            "frequency_pct": 3.51,
+            "mean_speed_kmh": 2.2,
+            "max_gust_kmh": 46.0
+          },
+          {
+            "sector": "W",
+            "count": 58,
+            "frequency_pct": 3.91,
+            "mean_speed_kmh": 1.9,
+            "max_gust_kmh": 20.1
+          },
+          {
+            "sector": "WNW",
+            "count": 69,
+            "frequency_pct": 4.65,
+            "mean_speed_kmh": 3.5,
+            "max_gust_kmh": 25.6
+          },
+          {
+            "sector": "NW",
+            "count": 140,
+            "frequency_pct": 9.44,
+            "mean_speed_kmh": 4.3,
+            "max_gust_kmh": 48.0
+          },
+          {
+            "sector": "NNW",
+            "count": 56,
+            "frequency_pct": 3.78,
+            "mean_speed_kmh": 3.1,
+            "max_gust_kmh": 21.9
+          }
+        ]
+      },
+      "11": {
+        "month": 11,
+        "name": "Noviembre",
+        "short_name": "Nov",
+        "total_obs": 1440,
+        "predominant_sector": "SSE",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 18,
+            "frequency_pct": 1.25,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 20.1
+          },
+          {
+            "sector": "NNE",
+            "count": 7,
+            "frequency_pct": 0.49,
+            "mean_speed_kmh": 1.0,
+            "max_gust_kmh": 21.9
+          },
+          {
+            "sector": "NE",
+            "count": 9,
+            "frequency_pct": 0.62,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "ENE",
+            "count": 21,
+            "frequency_pct": 1.46,
+            "mean_speed_kmh": 1.2,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "E",
+            "count": 26,
+            "frequency_pct": 1.81,
+            "mean_speed_kmh": 1.5,
+            "max_gust_kmh": 13.0
+          },
+          {
+            "sector": "ESE",
+            "count": 45,
+            "frequency_pct": 3.12,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "SE",
+            "count": 219,
+            "frequency_pct": 15.21,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 33.2
+          },
+          {
+            "sector": "SSE",
+            "count": 388,
+            "frequency_pct": 26.94,
+            "mean_speed_kmh": 0.9,
+            "max_gust_kmh": 34.9
+          },
+          {
+            "sector": "S",
+            "count": 168,
+            "frequency_pct": 11.67,
+            "mean_speed_kmh": 0.8,
+            "max_gust_kmh": 38.5
+          },
+          {
+            "sector": "SSW",
+            "count": 108,
+            "frequency_pct": 7.5,
+            "mean_speed_kmh": 7.2,
+            "max_gust_kmh": 55.0
+          },
+          {
+            "sector": "SW",
+            "count": 90,
+            "frequency_pct": 6.25,
+            "mean_speed_kmh": 5.7,
+            "max_gust_kmh": 64.4
+          },
+          {
+            "sector": "WSW",
+            "count": 65,
+            "frequency_pct": 4.51,
+            "mean_speed_kmh": 2.2,
+            "max_gust_kmh": 38.5
+          },
+          {
+            "sector": "W",
+            "count": 75,
+            "frequency_pct": 5.21,
+            "mean_speed_kmh": 2.6,
+            "max_gust_kmh": 25.6
+          },
+          {
+            "sector": "WNW",
+            "count": 65,
+            "frequency_pct": 4.51,
+            "mean_speed_kmh": 3.3,
+            "max_gust_kmh": 29.5
+          },
+          {
+            "sector": "NW",
+            "count": 81,
+            "frequency_pct": 5.62,
+            "mean_speed_kmh": 4.5,
+            "max_gust_kmh": 29.5
+          },
+          {
+            "sector": "NNW",
+            "count": 55,
+            "frequency_pct": 3.82,
+            "mean_speed_kmh": 3.1,
+            "max_gust_kmh": 29.5
+          }
+        ]
+      },
+      "12": {
+        "month": 12,
+        "name": "Diciembre",
+        "short_name": "Dic",
+        "total_obs": 1488,
+        "predominant_sector": "SSE",
+        "rose_16": [
+          {
+            "sector": "N",
+            "count": 40,
+            "frequency_pct": 2.69,
+            "mean_speed_kmh": 1.6,
+            "max_gust_kmh": 23.8
+          },
+          {
+            "sector": "NNE",
+            "count": 18,
+            "frequency_pct": 1.21,
+            "mean_speed_kmh": 1.3,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "NE",
+            "count": 27,
+            "frequency_pct": 1.81,
+            "mean_speed_kmh": 0.8,
+            "max_gust_kmh": 11.1
+          },
+          {
+            "sector": "ENE",
+            "count": 32,
+            "frequency_pct": 2.15,
+            "mean_speed_kmh": 0.6,
+            "max_gust_kmh": 9.3
+          },
+          {
+            "sector": "E",
+            "count": 47,
+            "frequency_pct": 3.16,
+            "mean_speed_kmh": 0.6,
+            "max_gust_kmh": 5.5
+          },
+          {
+            "sector": "ESE",
+            "count": 69,
+            "frequency_pct": 4.64,
+            "mean_speed_kmh": 0.7,
+            "max_gust_kmh": 14.8
+          },
+          {
+            "sector": "SE",
+            "count": 179,
+            "frequency_pct": 12.03,
+            "mean_speed_kmh": 0.6,
+            "max_gust_kmh": 11.1
+          },
+          {
+            "sector": "SSE",
+            "count": 331,
+            "frequency_pct": 22.24,
+            "mean_speed_kmh": 0.4,
+            "max_gust_kmh": 11.1
+          },
+          {
+            "sector": "S",
+            "count": 146,
+            "frequency_pct": 9.81,
+            "mean_speed_kmh": 0.6,
+            "max_gust_kmh": 29.5
+          },
+          {
+            "sector": "SSW",
+            "count": 111,
+            "frequency_pct": 7.46,
+            "mean_speed_kmh": 6.3,
+            "max_gust_kmh": 56.8
+          },
+          {
+            "sector": "SW",
+            "count": 54,
+            "frequency_pct": 3.63,
+            "mean_speed_kmh": 6.0,
+            "max_gust_kmh": 42.2
+          },
+          {
+            "sector": "WSW",
+            "count": 40,
+            "frequency_pct": 2.69,
+            "mean_speed_kmh": 1.6,
+            "max_gust_kmh": 16.6
+          },
+          {
+            "sector": "W",
+            "count": 74,
+            "frequency_pct": 4.97,
+            "mean_speed_kmh": 2.6,
+            "max_gust_kmh": 21.9
+          },
+          {
+            "sector": "WNW",
+            "count": 81,
+            "frequency_pct": 5.44,
+            "mean_speed_kmh": 4.8,
+            "max_gust_kmh": 33.2
+          },
+          {
+            "sector": "NW",
+            "count": 162,
+            "frequency_pct": 10.89,
+            "mean_speed_kmh": 6.9,
+            "max_gust_kmh": 43.9
+          },
+          {
+            "sector": "NNW",
+            "count": 77,
+            "frequency_pct": 5.17,
+            "mean_speed_kmh": 4.2,
+            "max_gust_kmh": 43.9
+          }
+        ]
+      }
+    },
     "beaufort_daily": [
       {
         "force": 0,
