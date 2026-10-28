@@ -4,7 +4,7 @@
  * Permite consultar almanaques, datos históricos y gráficos en el campo o zonas sin cobertura.
  */
 
-const CACHE_NAME = 'meteoriotuerto-cache-v1.1.8';
+const CACHE_NAME = 'meteoriotuerto-cache-v1.1.9';
 
 const PRECACHE_ASSETS = [
   './',

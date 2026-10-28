@@ -397,21 +397,125 @@
   }
 
   /* ------------------------------------------------------------------------
-   * EVO-032: Carga y consulta de tiempo actual en directo (live.json de la estación)
+   * EVO-034: Datos meteorológicos en tiempo real desde Weather Underground (PWS IRIOTU1)
    * ------------------------------------------------------------------------ */
+  const WU_STATION_ID = 'IRIOTU1';
+  const WU_PUBLIC_TOKEN = 'ff90f212a6984a7390f212a698ea73cc';
+
+  function degToSector16(deg) {
+    if (deg === null || deg === undefined || isNaN(deg)) return '—';
+    const sectors = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+    const idx = Math.floor(((Number(deg) + 11.25) % 360) / 22.5);
+    return sectors[idx] || '—';
+  }
+
+  async function fetchWeatherUndergroundLive() {
+    const currentUrl = `https://api.weather.com/v2/pws/observations/current?apiKey=${WU_PUBLIC_TOKEN}&stationId=${WU_STATION_ID}&numericPrecision=decimal&format=json&units=m`;
+    const summaryUrl = `https://api.weather.com/v2/pws/dailysummary/1day?apiKey=${WU_PUBLIC_TOKEN}&stationId=${WU_STATION_ID}&numericPrecision=decimal&format=json&units=m`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    try {
+      const [respCurrent, respSummary] = await Promise.allSettled([
+        fetch(currentUrl, { signal: controller.signal }),
+        fetch(summaryUrl, { signal: controller.signal }),
+      ]);
+      clearTimeout(timeoutId);
+
+      if (respCurrent.status !== 'fulfilled' || !respCurrent.value.ok) {
+        throw new Error('Fallo al obtener observación actual de Weather Underground');
+      }
+
+      const jsonCurrent = await respCurrent.value.json();
+      const obs = jsonCurrent?.observations?.[0];
+      if (!obs || !obs.metric) {
+        throw new Error('Estructura de observación inválida de Weather Underground');
+      }
+
+      let summaryData = null;
+      if (respSummary.status === 'fulfilled' && respSummary.value.ok) {
+        try {
+          const jsonSummary = await respSummary.value.json();
+          summaryData = jsonSummary?.summaries?.[0];
+        } catch (_) {}
+      }
+
+      const m = obs.metric;
+      const sm = summaryData?.metric || {};
+      const deg = obs.winddir !== null && obs.winddir !== undefined ? Number(obs.winddir) : null;
+      const cardinal = deg !== null ? degToSector16(deg) : '—';
+      const cardinalName = SECTOR_NAMES_ES[cardinal] ? ` (${SECTOR_NAMES_ES[cardinal]})` : '';
+
+      const localTimeStr = obs.obsTimeLocal || '';
+      const [datePart, timePart] = localTimeStr.includes(' ') ? localTimeStr.split(' ') : ['', ''];
+
+      return {
+        source: 'Weather Underground (PWS IRIOTU1)',
+        source_type: 'live_api',
+        station_id: WU_STATION_ID,
+        neighborhood: obs.neighborhood || 'Barrio de Arriba (Riotuerto)',
+        timestamp: obs.epoch ? obs.epoch * 1000 : Date.now(),
+        timestamp_str: localTimeStr,
+        date: datePart,
+        time: timePart ? timePart.substring(0, 5) : '',
+        temperature_c: m.temp !== undefined ? m.temp : null,
+        feels_like_c: m.heatIndex !== undefined && m.heatIndex !== m.temp ? m.heatIndex : (m.windChill !== undefined ? m.windChill : m.temp),
+        dew_point_c: m.dewpt !== undefined ? m.dewpt : null,
+        temp_min_c: sm.tempLow !== undefined ? sm.tempLow : null,
+        temp_max_c: sm.tempHigh !== undefined ? sm.tempHigh : null,
+        humidity_pct: obs.humidity !== undefined ? obs.humidity : null,
+        humidity_min_pct: summaryData?.humidityLow !== undefined ? summaryData.humidityLow : null,
+        humidity_max_pct: summaryData?.humidityHigh !== undefined ? summaryData.humidityHigh : null,
+        rain_daily_mm: m.precipTotal !== undefined ? m.precipTotal : (sm.precipTotal !== undefined ? sm.precipTotal : 0),
+        rain_rate_mm_h: m.precipRate !== undefined ? m.precipRate : 0,
+        wind_speed_kmh: m.windSpeed !== undefined ? m.windSpeed : null,
+        wind_gust_kmh: m.windGust !== undefined ? m.windGust : null,
+        wind_gust_day_max_kmh: sm.windgustHigh !== undefined ? sm.windgustHigh : (m.windGust || null),
+        wind_direction_deg: deg,
+        wind_direction_cardinal: cardinal,
+        wind_direction_name: cardinalName,
+        pressure_relative_hpa: m.pressure !== undefined ? m.pressure : null,
+        pressure_trend_hpa: sm.pressureTrend !== undefined ? sm.pressureTrend : null,
+        solar_radiation_wm2: obs.solarRadiation !== undefined ? obs.solarRadiation : null,
+        solar_radiation_max_wm2: summaryData?.solarRadiationHigh !== undefined ? summaryData.solarRadiationHigh : null,
+        uv_index: obs.uv !== undefined ? obs.uv : null,
+        uv_max_index: summaryData?.uvHigh !== undefined ? summaryData.uvHigh : null,
+        dashboard_url: 'https://www.wunderground.com/dashboard/pws/IRIOTU1',
+      };
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw err;
+    }
+  }
+
   async function ensureLiveWeatherLoaded(forceRefresh = false) {
     const now = Date.now();
-    if (!forceRefresh && STATE.liveWeather && (now - STATE.liveWeatherLastFetch < 60000)) {
+    // Cache de 30 segundos para evitar llamadas redundantes
+    if (!forceRefresh && STATE.liveWeather && (now - STATE.liveWeatherLastFetch < 30000)) {
       return STATE.liveWeather;
     }
 
+    // Nivel 1: Consulta directa en tiempo real a Weather Underground (PWS IRIOTU1)
+    try {
+      const wuLive = await fetchWeatherUndergroundLive();
+      STATE.liveWeather = wuLive;
+      STATE.liveWeatherLastFetch = now;
+      return STATE.liveWeather;
+    } catch (err) {
+      console.warn('Weather Underground no disponible o sin conexión. Recurriendo a snapshot local data/live.json:', err);
+    }
+
+    // Nivel 2: Contingencia mediante snapshot estático local data/live.json
     try {
       const snap = await fetchJson(`live.json?_=${now}`);
+      snap.source_type = 'fallback_json';
+      snap.source = snap.source || 'Estación Barrio de Arriba (archivo estático)';
       STATE.liveWeather = snap;
       STATE.liveWeatherLastFetch = now;
       return STATE.liveWeather;
     } catch (e) {
-      console.warn('No se pudo cargar live.json, recurriendo a último registro en caché si existe:', e);
+      console.warn('No se pudo cargar live.json, recurriendo a último registro en memoria:', e);
       if (STATE.liveWeather) return STATE.liveWeather;
       throw e;
     }
@@ -898,16 +1002,19 @@
   }
 
   /* ------------------------------------------------------------------------
-   * EVO-032: Renderizado del widget de tiempo actual en directo (Ecowitt)
+   * EVO-034: Renderizado del widget de tiempo actual en directo (Weather Underground + Ecowitt)
    * ------------------------------------------------------------------------ */
   function renderLiveWeatherWidget(live, ref) {
     const wrap = document.getElementById('sec-live-weather');
     if (!wrap || !live) return;
 
-    const badgeText = 'Tiempo actual · Estación Ecowitt';
-    const badgeClass = 'live-badge';
-    const liveTime = live.time || (live.timestamp_str ? live.timestamp_str.split(' ')[1].substring(0, 5) : '—');
-    const liveDate = live.date || (live.timestamp_str ? live.timestamp_str.split(' ')[0] : '');
+    const isLive = live.source_type === 'live_api';
+    const badgeText = isLive
+      ? `Tiempo real · Weather Underground (${live.station_id || 'IRIOTU1'})`
+      : 'Última observación · Estación Barrio de Arriba';
+    const badgeClass = isLive ? 'live-badge' : 'live-badge badge-offline';
+    const liveTime = live.time || (live.timestamp_str ? (live.timestamp_str.includes(' ') ? live.timestamp_str.split(' ')[1].substring(0, 5) : live.timestamp_str) : '—');
+    const liveDate = live.date || (live.timestamp_str ? (live.timestamp_str.includes(' ') ? live.timestamp_str.split(' ')[0] : '') : '');
 
     // Contraste climatológico con la referencia histórica del mes en curso
     let contrastHtml = '';
@@ -934,6 +1041,27 @@
       }
     }
 
+    // Subtítulos dinámicos enriquecidos con extremos del día
+    const tempExtremesStr = (live.temp_min_c !== null && live.temp_max_c !== null)
+      ? `Mín: <strong>${fmtNum(live.temp_min_c, 1)} °C</strong> · Máx: <strong>${fmtNum(live.temp_max_c, 1)} °C</strong>`
+      : 'Extremo térmico en consolidación';
+
+    const humRangeStr = (live.humidity_min_pct !== null && live.humidity_max_pct !== null)
+      ? `Rango hoy: <strong>${fmtNum(live.humidity_min_pct, 0)}%</strong> – <strong>${fmtNum(live.humidity_max_pct, 0)}%</strong>`
+      : 'Condensación sobre pastos y follaje';
+
+    const windRachaStr = live.wind_gust_day_max_kmh !== null
+      ? `Racha máx hoy: <strong>${fmtNum(live.wind_gust_day_max_kmh, 1)} km/h</strong>`
+      : (live.wind_gust_kmh ? `Racha: <strong>${fmtNum(live.wind_gust_kmh, 1)} km/h</strong>` : 'Racha del momento');
+
+    const windDirStr = live.wind_direction_deg !== null
+      ? `Rumbo: <strong>${live.wind_direction_deg}° (${live.wind_direction_cardinal})</strong>${live.wind_direction_name || ''}`
+      : 'Rumbo: —';
+
+    const baroTrendStr = live.pressure_trend_hpa !== null
+      ? `Tendencia: <strong>${live.pressure_trend_hpa >= 0 ? '+' : ''}${fmtNum(live.pressure_trend_hpa, 2)} hPa</strong>`
+      : 'Presión relativa a nivel del mar';
+
     wrap.innerHTML = `
       <div class="live-weather-header">
         <div class="live-weather-title-wrap">
@@ -945,13 +1073,17 @@
           <span class="live-weather-time">Observación del <strong>${fmtDateES(liveDate, false)}</strong> a las <strong>${escapeHtml(liveTime)} h</strong></span>
         </div>
         <div class="live-weather-actions">
-          <button type="button" id="btn-live-refresh" class="btn-live-action" title="Actualizar lectura instantánea">
+          <button type="button" id="btn-live-refresh" class="btn-live-action" title="Actualizar lectura instantánea desde Weather Underground">
             <span class="spin-icon" aria-hidden="true">🔄</span>
             <span>Actualizar</span>
           </button>
-          <a href="${escapeHtml(live.dashboard_url || 'https://www.ecowitt.net/home/index?id=33161')}" target="_blank" rel="noopener noreferrer" class="btn-live-action" title="Abrir monitor completo en ecowitt.net">
+          <a href="${escapeHtml(live.dashboard_url || 'https://www.wunderground.com/dashboard/pws/IRIOTU1')}" target="_blank" rel="noopener noreferrer" class="btn-live-action" title="Abrir estación IRIOTU1 en Weather Underground">
             <span aria-hidden="true">↗</span>
-            <span>Monitor en Ecowitt.net</span>
+            <span>Wunderground</span>
+          </a>
+          <a href="https://www.ecowitt.net/home/index?id=33161" target="_blank" rel="noopener noreferrer" class="btn-live-action" title="Abrir monitor completo en Ecowitt.net">
+            <span aria-hidden="true">↗</span>
+            <span>Ecowitt.net</span>
           </a>
         </div>
       </div>
@@ -967,7 +1099,7 @@
           </div>
           <div class="live-kpi-subdetail">
             Sensación: <strong>${live.feels_like_c !== null ? fmtNum(live.feels_like_c, 1) : '—'} °C</strong><br>
-            Mín: <strong>${live.temp_min_c !== null ? fmtNum(live.temp_min_c, 1) : '—'} °C</strong> · Máx: <strong>${live.temp_max_c !== null ? fmtNum(live.temp_max_c, 1) : '—'} °C</strong>
+            ${tempExtremesStr}
           </div>
         </div>
 
@@ -981,7 +1113,7 @@
           </div>
           <div class="live-kpi-subdetail">
             Punto de rocío: <strong>${live.dew_point_c !== null ? fmtNum(live.dew_point_c, 1) : '—'} °C</strong><br>
-            Condensación sobre pastos y follaje
+            ${humRangeStr}
           </div>
         </div>
 
@@ -1008,8 +1140,8 @@
             ${live.wind_speed_kmh !== null ? fmtNum(live.wind_speed_kmh, 1) : '0,0'} <span class="live-kpi-unit">km/h</span>
           </div>
           <div class="live-kpi-subdetail">
-            Racha hoy: <strong>${live.wind_gust_day_max_kmh !== null ? fmtNum(live.wind_gust_day_max_kmh, 1) : (live.wind_gust_kmh || 0)} km/h</strong><br>
-            Dirección: <strong>${live.wind_direction_deg !== null ? `${live.wind_direction_deg}° (${live.wind_direction_cardinal})` : '—'}</strong>
+            ${windRachaStr}<br>
+            ${windDirStr}
           </div>
         </div>
 
@@ -1022,8 +1154,8 @@
             ${live.pressure_relative_hpa !== null ? fmtNum(live.pressure_relative_hpa, 1) : '—'} <span class="live-kpi-unit">hPa</span>
           </div>
           <div class="live-kpi-subdetail">
-            Radiación: <strong>${live.solar_radiation_wm2 !== null ? fmtNum(live.solar_radiation_wm2, 0) : '0'} W/m²</strong><br>
-            Índice UV: <strong>${live.uv_index !== null ? fmtNum(live.uv_index, 0) : '0'}</strong>
+            Radiación: <strong>${live.solar_radiation_wm2 !== null ? fmtNum(live.solar_radiation_wm2, 0) : '0'} W/m²</strong> · UV: <strong>${live.uv_index !== null ? fmtNum(live.uv_index, 0) : '0'}</strong><br>
+            ${baroTrendStr}
           </div>
         </div>
       </div>
@@ -1031,7 +1163,7 @@
       ${contrastHtml}
     `;
 
-    // Conectar evento de actualización
+    // Conectar evento de actualización inmediata
     const refreshBtn = document.getElementById('btn-live-refresh');
     refreshBtn?.addEventListener('click', async () => {
       refreshBtn.classList.add('btn-refreshing');

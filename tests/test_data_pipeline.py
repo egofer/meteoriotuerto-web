@@ -1334,9 +1334,34 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.1.8", sw_js, "Falta cache v1.1.8 en sw.js")
+        self.assertIn("v1.1.9", sw_js, "Falta cache v1.1.9 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.1.8", index_html, "Falta v=1.1.8 en index.html")
+        self.assertIn("v=1.1.9", index_html, "Falta v=1.1.9 en index.html")
+
+    def test_weather_underground_realtime_integration(self):
+        """
+        EVO-034: Verifica la integración de tiempo real nativa desde Weather Underground (PWS IRIOTU1),
+        la consulta directa al endpoint PWS v2 sin requerir autenticación ni GitHub Actions,
+        la extracción paralela de la observación actual y el resumen del día, y la contingencia en live.json.
+        """
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+
+        # 1. Parámetros de la estación e integración WU
+        self.assertIn("IRIOTU1", app_js, "Falta identificador de estación IRIOTU1 en app.js")
+        self.assertIn("fetchWeatherUndergroundLive", app_js, "Falta función fetchWeatherUndergroundLive en app.js")
+        self.assertIn("api.weather.com/v2/pws/observations/current", app_js, "Falta endpoint current de WU en app.js")
+        self.assertIn("api.weather.com/v2/pws/dailysummary/1day", app_js, "Falta endpoint dailysummary de WU en app.js")
+        self.assertIn("ensureLiveWeatherLoaded", app_js)
+
+        # 2. Respaldo y contingencia
+        self.assertIn("live.json", app_js, "Falta fallback a data/live.json")
+        self.assertIn("fallback_json", app_js, "Falta tipo fallback_json")
+
+        # 3. Elementos en la interfaz y tarjetas enriquecidas
+        self.assertIn("Wunderground", app_js, "Falta enlace a Wunderground en app.js")
+        self.assertIn("Ecowitt.net", app_js, "Falta enlace a Ecowitt en app.js")
+        self.assertIn("degToSector16", app_js, "Falta conversión de grados a rumbos en app.js")
+        self.assertIn("btn-live-refresh", app_js, "Falta botón de refresco en app.js")
 
 
 if __name__ == "__main__":
