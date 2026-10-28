@@ -9,7 +9,7 @@
     "missing_days": 25,
     "coverage_pct": 93.2,
     "has_30min_series": true,
-    "clean_30min_records": 15631,
+    "clean_30min_records": 15629,
     "quality_audit": {
       "daily_anomalies_corrected": [
         "2023-11-18: Radiación diaria máxima bruta 1533.5 W/m² supera la constante solar (1361 W/m²); marcada como pico espurio/efecto borde de nube.",
@@ -23,11 +23,11 @@
       ],
       "intraday_meta": {
         "available": true,
-        "raw_rows": 15919,
-        "clean_rows": 15631,
-        "duplicates_removed": 0,
+        "raw_rows": 16445,
+        "clean_rows": 15629,
+        "duplicates_removed": 188,
         "out_of_year_removed": 288,
-        "embedded_daily_removed": 0,
+        "embedded_daily_removed": 340,
         "glitches_filtered": []
       }
     }
@@ -159,7 +159,7 @@
       "solar_max_raw_date": "2023-11-18",
       "uvi_max": 11,
       "uvi_max_raw": 14,
-      "estimated_sunshine_hours": 2372.0
+      "estimated_sunshine_hours": 2373.0
     },
     "degree_days": {
       "hdd_15_5": 959.2,
@@ -285,7 +285,7 @@
   },
   "wind_analysis": {
     "source_resolution": "30min",
-    "total_direction_observations": 15577,
+    "total_direction_observations": 15575,
     "predominant_sector": "SSE",
     "rose_16": [
       {
@@ -297,15 +297,15 @@
       },
       {
         "sector": "NNE",
-        "count": 237,
-        "frequency_pct": 1.52,
+        "count": 238,
+        "frequency_pct": 1.53,
         "mean_speed_kmh": 1.0,
         "max_gust_kmh": 18.3
       },
       {
         "sector": "NE",
         "count": 250,
-        "frequency_pct": 1.6,
+        "frequency_pct": 1.61,
         "mean_speed_kmh": 0.9,
         "max_gust_kmh": 21.9
       },
@@ -332,15 +332,15 @@
       },
       {
         "sector": "SE",
-        "count": 2070,
-        "frequency_pct": 13.29,
+        "count": 2069,
+        "frequency_pct": 13.28,
         "mean_speed_kmh": 0.7,
         "max_gust_kmh": 46.0
       },
       {
         "sector": "SSE",
-        "count": 2260,
-        "frequency_pct": 14.51,
+        "count": 2259,
+        "frequency_pct": 14.5,
         "mean_speed_kmh": 0.8,
         "max_gust_kmh": 34.9
       },
@@ -353,7 +353,7 @@
       },
       {
         "sector": "SSW",
-        "count": 890,
+        "count": 889,
         "frequency_pct": 5.71,
         "mean_speed_kmh": 6.5,
         "max_gust_kmh": 73.4
@@ -367,8 +367,8 @@
       },
       {
         "sector": "WSW",
-        "count": 475,
-        "frequency_pct": 3.05,
+        "count": 476,
+        "frequency_pct": 3.06,
         "mean_speed_kmh": 2.0,
         "max_gust_kmh": 56.8
       },
@@ -381,22 +381,22 @@
       },
       {
         "sector": "WNW",
-        "count": 1365,
-        "frequency_pct": 8.76,
+        "count": 1366,
+        "frequency_pct": 8.77,
         "mean_speed_kmh": 3.8,
         "max_gust_kmh": 51.5
       },
       {
         "sector": "NW",
-        "count": 2013,
-        "frequency_pct": 12.92,
+        "count": 2015,
+        "frequency_pct": 12.94,
         "mean_speed_kmh": 4.0,
         "max_gust_kmh": 49.7
       },
       {
         "sector": "NNW",
-        "count": 1182,
-        "frequency_pct": 7.59,
+        "count": 1178,
+        "frequency_pct": 7.56,
         "mean_speed_kmh": 2.9,
         "max_gust_kmh": 42.2
       }
@@ -419,8 +419,8 @@
           },
           {
             "sector": "NNE",
-            "count": 47,
-            "frequency_pct": 1.28,
+            "count": 48,
+            "frequency_pct": 1.31,
             "mean_speed_kmh": 1.4,
             "max_gust_kmh": 13.0
           },
@@ -447,22 +447,22 @@
           },
           {
             "sector": "ESE",
-            "count": 231,
-            "frequency_pct": 6.3,
+            "count": 232,
+            "frequency_pct": 6.32,
             "mean_speed_kmh": 1.1,
             "max_gust_kmh": 27.7
           },
           {
             "sector": "SE",
-            "count": 593,
-            "frequency_pct": 16.16,
+            "count": 592,
+            "frequency_pct": 16.14,
             "mean_speed_kmh": 1.0,
             "max_gust_kmh": 23.8
           },
           {
             "sector": "SSE",
-            "count": 627,
-            "frequency_pct": 17.09,
+            "count": 626,
+            "frequency_pct": 17.06,
             "mean_speed_kmh": 0.9,
             "max_gust_kmh": 23.8
           },
@@ -475,9 +475,9 @@
           },
           {
             "sector": "SSW",
-            "count": 195,
-            "frequency_pct": 5.31,
-            "mean_speed_kmh": 6.7,
+            "count": 194,
+            "frequency_pct": 5.29,
+            "mean_speed_kmh": 6.8,
             "max_gust_kmh": 55.0
           },
           {
@@ -489,8 +489,8 @@
           },
           {
             "sector": "WSW",
-            "count": 83,
-            "frequency_pct": 2.26,
+            "count": 84,
+            "frequency_pct": 2.29,
             "mean_speed_kmh": 2.8,
             "max_gust_kmh": 56.8
           },
@@ -503,23 +503,23 @@
           },
           {
             "sector": "WNW",
-            "count": 323,
-            "frequency_pct": 8.8,
+            "count": 324,
+            "frequency_pct": 8.83,
             "mean_speed_kmh": 5.0,
             "max_gust_kmh": 51.5
           },
           {
             "sector": "NW",
-            "count": 347,
-            "frequency_pct": 9.46,
+            "count": 349,
+            "frequency_pct": 9.51,
             "mean_speed_kmh": 4.7,
             "max_gust_kmh": 49.7
           },
           {
             "sector": "NNW",
-            "count": 218,
-            "frequency_pct": 5.94,
-            "mean_speed_kmh": 2.8,
+            "count": 215,
+            "frequency_pct": 5.86,
+            "mean_speed_kmh": 2.7,
             "max_gust_kmh": 40.4
           }
         ]
@@ -529,13 +529,13 @@
         "name": "Primavera",
         "code": "MAM",
         "icon": "🌸",
-        "total_obs": 4382,
+        "total_obs": 4380,
         "predominant_sector": "NW",
         "rose_16": [
           {
             "sector": "N",
             "count": 140,
-            "frequency_pct": 3.19,
+            "frequency_pct": 3.2,
             "mean_speed_kmh": 1.8,
             "max_gust_kmh": 18.3
           },
@@ -569,29 +569,29 @@
           },
           {
             "sector": "ESE",
-            "count": 166,
-            "frequency_pct": 3.79,
+            "count": 165,
+            "frequency_pct": 3.77,
             "mean_speed_kmh": 0.9,
             "max_gust_kmh": 16.6
           },
           {
             "sector": "SE",
             "count": 454,
-            "frequency_pct": 10.36,
+            "frequency_pct": 10.37,
             "mean_speed_kmh": 0.8,
             "max_gust_kmh": 23.8
           },
           {
             "sector": "SSE",
             "count": 571,
-            "frequency_pct": 13.03,
+            "frequency_pct": 13.04,
             "mean_speed_kmh": 1.0,
             "max_gust_kmh": 21.9
           },
           {
             "sector": "S",
             "count": 434,
-            "frequency_pct": 9.9,
+            "frequency_pct": 9.91,
             "mean_speed_kmh": 1.0,
             "max_gust_kmh": 29.5
           },
@@ -626,21 +626,21 @@
           {
             "sector": "WNW",
             "count": 420,
-            "frequency_pct": 9.58,
+            "frequency_pct": 9.59,
             "mean_speed_kmh": 4.0,
             "max_gust_kmh": 36.7
           },
           {
             "sector": "NW",
             "count": 758,
-            "frequency_pct": 17.3,
+            "frequency_pct": 17.31,
             "mean_speed_kmh": 4.4,
             "max_gust_kmh": 49.7
           },
           {
             "sector": "NNW",
-            "count": 416,
-            "frequency_pct": 9.49,
+            "count": 415,
+            "frequency_pct": 9.47,
             "mean_speed_kmh": 3.2,
             "max_gust_kmh": 42.2
           }
@@ -1138,7 +1138,7 @@
         "month": 3,
         "name": "Marzo",
         "short_name": "Mar",
-        "total_obs": 1454,
+        "total_obs": 1452,
         "predominant_sector": "SE",
         "rose_16": [
           {
@@ -1172,28 +1172,28 @@
           {
             "sector": "E",
             "count": 62,
-            "frequency_pct": 4.26,
+            "frequency_pct": 4.27,
             "mean_speed_kmh": 1.4,
             "max_gust_kmh": 14.8
           },
           {
             "sector": "ESE",
-            "count": 93,
-            "frequency_pct": 6.4,
+            "count": 92,
+            "frequency_pct": 6.34,
             "mean_speed_kmh": 1.4,
             "max_gust_kmh": 16.6
           },
           {
             "sector": "SE",
             "count": 193,
-            "frequency_pct": 13.27,
+            "frequency_pct": 13.29,
             "mean_speed_kmh": 1.0,
             "max_gust_kmh": 16.6
           },
           {
             "sector": "SSE",
             "count": 170,
-            "frequency_pct": 11.69,
+            "frequency_pct": 11.71,
             "mean_speed_kmh": 1.0,
             "max_gust_kmh": 14.8
           },
@@ -1207,14 +1207,14 @@
           {
             "sector": "SSW",
             "count": 130,
-            "frequency_pct": 8.94,
+            "frequency_pct": 8.95,
             "mean_speed_kmh": 9.6,
             "max_gust_kmh": 51.5
           },
           {
             "sector": "SW",
             "count": 148,
-            "frequency_pct": 10.18,
+            "frequency_pct": 10.19,
             "mean_speed_kmh": 10.4,
             "max_gust_kmh": 55.0
           },
@@ -1235,21 +1235,21 @@
           {
             "sector": "WNW",
             "count": 131,
-            "frequency_pct": 9.01,
+            "frequency_pct": 9.02,
             "mean_speed_kmh": 5.0,
             "max_gust_kmh": 36.7
           },
           {
             "sector": "NW",
             "count": 157,
-            "frequency_pct": 10.8,
+            "frequency_pct": 10.81,
             "mean_speed_kmh": 6.2,
             "max_gust_kmh": 49.7
           },
           {
             "sector": "NNW",
-            "count": 111,
-            "frequency_pct": 7.63,
+            "count": 110,
+            "frequency_pct": 7.58,
             "mean_speed_kmh": 3.2,
             "max_gust_kmh": 42.2
           }
@@ -2239,8 +2239,8 @@
           },
           {
             "sector": "NNE",
-            "count": 22,
-            "frequency_pct": 1.48,
+            "count": 23,
+            "frequency_pct": 1.55,
             "mean_speed_kmh": 1.3,
             "max_gust_kmh": 13.0
           },
@@ -2267,22 +2267,22 @@
           },
           {
             "sector": "ESE",
-            "count": 83,
-            "frequency_pct": 5.58,
+            "count": 84,
+            "frequency_pct": 5.65,
             "mean_speed_kmh": 1.0,
             "max_gust_kmh": 14.8
           },
           {
             "sector": "SE",
-            "count": 179,
-            "frequency_pct": 12.03,
+            "count": 178,
+            "frequency_pct": 11.96,
             "mean_speed_kmh": 0.8,
             "max_gust_kmh": 14.8
           },
           {
             "sector": "SSE",
-            "count": 251,
-            "frequency_pct": 16.87,
+            "count": 250,
+            "frequency_pct": 16.8,
             "mean_speed_kmh": 0.7,
             "max_gust_kmh": 23.8
           },
@@ -2295,9 +2295,9 @@
           },
           {
             "sector": "SSW",
-            "count": 119,
-            "frequency_pct": 8.0,
-            "mean_speed_kmh": 9.1,
+            "count": 118,
+            "frequency_pct": 7.93,
+            "mean_speed_kmh": 9.2,
             "max_gust_kmh": 55.0
           },
           {
@@ -2309,8 +2309,8 @@
           },
           {
             "sector": "WSW",
-            "count": 28,
-            "frequency_pct": 1.88,
+            "count": 29,
+            "frequency_pct": 1.95,
             "mean_speed_kmh": 2.7,
             "max_gust_kmh": 42.2
           },
@@ -2323,22 +2323,22 @@
           },
           {
             "sector": "WNW",
-            "count": 129,
-            "frequency_pct": 8.67,
+            "count": 130,
+            "frequency_pct": 8.74,
             "mean_speed_kmh": 4.9,
             "max_gust_kmh": 31.4
           },
           {
             "sector": "NW",
-            "count": 150,
-            "frequency_pct": 10.08,
+            "count": 152,
+            "frequency_pct": 10.22,
             "mean_speed_kmh": 4.9,
             "max_gust_kmh": 31.4
           },
           {
             "sector": "NNW",
-            "count": 94,
-            "frequency_pct": 6.32,
+            "count": 91,
+            "frequency_pct": 6.12,
             "mean_speed_kmh": 3.3,
             "max_gust_kmh": 33.2
           }

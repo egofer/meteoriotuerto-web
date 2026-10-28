@@ -2471,19 +2471,6 @@
         "hum_drop_3h_pct": null
       },
       {
-        "date": "2022-09-05",
-        "subtype": "Compresión adiabática cálida",
-        "temp_max": 31.9,
-        "temp_min": 14.1,
-        "temp_amp": 17.8,
-        "humidity_min": 30.0,
-        "wind_gust": 34.9,
-        "wind_dir": 162.0,
-        "sector": "SSE",
-        "jump_3h_c": null,
-        "hum_drop_3h_pct": null
-      },
-      {
         "date": "2022-09-11",
         "subtype": "Compresión adiabática cálida",
         "temp_max": 37.4,
@@ -2492,6 +2479,19 @@
         "humidity_min": 25.0,
         "wind_gust": 21.9,
         "wind_dir": 164.0,
+        "sector": "SSE",
+        "jump_3h_c": null,
+        "hum_drop_3h_pct": null
+      },
+      {
+        "date": "2022-09-05",
+        "subtype": "Compresión adiabática cálida",
+        "temp_max": 31.9,
+        "temp_min": 14.1,
+        "temp_amp": 17.8,
+        "humidity_min": 30.0,
+        "wind_gust": 34.9,
+        "wind_dir": 162.0,
         "sector": "SSE",
         "jump_3h_c": null,
         "hum_drop_3h_pct": null
