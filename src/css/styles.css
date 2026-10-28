@@ -4959,3 +4959,157 @@ html[data-theme="dark"] .offline-badge.online-restored {
   color: var(--txt-secondary);
   margin: 0;
 }
+
+/* ==========================================================================
+   Escaparate editorial de Grandes Acontecimientos Meteorológicos (EVO-027)
+   ========================================================================== */
+.val-wind {
+  color: var(--accent-wind, #d97706) !important;
+  font-weight: 700;
+}
+
+.featured-episodes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr));
+  gap: 22px;
+  margin-top: 18px;
+}
+
+.episode-featured-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.episode-featured-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.episode-card-rain {
+  border-top: 4px solid var(--accent-rain, #2563eb);
+}
+
+.episode-card-heat {
+  border-top: 4px solid var(--accent-heat, #ef4444);
+}
+
+.episode-card-wind {
+  border-top: 4px solid var(--accent-wind, #d97706);
+}
+
+.episode-card-storm {
+  border-top: 4px solid #7c3aed;
+}
+
+.episode-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.episode-badge-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.episode-tag {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--txt-secondary);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.episode-date {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--txt-primary);
+}
+
+.episode-title {
+  font-family: var(--font-serif);
+  font-size: 1.22rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--txt-primary);
+  margin-bottom: 14px;
+}
+
+.episode-kpis-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 520px) {
+  .episode-kpis-strip {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.episode-kpi {
+  display: flex;
+  flex-direction: column;
+}
+
+.episode-kpi .kpi-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--txt-secondary);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.episode-kpi .kpi-val {
+  font-size: 1.18rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.episode-kpi .kpi-sub {
+  font-size: 0.74rem;
+  color: var(--txt-secondary);
+  margin-top: 3px;
+}
+
+.episode-narrative {
+  font-size: 0.91rem;
+  line-height: 1.6;
+  color: var(--txt-secondary);
+  margin-bottom: 16px;
+}
+
+.episode-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+}

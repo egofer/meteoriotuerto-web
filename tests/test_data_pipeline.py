@@ -1039,7 +1039,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("hero-geo-pill", app_js)
         self.assertIn("hero-actions", app_js)
         self.assertIn("data-scroll-to=\"sec-almanaques-title\"", app_js)
-        self.assertIn("data-scroll-to=\"sec-records-portada\"", app_js)
+        self.assertTrue(
+            "data-scroll-to=\"sec-featured-episodes\"" in app_js or "data-scroll-to=\"sec-records-portada\"" in app_js
+        )
 
         # 2. Comprobar que en renderPortada no existe el iframe ni el bloque pesado anterior
         portada_code = app_js[app_js.find("async function renderPortada"):app_js.find("function renderOnThisDayWidget")]
@@ -1058,6 +1060,37 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".hero-actions", css_text)
         self.assertIn(".hero-btn", css_text)
         self.assertIn(".hero-btn-live", css_text)
+
+    def test_featured_episodes_showcase_readiness(self):
+        """Verifica que el evolutivo EVO-027 (Escaparate de grandes acontecimientos en portada) esté operativo."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Sección y encabezado en portada
+        self.assertIn("id=\"sec-featured-episodes\"", app_js)
+        self.assertIn("Acontecimientos meteorológicos que marcaron Riotuerto", app_js)
+
+        # 2. Presencia de los 4 grandes hitos canónicos con datos reales
+        self.assertIn("Borrasca Fien: 125,9 mm", app_js)
+        self.assertIn("42,1 °C en Barrio de Arriba", app_js)
+        self.assertIn("Borrasca Karlotta: vendaval de 97,2 km/h", app_js)
+        self.assertIn("Descarga torrencial récord: 44,2 mm en una hora", app_js)
+
+        # 3. Enlaces cruzados hacia los almanaques respectivos y catálogo de extremos
+        self.assertIn("href=\"#almanaque/2023\"", app_js)
+        self.assertIn("href=\"#almanaque/2024\"", app_js)
+        self.assertIn("href=\"#almanaque/2025\"", app_js)
+        self.assertIn("href=\"#records\"", app_js)
+
+        # 4. Reglas CSS específicas
+        self.assertIn(".featured-episodes-grid", css_text)
+        self.assertIn(".episode-featured-card", css_text)
+        self.assertIn(".episode-card-rain", css_text)
+        self.assertIn(".episode-card-heat", css_text)
+        self.assertIn(".episode-card-wind", css_text)
+        self.assertIn(".episode-card-storm", css_text)
+        self.assertIn(".episode-kpis-strip", css_text)
+        self.assertIn(".episode-narrative", css_text)
 
 
 if __name__ == "__main__":
