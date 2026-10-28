@@ -27,6 +27,7 @@ REQUIRED_FILES = [
     "glossary.json",
     "station.geojson",
     "schema.json",
+    "live.json",
     "almanac_2022.json",
     "almanac_2023.json",
     "almanac_2024.json",
@@ -245,6 +246,15 @@ def validate_directory(data_dir: Path) -> List[str]:
         errors.append("schema.json tiene un diccionario de variables incompleto.")
     if "$defs" not in schema_doc:
         errors.append("schema.json carece del bloque $defs de definiciones formales.")
+
+    # 5. Validar producto de tiempo en vivo (live.json para EVO-032)
+    if "live.json" in loaded:
+        live = loaded["live.json"]
+        for req_field in ["station", "timestamp", "temperature_c", "humidity_pct", "rain_daily_mm", "wind_speed_kmh", "status"]:
+            if req_field not in live:
+                errors.append(f"live.json carece del campo obligatorio: {req_field}")
+        if live.get("status") != "online":
+            errors.append(f"live.json status inesperado: {live.get('status')}")
 
     # 5. Salvaguarda de seguridad, privacidad doméstica e identificadores físicos en los JSONs
     forbidden_json_patterns = [

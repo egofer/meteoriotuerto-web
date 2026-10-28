@@ -1236,6 +1236,46 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".table-row-highlight", css_text)
         self.assertIn("@keyframes rowHighlightPulse", css_text)
 
+    def test_live_weather_module_and_ecowitt_integration(self):
+        """Verifica que el evolutivo EVO-032 (Píldora de tiempo actual de Ecowitt en portada) esté operativo."""
+        live_json_path = ROOT_DIR / "data" / "live.json"
+        self.assertTrue(live_json_path.exists(), "Falta el producto data/live.json")
+        live_data = json.loads(live_json_path.read_text(encoding="utf-8"))
+
+        # 1. Campos obligatorios y semántica de live.json
+        self.assertEqual(live_data.get("status"), "online")
+        self.assertIn("temperature_c", live_data)
+        self.assertIn("humidity_pct", live_data)
+        self.assertIn("rain_daily_mm", live_data)
+        self.assertIn("wind_speed_kmh", live_data)
+        self.assertIn("timestamp", live_data)
+        self.assertIn("dashboard_url", live_data)
+        self.assertIn("https://www.ecowitt.net/home/index?id=33161", live_data["dashboard_url"])
+
+        # 2. Comprobación en app.js
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("ensureLiveWeatherLoaded", app_js)
+        self.assertIn("renderLiveWeatherWidget", app_js)
+        self.assertIn('id="sec-live-weather"', app_js)
+        self.assertIn('live-weather-card', app_js)
+        self.assertIn('btn-live-refresh', app_js)
+        self.assertIn('btn-live-config-toggle', app_js)
+        self.assertIn('live-climatology-contrast', app_js)
+        self.assertIn('api.ecowitt.net', app_js)
+
+        # 3. Comprobación en styles.css
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".live-weather-card", css_text)
+        self.assertIn(".live-pulse-dot", css_text)
+        self.assertIn("@keyframes livePulseGlow", css_text)
+        self.assertIn(".live-kpi-grid", css_text)
+        self.assertIn(".live-climatology-contrast", css_text)
+        self.assertIn(".live-config-drawer", css_text)
+
+        # 4. Comprobación en sw.js (PWA precache de live.json)
+        sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+        self.assertIn("./data/live.json", sw_js)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

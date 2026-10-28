@@ -54,6 +54,8 @@
     cotidianoTab: 'labores',
     cotidianoYear: 2025,
     festivalSelectedId: 'san_juan',
+    liveWeather: null,
+    liveWeatherLastFetch: 0,
     cache: {
       index: null,
       records: null,
@@ -392,6 +394,104 @@
   }
 
   /* ------------------------------------------------------------------------
+   * EVO-032: Carga y consulta de tiempo actual en directo (Ecowitt API / live.json)
+   * ------------------------------------------------------------------------ */
+  async function ensureLiveWeatherLoaded(forceRefresh = false) {
+    const now = Date.now();
+    if (!forceRefresh && STATE.liveWeather && (now - STATE.liveWeatherLastFetch < 120000)) {
+      return STATE.liveWeather;
+    }
+
+    // 1. Comprobar si existen credenciales personalizadas en localStorage
+    let customCreds = null;
+    try {
+      const saved = localStorage.getItem('mr-ecowitt-creds');
+      if (saved) {
+        customCreds = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.warn('Error leyendo mr-ecowitt-creds:', e);
+    }
+
+    if (customCreds && customCreds.application_key && customCreds.api_key && customCreds.mac) {
+      try {
+        const query = new URLSearchParams({
+          application_key: customCreds.application_key.trim(),
+          api_key: customCreds.api_key.trim(),
+          mac: customCreds.mac.trim(),
+          call_back: 'all',
+        });
+        const liveApiUrl = `https://api.ecowitt.net/api/v3/device/real_time?${query.toString()}`;
+        const resp = await fetch(liveApiUrl, { mode: 'cors' });
+        if (resp.ok) {
+          const apiJson = await resp.json();
+          if (apiJson && apiJson.code === 0 && apiJson.data) {
+            const d = apiJson.data;
+            const outdoor = d.outdoor || {};
+            const solar = d.solar_and_uvi || {};
+            const rain = d.rainfall || {};
+            const wind = d.wind || {};
+            const press = d.pressure || {};
+
+            const deg_map = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+            const wDeg = wind.wind_direction && wind.wind_direction.value !== undefined ? Number(wind.wind_direction.value) : null;
+            const wCard = wDeg !== null ? deg_map[Math.floor(((wDeg + 11.25) / 22.5) % 16)] : '—';
+            const dtObj = new Date();
+
+            STATE.liveWeather = {
+              station: 'MeteoRiotuerto (Barrio de Arriba, Riotuerto)',
+              hardware: 'Ecowitt GW1100 + Sensores oficiales',
+              elevation_m: 115,
+              timestamp: dtObj.toISOString(),
+              timestamp_str: dtObj.toISOString().replace('T', ' ').substring(0, 19),
+              date: dtObj.toISOString().split('T')[0],
+              time: dtObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+              temperature_c: outdoor.temperature ? Number(outdoor.temperature.value) : null,
+              temp_min_c: outdoor.temperature_low ? Number(outdoor.temperature_low.value) : null,
+              temp_max_c: outdoor.temperature_high ? Number(outdoor.temperature_high.value) : null,
+              feels_like_c: outdoor.feels_like ? Number(outdoor.feels_like.value) : null,
+              dew_point_c: outdoor.dew_point ? Number(outdoor.dew_point.value) : null,
+              humidity_pct: outdoor.humidity ? Number(outdoor.humidity.value) : null,
+              rain_daily_mm: rain.daily ? Number(rain.daily.value) : 0.0,
+              rain_rate_mm_h: rain.rain_rate ? Number(rain.rain_rate.value) : 0.0,
+              wind_speed_kmh: wind.wind_speed ? Number(wind.wind_speed.value) : 0.0,
+              wind_gust_kmh: wind.wind_gust ? Number(wind.wind_gust.value) : 0.0,
+              wind_gust_day_max_kmh: wind.wind_gust ? Number(wind.wind_gust.value) : 0.0,
+              wind_direction_deg: wDeg,
+              wind_direction_cardinal: wCard,
+              pressure_relative_hpa: press.relative ? Number(press.relative.value) : 1018.0,
+              solar_radiation_wm2: solar.solar ? Number(solar.solar.value) : 0.0,
+              uv_index: solar.uvi ? Number(solar.uvi.value) : 0,
+              status: 'online',
+              dashboard_url: 'https://www.ecowitt.net/home/index?id=33161',
+              is_live_api: true,
+            };
+            STATE.liveWeatherLastFetch = now;
+            return STATE.liveWeather;
+          }
+        }
+      } catch (err) {
+        console.warn('Fallo en consulta directa a API de Ecowitt; recurriendo a snapshot consolidado live.json:', err);
+      }
+    }
+
+    // 2. Fallback estándar a ./data/live.json (generado por build_data / ecowitt_downloader)
+    try {
+      const snap = await fetchJson(`live.json?_=${now}`);
+      STATE.liveWeather = {
+        ...snap,
+        is_live_api: false,
+      };
+      STATE.liveWeatherLastFetch = now;
+      return STATE.liveWeather;
+    } catch (e) {
+      console.warn('No se pudo cargar live.json, recurriendo a último registro en caché si existe:', e);
+      if (STATE.liveWeather) return STATE.liveWeather;
+      throw e;
+    }
+  }
+
+  /* ------------------------------------------------------------------------
    * Gestión de instancias de Chart.js y paleta dinámica según tema
    * ------------------------------------------------------------------------ */
   function chartPalette() {
@@ -438,11 +538,12 @@
    * VISTA 1: PORTADA DEL ALMANAQUE
    * ------------------------------------------------------------------------ */
   async function renderPortada() {
-    const [idx, comparisons, almanacs, recordsData] = await Promise.all([
+    const [idx, comparisons, almanacs, recordsData, liveData] = await Promise.all([
       ensureIndexLoaded(),
       ensureComparisonsLoaded(),
       ensureAllAlmanacsLoaded(),
       ensureRecordsLoaded(),
+      ensureLiveWeatherLoaded().catch(() => null),
     ]);
 
     const container = document.getElementById('view-portada');
@@ -558,6 +659,11 @@
           </a>
         </div>
       </article>
+
+      <!-- EVO-032: Píldora de tiempo actual en directo desde la API de Ecowitt / snapshot de la estación -->
+      <section id="sec-live-weather" class="live-weather-card" aria-labelledby="live-weather-heading">
+        <!-- Renderizado dinámico por renderLiveWeatherWidget() -->
+      </section>
 
       <!-- Síntesis cuantitativa del archivo (Indicadores generales en primer plano) -->
       <div class="kpi-grid" aria-label="Indicadores generales del archivo">
@@ -856,8 +962,256 @@
       </section>
     `;
 
+    // Renderizar píldora de tiempo actual en directo (EVO-032)
+    if (liveData) {
+      renderLiveWeatherWidget(liveData, ref);
+    }
+
     // Renderizar bloque «Un día como hoy en MeteoRiotuerto» (EVO-004 y EVO-028)
     renderOnThisDayWidget(idx, almanacs, recordsData);
+  }
+
+  /* ------------------------------------------------------------------------
+   * EVO-032: Renderizado del widget de tiempo actual en directo (Ecowitt)
+   * ------------------------------------------------------------------------ */
+  function renderLiveWeatherWidget(live, ref) {
+    const wrap = document.getElementById('sec-live-weather');
+    if (!wrap || !live) return;
+
+    const isLive = live.is_live_api;
+    const badgeText = isLive ? 'API Ecowitt en vivo' : 'Última observación de la estación';
+    const badgeClass = isLive ? 'live-badge' : 'live-badge badge-offline';
+    const liveTime = live.time || (live.timestamp_str ? live.timestamp_str.split(' ')[1].substring(0, 5) : '—');
+    const liveDate = live.date || (live.timestamp_str ? live.timestamp_str.split(' ')[0] : '');
+
+    // Contraste climatológico con la referencia histórica del mes en curso
+    let contrastHtml = '';
+    if (ref && ref.monthly_mean_temp_c && liveDate) {
+      const parts = liveDate.split('-');
+      const mIdx = parts.length > 1 ? parseInt(parts[1], 10) - 1 : 9;
+      const mName = MONTH_FULL_ES[mIdx] || '';
+      const refMonthTemp = ref.monthly_mean_temp_c[mIdx];
+      const refMonthRain = ref.monthly_mean_rain_mm[mIdx];
+
+      if (refMonthTemp !== undefined && live.temperature_c !== null) {
+        const diffT = live.temperature_c - refMonthTemp;
+        const diffTStr = diffT >= 0 ? `+${fmtNum(diffT, 1)} °C por encima` : `${fmtNum(diffT, 1)} °C por debajo`;
+        contrastHtml = `
+          <div class="live-climatology-contrast" role="note">
+            <span aria-hidden="true" style="font-size:1.1rem;line-height:1">📊</span>
+            <div>
+              <strong>Contraste con el archivo climatológico:</strong>
+              La temperatura actual de <strong>${fmtNum(live.temperature_c, 1)} °C</strong> se sitúa <strong>${diffTStr}</strong> del promedio histórico de ${mName.toLowerCase()} en Barrio de Arriba (${fmtNum(refMonthTemp, 1)} °C).
+              La lluvia registrada hoy suma <strong>${fmtNum(live.rain_daily_mm, 1)} mm</strong> (frente a la media mensual de ${fmtNum(refMonthRain, 1)} mm).
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    wrap.innerHTML = `
+      <div class="live-weather-header">
+        <div class="live-weather-title-wrap">
+          <span class="${badgeClass}">
+            <span class="live-pulse-dot" aria-hidden="true"></span>
+            <span>${badgeText}</span>
+          </span>
+          <h3 id="live-weather-heading" class="live-weather-title">Tiempo actual en Barrio de Arriba</h3>
+          <span class="live-weather-time">Observación del <strong>${fmtDateES(liveDate, false)}</strong> a las <strong>${escapeHtml(liveTime)} h</strong></span>
+        </div>
+        <div class="live-weather-actions">
+          <button type="button" id="btn-live-refresh" class="btn-live-action" title="Actualizar lectura instantánea">
+            <span class="spin-icon" aria-hidden="true">🔄</span>
+            <span>Actualizar</span>
+          </button>
+          <button type="button" id="btn-live-config-toggle" class="btn-live-action" title="Configurar conexión API directa a Ecowitt">
+            <span aria-hidden="true">⚙️</span>
+            <span>Conexión API</span>
+          </button>
+          <a href="${escapeHtml(live.dashboard_url || 'https://www.ecowitt.net/home/index?id=33161')}" target="_blank" rel="noopener noreferrer" class="btn-live-action" title="Abrir monitor completo en ecowitt.net">
+            <span aria-hidden="true">↗</span>
+            <span>Ecowitt.net</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="live-kpi-grid" aria-label="Condiciones meteorológicas actuales">
+        <div class="live-kpi-card">
+          <div class="live-kpi-card-header">
+            <span>🌡️ Temperatura</span>
+            <span class="live-kpi-unit">Extremos del día</span>
+          </div>
+          <div class="live-kpi-main-val">
+            ${live.temperature_c !== null ? fmtNum(live.temperature_c, 1) : '—'} <span class="live-kpi-unit">°C</span>
+          </div>
+          <div class="live-kpi-subdetail">
+            Sensación: <strong>${live.feels_like_c !== null ? fmtNum(live.feels_like_c, 1) : '—'} °C</strong><br>
+            Mín: <strong>${live.temp_min_c !== null ? fmtNum(live.temp_min_c, 1) : '—'} °C</strong> · Máx: <strong>${live.temp_max_c !== null ? fmtNum(live.temp_max_c, 1) : '—'} °C</strong>
+          </div>
+        </div>
+
+        <div class="live-kpi-card">
+          <div class="live-kpi-card-header">
+            <span>💧 Humedad relativa</span>
+            <span class="live-kpi-unit">Higrometría</span>
+          </div>
+          <div class="live-kpi-main-val">
+            ${live.humidity_pct !== null ? fmtNum(live.humidity_pct, 0) : '—'} <span class="live-kpi-unit">%</span>
+          </div>
+          <div class="live-kpi-subdetail">
+            Punto de rocío: <strong>${live.dew_point_c !== null ? fmtNum(live.dew_point_c, 1) : '—'} °C</strong><br>
+            Condensación sobre pastos y follaje
+          </div>
+        </div>
+
+        <div class="live-kpi-card">
+          <div class="live-kpi-card-header">
+            <span>🌧️ Precipitación hoy</span>
+            <span class="live-kpi-unit">Pluviometría</span>
+          </div>
+          <div class="live-kpi-main-val">
+            ${live.rain_daily_mm !== null ? fmtNum(live.rain_daily_mm, 1) : '0,0'} <span class="live-kpi-unit">mm</span>
+          </div>
+          <div class="live-kpi-subdetail">
+            Intensidad actual: <strong>${live.rain_rate_mm_h !== null ? fmtNum(live.rain_rate_mm_h, 1) : '0,0'} mm/h</strong><br>
+            Acumulador balancín calibrado WH40
+          </div>
+        </div>
+
+        <div class="live-kpi-card">
+          <div class="live-kpi-card-header">
+            <span>💨 Viento y racha</span>
+            <span class="live-kpi-unit">Anemometría</span>
+          </div>
+          <div class="live-kpi-main-val">
+            ${live.wind_speed_kmh !== null ? fmtNum(live.wind_speed_kmh, 1) : '0,0'} <span class="live-kpi-unit">km/h</span>
+          </div>
+          <div class="live-kpi-subdetail">
+            Racha hoy: <strong>${live.wind_gust_day_max_kmh !== null ? fmtNum(live.wind_gust_day_max_kmh, 1) : (live.wind_gust_kmh || 0)} km/h</strong><br>
+            Dirección: <strong>${live.wind_direction_deg !== null ? `${live.wind_direction_deg}° (${live.wind_direction_cardinal})` : '—'}</strong>
+          </div>
+        </div>
+
+        <div class="live-kpi-card">
+          <div class="live-kpi-card-header">
+            <span>🧭 Barometría y Sol</span>
+            <span class="live-kpi-unit">Atmósfera</span>
+          </div>
+          <div class="live-kpi-main-val">
+            ${live.pressure_relative_hpa !== null ? fmtNum(live.pressure_relative_hpa, 1) : '—'} <span class="live-kpi-unit">hPa</span>
+          </div>
+          <div class="live-kpi-subdetail">
+            Radiación: <strong>${live.solar_radiation_wm2 !== null ? fmtNum(live.solar_radiation_wm2, 0) : '0'} W/m²</strong><br>
+            Índice UV: <strong>${live.uv_index !== null ? fmtNum(live.uv_index, 0) : '0'}</strong>
+          </div>
+        </div>
+      </div>
+
+      ${contrastHtml}
+
+      <!-- Cajón de configuración de credenciales API Ecowitt (opcional para el propietario de la estación) -->
+      <div id="live-config-drawer" class="live-config-drawer" hidden>
+        <strong>⚙️ Conexión directa a la API de Ecowitt (v3)</strong>
+        <p style="margin:4px 0 10px;color:var(--txt-muted);font-size:0.78rem">
+          Si dispones de claves de acceso a la API oficial de Ecowitt, puedes introducirlas para consultar lecturas en directo segundo a segundo.
+          Las claves se guardan <strong>exclusivamente en tu navegador (localStorage)</strong> y nunca se envían a ningún servidor externo.
+        </p>
+        <div class="live-config-fields">
+          <div>
+            <label for="ecowitt-app-key">Application Key</label>
+            <input type="text" id="ecowitt-app-key" placeholder="Ej: 3B4E... (hex)">
+          </div>
+          <div>
+            <label for="ecowitt-api-key">API Key</label>
+            <input type="password" id="ecowitt-api-key" placeholder="Ej: a9f8... (hex)">
+          </div>
+          <div>
+            <label for="ecowitt-mac">MAC de la estación</label>
+            <input type="text" id="ecowitt-mac" placeholder="Ej: Dirección MAC de la consola (12 hex)">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+          <button type="button" id="btn-save-ecowitt-creds" class="btn btn-sm btn-primary">Guardar y conectar en vivo</button>
+          <button type="button" id="btn-clear-ecowitt-creds" class="btn btn-sm btn-secondary">Restablecer a lectura de la estación</button>
+          <span id="live-config-status" style="font-size:0.78rem;font-weight:600"></span>
+        </div>
+      </div>
+    `;
+
+    // Conectar eventos del widget
+    const refreshBtn = document.getElementById('btn-live-refresh');
+    refreshBtn?.addEventListener('click', async () => {
+      refreshBtn.classList.add('btn-refreshing');
+      try {
+        const fresh = await ensureLiveWeatherLoaded(true);
+        renderLiveWeatherWidget(fresh, ref);
+      } catch (err) {
+        console.error('Error actualizando tiempo en vivo:', err);
+      } finally {
+        refreshBtn.classList.remove('btn-refreshing');
+      }
+    });
+
+    const toggleBtn = document.getElementById('btn-live-config-toggle');
+    const drawer = document.getElementById('live-config-drawer');
+    toggleBtn?.addEventListener('click', () => {
+      if (drawer) {
+        drawer.hidden = !drawer.hidden;
+        if (!drawer.hidden) {
+          try {
+            const saved = JSON.parse(localStorage.getItem('mr-ecowitt-creds') || '{}');
+            const inApp = document.getElementById('ecowitt-app-key');
+            const inApi = document.getElementById('ecowitt-api-key');
+            const inMac = document.getElementById('ecowitt-mac');
+            if (inApp) inApp.value = saved.application_key || '';
+            if (inApi) inApi.value = saved.api_key || '';
+            if (inMac) inMac.value = saved.mac || '';
+          } catch (e) {}
+        }
+      }
+    });
+
+    const saveBtn = document.getElementById('btn-save-ecowitt-creds');
+    saveBtn?.addEventListener('click', async () => {
+      const appKey = document.getElementById('ecowitt-app-key')?.value.trim();
+      const apiKey = document.getElementById('ecowitt-api-key')?.value.trim();
+      const mac = document.getElementById('ecowitt-mac')?.value.trim();
+      const statusEl = document.getElementById('live-config-status');
+
+      if (!appKey || !apiKey || !mac) {
+        if (statusEl) {
+          statusEl.textContent = 'Rellene todos los campos requeridos.';
+          statusEl.style.color = 'var(--accent-heat)';
+        }
+        return;
+      }
+
+      localStorage.setItem('mr-ecowitt-creds', JSON.stringify({
+        application_key: appKey,
+        api_key: apiKey,
+        mac: mac,
+      }));
+
+      if (statusEl) {
+        statusEl.textContent = 'Credenciales guardadas localmente. Conectando...';
+        statusEl.style.color = '#10b981';
+      }
+
+      const fresh = await ensureLiveWeatherLoaded(true);
+      renderLiveWeatherWidget(fresh, ref);
+    });
+
+    const clearBtn = document.getElementById('btn-clear-ecowitt-creds');
+    clearBtn?.addEventListener('click', async () => {
+      localStorage.removeItem('mr-ecowitt-creds');
+      const statusEl = document.getElementById('live-config-status');
+      if (statusEl) {
+        statusEl.textContent = 'Credenciales eliminadas. Conectando a datos consolidados...';
+        statusEl.style.color = 'var(--txt-muted)';
+      }
+      const fresh = await ensureLiveWeatherLoaded(true);
+      renderLiveWeatherWidget(fresh, ref);
+    });
   }
 
   /* ------------------------------------------------------------------------

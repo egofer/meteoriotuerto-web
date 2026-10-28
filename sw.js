@@ -4,7 +4,7 @@
  * Permite consultar almanaques, datos históricos y gráficos en el campo o zonas sin cobertura.
  */
 
-const CACHE_NAME = 'meteoriotuerto-cache-v1.1.3';
+const CACHE_NAME = 'meteoriotuerto-cache-v1.1.4';
 
 const PRECACHE_ASSETS = [
   './',
@@ -29,6 +29,7 @@ const PRECACHE_ASSETS = [
   './data/glossary.json',
   './data/station.geojson',
   './data/schema.json',
+  './data/live.json',
   './data/almanac_2022.json',
   './data/almanac_2023.json',
   './data/almanac_2024.json',

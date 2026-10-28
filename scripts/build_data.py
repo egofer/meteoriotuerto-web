@@ -2500,6 +2500,109 @@ def build_records_and_comparisons(
     return records_payload, comparisons_payload
 
 
+def build_live_payload(
+    almanacs: Dict[int, Dict[str, Any]],
+    all_daily_df: pd.DataFrame,
+    all_30min_dfs: Dict[int, Optional[pd.DataFrame]],
+) -> Dict[str, Any]:
+    """
+    Construye el producto data/live.json con la última observación instantánea
+    de la estación (Ecowitt) para alimentar la píldora de tiempo en vivo en portada (EVO-032).
+    """
+    last_year = max(almanacs.keys())
+    df_30 = all_30min_dfs.get(last_year)
+
+    cardinals = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+
+    def deg_to_cardinal(deg_val: Any) -> str:
+        if deg_val is None or pd.isna(deg_val):
+            return "—"
+        try:
+            val = float(deg_val)
+            idx = int((val + 11.25) / 22.5) % 16
+            return cardinals[idx]
+        except Exception:
+            return "—"
+
+    if df_30 is not None and not df_30.empty:
+        last = df_30.iloc[-1]
+        ts_str = str(last["timestamp_str"])
+        dt_val = last.get("dt")
+        iso_str = dt_val.strftime("%Y-%m-%dT%H:%M:%S+01:00") if hasattr(dt_val, "strftime") else ts_str
+        date_str = str(last["date"])
+        time_str = dt_val.strftime("%H:%M") if hasattr(dt_val, "strftime") else ts_str.split()[-1][:5]
+
+        temp_c = round(float(last["temp_mean"]), 1) if pd.notna(last["temp_mean"]) else None
+        feels_like = round(float(last["feels_like"]), 1) if pd.notna(last.get("feels_like")) else temp_c
+        dew_point = round(float(last["dew_point"]), 1) if pd.notna(last.get("dew_point")) else None
+        hum = int(round(float(last["humidity_mean"]))) if pd.notna(last.get("humidity_mean")) else None
+        rain_day = round(float(last["rain_daily"]), 1) if pd.notna(last.get("rain_daily")) else 0.0
+        rain_rate = round(float(last["rain_rate"]), 1) if pd.notna(last.get("rain_rate")) else 0.0
+        w_speed = round(float(last["wind_speed"]), 1) if pd.notna(last.get("wind_speed")) else 0.0
+        w_gust = round(float(last["wind_gust"]), 1) if pd.notna(last.get("wind_gust")) else 0.0
+        w_dir = int(round(float(last["wind_dir"]))) if pd.notna(last.get("wind_dir")) else None
+        press_rel = round(float(last["pressure_rel"]), 1) if pd.notna(last.get("pressure_rel")) else 1018.0
+        solar = round(float(last["solar"]), 1) if pd.notna(last.get("solar")) else 0.0
+        uvi = int(round(float(last["uvi"]))) if pd.notna(last.get("uvi")) else 0
+
+        day_rows = df_30[df_30["date"] == date_str]
+        tmin_day = round(float(day_rows["temp_min"].min()), 1) if not day_rows.empty and pd.notna(day_rows["temp_min"].min()) else temp_c
+        tmax_day = round(float(day_rows["temp_max"].max()), 1) if not day_rows.empty and pd.notna(day_rows["temp_max"].max()) else temp_c
+        gust_day = round(float(day_rows["wind_gust"].max()), 1) if not day_rows.empty and pd.notna(day_rows["wind_gust"].max()) else w_gust
+    else:
+        last_daily = all_daily_df.iloc[-1]
+        date_str = str(last_daily["date"])
+        ts_str = f"{date_str} 12:00:00"
+        iso_str = f"{date_str}T12:00:00+01:00"
+        time_str = "12:00"
+        temp_c = round(float(last_daily["temp_mean"]), 1)
+        feels_like = temp_c
+        dew_point = round(temp_c - ((100 - float(last_daily["humidity_mean"])) / 5.0), 1)
+        hum = int(round(float(last_daily["humidity_mean"])))
+        rain_day = round(float(last_daily["rain_daily"]), 1)
+        rain_rate = 0.0
+        w_speed = round(float(last_daily["wind_speed"]), 1)
+        w_gust = round(float(last_daily["wind_gust"]), 1)
+        w_dir = 180
+        press_rel = round(float(last_daily.get("pressure_rel", 1018.0)), 1)
+        solar = 0.0
+        uvi = 0
+        tmin_day = round(float(last_daily["temp_min"]), 1)
+        tmax_day = round(float(last_daily["temp_max"]), 1)
+        gust_day = w_gust
+
+    return {
+        "station": "MeteoRiotuerto (Barrio de Arriba, Riotuerto)",
+        "hardware": "Ecowitt GW1100 + WS69 + WH40 + WH32",
+        "elevation_m": 115,
+        "coordinates": {"lat": 43.341, "lon": -3.670},
+        "timestamp": iso_str,
+        "timestamp_str": ts_str,
+        "date": date_str,
+        "time": time_str,
+        "temperature_c": temp_c,
+        "temp_min_c": tmin_day,
+        "temp_max_c": tmax_day,
+        "feels_like_c": feels_like,
+        "dew_point_c": dew_point,
+        "humidity_pct": hum,
+        "rain_daily_mm": rain_day,
+        "rain_rate_mm_h": rain_rate,
+        "wind_speed_kmh": w_speed,
+        "wind_gust_kmh": w_gust,
+        "wind_gust_day_max_kmh": gust_day,
+        "wind_direction_deg": w_dir,
+        "wind_direction_cardinal": deg_to_cardinal(w_dir),
+        "pressure_relative_hpa": press_rel,
+        "solar_radiation_wm2": solar,
+        "uv_index": uvi,
+        "status": "online",
+        "dashboard_url": "https://www.ecowitt.net/home/index?id=33161",
+        "is_live_api": False,
+        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+
+
 def build_all(source_dir: Optional[Path], output_dir: Path, cache_dir: Path) -> bool:
     """
     Orquesta el flujo completo de extremo a extremo con escritura atómica.
@@ -2557,6 +2660,7 @@ def build_all(source_dir: Optional[Path], output_dir: Path, cache_dir: Path) -> 
             "glossary.json": get_glossary_payload(),
             "station.geojson": build_station_geojson(index_payload, records_payload, comparisons_payload),
             "schema.json": build_open_data_schema(),
+            "live.json": build_live_payload(almanacs, all_daily_df, all_30min_dfs),
         }
         for y, alm in almanacs.items():
             files_to_write[f"almanac_{y}.json"] = alm
