@@ -5422,11 +5422,11 @@ html[data-theme="dark"] .offline-badge.online-restored {
 /* EVO-031: Enlaces bidireccionales cruzados y distintivos de acontecimientos */
 .cal-cell.has-episode {
   position: relative;
-  box-shadow: inset 0 0 0 1.5px rgba(239, 68, 68, 0.7);
+  box-shadow: inset 0 0 0 1.5px #ef4444 !important;
 }
 
 .cal-cell.cal-peak-event {
-  box-shadow: inset 0 0 0 2px #d97706;
+  box-shadow: inset 0 0 0 2px #d97706, inset 0 0 0 3px rgba(0, 0, 0, 0.25) !important;
   font-weight: 800 !important;
 }
 
@@ -5435,10 +5435,45 @@ html[data-theme="dark"] .offline-badge.online-restored {
   position: absolute;
   top: 1px;
   right: 1px;
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: #ef4444;
+  box-shadow: 0 0 0 1px var(--bg-surface, #ffffff);
+  pointer-events: none;
+}
+
+.calendar-event-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--txt-muted);
+}
+
+.calendar-event-legend .legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendar-event-legend .legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+.calendar-event-legend .legend-box {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 2px #d97706;
+  background: var(--bg-subtle);
 }
 
 .cal-cell.cal-peak-event::after {

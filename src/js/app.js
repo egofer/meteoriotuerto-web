@@ -2093,6 +2093,11 @@
             </div>
           </div>
           <div id="almanac-calendar-container" class="calendar-heatmap-wrap"></div>
+          <div class="calendar-event-legend" aria-label="Leyenda de acontecimientos">
+            <span class="legend-item"><span class="legend-dot"></span> <strong>Punto rojo:</strong> día parte de un episodio catalogado</span>
+            <span class="legend-item"><span class="legend-box"></span> <strong>Borde dorado:</strong> día pico de intensidad</span>
+            <span class="legend-item"><em>(Pase el cursor por cualquier celda para ver el detalle y el badge del episodio)</em></span>
+          </div>
         </div>
 
         <!-- Hietograma diario y rachas máximas -->
