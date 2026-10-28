@@ -2194,7 +2194,7 @@
         </div>
 
         <div class="callout callout-info" style="margin-bottom:16px;font-size:0.86rem">
-          <strong>Nota metodológica — Identificación de patrones compatibles (EVO-005):</strong>
+          <strong>Nota metodológica — Identificación de patrones compatibles:</strong>
           Dado que una estación meteorológica en superficie registra variables locales en un único punto del valle y no el campo barométrico sinóptico en altura, <strong>este algoritmo identifica patrones instrumentales compatibles con el fenómeno de «surada» / efecto Foehn</strong>. ${escapeHtml(foehn.criteria_summary || '')}
         </div>
 
