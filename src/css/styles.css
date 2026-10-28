@@ -1002,17 +1002,24 @@ html[data-theme="dark"] .nav-link.active {
 }
 
 .almanac-character {
-  font-size: 0.85rem;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
   font-weight: 700;
+  line-height: 1.35;
   color: var(--txt-primary);
-  margin-bottom: 6px;
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
 .almanac-headline {
-  font-size: 0.82rem;
+  font-size: 0.81rem;
   color: var(--txt-secondary);
   margin-bottom: 14px;
-  line-height: 1.45;
+  line-height: 1.5;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
 }
 
 .almanac-mini-stats {
@@ -1020,7 +1027,7 @@ html[data-theme="dark"] .nav-link.active {
   padding-top: 12px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 10px 12px;
   font-size: 0.8rem;
   margin-bottom: 14px;
 }
@@ -1029,11 +1036,24 @@ html[data-theme="dark"] .nav-link.active {
   display: block;
   color: var(--txt-muted);
   font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 600;
+  margin-bottom: 2px;
 }
 
 .almanac-mini-stats div strong {
   font-family: var(--font-mono);
-  font-size: 0.92rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+}
+
+.almanac-mini-stats div small {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--txt-secondary);
+  margin-top: 1px;
 }
 
 .almanac-card-cta {

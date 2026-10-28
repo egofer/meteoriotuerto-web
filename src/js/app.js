@@ -451,10 +451,30 @@
     const rec = idx.headline_records;
     const yearsSummary = [...idx.years_summary].sort((a, b) => b.year - a.year);
 
+    // EVO-029: Titulares sinópticos de autor y efemérides destacadas por año
+    const YEAR_EDITORIAL_HEADLINES = {
+      2022: 'Año cálido y seco con estío prolongado y marcadas suradas otoñales',
+      2023: 'Grandes contrastes: el temporal Fien (509,8 mm en enero) y acusada sequía estival',
+      2024: 'Récord absoluto de calor (42,1 °C) y temporales atlánticos de viento sur',
+      2025: 'Pluviosidad abundante y gran regularidad estacional en el valle',
+      2026: 'Avance provisional del año en curso (registro consolidado hasta octubre)',
+    };
+
+    const YEAR_EDITORIAL_HIGHLIGHTS = {
+      2022: 'Mes más húmedo: Noviembre (261,1 mm) · 35 días de Surada / Foehn · Racha máx.: 73,4 km/h',
+      2023: 'Temporal Fien: 125,9 mm en 24 h y enero récord (509,8 mm) · Máxima de 40,4 °C en agosto',
+      2024: 'Récord histórico de 42,1 °C (11 ago.) · Vendaval Karlotta de 97,2 km/h · 2.047,9 mm anuales',
+      2025: 'Descarga torrencial récord de 145,2 mm/h en junio · 1.706,9 mm anuales con 218 días de lluvia',
+      2026: '300 días observados hasta octubre · Récord de amplitud de 25,2 °C (julio) · 1.505,2 mm acumulados',
+    };
+
     const almanacCardsHtml = yearsSummary.map((y) => {
+      const headline = YEAR_EDITORIAL_HEADLINES[y.year] || y.character;
+      const highlight = YEAR_EDITORIAL_HIGHLIGHTS[y.year] || `Mes más húmedo: ${escapeHtml(y.wettest_month)} (${fmtNum(y.wettest_month_mm, 1)} mm)`;
       const badgeHtml = y.is_provisional
-        ? `<span class="badge badge-provisional">Avance provisional</span>`
-        : `<span class="badge badge-complete">Anuario cerrado · ${fmtNum(y.coverage_pct, 1)}%</span>`;
+        ? `<span class="badge badge-provisional">Avance provisional · ${fmtNum(y.valid_days, 0)} días</span>`
+        : `<span class="badge badge-complete">Anuario consolidado · ${fmtNum(y.coverage_pct, 1)}%</span>`;
+
       return `
         <a href="#almanaque/${y.year}" class="almanac-card" aria-label="Abrir almanaque meteorológico de ${y.year}">
           <div>
@@ -462,29 +482,32 @@
               <span class="almanac-year-num">${y.year}</span>
               ${badgeHtml}
             </div>
-            <div class="almanac-character">${escapeHtml(y.character)}</div>
+            <div class="almanac-character">${escapeHtml(headline)}</div>
             <p class="almanac-headline">
-              Mes más húmedo: <strong>${escapeHtml(y.wettest_month)}</strong> (${fmtNum(y.wettest_month_mm, 1)} mm) ·
-              Racha máx.: <strong>${fmtNum(y.wind_gust_max_kmh, 1)} km/h</strong>
+              ${escapeHtml(highlight)}
             </p>
           </div>
           <div>
             <div class="almanac-mini-stats">
               <div>
-                <span>T. media</span>
-                <strong>${fmtNum(y.temp_mean, 1)} °C</strong>
-              </div>
-              <div>
-                <span>Precipitación</span>
+                <span>Precipitación anual</span>
                 <strong>${fmtNum(y.rain_total_mm, 1)} mm</strong>
+                <small>${fmtNum(y.rain_days_02, 0)} días de lluvia</small>
               </div>
               <div>
-                <span>Extremos térmicos</span>
-                <strong>${fmtNum(y.temp_min_abs, 1)} / ${fmtNum(y.temp_max_abs, 1)} °C</strong>
+                <span>Temperatura media</span>
+                <strong>${fmtNum(y.temp_mean, 1)} °C</strong>
+                <small>${fmtNum(y.temp_min_abs, 1)} / ${fmtNum(y.temp_max_abs, 1)} °C</small>
               </div>
               <div>
-                <span>Días de lluvia</span>
-                <strong>${fmtNum(y.rain_days_02, 0)} días</strong>
+                <span>Techo eólico</span>
+                <strong>${fmtNum(y.wind_gust_max_kmh, 1)} km/h</strong>
+                <small>${fmtDateES(y.wind_gust_max_date, false)}</small>
+              </div>
+              <div>
+                <span>Surada (Foehn)</span>
+                <strong>${y.foehn_days !== undefined ? fmtNum(y.foehn_days, 0) + ' días' : '—'}</strong>
+                <small>Compresión adiabática</small>
               </div>
             </div>
             <div class="almanac-card-cta">

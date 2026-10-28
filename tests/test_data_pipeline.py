@@ -1122,6 +1122,32 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".otd-verdict-box.verdict-mild", css_text)
         self.assertIn(".otd-verdict-badge", css_text)
 
+    def test_almanac_cards_editorial_headlines_and_hierarchy(self):
+        """Verifica que el evolutivo EVO-029 (Titulares sinópticos de autor y jerarquización de almanaques) esté operativo."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Definición de titulares de autor y efemérides en app.js
+        self.assertIn("YEAR_EDITORIAL_HEADLINES", app_js)
+        self.assertIn("YEAR_EDITORIAL_HIGHLIGHTS", app_js)
+
+        # 2. Comprobar los 5 titulares canónicos por año
+        self.assertIn("Año cálido y seco con estío prolongado y marcadas suradas otoñales", app_js)
+        self.assertIn("Grandes contrastes: el temporal Fien (509,8 mm en enero) y acusada sequía estival", app_js)
+        self.assertIn("Récord absoluto de calor (42,1 °C) y temporales atlánticos de viento sur", app_js)
+        self.assertIn("Pluviosidad abundante y gran regularidad estacional en el valle", app_js)
+        self.assertIn("Avance provisional del año en curso (registro consolidado hasta octubre)", app_js)
+
+        # 3. Métricas clave en tarjetas
+        self.assertIn("Precipitación anual", app_js)
+        self.assertIn("Temperatura media", app_js)
+        self.assertIn("Techo eólico", app_js)
+        self.assertIn("Surada (Foehn)", app_js)
+
+        # 4. Estilos visuales refinados en CSS
+        self.assertIn(".almanac-character", css_text)
+        self.assertIn(".almanac-mini-stats div small", css_text)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
