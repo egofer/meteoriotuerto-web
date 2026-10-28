@@ -70,6 +70,7 @@
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
   ];
+  const MONTH_FULL_ES = MONTH_NAMES_ES;
   const MONTH_SHORT_ES = [
     'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
     'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
@@ -989,7 +990,7 @@
     if (ref && ref.monthly_mean_temp_c && liveDate) {
       const parts = liveDate.split('-');
       const mIdx = parts.length > 1 ? parseInt(parts[1], 10) - 1 : 9;
-      const mName = MONTH_FULL_ES[mIdx] || '';
+      const mName = MONTH_NAMES_ES[mIdx] || '';
       const refMonthTemp = ref.monthly_mean_temp_c[mIdx];
       const refMonthRain = ref.monthly_mean_rain_mm[mIdx];
 
