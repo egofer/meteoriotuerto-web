@@ -643,8 +643,10 @@
               </p>
             </div>
             <div class="episode-card-footer">
-              <a href="#almanaque/2023" class="btn btn-sm btn-primary">Leer crónica de 2023 →</a>
-              <a href="#records" class="btn btn-sm btn-subtle">Ver en catálogo de extremos ↗</a>
+              <a href="#almanaque/2023" class="btn btn-sm btn-primary">Almanaque 2023 →</a>
+              <a href="#almanaque/2023/mes-01" class="btn btn-sm btn-secondary">📅 Ver enero 2023</a>
+              <a href="#records/episodio/wet-2023-01-11" class="btn btn-sm btn-subtle">⚡ Episodio extremo ↗</a>
+              <a href="#explorador/2023-01-14/2023-01-20/rain" class="btn btn-sm btn-subtle" title="Ver registros brutos de lluvia en el Explorador">🔍 Datos en Explorador</a>
             </div>
           </article>
 
@@ -683,8 +685,10 @@
               </p>
             </div>
             <div class="episode-card-footer">
-              <a href="#almanaque/2024" class="btn btn-sm btn-primary">Leer crónica de 2024 →</a>
-              <a href="#records" class="btn btn-sm btn-subtle">Ver en catálogo de extremos ↗</a>
+              <a href="#almanaque/2024" class="btn btn-sm btn-primary">Almanaque 2024 →</a>
+              <a href="#almanaque/2024/mes-08" class="btn btn-sm btn-secondary">📅 Ver agosto 2024</a>
+              <a href="#records/rankings/top_hottest_days" class="btn btn-sm btn-subtle">🔥 Top 10 de calor ↗</a>
+              <a href="#explorador/2024-08-09/2024-08-13/temp_max" class="btn btn-sm btn-subtle" title="Ver serie de temperaturas en el Explorador">🔍 Datos en Explorador</a>
             </div>
           </article>
 
@@ -723,8 +727,10 @@
               </p>
             </div>
             <div class="episode-card-footer">
-              <a href="#almanaque/2024" class="btn btn-sm btn-primary">Leer crónica de 2024 →</a>
-              <a href="#records" class="btn btn-sm btn-subtle">Ver en catálogo de extremos ↗</a>
+              <a href="#almanaque/2024" class="btn btn-sm btn-primary">Almanaque 2024 →</a>
+              <a href="#almanaque/2024/mes-02" class="btn btn-sm btn-secondary">📅 Ver febrero 2024</a>
+              <a href="#records/rankings/top_windiest_days" class="btn btn-sm btn-subtle">💨 Top 10 eólico ↗</a>
+              <a href="#explorador/2024-02-06/2024-02-10/wind_gust_max" class="btn btn-sm btn-subtle" title="Ver rachas de viento en el Explorador">🔍 Datos en Explorador</a>
             </div>
           </article>
 
@@ -763,8 +769,10 @@
               </p>
             </div>
             <div class="episode-card-footer">
-              <a href="#almanaque/2025" class="btn btn-sm btn-primary">Leer crónica de 2025 →</a>
-              <a href="#records" class="btn btn-sm btn-subtle">Ver en catálogo de extremos ↗</a>
+              <a href="#almanaque/2025" class="btn btn-sm btn-primary">Almanaque 2025 →</a>
+              <a href="#almanaque/2025/mes-06" class="btn btn-sm btn-secondary">📅 Ver junio 2025</a>
+              <a href="#records/absolutos" class="btn btn-sm btn-subtle">⚡ Extremos absolutos ↗</a>
+              <a href="#explorador/2025-06-08/2025-06-12/rain" class="btn btn-sm btn-subtle" title="Ver datos de precipitación en el Explorador">🔍 Datos en Explorador</a>
             </div>
           </article>
         </div>
@@ -1214,6 +1222,7 @@
           </dl>
           <div class="otd-year-footer">
             <a href="#almanaque/${e.year}">Ver almanaque ${e.year} →</a>
+            <a href="#explorador/${e.isoDate}/${e.isoDate}" class="otd-exp-link" title="Consultar las observaciones de este día en el Explorador">🔍 Datos del día ↗</a>
           </div>
         </div>
       `;
@@ -1250,7 +1259,7 @@
           </div>
         </div>
 
-        <!-- Tarjeta cabecera con el veredicto y titular del día (EVO-028) -->
+        <!-- Tarjeta cabecera con el veredicto y titular del día (EVO-028 y EVO-031) -->
         <div class="otd-verdict-box ${verdict.boxClass}">
           <div class="otd-verdict-header">
             <span class="otd-verdict-badge ${verdict.badgeClass}">
@@ -1261,7 +1270,10 @@
           </div>
           <h3 class="otd-verdict-title">${verdict.title}</h3>
           <p class="otd-verdict-desc">${verdict.description}</p>
-          ${verdict.linkHtml ? `<div class="otd-verdict-link">${verdict.linkHtml}</div>` : ''}
+          <div class="otd-verdict-actions" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+            ${verdict.linkHtml ? `<span class="otd-verdict-link">${verdict.linkHtml}</span>` : ''}
+            <a href="#explorador?from=2022-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}&to=2026-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}" class="btn btn-sm btn-subtle" title="Buscar registros de este día en la serie histórica en el Explorador">🔍 Explorar este día en la serie histórica ↗</a>
+          </div>
         </div>
 
         <div class="otd-summary-strip">
@@ -1877,7 +1889,7 @@
         ? ` <span title="${m.valid_days} de ${m.calendar_days} días observados" style="color:var(--accent-solar);font-size:0.75rem">(${m.valid_days}/${m.calendar_days} d)</span>`
         : '';
       return `
-        <tr>
+        <tr id="mes-${alm.year}-${String(m.month).padStart(2, '0')}" class="almanac-month-row">
           <td><strong>${m.name}</strong>${incTag}</td>
           <td class="num"><strong>${fmtNum(m.temp_mean, 1)}</strong></td>
           <td class="num">${fmtNum(m.temp_max_mean, 1)}</td>
@@ -2599,6 +2611,9 @@
       };
     });
 
+    // EVO-031: Catálogo de episodios para marcar distintivos en días destacados
+    const episodesList = (alm.extreme_episodes && alm.extreme_episodes.episodes) || [];
+
     const isLeap = (alm.year % 4 === 0 && alm.year % 100 !== 0) || (alm.year % 400 === 0);
     const daysInMonths = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -2626,10 +2641,20 @@
           continue;
         }
 
+        const epForDay = episodesList.find((e) => e.start_date <= iso && iso <= e.end_date);
+        const isPeak = epForDay && epForDay.peak_date === iso;
+        let eventClasses = '';
+        if (epForDay) {
+          eventClasses = isPeak ? ' has-episode cal-peak-event' : ' has-episode';
+        }
+
         const style = getCalendarCellStyle(val, mode);
         const disp = val === 0 && mode === 'rain' ? '0' : fmtNum(val, val >= 10 || val <= -1 ? 0 : 1);
-        const tooltip = `${fmtDateES(iso, false)} · T.med: ${fmtNum(rec.tmean, 1)} °C (${fmtNum(rec.tmin, 1)} / ${fmtNum(rec.tmax, 1)} °C) · Lluvia: ${fmtNum(rec.rain, 1)} mm · Racha: ${fmtNum(rec.gust, 1)} km/h`;
-        bodyRows += `<td class="cal-cell" style="${style}" title="${escapeHtml(tooltip)}">${disp}</td>`;
+        let tooltip = `${fmtDateES(iso, false)} · T.med: ${fmtNum(rec.tmean, 1)} °C (${fmtNum(rec.tmin, 1)} / ${fmtNum(rec.tmax, 1)} °C) · Lluvia: ${fmtNum(rec.rain, 1)} mm · Racha: ${fmtNum(rec.gust, 1)} km/h`;
+        if (epForDay) {
+          tooltip += ` · ⚡ [Episodio: ${epForDay.type_label} (${fmtNum(epForDay.peak_value, 1)} ${epForDay.peak_value_unit})]`;
+        }
+        bodyRows += `<td id="cal-cell-${iso}" class="cal-cell${eventClasses}" style="${style}" title="${escapeHtml(tooltip)}" data-date="${iso}">${disp}</td>`;
       }
       bodyRows += '</tr>';
     }
@@ -4762,9 +4787,11 @@
     }
 
     tbody.innerHTML = list.map((e) => {
+      const monthPart = e.start_date ? e.start_date.split('-')[1] : null;
+      const almMonthHref = monthPart ? `#almanaque/${e.year}/mes-${monthPart}` : `#almanaque/${e.year}`;
       const yearHtml = e.is_provisional
-        ? `<a href="#almanaque/${e.year}">${e.year}</a> <span class="badge badge-provisional" style="font-size:0.65rem">prov.</span>`
-        : `<a href="#almanaque/${e.year}"><strong>${e.year}</strong></a>`;
+        ? `<a href="${almMonthHref}" title="Abrir mes de este episodio en el almanaque">${e.year}</a> <span class="badge badge-provisional" style="font-size:0.65rem">prov.</span>`
+        : `<a href="${almMonthHref}" title="Abrir mes de este episodio en el almanaque"><strong>${e.year}</strong></a>`;
 
       let metricHtml = '';
       if (e.total_rain_mm !== undefined) {
@@ -4784,14 +4811,16 @@
       }
 
       return `
-        <tr>
+        <tr id="episode-${e.id}" class="episode-table-row">
           <td>
             <span class="episode-badge episode-badge-${e.type}">
               ${e.type_icon} ${escapeHtml(e.type_label)}
             </span>
           </td>
           <td>
-            <strong>${fmtDateES(e.start_date, false)}</strong> al <strong>${fmtDateES(e.end_date, false)}</strong>
+            <a href="#explorador/${e.start_date}/${e.end_date}" title="Consultar las observaciones diarias de este periodo en el Explorador" style="text-decoration:underline; text-underline-offset:2px">
+              <strong>${fmtDateES(e.start_date, false)}</strong> al <strong>${fmtDateES(e.end_date, false)}</strong> 🔍
+            </a>
           </td>
           <td class="num mono"><strong>${e.duration_days} días</strong></td>
           <td class="mono">${yearHtml}</td>
@@ -8840,13 +8869,24 @@
 
   /* ------------------------------------------------------------------------
    * Enrutador SPA basado en Hash (#portada, #cotidiano, #almanaque/2025, etc.)
+   * EVO-031: Enlaces profundos bidireccionales cruzados y parámetros de consulta
    * ------------------------------------------------------------------------ */
   function parseHashRoute() {
     const raw = (window.location.hash || '#portada').replace(/^#/, '');
-    const parts = raw.split('/');
+    const [hashPath, queryStr] = raw.split('?');
+    const parts = hashPath.split('/');
     let route = parts[0] || 'portada';
     let param = parts[1] || null;
     let subparam = parts[2] || null;
+    let extraparam = parts[3] || null;
+
+    const queryParams = {};
+    if (queryStr) {
+      queryStr.split('&').forEach((pair) => {
+        const [k, v] = pair.split('=');
+        if (k) queryParams[decodeURIComponent(k)] = decodeURIComponent(v || '');
+      });
+    }
 
     // Compatibilidad y redirección para #fiestas -> #cotidiano/fiestas
     if (route === 'fiestas') {
@@ -8871,11 +8911,13 @@
       route: validRoutes.includes(route) ? route : 'portada',
       param,
       subparam,
+      extraparam,
+      queryParams,
     };
   }
 
   async function handleRouteChange() {
-    const { route, param, subparam } = parseHashRoute();
+    const { route, param, subparam, extraparam, queryParams } = parseHashRoute();
     STATE.route = route;
 
     // Actualizar pestaña activa en el menú principal (EVO-030: 5 pilares temáticos)
@@ -8922,6 +8964,8 @@
     if (errorEl) errorEl.hidden = true;
     if (loadingEl) loadingEl.hidden = false;
 
+    let scrollToTarget = null;
+
     try {
       const idx = await ensureIndexLoaded();
       const totalDaysEl = document.getElementById('header-total-days');
@@ -8942,10 +8986,62 @@
           ? Number(param)
           : STATE.selectedYear || 2025;
         await renderAlmanaque(targetYear);
+
+        // EVO-031: Deep link a mes o celda del calendario
+        if (subparam) {
+          const mMatch = subparam.match(/^mes-(\d{1,2})$/i) || subparam.match(/^(\d{1,2})$/);
+          if (mMatch) {
+            const mNum = String(parseInt(mMatch[1], 10)).padStart(2, '0');
+            scrollToTarget = document.getElementById(`mes-${targetYear}-${mNum}`);
+          } else if (subparam.startsWith('cal-') || subparam.includes('-')) {
+            const dateId = subparam.startsWith('cal-') ? subparam : `cal-cell-${subparam}`;
+            scrollToTarget = document.getElementById(dateId);
+          }
+        }
       } else if (route === 'explorador') {
+        // EVO-031: Preconfigurar explorador desde deep links
+        if (param && param.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          STATE.explorer.dateFrom = param;
+          STATE.explorer.dateTo = (subparam && subparam.match(/^\d{4}-\d{2}-\d{2}$/)) ? subparam : param;
+          if (extraparam && EXPLORER_VARIABLES[extraparam]) {
+            STATE.explorer.variable = extraparam;
+          }
+        }
+        if (queryParams.from && queryParams.from.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          STATE.explorer.dateFrom = queryParams.from;
+        }
+        if (queryParams.to && queryParams.to.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          STATE.explorer.dateTo = queryParams.to;
+        }
+        if (queryParams.var && EXPLORER_VARIABLES[queryParams.var]) {
+          STATE.explorer.variable = queryParams.var;
+        }
         await renderExplorador();
       } else if (route === 'records') {
         await renderRecords();
+        // EVO-031: Deep link a episodio o ranking
+        if (param === 'episodio' && subparam) {
+          scrollToTarget = document.getElementById(`episode-${subparam}`) || document.getElementById('extreme-episodes-section');
+        } else if (param === 'episodios') {
+          if (subparam && ['heatwave', 'coldwave', 'wet_spell', 'dry_spell', 'foehn_spell'].includes(subparam)) {
+            STATE.episodes.filterType = subparam;
+            const btn = document.querySelector(`.episodes-filter-btn[data-type="${subparam}"]`);
+            if (btn) btn.click();
+          }
+          scrollToTarget = document.getElementById('extreme-episodes-section');
+        } else if (param === 'rankings') {
+          if (subparam) {
+            STATE.recordsRankingKey = subparam;
+            const sel = document.getElementById('select-ranking-cat');
+            if (sel) {
+              sel.value = subparam;
+              sel.dispatchEvent(new Event('change'));
+            }
+          }
+          scrollToTarget = document.getElementById('ranking-table-body')?.closest('.section-block');
+        } else if (param === 'absolutos') {
+          scrollToTarget = document.getElementById('records-heading')?.closest('.editorial-hero')?.nextElementSibling?.nextElementSibling;
+        }
       } else if (route === 'comparativas') {
         await renderComparativas();
       } else if (route === 'metodologia') {
@@ -8960,7 +9056,15 @@
       if (activeSection) {
         activeSection.hidden = false;
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (scrollToTarget) {
+        setTimeout(() => {
+          scrollToTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          scrollToTarget.classList.add('table-row-highlight');
+        }, 100);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     } catch (err) {
       console.error('Error al renderizar vista:', err);
       if (loadingEl) loadingEl.hidden = true;

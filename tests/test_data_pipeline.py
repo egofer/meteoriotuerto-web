@@ -1193,6 +1193,49 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".dropdown-caret", css_text)
         self.assertIn(".badge-provisional-sm", css_text)
 
+    def test_bidirectional_deep_linking_and_event_badges(self):
+        """Verifica que el evolutivo EVO-031 (Enlaces bidireccionales cruzados y distintivos de eventos) esté operativo."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Enlaces profundos desde las tarjetas de portada hacia mes de almanaque, catálogo y explorador
+        self.assertIn('href="#almanaque/2023/mes-01"', app_js)
+        self.assertIn('href="#records/episodio/wet-2023-01-11"', app_js)
+        self.assertIn('href="#explorador/2023-01-14/2023-01-20/rain"', app_js)
+        self.assertIn('href="#almanaque/2024/mes-08"', app_js)
+        self.assertIn('href="#records/rankings/top_hottest_days"', app_js)
+        self.assertIn('href="#almanaque/2024/mes-02"', app_js)
+        self.assertIn('href="#records/rankings/top_windiest_days"', app_js)
+        self.assertIn('href="#almanaque/2025/mes-06"', app_js)
+
+        # 2. Enlaces hacia el explorador desde el widget «Tal día como hoy»
+        self.assertIn('class="otd-exp-link"', app_js)
+        self.assertIn('href="#explorador/${e.isoDate}/${e.isoDate}"', app_js)
+        self.assertIn('Explorar este día en la serie histórica', app_js)
+
+        # 3. Distintivos de acontecimientos y celdas con ID en el calendario anual
+        self.assertIn('has-episode', app_js)
+        self.assertIn('cal-peak-event', app_js)
+        self.assertIn('id="cal-cell-${iso}"', app_js)
+        self.assertIn('data-date="${iso}"', app_js)
+        self.assertIn('⚡ [Episodio:', app_js)
+
+        # 4. Filas identificadas con ID para desplazamiento suave en tablas
+        self.assertIn('id="mes-${alm.year}-${String(m.month).padStart(2, \'0\')}"', app_js)
+        self.assertIn('id="episode-${e.id}"', app_js)
+
+        # 5. Enrutador SPA con soporte de parámetros y desplazamiento con resaltado
+        self.assertIn('scrollToTarget', app_js)
+        self.assertIn('table-row-highlight', app_js)
+        self.assertIn('queryParams', app_js)
+
+        # 6. Reglas CSS específicas para celdas de eventos y resaltado
+        self.assertIn(".cal-cell.has-episode", css_text)
+        self.assertIn(".cal-cell.cal-peak-event", css_text)
+        self.assertIn(".otd-exp-link", css_text)
+        self.assertIn(".table-row-highlight", css_text)
+        self.assertIn("@keyframes rowHighlightPulse", css_text)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
