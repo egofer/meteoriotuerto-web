@@ -1259,9 +1259,10 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn('id="sec-live-weather"', app_js)
         self.assertIn('live-weather-card', app_js)
         self.assertIn('btn-live-refresh', app_js)
-        self.assertIn('btn-live-config-toggle', app_js)
         self.assertIn('live-climatology-contrast', app_js)
-        self.assertIn('api.ecowitt.net', app_js)
+        self.assertIn('Ecowitt.net', app_js)
+        self.assertNotIn('btn-live-config-toggle', app_js)
+        self.assertNotIn('live-config-drawer', app_js)
 
         # 3. Comprobación en styles.css
         css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
@@ -1270,7 +1271,6 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("@keyframes livePulseGlow", css_text)
         self.assertIn(".live-kpi-grid", css_text)
         self.assertIn(".live-climatology-contrast", css_text)
-        self.assertIn(".live-config-drawer", css_text)
 
         # 4. Comprobación en sw.js (PWA precache de live.json)
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
