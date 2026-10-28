@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27 10:03:11",
+  "generated_at": "2026-10-28 10:55:36",
   "reference_baseline": {
     "years_included": [
       2022,
@@ -345,11 +345,11 @@
     {
       "year": 2026,
       "is_provisional": true,
-      "valid_days": 300,
+      "valid_days": 301,
       "coverage_pct": 100.0,
       "character": "Provisional (año en curso: cálido y húmedo hasta octubre)",
       "temp_mean": 15.8,
-      "temp_max_mean": 22.0,
+      "temp_max_mean": 21.9,
       "temp_min_mean": 10.9,
       "temp_anomaly_vs_series": 1.27,
       "temp_max_abs": 41.3,
@@ -362,17 +362,17 @@
       "intense_heat_35": 11,
       "extreme_heat_40": 1,
       "tropical_nights": 4,
-      "rain_total_mm": 1505.2,
+      "rain_total_mm": 1523.7,
       "rain_anomaly_mm": null,
       "rain_anomaly_pct": null,
-      "eto_total_mm": 971.6,
-      "water_balance_mm": 533.6,
+      "eto_total_mm": 973.2,
+      "water_balance_mm": 550.5,
       "summer_balance_mm": -182.3,
       "water_deficit_days": 208,
-      "water_surplus_days": 92,
-      "rain_days_02": 155,
-      "rain_days_1": 112,
-      "rain_days_10": 46,
+      "water_surplus_days": 93,
+      "rain_days_02": 157,
+      "rain_days_1": 113,
+      "rain_days_10": 47,
       "rain_days_30": 8,
       "max_daily_rain_mm": 83.8,
       "max_daily_rain_date": "2026-10-07",
@@ -387,18 +387,18 @@
       "foehn_days": 17,
       "wind_foehn_days": 7,
       "thermal_foehn_days": 13,
-      "hdd_15_5": 597.9,
+      "hdd_15_5": 598.3,
       "cdd_21_0": 94.2,
-      "gdd_10_0": 1827.5,
-      "temp_median": 16.1,
+      "gdd_10_0": 1832.6,
+      "temp_median": 16.0,
       "temp_p10": 9.2,
       "temp_p90": 22.4,
-      "comfort_days_15_25": 147,
-      "comfort_pct_15_25": 49.0,
+      "comfort_days_15_25": 148,
+      "comfort_pct_15_25": 49.2,
       "thermal_bands": {
         "cold_severe": 1,
         "cool_fresh": 48,
-        "comfort_mild": 70,
+        "comfort_mild": 71,
         "pleasant_warm": 77,
         "warm_hot": 73,
         "heat_intense": 31
@@ -406,7 +406,7 @@
       "humidity_mean_pct": 85.7,
       "pressure_mean_hpa": 1020.7,
       "solar_max_wm2": 1028.1,
-      "estimated_sunshine_hours": 2205.5
+      "estimated_sunshine_hours": 2211.0
     }
   ],
   "monthly_matrices": {
@@ -721,7 +721,7 @@
         58.5,
         56.3,
         81.7,
-        205.7,
+        224.2,
         null,
         null
       ]
@@ -793,7 +793,7 @@
         9,
         13,
         14,
-        19,
+        21,
         null,
         null
       ]
@@ -1009,7 +1009,7 @@
         0.0,
         0.0,
         0.0,
-        38.8,
+        39.2,
         null,
         null
       ]
@@ -1153,7 +1153,7 @@
         354.5,
         334.9,
         260.3,
-        144.2,
+        149.3,
         null,
         null
       ]
@@ -1225,7 +1225,7 @@
         157.3,
         126.0,
         106.5,
-        55.6,
+        57.2,
         null,
         null
       ]
@@ -1297,7 +1297,7 @@
         -98.8,
         -69.7,
         -24.8,
-        150.1,
+        167.0,
         null,
         null
       ]
@@ -4188,8 +4188,8 @@
         1504.0,
         1504.9,
         1505.2,
-        1505.2,
-        null,
+        1523.4,
+        1523.7,
         null,
         null,
         null,
@@ -4338,7 +4338,7 @@
       "2026": [
         1,
         48,
-        70,
+        71,
         77,
         73,
         31
@@ -4379,9 +4379,9 @@
       ],
       "2026": [
         0.3,
-        16.0,
-        23.3,
-        25.7,
+        15.9,
+        23.6,
+        25.6,
         24.3,
         10.3
       ]
@@ -4508,7 +4508,7 @@
           "P05": 8.1,
           "P10": 9.2,
           "P25": 11.5,
-          "P50": 16.1,
+          "P50": 16.0,
           "P75": 20.1,
           "P90": 22.4,
           "P95": 23.0
@@ -5452,20 +5452,20 @@
         "months_label": "Sep – Nov 2026",
         "is_provisional": true,
         "is_complete": false,
-        "observed_days": 57,
+        "observed_days": 58,
         "expected_days": 91,
-        "coverage_pct": 62.6,
+        "coverage_pct": 63.7,
         "notes": "Trimestre en curso (datos consolidados hasta octubre).",
-        "temp_mean": 17.1,
-        "temp_max_mean": 24.1,
+        "temp_mean": 17.0,
+        "temp_max_mean": 24.0,
         "temp_min_mean": 12.1,
         "temp_max_abs": 36.2,
         "temp_max_date": "2026-09-06",
         "temp_min_abs": 4.0,
         "temp_min_date": "2026-10-20",
-        "rain_total_mm": 287.4,
-        "rain_days_02": 33,
-        "rain_days_10": 9,
+        "rain_total_mm": 305.9,
+        "rain_days_02": 35,
+        "rain_days_10": 10,
         "rain_days_30": 1,
         "max_daily_rain_mm": 83.8,
         "max_daily_rain_date": "2026-10-07",
@@ -5477,10 +5477,10 @@
         "hot_days_30": 4,
         "tropical_nights": 0,
         "foehn_days": 3,
-        "hdd_15_5": 38.8,
+        "hdd_15_5": 39.2,
         "cdd_21_0": 7.3,
-        "gdd_10_0": 404.5,
-        "temp_anomaly": 1.2,
+        "gdd_10_0": 409.6,
+        "temp_anomaly": 1.1,
         "rain_anomaly_mm": null,
         "rain_anomaly_pct": null
       }
@@ -6571,12 +6571,12 @@
         "wettest_month_mm": 247.9
       },
       "2026": {
-        "rain_total_mm": 1505.2,
-        "eto_total_mm": 971.6,
-        "water_balance_mm": 533.6,
+        "rain_total_mm": 1523.7,
+        "eto_total_mm": 973.2,
+        "water_balance_mm": 550.5,
         "summer_balance_mm": -182.3,
         "deficit_days": 208,
-        "surplus_days": 92,
+        "surplus_days": 93,
         "driest_month": "Julio",
         "driest_month_mm": -98.8,
         "wettest_month": "Marzo",

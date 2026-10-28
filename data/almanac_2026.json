@@ -1,21 +1,21 @@
 {
   "year": 2026,
   "is_provisional": true,
-  "last_observed_date": "2026-10-27",
+  "last_observed_date": "2026-10-28",
   "coverage": {
     "calendar_days": 365,
-    "observed_span_days": 300,
-    "valid_days": 300,
+    "observed_span_days": 301,
+    "valid_days": 301,
     "missing_days": 0,
     "coverage_pct": 100.0,
     "has_30min_series": true,
-    "clean_30min_records": 14295,
+    "clean_30min_records": 14345,
     "quality_audit": {
       "daily_anomalies_corrected": [],
       "intraday_meta": {
         "available": true,
-        "raw_rows": 14297,
-        "clean_rows": 14295,
+        "raw_rows": 14347,
+        "clean_rows": 14345,
         "duplicates_removed": 2,
         "out_of_year_removed": 0,
         "embedded_daily_removed": 0,
@@ -72,7 +72,7 @@
   "stats": {
     "temperature": {
       "mean": 15.8,
-      "max_mean": 22.0,
+      "max_mean": 21.9,
       "min_mean": 10.9,
       "max_abs": 41.3,
       "max_abs_date": "2026-06-24",
@@ -96,12 +96,12 @@
       "torrid_nights_ge_25": 0
     },
     "precipitation": {
-      "total_mm": 1505.2,
-      "days_ge_02mm": 155,
-      "days_ge_1mm": 112,
-      "days_ge_10mm": 46,
+      "total_mm": 1523.7,
+      "days_ge_02mm": 157,
+      "days_ge_1mm": 113,
+      "days_ge_10mm": 47,
       "days_ge_30mm": 8,
-      "rain_days_pct": 51.7,
+      "rain_days_pct": 52.2,
       "max_daily_mm": 83.8,
       "max_daily_date": "2026-10-07",
       "max_rain_rate_mm_h": 85.8,
@@ -150,12 +150,12 @@
       "solar_max_raw_date": "2026-06-08",
       "uvi_max": 9,
       "uvi_max_raw": 9,
-      "estimated_sunshine_hours": 2205.5
+      "estimated_sunshine_hours": 2211.0
     },
     "degree_days": {
-      "hdd_15_5": 597.9,
+      "hdd_15_5": 598.3,
       "cdd_21_0": 94.2,
-      "gdd_10_0": 1827.5,
+      "gdd_10_0": 1832.6,
       "description": {
         "hdd": "Grados día de calefacción (base 15,5 °C): cuantifica la demanda de energía para calentar edificios.",
         "cdd": "Grados día de refrigeración (base 21,0 °C): cuantifica la necesidad de refrigeración por calor.",
@@ -167,7 +167,7 @@
         "P05": 8.1,
         "P10": 9.2,
         "P25": 11.5,
-        "P50": 16.1,
+        "P50": 16.0,
         "P75": 20.1,
         "P90": 22.4,
         "P95": 23.0
@@ -210,7 +210,7 @@
         "low": 8.0,
         "high": 15.0,
         "days": 48,
-        "pct": 16.0,
+        "pct": 15.9,
         "color": "#0d9488",
         "icon": "🧥"
       },
@@ -220,8 +220,8 @@
         "range": "15–20 °C",
         "low": 15.0,
         "high": 20.0,
-        "days": 70,
-        "pct": 23.3,
+        "days": 71,
+        "pct": 23.6,
         "color": "#10b981",
         "icon": "🍃"
       },
@@ -232,7 +232,7 @@
         "low": 20.0,
         "high": 25.0,
         "days": 77,
-        "pct": 25.7,
+        "pct": 25.6,
         "color": "#f59e0b",
         "icon": "☀️"
       },
@@ -260,10 +260,10 @@
       }
     ],
     "water_balance": {
-      "eto_total_mm": 971.6,
-      "water_balance_mm": 533.6,
+      "eto_total_mm": 973.2,
+      "water_balance_mm": 550.5,
       "deficit_days": 208,
-      "surplus_days": 92,
+      "surplus_days": 93,
       "summer_deficit_mm": -182.3,
       "surplus_months_count": 5,
       "deficit_months_count": 5,
@@ -276,13 +276,13 @@
   },
   "wind_analysis": {
     "source_resolution": "30min",
-    "total_direction_observations": 14290,
+    "total_direction_observations": 14340,
     "predominant_sector": "SSE",
     "rose_16": [
       {
         "sector": "N",
         "count": 266,
-        "frequency_pct": 1.86,
+        "frequency_pct": 1.85,
         "mean_speed_kmh": 1.4,
         "max_gust_kmh": 23.8
       },
@@ -303,41 +303,41 @@
       {
         "sector": "ENE",
         "count": 157,
-        "frequency_pct": 1.1,
+        "frequency_pct": 1.09,
         "mean_speed_kmh": 1.2,
         "max_gust_kmh": 20.1
       },
       {
         "sector": "E",
-        "count": 300,
-        "frequency_pct": 2.1,
+        "count": 302,
+        "frequency_pct": 2.11,
         "mean_speed_kmh": 1.3,
         "max_gust_kmh": 29.5
       },
       {
         "sector": "ESE",
-        "count": 487,
-        "frequency_pct": 3.41,
+        "count": 488,
+        "frequency_pct": 3.4,
         "mean_speed_kmh": 1.2,
         "max_gust_kmh": 27.7
       },
       {
         "sector": "SE",
-        "count": 1407,
-        "frequency_pct": 9.85,
+        "count": 1414,
+        "frequency_pct": 9.86,
         "mean_speed_kmh": 1.0,
         "max_gust_kmh": 23.8
       },
       {
         "sector": "SSE",
-        "count": 3571,
-        "frequency_pct": 24.99,
+        "count": 3587,
+        "frequency_pct": 25.01,
         "mean_speed_kmh": 0.6,
         "max_gust_kmh": 40.4
       },
       {
         "sector": "S",
-        "count": 1650,
+        "count": 1656,
         "frequency_pct": 11.55,
         "mean_speed_kmh": 1.0,
         "max_gust_kmh": 43.9
@@ -345,49 +345,49 @@
       {
         "sector": "SSW",
         "count": 864,
-        "frequency_pct": 6.05,
+        "frequency_pct": 6.03,
         "mean_speed_kmh": 5.8,
         "max_gust_kmh": 66.3
       },
       {
         "sector": "SW",
-        "count": 704,
-        "frequency_pct": 4.93,
+        "count": 705,
+        "frequency_pct": 4.92,
         "mean_speed_kmh": 5.9,
         "max_gust_kmh": 73.4
       },
       {
         "sector": "WSW",
-        "count": 435,
-        "frequency_pct": 3.04,
+        "count": 439,
+        "frequency_pct": 3.06,
         "mean_speed_kmh": 2.3,
         "max_gust_kmh": 53.3
       },
       {
         "sector": "W",
-        "count": 676,
-        "frequency_pct": 4.73,
+        "count": 677,
+        "frequency_pct": 4.72,
         "mean_speed_kmh": 2.7,
         "max_gust_kmh": 56.8
       },
       {
         "sector": "WNW",
-        "count": 1193,
+        "count": 1197,
         "frequency_pct": 8.35,
         "mean_speed_kmh": 4.1,
         "max_gust_kmh": 49.7
       },
       {
         "sector": "NW",
-        "count": 1590,
+        "count": 1596,
         "frequency_pct": 11.13,
         "mean_speed_kmh": 4.8,
         "max_gust_kmh": 55.0
       },
       {
         "sector": "NNW",
-        "count": 793,
-        "frequency_pct": 5.55,
+        "count": 795,
+        "frequency_pct": 5.54,
         "mean_speed_kmh": 3.1,
         "max_gust_kmh": 46.0
       }
@@ -396,14 +396,14 @@
       {
         "force": 0,
         "label": "F0 · Calma (<1 km/h)",
-        "days": 91,
-        "pct": 30.3
+        "days": 90,
+        "pct": 29.9
       },
       {
         "force": 1,
         "label": "F1 · Ventolina (1–5 km/h)",
-        "days": 174,
-        "pct": 58.0
+        "days": 176,
+        "pct": 58.5
       },
       {
         "force": 2,
@@ -911,37 +911,37 @@
       "month": 10,
       "name": "Octubre",
       "short": "Oct",
-      "valid_days": 27,
+      "valid_days": 28,
       "calendar_days": 31,
       "temp_mean": 15.3,
-      "temp_max_mean": 21.4,
+      "temp_max_mean": 21.3,
       "temp_min_mean": 11.2,
       "temp_max_abs": 28.3,
       "temp_max_date": "2026-10-14",
       "temp_min_abs": 4.0,
       "temp_min_date": "2026-10-20",
-      "rain_total": 205.7,
-      "rain_days_02": 19,
-      "rain_days_10": 6,
+      "rain_total": 224.2,
+      "rain_days_02": 21,
+      "rain_days_10": 7,
       "rain_max_day": 83.8,
       "rain_max_date": "2026-10-07",
       "wind_speed_mean": 1.3,
       "wind_gust_max": 38.5,
       "wind_gust_date": "2026-10-22",
-      "humidity_mean": 90.6,
+      "humidity_mean": 90.8,
       "pressure_mean": 1020.7,
       "solar_max": 662.3,
       "frost_days": 0,
       "hot_days_30": 0,
       "tropical_nights": 0,
       "foehn_days": 2,
-      "hdd_15_5": 38.8,
+      "hdd_15_5": 39.2,
       "cdd_21_0": 0.0,
-      "gdd_10_0": 144.2,
-      "eto_mm": 55.6,
-      "water_balance_mm": 150.1,
+      "gdd_10_0": 149.3,
+      "eto_mm": 57.2,
+      "water_balance_mm": 167.0,
       "deficit_days": 18,
-      "surplus_days": 9
+      "surplus_days": 10
     },
     {
       "month": 11,
@@ -1317,7 +1317,8 @@
       "2026-10-24",
       "2026-10-25",
       "2026-10-26",
-      "2026-10-27"
+      "2026-10-27",
+      "2026-10-28"
     ],
     "temp_mean": [
       3.9,
@@ -1619,7 +1620,8 @@
       11.7,
       13.5,
       17.8,
-      12.5
+      14.4,
+      13.2
     ],
     "temp_max": [
       12.4,
@@ -1921,7 +1923,8 @@
       17.2,
       20.9,
       27.4,
-      23.4
+      23.4,
+      18.6
     ],
     "temp_min": [
       -1.2,
@@ -2223,7 +2226,8 @@
       7.0,
       7.6,
       9.6,
-      10.2
+      10.2,
+      11.4
     ],
     "temp_amp": [
       13.6,
@@ -2525,7 +2529,8 @@
       10.2,
       13.3,
       17.8,
-      13.2
+      13.2,
+      7.2
     ],
     "feels_like": [
       3.9,
@@ -2827,7 +2832,8 @@
       11.7,
       13.5,
       17.8,
-      12.5
+      14.4,
+      13.2
     ],
     "dew_point": [
       2.2,
@@ -3129,7 +3135,8 @@
       9.7,
       11.8,
       11.8,
-      11.1
+      13.1,
+      12.5
     ],
     "humidity_mean": [
       90.3,
@@ -3431,7 +3438,8 @@
       88.7,
       90.6,
       76.2,
-      92.2
+      92.7,
+      95.6
     ],
     "humidity_min": [
       61.0,
@@ -3733,7 +3741,8 @@
       60.0,
       64.0,
       17.0,
-      34.0
+      34.0,
+      74.0
     ],
     "humidity_max": [
       99.0,
@@ -3976,6 +3985,7 @@
       99.0,
       96.0,
       98.0,
+      99.0,
       99.0,
       99.0,
       99.0,
@@ -4337,7 +4347,8 @@
       0.3,
       0.9,
       0.3,
-      0.0
+      18.2,
+      0.3
     ],
     "rain_rate": [
       1.8,
@@ -4639,7 +4650,8 @@
       1.8,
       1.8,
       1.8,
-      0.0
+      16.8,
+      1.8
     ],
     "wind_speed": [
       1.0,
@@ -4941,7 +4953,8 @@
       1.2,
       1.2,
       2.2,
-      1.0
+      1.1,
+      1.1
     ],
     "wind_gust": [
       5.5,
@@ -5243,7 +5256,8 @@
       11.1,
       16.6,
       27.7,
-      18.3
+      18.3,
+      16.6
     ],
     "wind_dir": [
       137.0,
@@ -5545,7 +5559,8 @@
       131.0,
       153.0,
       163.0,
-      144.0
+      158.0,
+      130.0
     ],
     "pressure_rel": [
       1019.9,
@@ -5847,7 +5862,8 @@
       1019.9,
       1020.1,
       1020.0,
-      1022.9
+      1022.3,
+      1020.7
     ],
     "pressure_rel_min": [
       1017.4,
@@ -6149,7 +6165,8 @@
       1017.6,
       1017.2,
       1015.3,
-      1020.6
+      1020.5,
+      1020.1
     ],
     "pressure_rel_max": [
       1021.7,
@@ -6451,7 +6468,8 @@
       1022.4,
       1022.7,
       1021.6,
-      1024.8
+      1024.8,
+      1022.3
     ],
     "solar_max": [
       278.1,
@@ -6753,7 +6771,8 @@
       462.8,
       357.8,
       497.9,
-      152.7
+      548.3,
+      320.5
     ],
     "uvi_max": [
       2.0,
@@ -7055,7 +7074,8 @@
       4.0,
       3.0,
       4.0,
-      1.0
+      5.0,
+      3.0
     ],
     "foehn_flag": [
       0,
@@ -7357,6 +7377,7 @@
       0,
       0,
       1,
+      0,
       0
     ],
     "eto": [
@@ -7659,7 +7680,8 @@
       1.6,
       2.0,
       2.5,
-      1.8
+      2.0,
+      1.4
     ],
     "water_balance": [
       -0.6,
@@ -7961,7 +7983,8 @@
       -1.3,
       -1.1,
       -2.2,
-      -1.8
+      16.2,
+      -1.1
     ],
     "eto_accum": [
       0.9,
@@ -8263,7 +8286,8 @@
       965.3,
       967.3,
       969.8,
-      971.6
+      971.8,
+      973.2
     ],
     "water_balance_accum": [
       -0.6,
@@ -8565,7 +8589,8 @@
       538.7,
       537.6,
       535.4,
-      533.6
+      551.6,
+      550.5
     ],
     "rain_accum": [
       0.3,
@@ -8867,7 +8892,8 @@
       1504.0,
       1504.9,
       1505.2,
-      1505.2
+      1523.4,
+      1523.7
     ]
   },
   "seasons": [
@@ -9003,20 +9029,20 @@
       "months_label": "Sep – Nov 2026",
       "is_provisional": true,
       "is_complete": false,
-      "observed_days": 57,
+      "observed_days": 58,
       "expected_days": 91,
-      "coverage_pct": 62.6,
+      "coverage_pct": 63.7,
       "notes": "Trimestre en curso (datos consolidados hasta octubre).",
-      "temp_mean": 17.1,
-      "temp_max_mean": 24.1,
+      "temp_mean": 17.0,
+      "temp_max_mean": 24.0,
       "temp_min_mean": 12.1,
       "temp_max_abs": 36.2,
       "temp_max_date": "2026-09-06",
       "temp_min_abs": 4.0,
       "temp_min_date": "2026-10-20",
-      "rain_total_mm": 287.4,
-      "rain_days_02": 33,
-      "rain_days_10": 9,
+      "rain_total_mm": 305.9,
+      "rain_days_02": 35,
+      "rain_days_10": 10,
       "rain_days_30": 1,
       "max_daily_rain_mm": 83.8,
       "max_daily_rain_date": "2026-10-07",
@@ -9028,10 +9054,10 @@
       "hot_days_30": 4,
       "tropical_nights": 0,
       "foehn_days": 3,
-      "hdd_15_5": 38.8,
+      "hdd_15_5": 39.2,
       "cdd_21_0": 7.3,
-      "gdd_10_0": 404.5,
-      "temp_anomaly": 1.2,
+      "gdd_10_0": 409.6,
+      "temp_anomaly": 1.1,
       "rain_anomaly_mm": null,
       "rain_anomaly_pct": null
     }
