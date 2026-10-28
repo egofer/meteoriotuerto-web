@@ -431,9 +431,121 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 4px;
-  overflow-x: auto;
-  scrollbar-width: thin;
+  overflow: visible;
   padding: 6px 0;
+}
+
+/* EVO-030: Desplegables accesibles para los 5 pilares temáticos */
+.nav-item-dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dropdown-caret {
+  font-size: 0.72rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+  opacity: 0.75;
+}
+
+.nav-item-dropdown:hover .dropdown-caret,
+.nav-item-dropdown:focus-within .dropdown-caret {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 275px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+  padding: 8px;
+  list-style: none;
+  z-index: 500;
+  display: none;
+}
+
+.nav-item-dropdown:hover .nav-dropdown-menu,
+.nav-item-dropdown:focus-within .nav-dropdown-menu,
+.nav-dropdown-menu.is-open {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: navDropdownFade 0.16s ease-out;
+}
+
+@keyframes navDropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nav-dropdown-link {
+  display: block;
+  padding: 8px 12px;
+  color: var(--txt-primary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.nav-dropdown-link:hover,
+.nav-dropdown-link:focus-visible {
+  background: var(--bg-subtle);
+  color: var(--accent-forest);
+  border-color: var(--border-color);
+}
+
+.nav-dropdown-link strong {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--txt-primary);
+}
+
+.nav-dropdown-link small {
+  display: block;
+  font-size: 0.73rem;
+  color: var(--txt-secondary);
+  margin-top: 1px;
+}
+
+.nav-dropdown-link.active-sub {
+  background: var(--bg-elevated);
+  border-color: var(--accent-forest);
+}
+
+.badge-provisional-sm {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: rgba(245, 158, 11, 0.18);
+  color: #b45309;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-right: 4px;
+}
+
+html[data-theme="dark"] .badge-provisional-sm {
+  background: rgba(245, 158, 11, 0.28);
+  color: #fcd34d;
 }
 
 .nav-link {
@@ -2181,6 +2293,47 @@ html[data-theme="dark"] .btn-excel:hover {
     display: flex !important;
     align-items: center;
     gap: 8px;
+  }
+
+  /* Adaptación móvil para desplegables de 5 pilares (EVO-030) */
+  .nav-item-dropdown {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-dropdown-trigger {
+    justify-content: space-between;
+  }
+
+  .nav-dropdown-menu {
+    position: static;
+    display: flex !important;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: none;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    margin: 4px 0 8px 12px;
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    min-width: auto;
+  }
+
+  .nav-dropdown-link {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-elevated);
+  }
+
+  .nav-dropdown-link:hover {
+    background: var(--bg-subtle);
+  }
+
+  .nav-item-dropdown:hover .dropdown-caret,
+  .nav-item-dropdown:focus-within .dropdown-caret {
+    transform: none;
   }
 
   /* 5. Liberar espacio vertical para el contenido */

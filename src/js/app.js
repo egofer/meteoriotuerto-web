@@ -827,42 +827,22 @@
         </div>
       </section>
 
-      <!-- Evolución interanual y tabla resumen en portada -->
-      <section class="section-block" aria-labelledby="sec-evol-title">
-        <div class="section-header">
-          <div>
-            <h2 id="sec-evol-title" class="section-title">Evolución interanual del registro (2022–2026)</h2>
-            <p class="section-subtitle">Comparación de acumulados pluviométricos, regímenes térmicos y días característicos</p>
+      <!-- Archivo y Análisis de la serie histórica (EVO-030) -->
+      <section class="section-block" aria-labelledby="sec-analisis-archive-title" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px;">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+          <div style="max-width: 680px;">
+            <span class="guide-badge">📊 Series históricas y herramientas analíticas</span>
+            <h3 id="sec-analisis-archive-title" style="font-family: var(--font-serif); font-size: 1.35rem; margin: 6px 0; color: var(--txt-primary);">
+              Archivo analítico, comparador interanual y metodología
+            </h3>
+            <p style="color: var(--txt-secondary); margin: 0; font-size: 0.92rem; line-height: 1.55;">
+              Consulte la evolución de las series diarias desde 2022, enfrente años cara a cara (<em>head-to-head</em>), examine los balances hídricos, audite la instrumentación técnica y descargue los registros en formatos abiertos (CSV, JSON y GeoJSON).
+            </p>
           </div>
-          <div class="btn-group">
-            <a href="#explorador" class="btn">Abrir explorador interactivo</a>
-            <a href="#metodologia" class="btn">Metodología y descargas</a>
-          </div>
-        </div>
-
-        <div class="charts-grid-2">
-          <div class="chart-panel">
-            <div class="chart-panel-header">
-              <div>
-                <h3 class="chart-panel-title">Precipitación acumulada y días de lluvia por año</h3>
-                <p class="chart-panel-subtitle">Media de años cerrados (2022–2025): 1.875,0 mm · 2026 muestra el avance hasta el 25 de octubre</p>
-              </div>
-            </div>
-            <div class="chart-canvas-wrap">
-              <canvas id="chart-home-rain"></canvas>
-            </div>
-          </div>
-
-          <div class="chart-panel">
-            <div class="chart-panel-header">
-              <div>
-                <h3 class="chart-panel-title">Perfil térmico anual (media, media de máximas y mínimas)</h3>
-                <p class="chart-panel-subtitle">Valores expresados en °C · 2026 es provisional al no incluir aún noviembre y diciembre</p>
-              </div>
-            </div>
-            <div class="chart-canvas-wrap">
-              <canvas id="chart-home-temp"></canvas>
-            </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="#comparativas" class="btn btn-primary" style="white-space: nowrap;">Comparativas entre años →</a>
+            <a href="#explorador" class="btn btn-secondary" style="white-space: nowrap;">Explorador de series</a>
+            <a href="#metodologia" class="btn btn-secondary" style="white-space: nowrap;">Metodología y datos</a>
           </div>
         </div>
       </section>
@@ -870,9 +850,6 @@
 
     // Renderizar bloque «Un día como hoy en MeteoRiotuerto» (EVO-004 y EVO-028)
     renderOnThisDayWidget(idx, almanacs, recordsData);
-
-    // Renderizar gráficos de portada
-    renderHomeCharts(comparisons);
   }
 
   /* ------------------------------------------------------------------------
@@ -1348,6 +1325,7 @@
   }
 
   function renderHomeCharts(comparisons) {
+    if (!document.getElementById('chart-home-rain')) return;
     const pal = chartPalette();
     const rows = comparisons.yearly_table;
     const labels = rows.map((r) => (r.is_provisional ? `${r.year} (prov.)` : String(r.year)));
@@ -8877,7 +8855,18 @@
       param = 'fiestas';
     }
 
-    const validRoutes = ['portada', 'cotidiano', 'almanaque', 'explorador', 'records', 'comparativas', 'fiestas', 'metodologia', 'glosario'];
+    // Compatibilidad para #analisis -> redirige por defecto a #explorador (EVO-030)
+    if (route === 'analisis') {
+      if (param && ['explorador', 'comparativas', 'metodologia', 'glosario'].includes(param)) {
+        route = param;
+        param = subparam;
+        subparam = null;
+      } else {
+        route = 'explorador';
+      }
+    }
+
+    const validRoutes = ['portada', 'cotidiano', 'almanaque', 'explorador', 'records', 'comparativas', 'fiestas', 'metodologia', 'glosario', 'analisis'];
     return {
       route: validRoutes.includes(route) ? route : 'portada',
       param,
@@ -8889,16 +8878,37 @@
     const { route, param, subparam } = parseHashRoute();
     STATE.route = route;
 
-    // Actualizar pestaña activa en el menú principal
+    // Actualizar pestaña activa en el menú principal (EVO-030: 5 pilares temáticos)
+    const ANALISIS_ROUTES = ['explorador', 'comparativas', 'metodologia', 'glosario', 'analisis'];
     document.querySelectorAll('#main-nav .nav-link').forEach((link) => {
       const r = link.getAttribute('data-route');
-      const isAct = (r === route) || (r === 'cotidiano' && (route === 'cotidiano' || route === 'fiestas'));
+      let isAct = false;
+      if (r === 'portada' && route === 'portada') isAct = true;
+      else if (r === 'almanaque' && route === 'almanaque') isAct = true;
+      else if (r === 'records' && route === 'records') isAct = true;
+      else if (r === 'cotidiano' && (route === 'cotidiano' || route === 'fiestas')) isAct = true;
+      else if (r === 'analisis' && ANALISIS_ROUTES.includes(route)) isAct = true;
+      else if (r === route) isAct = true;
+
       link.classList.toggle('active', isAct);
       if (isAct) {
         link.setAttribute('aria-current', 'page');
       } else {
         link.removeAttribute('aria-current');
       }
+    });
+
+    // Actualizar subenlace activo en desplegables de Almanaques y Análisis
+    document.querySelectorAll('#main-nav .nav-dropdown-link').forEach((sublink) => {
+      const subRoute = sublink.getAttribute('data-route-sub');
+      const href = sublink.getAttribute('href') || '';
+      let isSubAct = false;
+      if (route === 'almanaque' && param && href.includes(`almanaque/${param}`)) {
+        isSubAct = true;
+      } else if (subRoute && subRoute === route) {
+        isSubAct = true;
+      }
+      sublink.classList.toggle('active-sub', isSubAct);
     });
 
     // Ocultar todas las secciones y destruir gráficos previos
@@ -9092,8 +9102,8 @@
         navToggle.classList.toggle('active', isOpen);
       });
 
-      // Cerrar menú al hacer clic en cualquier enlace
-      mainNav.querySelectorAll('.nav-link').forEach((link) => {
+      // Cerrar menú al hacer clic en cualquier enlace (incluyendo submenús de pilares)
+      mainNav.querySelectorAll('.nav-link, .nav-dropdown-link').forEach((link) => {
         link.addEventListener('click', () => {
           if (mainNav.classList.contains('nav-open')) {
             mainNav.classList.remove('nav-open');
@@ -9157,12 +9167,34 @@
       }
     });
 
-    // Tecla Escape para cerrar modal y atajos de teclado Alt + Flecha Izq/Der
+    // Tecla Escape para cerrar modales y atajos de teclado Alt + 1..5 (pilares) y Alt + Flecha Izq/Der
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeTermModal();
+        if (mainNav && mainNav.classList.contains('nav-open')) {
+          mainNav.classList.remove('nav-open');
+          navToggle?.setAttribute('aria-expanded', 'false');
+          navToggle?.classList.remove('active');
+        }
         return;
       }
+
+      // Atajos de navegación directa para los 5 pilares temáticos: Alt + 1..5 (EVO-030)
+      if (e.altKey && ['1', '2', '3', '4', '5'].includes(e.key)) {
+        const tag = (e.target && e.target.tagName) || '';
+        if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) return;
+        e.preventDefault();
+        if (e.key === '1') window.location.hash = '#portada';
+        else if (e.key === '2') {
+          const year = STATE.selectedYear || 2025;
+          window.location.hash = `#almanaque/${year}`;
+        }
+        else if (e.key === '3') window.location.hash = '#records';
+        else if (e.key === '4') window.location.hash = '#cotidiano';
+        else if (e.key === '5') window.location.hash = '#explorador';
+        return;
+      }
+
       if (!e.altKey || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
       const tag = (e.target && e.target.tagName) || '';
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) return;

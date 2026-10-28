@@ -1148,6 +1148,51 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".almanac-character", css_text)
         self.assertIn(".almanac-mini-stats div small", css_text)
 
+    def test_five_pillars_navigation_and_streamlined_footer(self):
+        """Verifica que el evolutivo EVO-030 (Reorganización de navegación en 5 pilares y retirada de gráficos duplicados) esté operativo."""
+        html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Verificar los 5 pilares en el menú principal de index.html
+        self.assertIn('data-route="portada"', html_text)
+        self.assertIn('data-route="almanaque"', html_text)
+        self.assertIn('data-route="records"', html_text)
+        self.assertIn('data-route="cotidiano"', html_text)
+        self.assertIn('data-route="analisis"', html_text)
+
+        # 2. Verificar títulos y etiquetas de los 5 pilares
+        self.assertIn("Acontecimientos y Récords", html_text)
+        self.assertIn("Archivo y Análisis", html_text)
+        self.assertIn("Almanaques anuales", html_text)
+        self.assertIn("Riotuerto cotidiano", html_text)
+
+        # 3. Verificar desplegables y subenlaces en index.html
+        self.assertIn('class="nav-item-dropdown"', html_text)
+        self.assertIn('class="nav-dropdown-menu"', html_text)
+        self.assertIn('data-route-sub="explorador"', html_text)
+        self.assertIn('data-route-sub="comparativas"', html_text)
+        self.assertIn('data-route-sub="metodologia"', html_text)
+        self.assertIn('data-route-sub="glosario"', html_text)
+        self.assertIn('href="#almanaque/2026"', html_text)
+        self.assertIn('href="#almanaque/2022"', html_text)
+
+        # 4. Verificar retirada de gráficos duplicados del pie de portada en app.js
+        self.assertNotIn('<canvas id="chart-home-rain">', app_js)
+        self.assertNotIn('<canvas id="chart-home-temp">', app_js)
+        self.assertIn('id="sec-analisis-archive-title"', app_js)
+
+        # 5. Verificar atajos de teclado Alt + 1..5 y enrutamiento en app.js
+        self.assertIn("e.altKey && ['1', '2', '3', '4', '5'].includes(e.key)", app_js)
+        self.assertIn("ANALISIS_ROUTES", app_js)
+
+        # 6. Verificar estilos CSS de navegación y desplegables
+        self.assertIn(".nav-item-dropdown", css_text)
+        self.assertIn(".nav-dropdown-menu", css_text)
+        self.assertIn(".nav-dropdown-link", css_text)
+        self.assertIn(".dropdown-caret", css_text)
+        self.assertIn(".badge-provisional-sm", css_text)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -109,14 +109,40 @@
 
       <nav class="site-nav" aria-label="Navegación principal del almanaque">
         <ul class="nav-list" id="main-nav">
-          <li><a href="#portada" data-route="portada" class="nav-link active">Portada</a></li>
-          <li><a href="#cotidiano" data-route="cotidiano" class="nav-link">Riotuerto cotidiano</a></li>
-          <li><a href="#almanaque/2025" data-route="almanaque" class="nav-link">Almanaques anuales</a></li>
-          <li><a href="#explorador" data-route="explorador" class="nav-link">Explorador histórico</a></li>
-          <li><a href="#records" data-route="records" class="nav-link">Récords y efemérides</a></li>
-          <li><a href="#comparativas" data-route="comparativas" class="nav-link">Comparativas entre años</a></li>
-          <li><a href="#metodologia" data-route="metodologia" class="nav-link">Metodología y datos</a></li>
-          <li><a href="#glosario" data-route="glosario" class="nav-link">Glosario</a></li>
+          <li>
+            <a href="#portada" data-route="portada" class="nav-link active" title="Portada (Alt + 1)">Portada</a>
+          </li>
+          <li class="nav-item-dropdown">
+            <a href="#almanaque/2025" data-route="almanaque" class="nav-link nav-dropdown-trigger" id="nav-almanaques" aria-haspopup="true" aria-expanded="false" title="Almanaques anuales (Alt + 2)">
+              <span>Almanaques anuales</span>
+              <span class="dropdown-caret" aria-hidden="true">▾</span>
+            </a>
+            <ul class="nav-dropdown-menu" aria-labelledby="nav-almanaques">
+              <li><a href="#almanaque/2026" class="nav-dropdown-link"><span class="badge-provisional-sm">2026</span> Avance en curso (provisional)</a></li>
+              <li><a href="#almanaque/2025" class="nav-dropdown-link"><strong>2025</strong> Anuario consolidado</a></li>
+              <li><a href="#almanaque/2024" class="nav-dropdown-link"><strong>2024</strong> Anuario consolidado</a></li>
+              <li><a href="#almanaque/2023" class="nav-dropdown-link"><strong>2023</strong> Anuario consolidado</a></li>
+              <li><a href="#almanaque/2022" class="nav-dropdown-link"><strong>2022</strong> Anuario consolidado</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#records" data-route="records" class="nav-link" title="Acontecimientos y Récords (Alt + 3)">Acontecimientos y Récords</a>
+          </li>
+          <li>
+            <a href="#cotidiano" data-route="cotidiano" class="nav-link" title="Riotuerto cotidiano (Alt + 4)">Riotuerto cotidiano</a>
+          </li>
+          <li class="nav-item-dropdown">
+            <a href="#explorador" data-route="analisis" class="nav-link nav-dropdown-trigger" id="nav-analisis" aria-haspopup="true" aria-expanded="false" title="Archivo y Análisis (Alt + 5)">
+              <span>Archivo y Análisis</span>
+              <span class="dropdown-caret" aria-hidden="true">▾</span>
+            </a>
+            <ul class="nav-dropdown-menu" aria-labelledby="nav-analisis">
+              <li><a href="#explorador" data-route-sub="explorador" class="nav-dropdown-link">🔍 <strong>Explorador histórico</strong><small>Filtros de series diarias y descarga CSV/JSON</small></a></li>
+              <li><a href="#comparativas" data-route-sub="comparativas" class="nav-dropdown-link">⚖️ <strong>Comparativas entre años</strong><small>Duelos cara a cara, balance hídrico y anomalías</small></a></li>
+              <li><a href="#metodologia" data-route-sub="metodologia" class="nav-dropdown-link">📐 <strong>Metodología y calidad</strong><small>Emplazamiento, instrumental, mapa e interoperabilidad</small></a></li>
+              <li><a href="#glosario" data-route-sub="glosario" class="nav-dropdown-link">📖 <strong>Glosario meteorológico</strong><small>36 conceptos y definiciones del valle</small></a></li>
+            </ul>
+          </li>
           <li class="mobile-only-nav-item">
             <a href="https://app.weathercloud.net/d6619283754" target="_blank" rel="noopener noreferrer" class="nav-link nav-link-weathercloud" title="Consultar datos instantáneos en abierto en Weathercloud">
               <span class="pulse-dot" aria-hidden="true"></span>
@@ -197,20 +223,17 @@
         </p>
       </div>
       <div class="footer-col">
-        <h3 class="footer-subtitle">Secciones del archivo</h3>
+        <h3 class="footer-subtitle">Pilares del archivo</h3>
         <ul class="footer-links">
-          <li><a href="#portada">Portada del almanaque</a></li>
+          <li><a href="#portada">Portada editorial y efemérides</a></li>
+          <li><a href="#almanaque/2025">Almanaques anuales (2022–2026)</a></li>
+          <li><a href="#records">Acontecimientos y récords históricos</a></li>
           <li><a href="#cotidiano">Riotuerto cotidiano (labores y festividades)</a></li>
-          <li><a href="#almanaque/2025">Almanaque anual 2025</a></li>
-          <li><a href="#almanaque/2024">Almanaque anual 2024</a></li>
-          <li><a href="#almanaque/2023">Almanaque anual 2023</a></li>
-          <li><a href="#almanaque/2022">Almanaque anual 2022</a></li>
           <li><a href="#explorador">Explorador de series históricas</a></li>
-          <li><a href="#records">Récords y efemérides</a></li>
-          <li><a href="#comparativas">Comparativas interanuales</a></li>
-          <li><a href="#fiestas">El tiempo en las fiestas de Riotuerto</a></li>
+          <li><a href="#comparativas">Comparativas entre años</a></li>
           <li><a href="#metodologia">Metodología y control de calidad</a></li>
           <li><a href="#glosario">Glosario meteorológico</a></li>
+          <li><a href="#fiestas">El tiempo en las fiestas de Riotuerto</a></li>
         </ul>
       </div>
       <div class="footer-col">
