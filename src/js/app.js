@@ -3727,7 +3727,7 @@
   }
 
   /* ------------------------------------------------------------------------
-   * EXPORTACIÓN NATIVA A EXCEL (.XLSX) CON SHEETJS
+   * EXPORTACIÓN NATIVA A EXCEL (.XLSX) CON SHEETJS (MEJ-003: CARGA DIFERIDA BAJO DEMANDA)
    * ------------------------------------------------------------------------ */
   async function ensureXLSXLoaded() {
     if (window.XLSX && typeof window.XLSX.writeFile === 'function') {
@@ -3746,11 +3746,12 @@
       const s = document.createElement('script');
       s.id = 'script-xlsx-vendor';
       s.src = './src/js/vendor/xlsx.mini.min.js';
-      s.defer = true;
+      s.async = true;
       s.onload = () => resolve(window.XLSX);
       s.onerror = () => {
         const sCdn = document.createElement('script');
         sCdn.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.mini.min.js';
+        sCdn.async = true;
         sCdn.onload = () => resolve(window.XLSX);
         sCdn.onerror = (e) => reject(new Error('Error al cargar la librería de exportación a Excel.'));
         document.head.appendChild(sCdn);
@@ -3760,7 +3761,9 @@
   }
 
   async function exportWorkbookToXLSX(sheetsMap, defaultFilename) {
+    const prevCursor = document.body.style.cursor;
     try {
+      document.body.style.cursor = 'wait';
       const XLSX = await ensureXLSXLoaded();
       const wb = XLSX.utils.book_new();
       Object.entries(sheetsMap).forEach(([rawSheetName, sheetData]) => {
@@ -3777,6 +3780,8 @@
     } catch (err) {
       console.error('Error al exportar archivo Excel:', err);
       alert('No se pudo generar el archivo Excel: ' + (err.message || err));
+    } finally {
+      document.body.style.cursor = prevCursor;
     }
   }
 

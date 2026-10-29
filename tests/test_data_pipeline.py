@@ -580,8 +580,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertTrue(vendor_file.exists(), "Falta el archivo vendor SheetJS")
         self.assertGreater(vendor_file.stat().st_size, 100_000, "El script SheetJS es menor de 100 KB")
 
+        # MEJ-003: SheetJS no se carga síncronamente en index.html, sino diferido vía ensureXLSXLoaded()
         html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("xlsx.mini.min.js", html_text, "Falta la carga de SheetJS en index.html")
+        self.assertNotIn("xlsx.mini.min.js", html_text, "MEJ-003: index.html no debe cargar SheetJS síncronamente en el arranque")
 
         app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
         required_functions = [
@@ -1345,9 +1346,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.3", sw_js, "Falta cache v1.2.3 en sw.js")
+        self.assertIn("v1.2.4", sw_js, "Falta cache v1.2.4 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.2.3", index_html, "Falta v=1.2.3 en index.html")
+        self.assertIn("v=1.2.4", index_html, "Falta v=1.2.4 en index.html")
 
     def test_weather_underground_realtime_integration(self):
         """
@@ -1471,11 +1472,34 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertNotIn("function renderHomeCharts", app_js, "renderHomeCharts() debe haber sido purgada de app.js")
         self.assertNotIn("renderHomeCharts(", app_js, "No debe haber llamadas residuales a renderHomeCharts()")
 
-        # 4. Comprobar sincronización de caché v1.2.3
+        # 4. Comprobar sincronización de caché v1.2.4
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.3", sw_txt)
-        self.assertIn("app.js?v=1.2.3", index_txt)
+        self.assertIn("v1.2.4", sw_txt)
+        self.assertIn("app.js?v=1.2.4", index_txt)
+
+    def test_mej_003_sheetjs_deferred_loading(self):
+        """
+        MEJ-003: Verifica la carga diferida bajo demanda de SheetJS:
+        1. index.html no carga xlsx.mini.min.js en el arranque (ahorro de 245 KB en FCP/LCP).
+        2. sw.js precachea ./src/js/vendor/xlsx.mini.min.js para soporte offline inmediato.
+        3. ensureXLSXLoaded() en app.js inyecta dinámicamente el script con fallback a CDN.
+        4. exportWorkbookToXLSX() gestiona el cursor 'wait' y desbloquea en bloque finally.
+        5. Versión de caché v1.2.4 sincronizada en sw.js e index.html.
+        """
+        html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertNotIn("xlsx.mini.min.js", html_text, "index.html no debe cargar SheetJS de forma bloqueante en el arranque")
+
+        sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+        self.assertIn("./src/js/vendor/xlsx.mini.min.js", sw_txt, "sw.js debe precachear SheetJS para modo offline")
+        self.assertIn("v1.2.4", sw_txt)
+
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("async function ensureXLSXLoaded()", app_js)
+        self.assertIn("s.src = './src/js/vendor/xlsx.mini.min.js'", app_js)
+        self.assertIn("s.async = true", app_js)
+        self.assertIn("https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.mini.min.js", app_js)
+        self.assertIn("document.body.style.cursor = 'wait'", app_js)
 
 
 if __name__ == "__main__":
