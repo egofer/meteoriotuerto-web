@@ -1626,12 +1626,16 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertEqual(station["geo"]["elevation"], 115)
         self.assertEqual(station["address"]["addressLocality"], "Riotuerto")
         self.assertEqual(station["address"]["addressRegion"], "Cantabria")
+        self.assertEqual(station["provider"]["name"], "Emilio Gómez Fernández")
+        self.assertEqual(station["creator"]["name"], "Emilio Gómez Fernández")
         self.assertTrue(any("wunderground" in url for url in station["sameAs"]))
         self.assertTrue(any("weathercloud" in url for url in station["sameAs"]))
 
         # Comprobar Dataset
         dataset = graph["Dataset"]
         self.assertIn("2022–2026", dataset["name"])
+        self.assertEqual(dataset["creator"]["name"], "Emilio Gómez Fernández")
+        self.assertEqual(dataset["publisher"]["name"], "MeteoRiotuerto")
         self.assertIn("https://creativecommons.org/licenses/by/4.0/", dataset["license"])
         self.assertTrue(dataset["isAccessibleForFree"])
         self.assertEqual(dataset["temporalCoverage"], "2022-01-01/..")
