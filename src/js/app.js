@@ -654,10 +654,11 @@
    * VISTA 1: PORTADA DEL ALMANAQUE
    * ------------------------------------------------------------------------ */
   async function renderPortada() {
-    const [idx, comparisons, almanacs, recordsData, liveData] = await Promise.all([
+    // MEJ-002: Carga ágil y desacoplada de la Portada.
+    // Solo se descargan metadatos globales (index.json), catálogo de récords (records.json) y tiempo en directo.
+    // Los almanaques anuales (~1 MB) y comparativas se descargan bajo demanda de forma diferida.
+    const [idx, recordsData, liveData] = await Promise.all([
       ensureIndexLoaded(),
-      ensureComparisonsLoaded(),
-      ensureAllAlmanacsLoaded(),
       ensureRecordsLoaded(),
       ensureLiveWeatherLoaded().catch(() => null),
     ]);
@@ -1098,8 +1099,8 @@
       }, 60000);
     }
 
-    // Renderizar bloque «Un día como hoy en MeteoRiotuerto» (EVO-004 y EVO-028)
-    renderOnThisDayWidget(idx, almanacs, recordsData);
+    // Renderizar bloque «Un día como hoy en MeteoRiotuerto» de forma diferida (EVO-004, EVO-028, MEJ-002)
+    renderOnThisDayWidget(idx, recordsData);
   }
 
   /* ------------------------------------------------------------------------
@@ -1459,9 +1460,29 @@
     };
   }
 
-  function renderOnThisDayWidget(idx, almanacs, recordsData = STATE.cache.records) {
+  async function renderOnThisDayWidget(idx, recordsData = STATE.cache.records) {
     const wrap = document.getElementById('on-this-day-widget');
     if (!wrap) return;
+
+    // MEJ-002: Si los almanaques anuales no están en memoria, mostrar estado de carga mientras se descargan
+    const years = [...idx.series_overview.years_available].sort((a, b) => a - b);
+    const hasAllAlmanacs = STATE.cache.almanacs && years.every((y) => !!STATE.cache.almanacs[y]);
+
+    if (!hasAllAlmanacs) {
+      wrap.innerHTML = `
+        <div class="otd-panel" style="min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 16px;">
+          <div class="spinner" aria-hidden="true"></div>
+          <p style="color: var(--txt-secondary); margin: 0; font-size: 0.95rem;">
+            Cargando efemérides diarias de la serie histórica…
+          </p>
+        </div>
+      `;
+      await ensureAllAlmanacsLoaded();
+      // Si el usuario navegó a otra vista o el contenedor fue desmontado mientras se descargaba, abortar
+      if (!document.getElementById('on-this-day-widget') || STATE.route !== 'portada') return;
+    }
+
+    const almanacs = STATE.cache.almanacs || {};
 
     const now = new Date();
     const todayMonth = now.getMonth() + 1;
@@ -1482,7 +1503,6 @@
     const isToday = month === todayMonth && day === todayDay;
     const mmdd = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayLabel = `${day} de ${MONTH_NAMES_ES[month - 1].toLowerCase()}`;
-    const years = [...idx.series_overview.years_available].sort((a, b) => a - b);
     const lastObsDate = idx.series_overview.last_observation_date || '2026-10-25';
 
     // Extraer registros diarios para cada año en la fecha MM-DD
@@ -1740,7 +1760,7 @@
         month: refDate.getUTCMonth() + 1,
         day: refDate.getUTCDate(),
       };
-      renderOnThisDayWidget(idx, almanacs, recordsData);
+      renderOnThisDayWidget(idx, recordsData);
     };
 
     document.getElementById('btn-otd-prev')?.addEventListener('click', () => shiftDay(-1));
@@ -1748,132 +1768,18 @@
     document.getElementById('btn-otd-today')?.addEventListener('click', () => {
       const current = new Date();
       STATE.onThisDay = { month: current.getMonth() + 1, day: current.getDate() };
-      renderOnThisDayWidget(idx, almanacs, recordsData);
+      renderOnThisDayWidget(idx, recordsData);
     });
     document.getElementById('sel-otd-month')?.addEventListener('change', (ev) => {
       const newMonth = parseInt(ev.target.value, 10);
       const maxD = maxDaysPerMonth[newMonth - 1];
       STATE.onThisDay = { month: newMonth, day: Math.min(day, maxD) };
-      renderOnThisDayWidget(idx, almanacs, recordsData);
+      renderOnThisDayWidget(idx, recordsData);
     });
     document.getElementById('sel-otd-day')?.addEventListener('change', (ev) => {
       const newDay = parseInt(ev.target.value, 10);
       STATE.onThisDay = { month, day: newDay };
-      renderOnThisDayWidget(idx, almanacs, recordsData);
-    });
-  }
-
-  function renderHomeCharts(comparisons) {
-    if (!document.getElementById('chart-home-rain')) return;
-    const pal = chartPalette();
-    const rows = comparisons.yearly_table;
-    const labels = rows.map((r) => (r.is_provisional ? `${r.year} (prov.)` : String(r.year)));
-
-    createChart('home_rain', 'chart-home-rain', {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'Precipitación total (mm)',
-            data: rows.map((r) => r.rain_total_mm),
-            backgroundColor: rows.map((r) => (r.is_provisional ? 'rgba(56, 189, 248, 0.38)' : pal.rainBar)),
-            borderColor: pal.rain,
-            borderWidth: 1.5,
-            borderRadius: 5,
-            yAxisID: 'y',
-          },
-          {
-            label: 'Días de lluvia (≥0,2 mm)',
-            data: rows.map((r) => r.rain_days_02),
-            type: 'line',
-            borderColor: pal.forest,
-            backgroundColor: pal.forest,
-            borderWidth: 2.5,
-            pointRadius: 4,
-            tension: 0.25,
-            yAxisID: 'y1',
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { labels: { color: pal.text } },
-        },
-        scales: {
-          x: { ticks: { color: pal.text }, grid: { color: pal.grid } },
-          y: {
-            position: 'left',
-            beginAtZero: true,
-            title: { display: true, text: 'Precipitación (mm)', color: pal.text },
-            ticks: { color: pal.text },
-            grid: { color: pal.grid },
-          },
-          y1: {
-            position: 'right',
-            beginAtZero: true,
-            max: 300,
-            title: { display: true, text: 'Días con lluvia ≥0,2 mm', color: pal.text },
-            ticks: { color: pal.text },
-            grid: { drawOnChartArea: false },
-          },
-        },
-      },
-    });
-
-    createChart('home_temp', 'chart-home-temp', {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'Media de las máximas (°C)',
-            data: rows.map((r) => r.temp_max_mean),
-            borderColor: pal.heat,
-            backgroundColor: pal.heat,
-            borderWidth: 2,
-            pointRadius: 4,
-            tension: 0.25,
-          },
-          {
-            label: 'Temperatura media anual (°C)',
-            data: rows.map((r) => r.temp_mean),
-            borderColor: pal.forest,
-            backgroundColor: pal.forest,
-            borderWidth: 3,
-            pointRadius: 5,
-            tension: 0.25,
-          },
-          {
-            label: 'Media de las mínimas (°C)',
-            data: rows.map((r) => r.temp_min_mean),
-            borderColor: pal.cold,
-            backgroundColor: pal.cold,
-            borderWidth: 2,
-            pointRadius: 4,
-            tension: 0.25,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { labels: { color: pal.text } },
-        },
-        scales: {
-          x: { ticks: { color: pal.text }, grid: { color: pal.grid } },
-          y: {
-            title: { display: true, text: 'Temperatura (°C)', color: pal.text },
-            ticks: { color: pal.text },
-            grid: { color: pal.grid },
-          },
-        },
-      },
+      renderOnThisDayWidget(idx, recordsData);
     });
   }
 

@@ -1345,9 +1345,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.2", sw_js, "Falta cache v1.2.2 en sw.js")
+        self.assertIn("v1.2.3", sw_js, "Falta cache v1.2.3 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.2.2", index_html, "Falta v=1.2.2 en index.html")
+        self.assertIn("v=1.2.3", index_html, "Falta v=1.2.3 en index.html")
 
     def test_weather_underground_realtime_integration(self):
         """
@@ -1440,6 +1440,42 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         self.assertIn("./robots.txt", sw_txt)
         self.assertIn("./sitemap.xml", sw_txt)
+
+    def test_mej_002_portada_decoupling_and_dead_code_purge(self):
+        """
+        MEJ-002: Verifica el desacoplamiento de la descarga masiva de almanaques en la portada:
+        1. renderPortada() solo descarga index.json, records.json y estado en vivo (no bloquea con almanaques ni comparisons).
+        2. renderOnThisDayWidget() carga los almanaques de forma diferida y asíncrona bajo demanda.
+        3. Se purga el código muerto renderHomeCharts().
+        4. Las versiones de caché en sw.js e index.html están sincronizadas en v1.2.3.
+        """
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+
+        # 1. Comprobar que renderPortada no descarga masivamente almanaques ni comparativas
+        self.assertIn("async function renderPortada()", app_js)
+        portada_start = app_js.find("async function renderPortada()")
+        portada_body = app_js[portada_start : portada_start + 600]
+        self.assertIn("ensureIndexLoaded()", portada_body)
+        self.assertIn("ensureRecordsLoaded()", portada_body)
+        self.assertIn("ensureLiveWeatherLoaded()", portada_body)
+        self.assertNotIn("ensureComparisonsLoaded()", portada_body, "renderPortada no debe cargar comparisons.json")
+        self.assertNotIn("ensureAllAlmanacsLoaded()", portada_body, "renderPortada no debe cargar todos los almanaques por adelantado")
+
+        # 2. Comprobar que renderOnThisDayWidget es asíncrona y gestiona la carga diferida
+        self.assertIn("async function renderOnThisDayWidget(", app_js)
+        otd_start = app_js.find("async function renderOnThisDayWidget(")
+        otd_body = app_js[otd_start : otd_start + 1200]
+        self.assertIn("ensureAllAlmanacsLoaded()", otd_body)
+
+        # 3. Comprobar que renderHomeCharts ha sido eliminada por completo
+        self.assertNotIn("function renderHomeCharts", app_js, "renderHomeCharts() debe haber sido purgada de app.js")
+        self.assertNotIn("renderHomeCharts(", app_js, "No debe haber llamadas residuales a renderHomeCharts()")
+
+        # 4. Comprobar sincronización de caché v1.2.3
+        sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+        index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn("v1.2.3", sw_txt)
+        self.assertIn("app.js?v=1.2.3", index_txt)
 
 
 if __name__ == "__main__":
