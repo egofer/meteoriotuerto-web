@@ -1947,6 +1947,19 @@ html[data-theme="dark"] .btn-windrose-filter.active {
   margin-bottom: 4px;
 }
 
+/* MEJ-009: Accesibilidad en tablas de datos (WCAG 2.2 AA) */
+.data-table caption,
+.calendar-matrix caption,
+.table-caption {
+  caption-side: top;
+  text-align: left;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--txt-secondary);
+  padding: 4px 2px 8px 2px;
+  line-height: 1.4;
+}
+
 .data-table th,
 .data-table td {
   padding: 10px 14px;

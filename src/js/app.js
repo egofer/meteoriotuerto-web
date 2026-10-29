@@ -2579,17 +2579,18 @@
 
         <div class="table-responsive">
           <table class="data-table">
+            <caption class="table-caption">Episodios instrumentales de viento sur y efecto Foehn registrados en ${alm.year}</caption>
             <thead>
               <tr>
-                <th>Fecha</th>
-                <th>Modalidad sinóptica</th>
-                <th class="num">T. máx.</th>
-                <th class="num">T. mín.</th>
-                <th class="num">Amplitud (ΔT)</th>
-                <th class="num">HR mín.</th>
-                <th class="num">Racha máx.</th>
-                <th class="num">Rumbo</th>
-                <th class="num">Salto máx. 3 h (ΔT / ΔHR)</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Modalidad sinóptica</th>
+                <th scope="col" class="num">T. máx.</th>
+                <th scope="col" class="num">T. mín.</th>
+                <th scope="col" class="num">Amplitud (ΔT)</th>
+                <th scope="col" class="num">HR mín.</th>
+                <th scope="col" class="num">Racha máx.</th>
+                <th scope="col" class="num">Rumbo</th>
+                <th scope="col" class="num">Salto máx. 3 h (ΔT / ΔHR)</th>
               </tr>
             </thead>
             <tbody>
@@ -2739,9 +2740,10 @@
         <div class="stats-two-col">
           <div class="table-responsive">
             <table class="data-table">
+              <caption class="table-caption">Termometría y umbrales térmicos registrados en ${alm.year}</caption>
               <thead>
                 <tr>
-                  <th colspan="3">Termometría y umbrales térmicos (${alm.year})</th>
+                  <th scope="col" colspan="3">Termometría y umbrales térmicos (${alm.year})</th>
                 </tr>
               </thead>
               <tbody>
@@ -2771,9 +2773,10 @@
 
           <div class="table-responsive">
             <table class="data-table">
+              <caption class="table-caption">Pluviometría, viento y variables atmosféricas registradas en ${alm.year}</caption>
               <thead>
                 <tr>
-                  <th colspan="3">Pluviometría, viento y atmósfera (${alm.year})</th>
+                  <th scope="col" colspan="3">Pluviometría, viento y atmósfera (${alm.year})</th>
                 </tr>
               </thead>
               <tbody>
@@ -2822,23 +2825,24 @@
         </div>
         <div class="table-responsive">
           <table class="data-table">
+            <caption class="table-caption">Resumen mensual y acumulados anuales de variables meteorológicas de ${alm.year}</caption>
             <thead>
               <tr>
-                <th>Mes</th>
-                <th class="num">T. media (°C)</th>
-                <th class="num">Med. máx. (°C)</th>
-                <th class="num">Med. mín. (°C)</th>
-                <th class="num">T. máx. abs. (°C)</th>
-                <th class="num">T. mín. abs. (°C)</th>
-                <th class="num">Lluvia (mm)</th>
-                <th class="num">Días ≥0,2 mm</th>
-                <th class="num">Máx. 24h (mm)</th>
-                <th class="num">Racha máx. (km/h)</th>
-                <th class="num">Días Foehn</th>
-                <th class="num" title="Grados día de calefacción base 15,5 °C">HDD (15,5 °C)</th>
-                <th class="num" title="Grados día de refrigeración base 21,0 °C">CDD (21 °C)</th>
-                <th class="num" title="Grados día de desarrollo agrícola base 10,0 °C">GDD (10 °C)</th>
-                <th class="num">Humedad med.</th>
+                <th scope="col">Mes</th>
+                <th scope="col" class="num">T. media (°C)</th>
+                <th scope="col" class="num">Med. máx. (°C)</th>
+                <th scope="col" class="num">Med. mín. (°C)</th>
+                <th scope="col" class="num">T. máx. abs. (°C)</th>
+                <th scope="col" class="num">T. mín. abs. (°C)</th>
+                <th scope="col" class="num">Lluvia (mm)</th>
+                <th scope="col" class="num">Días ≥0,2 mm</th>
+                <th scope="col" class="num">Máx. 24h (mm)</th>
+                <th scope="col" class="num">Racha máx. (km/h)</th>
+                <th scope="col" class="num">Días Foehn</th>
+                <th scope="col" class="num" title="Grados día de calefacción base 15,5 °C">HDD (15,5 °C)</th>
+                <th scope="col" class="num" title="Grados día de refrigeración base 21,0 °C">CDD (21 °C)</th>
+                <th scope="col" class="num" title="Grados día de desarrollo agrícola base 10,0 °C">GDD (10 °C)</th>
+                <th scope="col" class="num">Humedad med.</th>
               </tr>
             </thead>
             <tbody>
@@ -3029,16 +3033,16 @@
     const isLeap = (alm.year % 4 === 0 && alm.year % 100 !== 0) || (alm.year % 400 === 0);
     const daysInMonths = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-    let dayHeaders = '<tr><th class="month-label">Mes \\ Día</th>';
+    let dayHeaders = '<tr><th scope="col" class="month-label">Mes \\ Día</th>';
     for (let d = 1; d <= 31; d++) {
-      dayHeaders += `<th>${d}</th>`;
+      dayHeaders += `<th scope="col">${d}</th>`;
     }
     dayHeaders += '</tr>';
 
     let bodyRows = '';
     for (let m = 1; m <= 12; m++) {
       const maxD = daysInMonths[m - 1];
-      bodyRows += `<tr><th class="month-label">${MONTH_SHORT_ES[m - 1]}</th>`;
+      bodyRows += `<tr><th scope="row" class="month-label">${MONTH_SHORT_ES[m - 1]}</th>`;
       for (let d = 1; d <= 31; d++) {
         if (d > maxD) {
           bodyRows += `<td class="cal-cell invalid-day"></td>`;
@@ -3071,7 +3075,7 @@
       bodyRows += '</tr>';
     }
 
-    wrap.innerHTML = `<table class="calendar-matrix" aria-label="Calendario diario de ${alm.year}"><thead>${dayHeaders}</thead><tbody>${bodyRows}</tbody></table>`;
+    wrap.innerHTML = `<table class="calendar-matrix" aria-label="Calendario diario de ${alm.year}"><caption class="table-caption">Matriz de calendario diario de ${mode === 'rain' ? 'precipitación (mm)' : 'temperatura media (°C)'} de ${alm.year}</caption><thead>${dayHeaders}</thead><tbody>${bodyRows}</tbody></table>`;
   }
 
   function getCalendarCellStyle(val, mode) {
@@ -4664,18 +4668,19 @@
         </div>
         <div class="table-responsive">
           <table class="data-table">
+            <caption class="table-caption">Registros diarios de variables meteorológicas según los filtros aplicados</caption>
             <thead>
               <tr>
-                <th>Fecha</th>
-                <th class="num">T. media (°C)</th>
-                <th class="num">T. máx. (°C)</th>
-                <th class="num">T. mín. (°C)</th>
-                <th class="num">Amplitud (°C)</th>
-                <th class="num">Lluvia (mm)</th>
-                <th class="num">Viento med. (km/h)</th>
-                <th class="num">Racha máx. (km/h)</th>
-                <th class="num">Humedad (%)</th>
-                <th class="num">Presión (hPa)</th>
+                <th scope="col">Fecha</th>
+                <th scope="col" class="num">T. media (°C)</th>
+                <th scope="col" class="num">T. máx. (°C)</th>
+                <th scope="col" class="num">T. mín. (°C)</th>
+                <th scope="col" class="num">Amplitud (°C)</th>
+                <th scope="col" class="num">Lluvia (mm)</th>
+                <th scope="col" class="num">Viento med. (km/h)</th>
+                <th scope="col" class="num">Racha máx. (km/h)</th>
+                <th scope="col" class="num">Humedad (%)</th>
+                <th scope="col" class="num">Presión (hPa)</th>
               </tr>
             </thead>
             <tbody id="explorer-table-body"></tbody>
@@ -5085,17 +5090,18 @@
         </div>
         <div class="table-responsive">
           <table class="data-table">
+            <caption class="table-caption">Ranking histórico de efemérides y valores extremos de Riotuerto</caption>
             <thead>
               <tr>
-                <th>Pos.</th>
-                <th>Fecha</th>
-                <th>Año</th>
-                <th class="num">Valor extremo</th>
-                <th class="num">T. máx. (°C)</th>
-                <th class="num">T. mín. (°C)</th>
-                <th class="num">T. media (°C)</th>
-                <th class="num">Lluvia 24h (mm)</th>
-                <th class="num">Racha máx. (km/h)</th>
+                <th scope="col">Pos.</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Año</th>
+                <th scope="col" class="num">Valor extremo</th>
+                <th scope="col" class="num">T. máx. (°C)</th>
+                <th scope="col" class="num">T. mín. (°C)</th>
+                <th scope="col" class="num">T. media (°C)</th>
+                <th scope="col" class="num">Lluvia 24h (mm)</th>
+                <th scope="col" class="num">Racha máx. (km/h)</th>
               </tr>
             </thead>
             <tbody id="ranking-table-body"></tbody>
@@ -5118,16 +5124,17 @@
         </div>
         <div class="table-responsive">
           <table class="data-table">
+            <caption class="table-caption">Efemérides y valores extremos por mes del calendario (2022–2026)</caption>
             <thead>
               <tr>
-                <th>Mes</th>
-                <th class="num">Techo térmico</th>
-                <th class="num">Suelo térmico</th>
-                <th class="num">Máxima lluvia 24h</th>
-                <th class="num">Racha máxima</th>
-                <th class="num">Edición más lluviosa</th>
-                <th class="num">Edición más seca</th>
-                <th class="num">Edición más cálida</th>
+                <th scope="col">Mes</th>
+                <th scope="col" class="num">Techo térmico</th>
+                <th scope="col" class="num">Suelo térmico</th>
+                <th scope="col" class="num">Máxima lluvia 24h</th>
+                <th scope="col" class="num">Racha máxima</th>
+                <th scope="col" class="num">Edición más lluviosa</th>
+                <th scope="col" class="num">Edición más seca</th>
+                <th scope="col" class="num">Edición más cálida</th>
               </tr>
             </thead>
             <tbody>
@@ -5184,17 +5191,18 @@
         <!-- Tabla detallada del catálogo -->
         <div class="table-responsive">
           <table class="data-table">
+            <caption class="table-caption">Catálogo cronológico de episodios climáticos extremos de Riotuerto (2022–2026)</caption>
             <thead>
               <tr>
-                <th>Tipo de episodio</th>
-                <th>Periodo (Inicio — Fin)</th>
-                <th class="num">Duración</th>
-                <th>Año</th>
-                <th class="num">Intensidad máxima</th>
-                <th>Fecha pico</th>
-                <th class="num">Métrica media / total</th>
-                <th>Indicador complementario</th>
-                <th>Descripción y síntesis del episodio</th>
+                <th scope="col">Tipo de episodio</th>
+                <th scope="col">Periodo (Inicio — Fin)</th>
+                <th scope="col" class="num">Duración</th>
+                <th scope="col">Año</th>
+                <th scope="col" class="num">Intensidad máxima</th>
+                <th scope="col">Fecha pico</th>
+                <th scope="col" class="num">Métrica media / total</th>
+                <th scope="col">Indicador complementario</th>
+                <th scope="col">Descripción y síntesis del episodio</th>
               </tr>
             </thead>
             <tbody id="episodes-table-body">
@@ -5653,27 +5661,28 @@
         <!-- Tabla analítica de todas las estaciones registradas -->
         <div class="table-responsive">
           <table class="data-table">
+            <caption class="table-caption">Comparativa estacional multianual de las cuatro estaciones OMM (2022–2026)</caption>
             <thead>
               <tr>
-                <th>Año</th>
-                <th>Estación</th>
-                <th class="num">OMM</th>
-                <th>Meses</th>
-                <th class="num">Días</th>
-                <th class="num">T. media</th>
-                <th class="num">Anom. T.</th>
-                <th class="num">T. máx. abs.</th>
-                <th class="num">T. mín. abs.</th>
-                <th class="num">Lluvia trimestral</th>
-                <th class="num">Anom. lluvia</th>
-                <th class="num">Días ≥0,2 mm</th>
-                <th class="num">Heladas</th>
-                <th class="num">Días ≥30 °C</th>
-                <th class="num">Noches trop.</th>
-                <th class="num">Días Foehn</th>
-                <th class="num">GDD (10 °C)</th>
-                <th class="num">HDD (15,5 °C)</th>
-                <th class="num">Racha máx.</th>
+                <th scope="col">Año</th>
+                <th scope="col">Estación</th>
+                <th scope="col" class="num">OMM</th>
+                <th scope="col">Meses</th>
+                <th scope="col" class="num">Días</th>
+                <th scope="col" class="num">T. media</th>
+                <th scope="col" class="num">Anom. T.</th>
+                <th scope="col" class="num">T. máx. abs.</th>
+                <th scope="col" class="num">T. mín. abs.</th>
+                <th scope="col" class="num">Lluvia trimestral</th>
+                <th scope="col" class="num">Anom. lluvia</th>
+                <th scope="col" class="num">Días ≥0,2 mm</th>
+                <th scope="col" class="num">Heladas</th>
+                <th scope="col" class="num">Días ≥30 °C</th>
+                <th scope="col" class="num">Noches trop.</th>
+                <th scope="col" class="num">Días Foehn</th>
+                <th scope="col" class="num">GDD (10 °C)</th>
+                <th scope="col" class="num">HDD (15,5 °C)</th>
+                <th scope="col" class="num">Racha máx.</th>
               </tr>
             </thead>
             <tbody id="seasonal-table-body">
@@ -5761,17 +5770,18 @@
 
         <div class="table-responsive" style="margin-bottom:20px">
           <table class="data-table">
+            <caption class="table-caption">Balance hídrico del suelo y evapotranspiración de referencia por año (2022–2026)</caption>
             <thead>
               <tr>
-                <th>Año</th>
-                <th class="num">Lluvia total</th>
-                <th class="num">Evapotranspiración ET₀</th>
-                <th class="num">Balance neto (P &minus; ET₀)</th>
-                <th class="num">Balance estival (JJA)</th>
-                <th class="num">Días déficit (P &lt; ET₀)</th>
-                <th class="num">Días recarga (P &ge; ET₀)</th>
-                <th>Mes mayor déficit</th>
-                <th>Mes mayor superávit</th>
+                <th scope="col">Año</th>
+                <th scope="col" class="num">Lluvia total</th>
+                <th scope="col" class="num">Evapotranspiración ET₀</th>
+                <th scope="col" class="num">Balance neto (P &minus; ET₀)</th>
+                <th scope="col" class="num">Balance estival (JJA)</th>
+                <th scope="col" class="num">Días déficit (P &lt; ET₀)</th>
+                <th scope="col" class="num">Días recarga (P &ge; ET₀)</th>
+                <th scope="col">Mes mayor déficit</th>
+                <th scope="col">Mes mayor superávit</th>
               </tr>
             </thead>
             <tbody>
@@ -5815,28 +5825,29 @@
         </div>
         <div class="table-responsive">
           <table class="data-table">
+            <caption class="table-caption">Cuadro sinóptico multianual de indicadores climáticos y anomalías (2022–2026)</caption>
             <thead>
               <tr>
-                <th>Año</th>
-                <th>Carácter sinóptico</th>
-                <th class="num">T. media</th>
-                <th class="num">Anom. T.</th>
-                <th class="num" title="Mediana de temperatura media diaria">Mediana (P50)</th>
-                <th class="num">T. máx. abs.</th>
-                <th class="num">T. mín. abs.</th>
-                <th class="num" title="Días con máxima entre 15 y 25 °C">Confort (15–25 °C)</th>
-                <th class="num">Lluvia anual</th>
-                <th class="num">Anom. lluvia</th>
-                <th class="num">Días ≥0,2 mm</th>
-                <th class="num">Días ≥30 mm</th>
-                <th class="num">Heladas</th>
-                <th class="num">Días ≥30 °C</th>
-                <th class="num">Noches trop.</th>
-                <th class="num">Días Foehn</th>
-                <th class="num">HDD (15,5 °C)</th>
-                <th class="num">CDD (21 °C)</th>
-                <th class="num">GDD (10 °C)</th>
-                <th class="num">Racha máx.</th>
+                <th scope="col">Año</th>
+                <th scope="col">Carácter sinóptico</th>
+                <th scope="col" class="num">T. media</th>
+                <th scope="col" class="num">Anom. T.</th>
+                <th scope="col" class="num" title="Mediana de temperatura media diaria">Mediana (P50)</th>
+                <th scope="col" class="num">T. máx. abs.</th>
+                <th scope="col" class="num">T. mín. abs.</th>
+                <th scope="col" class="num" title="Días con máxima entre 15 y 25 °C">Confort (15–25 °C)</th>
+                <th scope="col" class="num">Lluvia anual</th>
+                <th scope="col" class="num">Anom. lluvia</th>
+                <th scope="col" class="num">Días ≥0,2 mm</th>
+                <th scope="col" class="num">Días ≥30 mm</th>
+                <th scope="col" class="num">Heladas</th>
+                <th scope="col" class="num">Días ≥30 °C</th>
+                <th scope="col" class="num">Noches trop.</th>
+                <th scope="col" class="num">Días Foehn</th>
+                <th scope="col" class="num">HDD (15,5 °C)</th>
+                <th scope="col" class="num">CDD (21 °C)</th>
+                <th scope="col" class="num">GDD (10 °C)</th>
+                <th scope="col" class="num">Racha máx.</th>
               </tr>
             </thead>
             <tbody>
@@ -5889,16 +5900,17 @@
 
         <div class="table-responsive">
           <table class="data-table">
+            <caption class="table-caption">Calendario histórico de labores cotidianas y agroclimatología por año (2022–2026)</caption>
             <thead>
               <tr>
-                <th>Labor o actividad cotidiana</th>
-                <th>Criterio agroclimático</th>
-                <th>2022</th>
-                <th>2023</th>
-                <th>2024</th>
-                <th>2025</th>
-                <th>2026 (Avance)</th>
-                <th>Fecha media habitual</th>
+                <th scope="col">Labor o actividad cotidiana</th>
+                <th scope="col">Criterio agroclimático</th>
+                <th scope="col">2022</th>
+                <th scope="col">2023</th>
+                <th scope="col">2024</th>
+                <th scope="col">2025</th>
+                <th scope="col">2026 (Avance)</th>
+                <th scope="col">Fecha media habitual</th>
               </tr>
             </thead>
             <tbody>
@@ -6346,13 +6358,14 @@
           </button>
         </div>
         <table class="data-table h2h-table">
+          <caption class="table-caption">Marcador comparativo cara a cara de indicadores climatológicos: ${escapeHtml(profA.shortLabel)} vs. ${escapeHtml(profB.shortLabel)}</caption>
           <thead>
             <tr>
-              <th>Indicador climatológico</th>
-              <th class="num" style="color:#2563eb">Periodo A (${escapeHtml(profA.shortLabel)})</th>
-              <th style="width:180px;text-align:center">Proporción A vs. B</th>
-              <th class="num" style="color:#d97706">Periodo B (${escapeHtml(profB.shortLabel)})</th>
-              <th class="num">Diferencia (B − A)</th>
+              <th scope="col">Indicador climatológico</th>
+              <th scope="col" class="num" style="color:#2563eb">Periodo A (${escapeHtml(profA.shortLabel)})</th>
+              <th scope="col" style="width:180px;text-align:center">Proporción A vs. B</th>
+              <th scope="col" class="num" style="color:#d97706">Periodo B (${escapeHtml(profB.shortLabel)})</th>
+              <th scope="col" class="num">Diferencia (B − A)</th>
             </tr>
           </thead>
           <tbody>
@@ -8040,14 +8053,15 @@
         </div>
         <div class="table-responsive">
           <table class="data-table">
+            <caption class="table-caption">Auditoría de cobertura temporal y control de calidad de la serie meteorológica por año</caption>
             <thead>
               <tr>
-                <th>Año</th>
-                <th class="num">Días válidos / posibles</th>
-                <th class="num">Cobertura diaria</th>
-                <th class="num">Registros 30 min limpios</th>
-                <th>Incidencias documentadas y acciones de control de calidad</th>
-                <th class="num">Datos procesados</th>
+                <th scope="col">Año</th>
+                <th scope="col" class="num">Días válidos / posibles</th>
+                <th scope="col" class="num">Cobertura diaria</th>
+                <th scope="col" class="num">Registros 30 min limpios</th>
+                <th scope="col">Incidencias documentadas y acciones de control de calidad</th>
+                <th scope="col" class="num">Datos procesados</th>
               </tr>
             </thead>
             <tbody>
@@ -9113,13 +9127,14 @@
               </div>
               <div class="table-responsive">
                 <table class="data-table">
+                  <caption class="table-caption">Calendario fenológico y agroclimático de labores cotidianas en ${alm.year}</caption>
                   <thead>
                     <tr>
-                      <th>Labor o actividad cotidiana</th>
-                      <th>Criterio agroclimático</th>
-                      <th>Fecha observada en ${alm.year}</th>
-                      <th>Fecha media habitual</th>
-                      <th>Diagnóstico</th>
+                      <th scope="col">Labor o actividad cotidiana</th>
+                      <th scope="col">Criterio agroclimático</th>
+                      <th scope="col">Fecha observada en ${alm.year}</th>
+                      <th scope="col">Fecha media habitual</th>
+                      <th scope="col">Diagnóstico</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -9150,16 +9165,17 @@
 
           <div class="table-responsive">
             <table class="data-table">
+              <caption class="table-caption">Comparativa interanual de fechas de labores cotidianas y agroclimatología (2022–2026)</caption>
               <thead>
                 <tr>
-                  <th>Labor o actividad cotidiana</th>
-                  <th>Criterio agroclimático</th>
-                  <th>2022</th>
-                  <th>2023</th>
-                  <th>2024</th>
-                  <th>2025</th>
-                  <th>2026 (Avance)</th>
-                  <th>Fecha media habitual</th>
+                  <th scope="col">Labor o actividad cotidiana</th>
+                  <th scope="col">Criterio agroclimático</th>
+                  <th scope="col">2022</th>
+                  <th scope="col">2023</th>
+                  <th scope="col">2024</th>
+                  <th scope="col">2025</th>
+                  <th scope="col">2026 (Avance)</th>
+                  <th scope="col">Fecha media habitual</th>
                 </tr>
               </thead>
               <tbody>
@@ -9242,18 +9258,19 @@
             <!-- Tabla histórica de los 5 años -->
             <div class="table-responsive">
               <table class="data-table">
+                <caption class="table-caption">Comportamiento meteorológico histórico registrado durante la fiesta de ${escapeHtml(activeStat.name)} (2022–2026)</caption>
                 <thead>
                   <tr>
-                    <th>Año</th>
-                    <th>Fecha observada</th>
-                    <th class="num">T. media</th>
-                    <th class="num">T. máx.</th>
-                    <th class="num">T. mín.</th>
-                    <th class="num">Amplitud (ΔT)</th>
-                    <th class="num">Lluvia (24h)</th>
-                    <th class="num">Racha máx.</th>
-                    <th class="num">Humedad media</th>
-                    <th>Calificación sinóptica</th>
+                    <th scope="col">Año</th>
+                    <th scope="col">Fecha observada</th>
+                    <th scope="col" class="num">T. media</th>
+                    <th scope="col" class="num">T. máx.</th>
+                    <th scope="col" class="num">T. mín.</th>
+                    <th scope="col" class="num">Amplitud (ΔT)</th>
+                    <th scope="col" class="num">Lluvia (24h)</th>
+                    <th scope="col" class="num">Racha máx.</th>
+                    <th scope="col" class="num">Humedad media</th>
+                    <th scope="col">Calificación sinóptica</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -9277,16 +9294,17 @@
 
           <div class="table-responsive">
             <table class="data-table">
+              <caption class="table-caption">Cuadro sinóptico comparativo del clima histórico en las 8 fiestas de Riotuerto</caption>
               <thead>
                 <tr>
-                  <th>Festividad</th>
-                  <th>Localidad</th>
-                  <th>Fecha habitual</th>
-                  <th class="num">T. máx. media</th>
-                  <th class="num">T. mín. media</th>
-                  <th class="num">Probabilidad de lluvia</th>
-                  <th class="num">Lluvia media</th>
-                  <th class="num">Récord T. máx.</th>
+                  <th scope="col">Festividad</th>
+                  <th scope="col">Localidad</th>
+                  <th scope="col">Fecha habitual</th>
+                  <th scope="col" class="num">T. máx. media</th>
+                  <th scope="col" class="num">T. mín. media</th>
+                  <th scope="col" class="num">Probabilidad de lluvia</th>
+                  <th scope="col" class="num">Lluvia media</th>
+                  <th scope="col" class="num">Récord T. máx.</th>
                 </tr>
               </thead>
               <tbody>
