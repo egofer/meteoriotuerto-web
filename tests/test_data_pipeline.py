@@ -1501,6 +1501,55 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.mini.min.js", app_js)
         self.assertIn("document.body.style.cursor = 'wait'", app_js)
 
+    def test_mej_004_open_graph_and_twitter_cards_metadata(self):
+        """
+        MEJ-004: Verifica la presencia y coherencia de los metadatos sociales Open Graph y Twitter Cards:
+        1. Etiqueta canonical canónica en index.html apuntando a https://egofer.github.io/meteoriotuerto-web/
+        2. Metadatos Open Graph completos: og:type, og:site_name, og:title, og:description, og:url, og:image, og:locale.
+        3. Metadatos Twitter Cards completos: twitter:card, twitter:title, twitter:description, twitter:image.
+        4. Imagen canónica existente en assets/img/estacion-meteorologica-barrio-de-arriba.jpg con dimensiones declaradas (1600x1200).
+        """
+        html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+
+        # 1. Canonical
+        self.assertIn('<link rel="canonical" href="https://egofer.github.io/meteoriotuerto-web/">', html_text)
+
+        # 2. Open Graph
+        expected_og = [
+            '<meta property="og:type" content="website">',
+            '<meta property="og:locale" content="es_ES">',
+            '<meta property="og:site_name" content="MeteoRiotuerto">',
+            '<meta property="og:title" content="MeteoRiotuerto — Almanaque meteorológico y climatológico digital de Riotuerto">',
+            '<meta property="og:url" content="https://egofer.github.io/meteoriotuerto-web/">',
+            '<meta property="og:image" content="https://egofer.github.io/meteoriotuerto-web/assets/img/estacion-meteorologica-barrio-de-arriba.jpg">',
+            '<meta property="og:image:secure_url" content="https://egofer.github.io/meteoriotuerto-web/assets/img/estacion-meteorologica-barrio-de-arriba.jpg">',
+            '<meta property="og:image:type" content="image/jpeg">',
+            '<meta property="og:image:width" content="1600">',
+            '<meta property="og:image:height" content="1200">',
+        ]
+        for og_tag in expected_og:
+            self.assertIn(og_tag, html_text, f"Falta etiqueta Open Graph: {og_tag}")
+
+        self.assertIn('property="og:description"', html_text)
+        self.assertIn('property="og:image:alt"', html_text)
+
+        # 3. Twitter Cards
+        expected_twitter = [
+            '<meta name="twitter:card" content="summary_large_image">',
+            '<meta name="twitter:title" content="MeteoRiotuerto — Almanaque meteorológico y climatológico digital de Riotuerto">',
+            '<meta name="twitter:image" content="https://egofer.github.io/meteoriotuerto-web/assets/img/estacion-meteorologica-barrio-de-arriba.jpg">',
+        ]
+        for tw_tag in expected_twitter:
+            self.assertIn(tw_tag, html_text, f"Falta etiqueta Twitter Card: {tw_tag}")
+
+        self.assertIn('name="twitter:description"', html_text)
+        self.assertIn('name="twitter:image:alt"', html_text)
+
+        # 4. Existencia de la imagen canónica en disco
+        img_path = ROOT_DIR / "assets" / "img" / "estacion-meteorologica-barrio-de-arriba.jpg"
+        self.assertTrue(img_path.exists(), "La imagen referenciada en og:image no existe en assets/img")
+        self.assertGreater(img_path.stat().st_size, 100_000, "La imagen og:image parece incompleta o vacía")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
