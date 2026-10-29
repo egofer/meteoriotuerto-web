@@ -1346,9 +1346,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.5", sw_js, "Falta cache v1.2.5 en sw.js")
+        self.assertIn("v1.2.6", sw_js, "Falta cache v1.2.6 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.2.5", index_html, "Falta v=1.2.5 en index.html")
+        self.assertIn("v=1.2.6", index_html, "Falta v=1.2.6 en index.html")
 
     def test_weather_underground_realtime_integration(self):
         """
@@ -1472,11 +1472,11 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertNotIn("function renderHomeCharts", app_js, "renderHomeCharts() debe haber sido purgada de app.js")
         self.assertNotIn("renderHomeCharts(", app_js, "No debe haber llamadas residuales a renderHomeCharts()")
 
-        # 4. Comprobar sincronización de caché v1.2.5
+        # 4. Comprobar sincronización de caché v1.2.6
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.5", sw_txt)
-        self.assertIn("app.js?v=1.2.5", index_txt)
+        self.assertIn("v1.2.6", sw_txt)
+        self.assertIn("app.js?v=1.2.6", index_txt)
 
     def test_mej_003_sheetjs_deferred_loading(self):
         """
@@ -1485,14 +1485,14 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         2. sw.js precachea ./src/js/vendor/xlsx.mini.min.js para soporte offline inmediato.
         3. ensureXLSXLoaded() en app.js inyecta dinámicamente el script con fallback a CDN.
         4. exportWorkbookToXLSX() gestiona el cursor 'wait' y desbloquea en bloque finally.
-        5. Versión de caché v1.2.5 sincronizada en sw.js e index.html.
+        5. Versión de caché v1.2.6 sincronizada en sw.js e index.html.
         """
         html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
         self.assertNotIn("xlsx.mini.min.js", html_text, "index.html no debe cargar SheetJS de forma bloqueante en el arranque")
 
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         self.assertIn("./src/js/vendor/xlsx.mini.min.js", sw_txt, "sw.js debe precachear SheetJS para modo offline")
-        self.assertIn("v1.2.5", sw_txt)
+        self.assertIn("v1.2.6", sw_txt)
 
         app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn("async function ensureXLSXLoaded()", app_js)
@@ -1556,7 +1556,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         1. handleRouteChange() invoca updateDocumentMetadata(route, param, subparam, idx).
         2. updateDocumentMetadata actualiza document.title, meta[name="description"], og:title, og:description, og:url, twitter:title y twitter:description.
         3. Manejo diferenciado de rutas clave: almanaques anuales y mensuales, récords (episodios, rankings, absolutos), fiestas, labores cotidianas, explorador, comparativas, metodología y glosario.
-        4. Sincronización de caché v1.2.5 en sw.js e index.html.
+        4. Sincronización de caché v1.2.6 en sw.js e index.html.
         """
         app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
 
@@ -1586,12 +1586,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("route === 'metodologia'", fn_body)
         self.assertIn("route === 'glosario'", fn_body)
 
-        # 4. Sincronización de versión de caché v1.2.5
+        # 4. Sincronización de versión de caché v1.2.6
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.5", sw_txt)
-        self.assertIn("app.js?v=1.2.5", index_txt)
-        self.assertIn("styles.css?v=1.2.5", index_txt)
+        self.assertIn("v1.2.6", sw_txt)
+        self.assertIn("app.js?v=1.2.6", index_txt)
+        self.assertIn("styles.css?v=1.2.6", index_txt)
 
     def test_mej_012_schema_org_json_ld_metadata(self):
         """
@@ -1644,6 +1644,39 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("application/json", dist_formats)
         self.assertIn("application/geo+json", dist_formats)
         self.assertIn("application/schema+json", dist_formats)
+
+    def test_mej_010_prefers_reduced_motion_support(self):
+        """
+        MEJ-010: Verifica el soporte completo de accesibilidad para la preferencia prefers-reduced-motion:
+        1. Regla global en styles.css con @media (prefers-reduced-motion: reduce) que neutraliza duraciones,
+           desplaza suavemente a auto y cancela animaciones infinitas/parpadeos (WCAG 2.2 AAA / A).
+        2. Detección en app.js mediante matchMedia('(prefers-reduced-motion: reduce)') en prefersReducedMotion().
+        3. createChart() desactiva animaciones de Chart.js (options.animation = false) ante la preferencia.
+        4. getScrollBehavior() conmuta dinámicamente entre 'auto' y 'smooth' en el router y eventos data-scroll-to.
+        5. Versión de caché v1.2.6 sincronizada en sw.js e index.html.
+        """
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn("@media (prefers-reduced-motion: reduce)", css_text)
+        self.assertIn("animation-duration: 0.01ms !important;", css_text)
+        self.assertIn("scroll-behavior: auto !important;", css_text)
+        self.assertIn(".topo-pulse-beacon", css_text)
+        self.assertIn(".pulse-offline", css_text)
+        self.assertIn(".live-pulse-glow", css_text)
+        self.assertIn(".row-highlight-pulse", css_text)
+
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("function prefersReducedMotion()", app_js)
+        self.assertIn("window.matchMedia('(prefers-reduced-motion: reduce)')", app_js)
+        self.assertIn("function getScrollBehavior()", app_js)
+        self.assertIn("config.options.animation = false;", app_js)
+        self.assertIn("behavior: getScrollBehavior()", app_js)
+
+        # Comprobar versión de caché v1.2.6
+        sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+        index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn("v1.2.6", sw_txt)
+        self.assertIn("app.js?v=1.2.6", index_txt)
+        self.assertIn("styles.css?v=1.2.6", index_txt)
 
 
 if __name__ == "__main__":

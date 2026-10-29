@@ -639,6 +639,15 @@
     });
   }
 
+  /* MEJ-010: Detección de preferencia de movimiento reducido (WCAG 2.2 AAA / A) */
+  function prefersReducedMotion() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  function getScrollBehavior() {
+    return prefersReducedMotion() ? 'auto' : 'smooth';
+  }
+
   function createChart(key, canvasId, config) {
     if (!window.Chart) return null;
     if (STATE.charts[key]) {
@@ -646,6 +655,13 @@
     }
     const el = document.getElementById(canvasId);
     if (!el) return null;
+
+    // MEJ-010: Desactivar animaciones en Chart.js cuando el usuario prefiere movimiento reducido
+    if (prefersReducedMotion() && config) {
+      config.options = config.options || {};
+      config.options.animation = false;
+    }
+
     STATE.charts[key] = new window.Chart(el, config);
     return STATE.charts[key];
   }
@@ -9647,11 +9663,11 @@
 
       if (scrollToTarget) {
         setTimeout(() => {
-          scrollToTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          scrollToTarget.scrollIntoView({ behavior: getScrollBehavior(), block: 'center' });
           scrollToTarget.classList.add('table-row-highlight');
         }, 100);
       } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: getScrollBehavior() });
       }
     } catch (err) {
       console.error('Error al renderizar vista:', err);
@@ -9839,7 +9855,7 @@
         const targetEl = document.getElementById(targetId);
         if (targetEl && !targetEl.closest('.view-section[hidden]')) {
           e.preventDefault();
-          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          targetEl.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' });
           return;
         }
       }

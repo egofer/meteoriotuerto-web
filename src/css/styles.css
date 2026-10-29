@@ -5834,3 +5834,35 @@ html[data-theme="dark"] .offline-badge.online-restored {
 .live-synoptic-pill strong {
   color: var(--txt-primary);
 }
+
+/* ==========================================================================
+   MEJ-010: Accesibilidad - Soporte para preferencia prefers-reduced-motion
+   Desactiva animaciones, pulsaciones continuas y desplazamientos suaves
+   para evitar mareos, desorientación o fatiga visual en usuarios sensibles
+   (WCAG 2.2 Criterios 2.2.2 y 2.3.3 - Nivel AAA).
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .topo-pulse-beacon,
+  .topo-wind-flow-left,
+  .topo-wind-flow-right,
+  .pulse-offline,
+  .live-pulse-glow,
+  .pulse-dot,
+  .row-highlight-pulse {
+    animation: none !important;
+  }
+}
+
