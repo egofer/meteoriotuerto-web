@@ -217,6 +217,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
                 for endpoint in [
                     "/",
                     "/index.html",
+                    "/robots.txt",
+                    "/sitemap.xml",
                     "/favicon.svg",
                     "/favicon.ico",
                     "/src/css/styles.css",
@@ -1343,9 +1345,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.1", sw_js, "Falta cache v1.2.1 en sw.js")
+        self.assertIn("v1.2.2", sw_js, "Falta cache v1.2.2 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.2.1", index_html, "Falta v=1.2.1 en index.html")
+        self.assertIn("v=1.2.2", index_html, "Falta v=1.2.2 en index.html")
 
     def test_weather_underground_realtime_integration(self):
         """
@@ -1384,6 +1386,60 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
         self.assertIn('id="top-live-weather-link"', index_html, "Falta id top-live-weather-link en index.html")
         self.assertIn('id="top-live-weather-text"', index_html, "Falta id top-live-weather-text en index.html")
+
+    def test_seo_robots_and_sitemap_integrity(self):
+        """
+        MEJ-001: Verifica la existencia, sintaxis y consistencia de robots.txt y sitemap.xml.
+        Asegura que robots.txt declare el sitemap oficial y permita la indexación de /,
+        y que sitemap.xml contenga URLs canónicas válidas para la portada, almanaques anuales,
+        récords, labores y datos abiertos de MeteoRiotuerto.
+        """
+        robots_path = ROOT_DIR / "robots.txt"
+        sitemap_path = ROOT_DIR / "sitemap.xml"
+
+        self.assertTrue(robots_path.exists(), "Falta el archivo robots.txt en la raíz")
+        self.assertTrue(sitemap_path.exists(), "Falta el archivo sitemap.xml en la raíz")
+
+        robots_txt = robots_path.read_text(encoding="utf-8")
+        self.assertIn("User-agent: *", robots_txt)
+        self.assertIn("Allow: /", robots_txt)
+        self.assertIn("Sitemap: https://egofer.github.io/meteoriotuerto-web/sitemap.xml", robots_txt)
+
+        sitemap_txt = sitemap_path.read_text(encoding="utf-8")
+        self.assertIn('<?xml version="1.0" encoding="UTF-8"?>', sitemap_txt)
+        self.assertIn('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', sitemap_txt)
+
+        # Verificar presencia de secciones clave en sitemap
+        expected_urls = [
+            "https://egofer.github.io/meteoriotuerto-web/",
+            "https://egofer.github.io/meteoriotuerto-web/#almanaque/2026",
+            "https://egofer.github.io/meteoriotuerto-web/#almanaque/2025",
+            "https://egofer.github.io/meteoriotuerto-web/#almanaque/2024",
+            "https://egofer.github.io/meteoriotuerto-web/#almanaque/2023",
+            "https://egofer.github.io/meteoriotuerto-web/#almanaque/2022",
+            "https://egofer.github.io/meteoriotuerto-web/#records",
+            "https://egofer.github.io/meteoriotuerto-web/#cotidiano",
+            "https://egofer.github.io/meteoriotuerto-web/#fiestas",
+            "https://egofer.github.io/meteoriotuerto-web/#explorador",
+            "https://egofer.github.io/meteoriotuerto-web/#comparativas",
+            "https://egofer.github.io/meteoriotuerto-web/#metodologia",
+            "https://egofer.github.io/meteoriotuerto-web/#glosario",
+            "https://egofer.github.io/meteoriotuerto-web/data/index.json",
+            "https://egofer.github.io/meteoriotuerto-web/data/station.geojson",
+            "https://egofer.github.io/meteoriotuerto-web/data/schema.json",
+        ]
+        for url in expected_urls:
+            self.assertIn(f"<loc>{url}</loc>", sitemap_txt, f"Falta URL {url} en sitemap.xml")
+
+        # Verificar empaquetado en workflows
+        for wf_file in [ROOT_DIR / ".github" / "workflows" / "deploy.yml", ROOT_DIR / "docs" / "deploy.yml"]:
+            txt = wf_file.read_text(encoding="utf-8")
+            self.assertIn("robots.txt sitemap.xml _site/", txt, f"Falta empaquetado en {wf_file.name}")
+
+        # Verificar precacheo en sw.js
+        sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+        self.assertIn("./robots.txt", sw_txt)
+        self.assertIn("./sitemap.xml", sw_txt)
 
 
 if __name__ == "__main__":

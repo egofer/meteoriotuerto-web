@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap oficial del archivo climatológico de MeteoRiotuerto
+Sitemap: https://egofer.github.io/meteoriotuerto-web/sitemap.xml
