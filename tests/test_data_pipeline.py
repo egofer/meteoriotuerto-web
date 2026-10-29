@@ -1593,6 +1593,54 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("app.js?v=1.2.5", index_txt)
         self.assertIn("styles.css?v=1.2.5", index_txt)
 
+    def test_mej_012_schema_org_json_ld_metadata(self):
+        """
+        MEJ-012: Verifica el marcado semántico estructurado Schema.org JSON-LD en index.html:
+        1. Existencia del bloque script type="application/ld+json".
+        2. Sintaxis JSON estricta y contexto canónico https://schema.org.
+        3. Entidad WeatherStation con coordenadas geográficas (43.341, -3.670, 115 m), dirección postal y enlaces de calibración.
+        4. Entidad Dataset con licencia CC BY 4.0, cobertura temporal, espacial, variables medidas y distribuciones de descarga.
+        5. Entidad WebSite declarando el idioma es-ES y metadatos generales.
+        """
+        import json
+        import re
+
+        html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        m = re.search(r'<script type="application/ld\+json">(.*?)</script>', html_text, re.DOTALL)
+        self.assertIsNotNone(m, "Falta el bloque script application/ld+json en index.html")
+
+        json_ld = json.loads(m.group(1))
+        self.assertEqual(json_ld.get("@context"), "https://schema.org")
+        self.assertIn("@graph", json_ld)
+
+        graph = {item.get("@type"): item for item in json_ld["@graph"]}
+        self.assertIn("WeatherStation", graph, "Falta entidad WeatherStation en Schema.org")
+        self.assertIn("Dataset", graph, "Falta entidad Dataset en Schema.org")
+        self.assertIn("WebSite", graph, "Falta entidad WebSite en Schema.org")
+
+        # Comprobar WeatherStation
+        station = graph["WeatherStation"]
+        self.assertIn("Barrio de Arriba", station["name"])
+        self.assertEqual(station["geo"]["latitude"], 43.341)
+        self.assertEqual(station["geo"]["longitude"], -3.670)
+        self.assertEqual(station["geo"]["elevation"], 115)
+        self.assertEqual(station["address"]["addressLocality"], "Riotuerto")
+        self.assertEqual(station["address"]["addressRegion"], "Cantabria")
+        self.assertTrue(any("wunderground" in url for url in station["sameAs"]))
+        self.assertTrue(any("weathercloud" in url for url in station["sameAs"]))
+
+        # Comprobar Dataset
+        dataset = graph["Dataset"]
+        self.assertIn("2022–2026", dataset["name"])
+        self.assertIn("https://creativecommons.org/licenses/by/4.0/", dataset["license"])
+        self.assertTrue(dataset["isAccessibleForFree"])
+        self.assertEqual(dataset["temporalCoverage"], "2022-01-01/..")
+        self.assertGreaterEqual(len(dataset["variableMeasured"]), 5)
+        dist_formats = [d["encodingFormat"] for d in dataset["distribution"]]
+        self.assertIn("application/json", dist_formats)
+        self.assertIn("application/geo+json", dist_formats)
+        self.assertIn("application/schema+json", dist_formats)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -29,6 +29,111 @@
   <meta name="twitter:image" content="https://egofer.github.io/meteoriotuerto-web/assets/img/estacion-meteorologica-barrio-de-arriba.jpg">
   <meta name="twitter:image:alt" content="Estación meteorológica automática en Barrio de Arriba, Riotuerto (Cantabria)">
 
+  <!-- Marcado estructurado Schema.org JSON-LD (MEJ-012) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WeatherStation",
+        "@id": "https://egofer.github.io/meteoriotuerto-web/#station",
+        "name": "MeteoRiotuerto — Estación Meteorológica de Barrio de Arriba",
+        "description": "Estación meteorológica automática y archivo climatológico local situado en Barrio de Arriba (municipio de Riotuerto, Cantabria, España; 115 m s. n. m.).",
+        "url": "https://egofer.github.io/meteoriotuerto-web/",
+        "image": "https://egofer.github.io/meteoriotuerto-web/assets/img/estacion-meteorologica-barrio-de-arriba.jpg",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 43.341,
+          "longitude": -3.670,
+          "elevation": 115
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Barrio de Arriba",
+          "addressLocality": "Riotuerto",
+          "postalCode": "39720",
+          "addressRegion": "Cantabria",
+          "addressCountry": "ES"
+        },
+        "provider": {
+          "@type": "Person",
+          "name": "Emilio Gómez Fernández"
+        },
+        "sameAs": [
+          "https://github.com/egofer/meteoriotuerto",
+          "https://app.weathercloud.net/d6619283754",
+          "https://www.wunderground.com/dashboard/pws/IRIOTU1",
+          "https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670"
+        ]
+      },
+      {
+        "@type": "Dataset",
+        "@id": "https://egofer.github.io/meteoriotuerto-web/#dataset",
+        "name": "Serie meteorológica y climatológica histórica de Riotuerto (2022–2026)",
+        "description": "Observaciones meteorológicas continuas, resúmenes estadísticos diarios y mensuales de temperatura, precipitación, viento (suradas y efecto Foehn), humedad y presión en Barrio de Arriba (Riotuerto, Cantabria).",
+        "url": "https://egofer.github.io/meteoriotuerto-web/",
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isAccessibleForFree": true,
+        "creator": {
+          "@type": "Person",
+          "name": "Emilio Gómez Fernández"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "MeteoRiotuerto",
+          "url": "https://egofer.github.io/meteoriotuerto-web/"
+        },
+        "spatialCoverage": {
+          "@type": "Place",
+          "name": "Barrio de Arriba, Riotuerto, Cantabria, España",
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 43.341,
+            "longitude": -3.670,
+            "elevation": 115
+          }
+        },
+        "temporalCoverage": "2022-01-01/..",
+        "variableMeasured": [
+          "Temperatura del aire (°C)",
+          "Precipitación acumulada (mm)",
+          "Intensidad horaria de precipitación (mm/h)",
+          "Velocidad y racha de viento (km/h)",
+          "Dirección del viento (°)",
+          "Humedad relativa (%)",
+          "Presión barométrica relativa (hPa)",
+          "Radiación solar (W/m²)"
+        ],
+        "distribution": [
+          {
+            "@type": "DataDownload",
+            "encodingFormat": "application/json",
+            "contentUrl": "https://egofer.github.io/meteoriotuerto-web/data/index.json"
+          },
+          {
+            "@type": "DataDownload",
+            "encodingFormat": "application/geo+json",
+            "contentUrl": "https://egofer.github.io/meteoriotuerto-web/data/station.geojson"
+          },
+          {
+            "@type": "DataDownload",
+            "encodingFormat": "application/schema+json",
+            "contentUrl": "https://egofer.github.io/meteoriotuerto-web/data/schema.json"
+          }
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://egofer.github.io/meteoriotuerto-web/#website",
+        "url": "https://egofer.github.io/meteoriotuerto-web/",
+        "name": "MeteoRiotuerto",
+        "description": "Archivo histórico, anuario estadístico y notario del clima del municipio de Riotuerto (Barrio de Arriba, Cantabria).",
+        "inLanguage": "es-ES"
+      }
+    ]
+  }
+  </script>
+
   <!-- Iconos y Favicon de MeteoRiotuerto -->
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
