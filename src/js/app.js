@@ -9395,6 +9395,112 @@
     };
   }
 
+  /* ------------------------------------------------------------------------
+   * MEJ-005: Actualización dinámica de document.title y metadatos SEO / Open Graph
+   * ------------------------------------------------------------------------ */
+  function updateDocumentMetadata(route, param, subparam, idx) {
+    let title = 'MeteoRiotuerto — Almanaque meteorológico y climatológico digital de Riotuerto';
+    let desc = 'Archivo histórico, anuario estadístico y notario del clima del municipio de Riotuerto (Barrio de Arriba, Cantabria, 115 msnm). Observaciones, almanaques anuales, récords, comparativas y metodología.';
+    let url = 'https://egofer.github.io/meteoriotuerto-web/';
+
+    const YEAR_EDITORIAL_HEADLINES = {
+      2022: 'Año cálido y seco con estío prolongado y marcadas suradas otoñales',
+      2023: 'Grandes contrastes: el temporal Fien (509,8 mm en enero) y acusada sequía estival',
+      2024: 'Récord absoluto de calor (42,1 °C) y temporales atlánticos de viento sur',
+      2025: 'Pluviosidad abundante y gran regularidad estacional en el valle',
+      2026: 'Avance provisional del año en curso (registro consolidado hasta octubre)',
+    };
+
+    if (route === 'almanaque') {
+      const targetYear = param && [2022, 2023, 2024, 2025, 2026].includes(Number(param))
+        ? Number(param)
+        : STATE.selectedYear || 2025;
+      url = `https://egofer.github.io/meteoriotuerto-web/#almanaque/${targetYear}`;
+      const headline = YEAR_EDITORIAL_HEADLINES[targetYear] || `Anuario climatológico de ${targetYear}`;
+
+      if (subparam) {
+        const mMatch = subparam.match(/^mes-(\d{1,2})$/i) || subparam.match(/^(\d{1,2})$/);
+        if (mMatch) {
+          const mIdx = parseInt(mMatch[1], 10) - 1;
+          const mName = MONTH_NAMES_ES[mIdx] || subparam;
+          title = `Almanaque Riotuerto ${targetYear} — ${mName} | MeteoRiotuerto`;
+          desc = `Observaciones meteorológicas, temperaturas, precipitación y viento en Riotuerto (Cantabria) durante ${mName} de ${targetYear}.`;
+          url = `https://egofer.github.io/meteoriotuerto-web/#almanaque/${targetYear}/${subparam}`;
+        } else {
+          title = `Almanaque meteorológico de Riotuerto ${targetYear} | MeteoRiotuerto`;
+          desc = `Anuario de ${targetYear} en Barrio de Arriba (Riotuerto): ${headline}. Climograma, efemérides, rosa de vientos y tablas.`;
+        }
+      } else {
+        title = `Almanaque meteorológico de Riotuerto ${targetYear} | MeteoRiotuerto`;
+        desc = `Anuario de ${targetYear} en Barrio de Arriba (Riotuerto): ${headline}. Climograma, efemérides, rosa de vientos y tablas mensuales.`;
+      }
+    } else if (route === 'records') {
+      url = 'https://egofer.github.io/meteoriotuerto-web/#records';
+      if (param === 'episodio' && subparam) {
+        title = `Episodio meteorológico extremo en Riotuerto (${subparam}) | MeteoRiotuerto`;
+        desc = `Crónica instrumental y memoria del acontecimiento meteorológico extraordinario documentado en Riotuerto (Cantabria).`;
+        url = `https://egofer.github.io/meteoriotuerto-web/#records/episodio/${subparam}`;
+      } else if (param === 'rankings') {
+        title = 'Rankings históricos y Top 10 meteorológico de Riotuerto | MeteoRiotuerto';
+        desc = 'Clasificaciones históricas Top 10 de calor, frío, precipitación diaria y rachas de viento en Riotuerto (2022–2026).';
+        url = 'https://egofer.github.io/meteoriotuerto-web/#records/rankings';
+      } else if (param === 'absolutos') {
+        title = 'Récords absolutos registrados en Riotuerto | MeteoRiotuerto';
+        desc = 'Techos y suelos meteorológicos históricos verificados por la estación de Barrio de Arriba en Riotuerto (Cantabria).';
+        url = 'https://egofer.github.io/meteoriotuerto-web/#records/absolutos';
+      } else {
+        title = 'Acontecimientos extremos y récords de Riotuerto | MeteoRiotuerto';
+        desc = 'Catálogo de grandes temporales, efemérides mensuales, olas de calor y récords históricos documentados en Riotuerto.';
+      }
+    } else if (route === 'cotidiano' || route === 'fiestas') {
+      if (route === 'fiestas' || param === 'fiestas') {
+        title = 'El tiempo en las fiestas y tradiciones de Riotuerto | MeteoRiotuerto';
+        desc = 'Memoria y probabilidad meteorológica en las 8 fiestas tradicionales de Riotuerto (San Cipriano, San Antonio, San Roque y más).';
+        url = 'https://egofer.github.io/meteoriotuerto-web/#fiestas';
+      } else {
+        title = 'Riotuerto cotidiano: labores del campo, huerta y hogar | MeteoRiotuerto';
+        desc = 'Información práctica agroclimática para el vecindario: calefacción, siega de prados, alertas de mildiu, setas y placas solares.';
+        url = 'https://egofer.github.io/meteoriotuerto-web/#cotidiano';
+      }
+    } else if (route === 'explorador') {
+      title = 'Explorador interactivo de series meteorológicas de Riotuerto | MeteoRiotuerto';
+      desc = 'Herramienta científica de consulta, filtrado y descarga de series diarias de temperatura, lluvia, viento y presión (2022–2026).';
+      url = 'https://egofer.github.io/meteoriotuerto-web/#explorador';
+    } else if (route === 'comparativas') {
+      title = 'Comparativas interanuales del clima de Riotuerto (2022–2026) | MeteoRiotuerto';
+      desc = 'Comparador interanual, cara a cara (head-to-head), matrices plurianuales y balance hídrico de la estación de Barrio de Arriba.';
+      url = 'https://egofer.github.io/meteoriotuerto-web/#comparativas';
+    } else if (route === 'metodologia') {
+      title = 'Metodología, instrumentación y calidad de datos | MeteoRiotuerto';
+      desc = 'Ficha técnica de la estación en Barrio de Arriba, control de calidad instrumental y catálogo de datos abiertos en GeoJSON y JSON Schema.';
+      url = 'https://egofer.github.io/meteoriotuerto-web/#metodologia';
+    } else if (route === 'glosario') {
+      title = 'Glosario meteorológico de Riotuerto y Cantabria | MeteoRiotuerto';
+      desc = 'Definiciones claras y divulgativas de conceptos meteorológicos, bioclimáticos y sinópticos aplicados al valle de Riotuerto.';
+      url = 'https://egofer.github.io/meteoriotuerto-web/#glosario';
+    }
+
+    document.title = title;
+
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', desc);
+
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', title);
+
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.setAttribute('content', desc);
+
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute('content', url);
+
+    const twTitle = document.querySelector('meta[name="twitter:title"]');
+    if (twTitle) twTitle.setAttribute('content', title);
+
+    const twDesc = document.querySelector('meta[name="twitter:description"]');
+    if (twDesc) twDesc.setAttribute('content', desc);
+  }
+
   async function handleRouteChange() {
     const { route, param, subparam, extraparam, queryParams } = parseHashRoute();
     STATE.route = route;
@@ -9535,6 +9641,9 @@
       if (activeSection) {
         activeSection.hidden = false;
       }
+
+      // MEJ-005: Actualizar dinámicamente document.title y metadatos SEO / Open Graph según la vista activa
+      updateDocumentMetadata(route, param, subparam, idx);
 
       if (scrollToTarget) {
         setTimeout(() => {
