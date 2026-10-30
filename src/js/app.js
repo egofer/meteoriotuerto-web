@@ -14,7 +14,7 @@
    * Estado en memoria y caché de productos JSON
    * ------------------------------------------------------------------------ */
   const STATE = {
-    theme: document.documentElement.getAttribute('data-theme') || 'light',
+    theme: document.documentElement.getAttribute('data-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
     route: 'portada',
     selectedYear: 2025,
     onThisDay: null, // { month: 1..12, day: 1..31 }
@@ -9816,6 +9816,21 @@
     initServiceWorkerAndPWA();
     document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle')?.addEventListener('click', toggleTheme);
+
+    // MEJ-011: Escuchar cambios dinámicos de tema del sistema operativo si no hay preferencia manual fijada
+    try {
+      const mediaDark = window.matchMedia('(prefers-color-scheme: dark)');
+      if (mediaDark && mediaDark.addEventListener) {
+        mediaDark.addEventListener('change', (e) => {
+          if (!localStorage.getItem('mr-theme')) {
+            STATE.theme = e.matches ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', STATE.theme);
+            updateThemeButtonUI();
+            handleRouteChange();
+          }
+        });
+      }
+    } catch (e) {}
 
     // Menú de navegación accesible para dispositivos móviles
     const navToggle = document.getElementById('nav-toggle');

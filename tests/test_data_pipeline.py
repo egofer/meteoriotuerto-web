@@ -1346,9 +1346,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.7", sw_js, "Falta cache v1.2.7 en sw.js")
+        self.assertIn("v1.2.8", sw_js, "Falta cache v1.2.8 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.2.7", index_html, "Falta v=1.2.7 en index.html")
+        self.assertIn("v=1.2.8", index_html, "Falta v=1.2.8 en index.html")
 
     def test_weather_underground_realtime_integration(self):
         """
@@ -1472,11 +1472,11 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertNotIn("function renderHomeCharts", app_js, "renderHomeCharts() debe haber sido purgada de app.js")
         self.assertNotIn("renderHomeCharts(", app_js, "No debe haber llamadas residuales a renderHomeCharts()")
 
-        # 4. Comprobar sincronización de caché v1.2.7
+        # 4. Comprobar sincronización de caché v1.2.8
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.7", sw_txt)
-        self.assertIn("app.js?v=1.2.7", index_txt)
+        self.assertIn("v1.2.8", sw_txt)
+        self.assertIn("app.js?v=1.2.8", index_txt)
 
     def test_mej_003_sheetjs_deferred_loading(self):
         """
@@ -1485,14 +1485,14 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         2. sw.js precachea ./src/js/vendor/xlsx.mini.min.js para soporte offline inmediato.
         3. ensureXLSXLoaded() en app.js inyecta dinámicamente el script con fallback a CDN.
         4. exportWorkbookToXLSX() gestiona el cursor 'wait' y desbloquea en bloque finally.
-        5. Versión de caché v1.2.7 sincronizada en sw.js e index.html.
+        5. Versión de caché v1.2.8 sincronizada en sw.js e index.html.
         """
         html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
         self.assertNotIn("xlsx.mini.min.js", html_text, "index.html no debe cargar SheetJS de forma bloqueante en el arranque")
 
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         self.assertIn("./src/js/vendor/xlsx.mini.min.js", sw_txt, "sw.js debe precachear SheetJS para modo offline")
-        self.assertIn("v1.2.7", sw_txt)
+        self.assertIn("v1.2.8", sw_txt)
 
         app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn("async function ensureXLSXLoaded()", app_js)
@@ -1586,12 +1586,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("route === 'metodologia'", fn_body)
         self.assertIn("route === 'glosario'", fn_body)
 
-        # 4. Sincronización de versión de caché v1.2.7
+        # 4. Sincronización de versión de caché v1.2.8
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.7", sw_txt)
-        self.assertIn("app.js?v=1.2.7", index_txt)
-        self.assertIn("styles.css?v=1.2.7", index_txt)
+        self.assertIn("v1.2.8", sw_txt)
+        self.assertIn("app.js?v=1.2.8", index_txt)
+        self.assertIn("styles.css?v=1.2.8", index_txt)
 
     def test_mej_012_schema_org_json_ld_metadata(self):
         """
@@ -1671,12 +1671,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("config.options.animation = false;", app_js)
         self.assertIn("behavior: getScrollBehavior()", app_js)
 
-        # Comprobar versión de caché v1.2.7
+        # Comprobar versión de caché v1.2.8
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.7", sw_txt)
-        self.assertIn("app.js?v=1.2.7", index_txt)
-        self.assertIn("styles.css?v=1.2.7", index_txt)
+        self.assertIn("v1.2.8", sw_txt)
+        self.assertIn("app.js?v=1.2.8", index_txt)
+        self.assertIn("styles.css?v=1.2.8", index_txt)
 
     def test_mej_009_accessible_tables_caption_and_scope(self):
         """
@@ -1684,7 +1684,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         1. Las 19 tablas dinámicas en app.js disponen de su correspondiente etiqueta <caption> descriptiva.
         2. Todas las cabeceras <th> cuentan explícitamente con atributo scope='col' o scope='row' (0 <th> huérfanos).
         3. En styles.css se incluye la regla de estilo para caption (.data-table caption, .table-caption).
-        4. Sincronización de versión de caché v1.2.7 en sw.js e index.html.
+        4. Sincronización de versión de caché v1.2.8 en sw.js e index.html.
         """
         import re
 
@@ -1708,12 +1708,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".data-table caption", css_text)
         self.assertIn("caption-side: top;", css_text)
 
-        # 4. Comprobar sincronización de versión de caché v1.2.7
+        # 4. Comprobar sincronización de versión de caché v1.2.8
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.7", sw_txt)
-        self.assertIn("app.js?v=1.2.7", index_txt)
-        self.assertIn("styles.css?v=1.2.7", index_txt)
+        self.assertIn("v1.2.8", sw_txt)
+        self.assertIn("app.js?v=1.2.8", index_txt)
+        self.assertIn("styles.css?v=1.2.8", index_txt)
 
     def test_mej_006_minified_json_production_output(self):
         """
@@ -1740,6 +1740,41 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             # Comprobar validez sintáctica
             parsed = json.loads(raw_content)
             self.assertTrue(isinstance(parsed, (dict, list)), f"Contenido inválido en {fpath.name}")
+
+    def test_mej_011_os_dark_theme_detection(self):
+        """
+        MEJ-011: Verifica la detección automática del tema oscuro del sistema operativo:
+        1. Script inline en <head> de index.html evalúa prefers-color-scheme: dark si no hay mr-theme guardado.
+        2. app.js inicializa STATE.theme considerando matchMedia('(prefers-color-scheme: dark)').
+        3. app.js registra un listener sobre prefers-color-scheme para sincronización dinámica sin recargar.
+        4. Sincronización de versión de caché v1.2.8 en sw.js e index.html.
+        """
+        html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn("window.matchMedia('(prefers-color-scheme: dark)').matches", html_text)
+        self.assertIn("document.documentElement.setAttribute('data-theme', 'dark')", html_text)
+
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("(prefers-color-scheme: dark)", app_js)
+        self.assertIn("mediaDark.addEventListener('change'", app_js)
+
+        # Comprobar versión de caché v1.2.8
+        sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+        self.assertIn("v1.2.8", sw_txt)
+        self.assertIn("app.js?v=1.2.8", html_text)
+        self.assertIn("styles.css?v=1.2.8", html_text)
+
+    def test_mej_008_orphan_image_folder_purged(self):
+        """
+        MEJ-008: Verifica que la carpeta duplicada huérfana src/img ha sido eliminada
+        y que assets/img preserva todas las imágenes oficiales.
+        """
+        src_img = ROOT_DIR / "src" / "img"
+        self.assertFalse(src_img.exists(), "La carpeta huérfana src/img/ debe haber sido eliminada (MEJ-008)")
+
+        assets_img = ROOT_DIR / "assets" / "img"
+        self.assertTrue(assets_img.exists(), "La carpeta canónica assets/img/ debe existir")
+        self.assertTrue((assets_img / "estacion-meteorologica-barrio-de-arriba.jpg").exists())
+        self.assertTrue((assets_img / "estacion-meteorologica-barrio-de-arriba.webp").exists())
 
 
 if __name__ == "__main__":
