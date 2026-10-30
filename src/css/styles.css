@@ -251,6 +251,30 @@ a:hover {
   background: rgba(255, 255, 255, 0.18);
 }
 
+.btn-share-page {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--txt-masthead);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-share-page:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.btn-share-page .share-icon {
+  flex-shrink: 0;
+}
+
 /* Cabecera editorial */
 .site-header {
   background-color: var(--bg-surface);

@@ -10175,12 +10175,14 @@
   }
 
   /* ------------------------------------------------------------------------
-   * MEJ-005: Actualización dinámica de document.title y metadatos SEO / Open Graph
+   * MEJ-005 / EVO-037: Actualización dinámica de document.title y metadatos SEO / Open Graph
    * ------------------------------------------------------------------------ */
   function updateDocumentMetadata(route, param, subparam, idx) {
     let title = 'MeteoRiotuerto — Almanaque meteorológico y climatológico digital de Riotuerto';
     let desc = 'Archivo histórico, anuario estadístico y notario del clima del municipio de Riotuerto (Barrio de Arriba, Cantabria, 115 msnm). Observaciones, almanaques anuales, récords, comparativas y metodología.';
     let url = 'https://egofer.github.io/meteoriotuerto-web/';
+    let imageRel = 'assets/img/og/og-portada.jpg';
+    let imageAlt = 'MeteoRiotuerto — Notario del clima y archivo meteorológico de Barrio de Arriba (Cantabria)';
 
     const YEAR_EDITORIAL_HEADLINES = {
       2022: 'Año cálido y seco con estío prolongado y marcadas suradas otoñales',
@@ -10195,6 +10197,8 @@
         ? Number(param)
         : STATE.selectedYear || 2025;
       url = `https://egofer.github.io/meteoriotuerto-web/#almanaque/${targetYear}`;
+      imageRel = `assets/img/og/og-almanaque-${targetYear}.jpg`;
+      imageAlt = `Almanaque meteorológico de Riotuerto ${targetYear} — Barrio de Arriba (Cantabria)`;
       const headline = YEAR_EDITORIAL_HEADLINES[targetYear] || `Anuario climatológico de ${targetYear}`;
 
       if (subparam) {
@@ -10215,6 +10219,8 @@
       }
     } else if (route === 'records') {
       url = 'https://egofer.github.io/meteoriotuerto-web/#records';
+      imageRel = 'assets/img/og/og-records.jpg';
+      imageAlt = 'Grandes acontecimientos y récords meteorológicos de Riotuerto';
       if (param === 'episodio' && subparam) {
         title = `Episodio meteorológico extremo en Riotuerto (${subparam}) | MeteoRiotuerto`;
         desc = `Crónica instrumental y memoria del acontecimiento meteorológico extraordinario documentado en Riotuerto (Cantabria).`;
@@ -10236,30 +10242,64 @@
         title = 'El tiempo en las fiestas y tradiciones de Riotuerto | MeteoRiotuerto';
         desc = 'Memoria y probabilidad meteorológica en las 8 fiestas tradicionales de Riotuerto (San Cipriano, San Antonio, San Roque y más).';
         url = 'https://egofer.github.io/meteoriotuerto-web/#fiestas';
+        imageRel = 'assets/img/og/og-cotidiano.jpg';
+        imageAlt = 'El tiempo en las fiestas tradicionales de Riotuerto';
       } else {
         title = 'Riotuerto cotidiano: labores del campo, huerta y hogar | MeteoRiotuerto';
         desc = 'Información práctica agroclimática para el vecindario: calefacción, siega de prados, alertas de mildiu, setas y placas solares.';
         url = 'https://egofer.github.io/meteoriotuerto-web/#cotidiano';
+
+        const laborImgs = {
+          calefaccion: 'assets/img/labor-calefaccion-lena.jpg',
+          robot: 'assets/img/labor-robot-cortacesped.jpg',
+          'robot-cortacesped': 'assets/img/labor-robot-cortacesped.jpg',
+          siega: 'assets/img/labor-siega-forraje.jpg',
+          'siega-forraje': 'assets/img/labor-siega-forraje.jpg',
+          huerta: 'assets/img/labor-huerta-tratamientos.jpg',
+          mildiu: 'assets/img/labor-huerta-tratamientos.jpg',
+          setas: 'assets/img/labor-setas-micologia.jpg',
+          micologia: 'assets/img/labor-setas-micologia.jpg',
+          solar: 'assets/img/labor-solar-fotovoltaica.jpg',
+          fotovoltaica: 'assets/img/labor-solar-fotovoltaica.jpg',
+        };
+        const subKey = (subparam || param || '').toLowerCase();
+        if (laborImgs[subKey]) {
+          imageRel = laborImgs[subKey];
+          imageAlt = `Labor agroclimática tradicional en Riotuerto: ${subKey}`;
+        } else {
+          imageRel = 'assets/img/og/og-cotidiano.jpg';
+          imageAlt = 'Riotuerto cotidiano: labores del campo, huerta y hogar';
+        }
       }
     } else if (route === 'explorador') {
       title = 'Explorador interactivo de series meteorológicas de Riotuerto | MeteoRiotuerto';
       desc = 'Herramienta científica de consulta, filtrado y descarga de series diarias de temperatura, lluvia, viento y presión (2022–2026).';
       url = 'https://egofer.github.io/meteoriotuerto-web/#explorador';
+      imageRel = 'assets/img/og/og-explorador.jpg';
+      imageAlt = 'Explorador de series meteorológicas y multianuales de Riotuerto';
     } else if (route === 'comparativas') {
       title = 'Comparativas interanuales del clima de Riotuerto (2022–2026) | MeteoRiotuerto';
       desc = 'Comparador interanual, cara a cara (head-to-head), matrices plurianuales y balance hídrico de la estación de Barrio de Arriba.';
       url = 'https://egofer.github.io/meteoriotuerto-web/#comparativas';
+      imageRel = 'assets/img/og/og-comparativas.jpg';
+      imageAlt = 'Comparativas interanuales y balance hídrico de Riotuerto';
     } else if (route === 'metodologia') {
       title = 'Metodología, instrumentación y calidad de datos | MeteoRiotuerto';
       desc = 'Ficha técnica de la estación en Barrio de Arriba, control de calidad instrumental y catálogo de datos abiertos en GeoJSON y JSON Schema.';
       url = 'https://egofer.github.io/meteoriotuerto-web/#metodologia';
+      imageRel = 'assets/img/og/og-metodologia.jpg';
+      imageAlt = 'Metodología, instrumentación y datos abiertos de Riotuerto';
     } else if (route === 'glosario') {
       title = 'Glosario meteorológico de Riotuerto y Cantabria | MeteoRiotuerto';
       desc = 'Definiciones claras y divulgativas de conceptos meteorológicos, bioclimáticos y sinópticos aplicados al valle de Riotuerto.';
       url = 'https://egofer.github.io/meteoriotuerto-web/#glosario';
+      imageRel = 'assets/img/og/og-glosario.jpg';
+      imageAlt = 'Glosario meteorológico y microclima de Riotuerto';
     }
 
     document.title = title;
+
+    const fullImageUrl = `https://egofer.github.io/meteoriotuerto-web/${imageRel}`;
 
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute('content', desc);
@@ -10273,11 +10313,23 @@
     const ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl) ogUrl.setAttribute('content', url);
 
+    const ogImg = document.querySelector('meta[property="og:image"]');
+    if (ogImg) ogImg.setAttribute('content', fullImageUrl);
+    const ogImgSec = document.querySelector('meta[property="og:image:secure_url"]');
+    if (ogImgSec) ogImgSec.setAttribute('content', fullImageUrl);
+    const ogImgAlt = document.querySelector('meta[property="og:image:alt"]');
+    if (ogImgAlt) ogImgAlt.setAttribute('content', imageAlt);
+
     const twTitle = document.querySelector('meta[name="twitter:title"]');
     if (twTitle) twTitle.setAttribute('content', title);
 
     const twDesc = document.querySelector('meta[name="twitter:description"]');
     if (twDesc) twDesc.setAttribute('content', desc);
+
+    const twImg = document.querySelector('meta[name="twitter:image"]');
+    if (twImg) twImg.setAttribute('content', fullImageUrl);
+    const twImgAlt = document.querySelector('meta[name="twitter:image:alt"]');
+    if (twImgAlt) twImgAlt.setAttribute('content', imageAlt);
   }
 
   async function handleRouteChange() {
@@ -10724,6 +10776,42 @@
         window.location.hash = `#almanaque/${years[targetIdx]}`;
       }
     });
+
+    // EVO-037: Botón de compartir nativo con Web Share API o copiado al portapapeles
+    const shareBtn = document.getElementById('btn-share-page');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        const shareData = {
+          title: document.title,
+          text: document.querySelector('meta[name="description"]')?.getAttribute('content') || document.title,
+          url: window.location.href,
+        };
+        const labelEl = document.getElementById('share-label');
+        const origText = labelEl ? labelEl.textContent : 'Compartir';
+
+        if (navigator.share) {
+          try {
+            await navigator.share(shareData);
+            return;
+          } catch (err) {
+            if (err.name === 'AbortError') return;
+          }
+        }
+
+        // Fallback: Copiar enlace al portapapeles
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          if (labelEl) labelEl.textContent = '✓ ¡Copiado!';
+          shareBtn.title = '¡Enlace copiado al portapapeles!';
+          setTimeout(() => {
+            if (labelEl) labelEl.textContent = origText;
+            shareBtn.title = 'Compartir enlace';
+          }, 2000);
+        } catch (clipErr) {
+          window.prompt('Copia este enlace para compartir:', window.location.href);
+        }
+      });
+    }
 
     // EVO-035: Exposición en window para interoperabilidad, pruebas y consola
     window.renderChartExportBtn = renderChartExportBtn;
