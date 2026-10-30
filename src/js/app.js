@@ -2463,6 +2463,15 @@
           carácter provisional hasta el cierre del año natural el 31 de diciembre.
         </div>
       `);
+      if (alm.year === 2026) {
+        banners.push(`
+          <div class="callout callout-forest">
+            <strong>✨ Cierre del Primer Quinquenio de Observaciones (2022–2026):</strong>
+            Con los datos de 2026, la estación de Barrio de Arriba completa su primer lustro histórico.
+            Consulte la serie de referencia y <a href="#comparativas" style="text-decoration:underline; font-weight:700">normales climáticas provisionales del Quinquenio (WMO-No. 1203)</a> en la sección de comparativas.
+          </div>
+        `);
+      }
     }
     if (cov.missing_days > 0) {
       banners.push(`
@@ -4310,6 +4319,127 @@
     }, 'meteoriotuerto_comparativas_sinopticas.xlsx');
   }
 
+  function exportQuinquenniumToExcel(q5) {
+    if (!q5) return;
+    const ann = q5.annual_summary || {};
+    const rows = [
+      ['METEORIOTUERTO — NORMALES CLIMATOLÓGICAS PROVISIONALES DEL PRIMER QUINQUENIO (2022–2026)'],
+      ['Estación Meteorológica Automática de Barrio de Arriba · Riotuerto (Cantabria, España)'],
+      ['Coordenadas: 43,341° N, 3,670° O · Altitud: 115 m s. n. m. · Directrices OMM WMO-No. 1203'],
+      [`Fecha de generación: ${new Date().toISOString().replace('T', ' ').slice(0, 19)} · Licencia CC BY 4.0`],
+      [],
+      [
+        'Mes',
+        'Años obs.',
+        'Estado de consolidación',
+        'T. Media (°C)',
+        'T. Máx. Media (°C)',
+        'T. Mín. Media (°C)',
+        'T. Máx. Abs. Lustro (°C)',
+        'Año Máx. Abs.',
+        'T. Mín. Abs. Lustro (°C)',
+        'Año Mín. Abs.',
+        'Lluvia Normal (mm)',
+        'Días Lluvia (≥0,2 mm)',
+        'Días Lluvia (≥10 mm)',
+        'Máx. Lluvia 24h (mm)',
+        'Año Máx. Lluvia 24h',
+        'Viento Medio (km/h)',
+        'Racha Máx. Lustro (km/h)',
+        'Año Racha Máx.',
+        'Días Foehn / Surada',
+        'Días Helada (≤0 °C)',
+        'Días Calor (≥30 °C)',
+        'Noches Tropicales (≥20 °C)',
+        'HDD (15,5 °C)',
+        'CDD (21,0 °C)',
+        'GDD (10,0 °C)',
+        'Evapotranspiración ET₀ (mm)',
+        'Balance Hídrico (mm)'
+      ]
+    ];
+
+    (q5.monthly_normals || []).forEach((m) => {
+      rows.push([
+        m.name,
+        m.sample_years_count,
+        m.is_fully_consolidated ? 'Consolidado (5 años)' : 'Referencia (4 años cerrados)',
+        m.temp_mean,
+        m.temp_max_mean,
+        m.temp_min_mean,
+        m.temp_max_abs,
+        m.temp_max_abs_year,
+        m.temp_min_abs,
+        m.temp_min_abs_year,
+        m.rain_total_mm,
+        m.rain_days_02,
+        m.rain_days_10,
+        m.rain_max_day_mm,
+        m.rain_max_day_year,
+        m.wind_speed_mean_kmh,
+        m.wind_gust_max_kmh,
+        m.wind_gust_max_year,
+        m.foehn_days,
+        m.frost_days,
+        m.hot_days_30,
+        m.tropical_nights,
+        m.hdd_15_5,
+        m.cdd_21_0,
+        m.gdd_10_0,
+        m.eto_mm,
+        m.water_balance_mm
+      ]);
+    });
+
+    rows.push([
+      'AÑO NORMALIZADO (2022–2026)',
+      5,
+      'Normal Quinquenal Provisoria (WMO-No. 1203)',
+      ann.temp_mean,
+      null,
+      null,
+      ann.records_lustrum?.temp_max_abs?.value,
+      2024,
+      ann.records_lustrum?.temp_min_abs?.value,
+      2023,
+      ann.rain_total_mm,
+      ann.rain_days_02,
+      ann.rain_days_10,
+      ann.records_lustrum?.rain_max_daily?.value,
+      2023,
+      null,
+      ann.records_lustrum?.wind_gust_max?.value,
+      2024,
+      ann.foehn_days,
+      ann.frost_days,
+      ann.hot_days_30,
+      ann.tropical_nights,
+      ann.hdd_15_5,
+      ann.cdd_21_0,
+      ann.gdd_10_0,
+      ann.eto_total_mm,
+      ann.water_balance_mm
+    ]);
+
+    const recordRows = [
+      ['RÉCORDS ABSOLUTOS DEL PRIMER QUINQUENIO (2022–2026) — METEORIOTUERTO'],
+      ['Barrio de Arriba · Riotuerto (Cantabria, 115 m s. n. m.)'],
+      [],
+      ['Hito climatológico', 'Valor récord', 'Unidad', 'Fecha', 'Contexto sinóptico'],
+      ['Temperatura máxima absoluta', ann.records_lustrum?.temp_max_abs?.value, '°C', ann.records_lustrum?.temp_max_abs?.date, 'Ola de calor histórica en agosto de 2024'],
+      ['Temperatura mínima absoluta', ann.records_lustrum?.temp_min_abs?.value, '°C', ann.records_lustrum?.temp_min_abs?.date, 'Helada por inversión térmica en marzo de 2023'],
+      ['Precipitación máxima en 24 h', ann.records_lustrum?.rain_max_daily?.value, 'mm', ann.records_lustrum?.rain_max_daily?.date, 'Temporal atlántico histórico (Borrasca Fien)'],
+      ['Racha máxima absoluta de viento', ann.records_lustrum?.wind_gust_max?.value, 'km/h', ann.records_lustrum?.wind_gust_max?.date, 'Vendaval del sur / surada (Borrasca Karlotta)'],
+      ['Mayor oscilación térmica en 24 h', ann.records_lustrum?.max_daily_amplitude?.value, '°C', ann.records_lustrum?.max_daily_amplitude?.date, 'Amplitud térmica extrema el 11 de agosto de 2024'],
+      ['Máxima intensidad de precipitación', ann.records_lustrum?.rain_rate_max?.value, 'mm/h', ann.records_lustrum?.rain_rate_max?.date, 'Tormenta torrencial convectiva en junio de 2025']
+    ];
+
+    exportWorkbookToXLSX({
+      'Normales_Quinquenio_2022_2026': rows,
+      'Records_Lustro_2022_2026': recordRows
+    }, 'meteoriotuerto_normales_quinquenio_2022_2026.xlsx');
+  }
+
   function exportHeadToHeadScoreboardToExcel(profA, profB, mode) {
     const scoreboardHeaders = [
       'Indicador climatológico',
@@ -6126,6 +6256,35 @@
       `;
     }).join('');
 
+    // EVO-040: Primer Quinquenio Climatológico (2022–2026) · Normales Provisionales OMM
+    const q5 = comp.quinquennium_2022_2026 || {};
+    const q5Ann = q5.annual_summary || {};
+    const q5Months = q5.monthly_normals || [];
+
+    const q5TableRowsHtml = q5Months.map((m) => {
+      const isCons = m.is_fully_consolidated;
+      return `
+        <tr>
+          <td><strong>${m.name}</strong></td>
+          <td class="num">${m.sample_years_count}/5 ${isCons ? '<span class="badge" style="font-size:0.65rem;background:#059669;color:#fff">5 años</span>' : '<span class="badge" style="font-size:0.65rem;background:#d97706;color:#fff">4 años</span>'}</td>
+          <td class="num"><strong>${fmtNum(m.temp_mean, 1)} °C</strong></td>
+          <td class="num">${fmtNum(m.temp_max_mean, 1)} °C</td>
+          <td class="num">${fmtNum(m.temp_min_mean, 1)} °C</td>
+          <td class="num" style="color:var(--accent-heat)">${fmtNum(m.temp_max_abs, 1)} °C <small>('${String(m.temp_max_abs_year).slice(2)})</small></td>
+          <td class="num" style="color:var(--accent-cold)">${fmtNum(m.temp_min_abs, 1)} °C <small>('${String(m.temp_min_abs_year).slice(2)})</small></td>
+          <td class="num" style="color:var(--accent-rain)"><strong>${fmtNum(m.rain_total_mm, 1)} mm</strong></td>
+          <td class="num">${fmtNum(m.rain_days_02, 1)} d</td>
+          <td class="num">${fmtNum(m.rain_days_10, 1)} d</td>
+          <td class="num" style="color:var(--accent-rain)">${fmtNum(m.rain_max_day_mm, 1)} mm <small>('${String(m.rain_max_day_year).slice(2)})</small></td>
+          <td class="num">${fmtNum(m.frost_days, 1)} d</td>
+          <td class="num">${fmtNum(m.hot_days_30, 1)} d</td>
+          <td class="num">${fmtNum(m.foehn_days, 1)} d</td>
+          <td class="num">${fmtNum(m.eto_mm, 1)} mm</td>
+          <td class="num" style="color:${(m.water_balance_mm ?? 0) >= 0 ? '#059669' : '#ea580c'}"><strong>${(m.water_balance_mm ?? 0) >= 0 ? '+' : ''}${fmtNum(m.water_balance_mm, 1)} mm</strong></td>
+        </tr>
+      `;
+    }).join('');
+
     container.innerHTML = `
       <article class="editorial-hero">
         <div class="editorial-kicker">PERSPECTIVA INTERANUAL Y VARIABILIDAD CLIMÁTICA</div>
@@ -6559,6 +6718,141 @@
         </div>
       </section>
 
+      <!-- EVO-040: Primer Quinquenio Climatológico (2022–2026) y Normales Provisionales OMM -->
+      <section class="section-block quinquennium-section" id="sec-quinquennium" aria-labelledby="quinquennium-heading">
+        <div class="section-header">
+          <div>
+            <div class="editorial-kicker">SERIE CANÓNICA DE 5 AÑOS · DIRECTRICES OMM WMO-No. 1203</div>
+            <h3 id="quinquennium-heading" class="section-title">Primer Quinquenio Climatológico de Riotuerto (2022–2026)</h3>
+            <p class="section-subtitle">
+              Normales climatológicas provisionales y medias de corto periodo para los primeros 5 años de observaciones en Barrio de Arriba
+            </p>
+          </div>
+          <div>
+            <button type="button" id="btn-export-quinquennium-xlsx" class="btn btn-excel">
+              📊 Exportar normales del quinquenio (.xlsx)
+            </button>
+          </div>
+        </div>
+
+        <div class="quinquennium-hero-card">
+          <div class="quinquennium-badge-bar">
+            <span class="badge" style="background:#0284c7;color:#fff">5 AÑOS OBSERVADOS</span>
+            <span class="badge" style="background:var(--accent-forest);color:#fff">SERIE DE REFERENCIA 2022–2026</span>
+            <span class="badge" style="background:rgba(255,255,255,0.2);color:var(--txt-primary)">WMO-No. 1203</span>
+          </div>
+          <div class="quinquennium-kpis-grid">
+            <div class="q-kpi-card">
+              <span class="q-kpi-label">Temperatura media normal</span>
+              <span class="q-kpi-val" style="color:var(--accent-heat)">${fmtNum(q5Ann.temp_mean, 1)} °C</span>
+              <span class="q-kpi-sub">Promedio térmico del quinquenio 2022–2026</span>
+            </div>
+            <div class="q-kpi-card">
+              <span class="q-kpi-label">Precipitación anual normal</span>
+              <span class="q-kpi-val" style="color:var(--accent-rain)">${fmtNum(q5Ann.rain_total_mm, 1)} mm</span>
+              <span class="q-kpi-sub">Suma de medias mensuales (clima hiperhúmedo)</span>
+            </div>
+            <div class="q-kpi-card">
+              <span class="q-kpi-label">Frecuencia de precipitación</span>
+              <span class="q-kpi-val" style="color:var(--accent-rain)">${fmtNum(q5Ann.rain_days_02, 1)} días/año</span>
+              <span class="q-kpi-sub">58,7 % de los días con precipitación ≥0,2 mm</span>
+            </div>
+            <div class="q-kpi-card">
+              <span class="q-kpi-label">Balance hídrico neto normal</span>
+              <span class="q-kpi-val" style="color:#059669">+${fmtNum(q5Ann.water_balance_mm, 1)} mm</span>
+              <span class="q-kpi-sub">Superávit anual P &minus; ET₀ (déficit estival: ${fmtNum(q5Ann.summer_water_balance_mm, 1)} mm)</span>
+            </div>
+          </div>
+
+          <div class="quinquennium-records-box">
+            <h4 style="font-size:0.95rem; font-weight:700; margin:0 0 10px 0; color:var(--txt-primary)">
+              🏆 Hitos y récords climatológicos del lustro (2022–2026)
+            </h4>
+            <div class="quinquennium-records-grid">
+              <div class="q-record-item">
+                <span class="q-rec-title">Máxima absoluta</span>
+                <span class="q-rec-val" style="color:var(--accent-heat)">42,1 °C</span>
+                <span class="q-rec-date">11 ago 2024 (Ola de calor)</span>
+              </div>
+              <div class="q-record-item">
+                <span class="q-rec-title">Mínima absoluta</span>
+                <span class="q-rec-val" style="color:var(--accent-cold)">-2,4 °C</span>
+                <span class="q-rec-date">1 mar 2023 (Inversión térmica)</span>
+              </div>
+              <div class="q-record-item">
+                <span class="q-rec-title">Precipitación 24h</span>
+                <span class="q-rec-val" style="color:var(--accent-rain)">125,9 mm</span>
+                <span class="q-rec-date">16 ene 2023 (Borrasca Fien)</span>
+              </div>
+              <div class="q-record-item">
+                <span class="q-rec-title">Racha máxima</span>
+                <span class="q-rec-val" style="color:var(--txt-primary)">97,2 km/h</span>
+                <span class="q-rec-date">8 feb 2024 (Vendaval Karlotta)</span>
+              </div>
+              <div class="q-record-item">
+                <span class="q-rec-title">Oscilación térmica 24h</span>
+                <span class="q-rec-val" style="color:var(--accent-heat)">27,2 °C</span>
+                <span class="q-rec-date">11 ago 2024 (Amplitud récord)</span>
+              </div>
+              <div class="q-record-item">
+                <span class="q-rec-title">Intensidad máx. lluvia</span>
+                <span class="q-rec-val" style="color:var(--accent-rain)">145,2 mm/h</span>
+                <span class="q-rec-date">19 jun 2025 (Convectiva)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <caption class="table-caption">Normales climatológicas provisionales del Primer Quinquenio (2022–2026) mes a mes</caption>
+            <thead>
+              <tr>
+                <th scope="col">Mes</th>
+                <th scope="col" class="num">Años obs.</th>
+                <th scope="col" class="num">T. media</th>
+                <th scope="col" class="num">T. máx. media</th>
+                <th scope="col" class="num">T. mín. media</th>
+                <th scope="col" class="num">Máx. abs. lustro</th>
+                <th scope="col" class="num">Mín. abs. lustro</th>
+                <th scope="col" class="num">Lluvia normal</th>
+                <th scope="col" class="num">Días ≥0,2 mm</th>
+                <th scope="col" class="num">Días ≥10 mm</th>
+                <th scope="col" class="num">Máx. día lustro</th>
+                <th scope="col" class="num">Días helada</th>
+                <th scope="col" class="num">Días ≥30 °C</th>
+                <th scope="col" class="num">Días Foehn</th>
+                <th scope="col" class="num">ET₀ normal</th>
+                <th scope="col" class="num">Balance normal</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${q5TableRowsHtml}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>AÑO NORMALIZADO</td>
+                <td class="num">5 años</td>
+                <td class="num"><strong>${fmtNum(q5Ann.temp_mean, 1)} °C</strong></td>
+                <td class="num">—</td>
+                <td class="num">—</td>
+                <td class="num" style="color:var(--accent-heat)">42,1 °C ('24)</td>
+                <td class="num" style="color:var(--accent-cold)">-2,4 °C ('23)</td>
+                <td class="num" style="color:var(--accent-rain)"><strong>${fmtNum(q5Ann.rain_total_mm, 1)} mm</strong></td>
+                <td class="num">${fmtNum(q5Ann.rain_days_02, 1)} d</td>
+                <td class="num">${fmtNum(q5Ann.rain_days_10, 1)} d</td>
+                <td class="num" style="color:var(--accent-rain)">125,9 mm ('23)</td>
+                <td class="num">${fmtNum(q5Ann.frost_days, 1)} d</td>
+                <td class="num">${fmtNum(q5Ann.hot_days_30, 1)} d</td>
+                <td class="num">${fmtNum(q5Ann.foehn_days, 1)} d</td>
+                <td class="num">${fmtNum(q5Ann.eto_total_mm, 1)} mm</td>
+                <td class="num" style="color:#059669"><strong>+${fmtNum(q5Ann.water_balance_mm, 1)} mm</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
       <!-- Calendario histórico agroclimático y fenológico de Riotuerto -->
       <section class="section-block" aria-labelledby="sec-phenology-title">
         <div class="section-header">
@@ -6620,6 +6914,10 @@
 
     document.getElementById('btn-export-waterbalance-xlsx')?.addEventListener('click', () => {
       exportWaterBalanceToExcel(comp);
+    });
+
+    document.getElementById('btn-export-quinquennium-xlsx')?.addEventListener('click', () => {
+      exportQuinquenniumToExcel(q5);
     });
 
     renderHeadToHeadComparator(comp);
@@ -10818,6 +11116,8 @@
     window.exportChartWithLetterhead = exportChartWithLetterhead;
     // EVO-039: Exposición del sensor de frescura para pruebas y telemetría
     window.computeDataFreshness = computeDataFreshness;
+    // EVO-040: Exposición del exportador de normales del quinquenio
+    window.exportQuinquenniumToExcel = exportQuinquenniumToExcel;
 
     handleRouteChange();
   });

@@ -178,6 +178,17 @@ def validate_directory(data_dir: Path) -> List[str]:
         if len(wbc.get("years", {})) < 5:
             errors.append(f"Años insuficientes en water_balance_comparison: {len(wbc.get('years', {}))} < 5.")
 
+    # Validar normales del primer quinquenio 2022–2026 (EVO-040)
+    q5 = comp.get("quinquennium_2022_2026", {})
+    if not q5:
+        errors.append("comparisons.json carece del objeto 'quinquennium_2022_2026' (EVO-040).")
+    else:
+        if len(q5.get("monthly_normals", [])) != 12:
+            errors.append(f"Faltan meses en quinquennium_2022_2026: {len(q5.get('monthly_normals', []))} != 12.")
+        ann = q5.get("annual_summary", {})
+        if "temp_mean" not in ann or "rain_total_mm" not in ann or "records_lustrum" not in ann:
+            errors.append("annual_summary incompleto en quinquennium_2022_2026.")
+
     # Validar catálogo de episodios extremos en records.json (EVO-020 / EVO-D)
     rec = loaded.get("records.json", {})
     rec_ee = rec.get("extreme_episodes", {})

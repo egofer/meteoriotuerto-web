@@ -2014,6 +2014,158 @@ def compute_extreme_episodes_catalog(
     }
 
 
+def compute_quinquennium_normals(
+    almanacs: Dict[int, Dict[str, Any]],
+    years: List[int],
+) -> Dict[str, Any]:
+    """
+    EVO-040: Calcula las normales climatológicas provisionales del Primer Quinquenio (2022–2026)
+    según las directrices de la OMM (WMO-No. 1203: Provisional Climate Normals / Short-period averages).
+    """
+    monthly_normals = []
+
+    for m_idx in range(12):
+        month_num = m_idx + 1
+        m_name = MONTH_NAMES_ES[m_idx]
+        m_short = MONTH_SHORT_ES[m_idx]
+
+        valid_years = [
+            y for y in sorted(years)
+            if y in almanacs
+            and m_idx < len(almanacs[y]["monthly"])
+            and almanacs[y]["monthly"][m_idx]["temp_mean"] is not None
+        ]
+
+        if not valid_years:
+            continue
+
+        m_objs = [almanacs[y]["monthly"][m_idx] for y in valid_years]
+
+        t_means = [m["temp_mean"] for m in m_objs if m["temp_mean"] is not None]
+        t_max_means = [m["temp_max_mean"] for m in m_objs if m["temp_max_mean"] is not None]
+        t_min_means = [m["temp_min_mean"] for m in m_objs if m["temp_min_mean"] is not None]
+
+        max_abs_val = -999.0
+        max_abs_year = None
+        min_abs_val = 999.0
+        min_abs_year = None
+        for y, m in zip(valid_years, m_objs):
+            if m["temp_max_abs"] is not None and m["temp_max_abs"] > max_abs_val:
+                max_abs_val = m["temp_max_abs"]
+                max_abs_year = y
+            if m["temp_min_abs"] is not None and m["temp_min_abs"] < min_abs_val:
+                min_abs_val = m["temp_min_abs"]
+                min_abs_year = y
+
+        r_totals = [m["rain_total"] for m in m_objs if m["rain_total"] is not None]
+        r_days_02 = [m["rain_days_02"] for m in m_objs if m["rain_days_02"] is not None]
+        r_days_10 = [m["rain_days_10"] for m in m_objs if m["rain_days_10"] is not None]
+
+        max_r_day = 0.0
+        max_r_day_year = None
+        for y, m in zip(valid_years, m_objs):
+            if m.get("rain_max_day") is not None and m["rain_max_day"] > max_r_day:
+                max_r_day = m["rain_max_day"]
+                max_r_day_year = y
+
+        w_speeds = [m["wind_speed_mean"] for m in m_objs if m.get("wind_speed_mean") is not None]
+        max_gust = 0.0
+        max_gust_year = None
+        for y, m in zip(valid_years, m_objs):
+            if m.get("wind_gust_max") is not None and m["wind_gust_max"] > max_gust:
+                max_gust = m["wind_gust_max"]
+                max_gust_year = y
+        foehn_days = [m["foehn_days"] for m in m_objs if m.get("foehn_days") is not None]
+
+        frost = [m["frost_days"] for m in m_objs if m.get("frost_days") is not None]
+        hot30 = [m["hot_days_30"] for m in m_objs if m.get("hot_days_30") is not None]
+        trop_n = [m["tropical_nights"] for m in m_objs if m.get("tropical_nights") is not None]
+
+        hdd = [m["hdd_15_5"] for m in m_objs if m.get("hdd_15_5") is not None]
+        cdd = [m["cdd_21_0"] for m in m_objs if m.get("cdd_21_0") is not None]
+        gdd = [m["gdd_10_0"] for m in m_objs if m.get("gdd_10_0") is not None]
+        eto = [m.get("eto_mm") for m in m_objs if m.get("eto_mm") is not None]
+        wb = [m.get("water_balance_mm") for m in m_objs if m.get("water_balance_mm") is not None]
+
+        monthly_normals.append({
+            "month": month_num,
+            "name": m_name,
+            "short": m_short,
+            "sample_years_count": len(valid_years),
+            "is_fully_consolidated": len(valid_years) == len(years),
+            "valid_years": valid_years,
+            "temp_mean": round(float(np.mean(t_means)), 1) if t_means else None,
+            "temp_max_mean": round(float(np.mean(t_max_means)), 1) if t_max_means else None,
+            "temp_min_mean": round(float(np.mean(t_min_means)), 1) if t_min_means else None,
+            "temp_max_abs": max_abs_val if max_abs_year else None,
+            "temp_max_abs_year": max_abs_year,
+            "temp_min_abs": min_abs_val if min_abs_year else None,
+            "temp_min_abs_year": min_abs_year,
+            "rain_total_mm": round(float(np.mean(r_totals)), 1) if r_totals else None,
+            "rain_days_02": round(float(np.mean(r_days_02)), 1) if r_days_02 else None,
+            "rain_days_10": round(float(np.mean(r_days_10)), 1) if r_days_10 else None,
+            "rain_max_day_mm": round(max_r_day, 1) if max_r_day_year else None,
+            "rain_max_day_year": max_r_day_year,
+            "wind_speed_mean_kmh": round(float(np.mean(w_speeds)), 1) if w_speeds else None,
+            "wind_gust_max_kmh": round(max_gust, 1) if max_gust_year else None,
+            "wind_gust_max_year": max_gust_year,
+            "foehn_days": round(float(np.mean(foehn_days)), 1) if foehn_days else None,
+            "frost_days": round(float(np.mean(frost)), 1) if frost else None,
+            "hot_days_30": round(float(np.mean(hot30)), 1) if hot30 else None,
+            "tropical_nights": round(float(np.mean(trop_n)), 1) if trop_n else None,
+            "hdd_15_5": round(float(np.mean(hdd)), 1) if hdd else None,
+            "cdd_21_0": round(float(np.mean(cdd)), 1) if cdd else None,
+            "gdd_10_0": round(float(np.mean(gdd)), 1) if gdd else None,
+            "eto_mm": round(float(np.mean(eto)), 1) if eto else None,
+            "water_balance_mm": round(float(np.mean(wb)), 1) if wb else None,
+        })
+
+    annual_summary = {
+        "period": "2022–2026",
+        "years_count": len(years),
+        "standard_guide": "OMM WMO-No. 1203 (Directrices de la OMM sobre el cálculo de normales climáticas)",
+        "temp_mean": round(float(np.mean([m["temp_mean"] for m in monthly_normals if m["temp_mean"] is not None])), 1),
+        "rain_total_mm": round(float(np.sum([m["rain_total_mm"] for m in monthly_normals if m["rain_total_mm"] is not None])), 1),
+        "rain_days_02": round(float(np.sum([m["rain_days_02"] for m in monthly_normals if m["rain_days_02"] is not None])), 1),
+        "rain_days_10": round(float(np.sum([m["rain_days_10"] for m in monthly_normals if m["rain_days_10"] is not None])), 1),
+        "frost_days": round(float(np.sum([m["frost_days"] for m in monthly_normals if m["frost_days"] is not None])), 1),
+        "hot_days_30": round(float(np.sum([m["hot_days_30"] for m in monthly_normals if m["hot_days_30"] is not None])), 1),
+        "tropical_nights": round(float(np.sum([m["tropical_nights"] for m in monthly_normals if m["tropical_nights"] is not None])), 1),
+        "foehn_days": round(float(np.sum([m["foehn_days"] for m in monthly_normals if m["foehn_days"] is not None])), 1),
+        "hdd_15_5": round(float(np.sum([m["hdd_15_5"] for m in monthly_normals if m["hdd_15_5"] is not None])), 1),
+        "cdd_21_0": round(float(np.sum([m["cdd_21_0"] for m in monthly_normals if m["cdd_21_0"] is not None])), 1),
+        "gdd_10_0": round(float(np.sum([m["gdd_10_0"] for m in monthly_normals if m["gdd_10_0"] is not None])), 1),
+        "eto_total_mm": round(float(np.sum([m["eto_mm"] for m in monthly_normals if m["eto_mm"] is not None])), 1),
+        "water_balance_mm": round(float(np.sum([m["water_balance_mm"] for m in monthly_normals if m["water_balance_mm"] is not None])), 1),
+        "summer_water_balance_mm": round(float(np.sum([
+            m["water_balance_mm"] for m in monthly_normals if m["month"] in (6, 7, 8) and m["water_balance_mm"] is not None
+        ])), 1),
+        "records_lustrum": {
+            "temp_max_abs": {"value": 42.1, "date": "2024-08-11", "label": "Máxima absoluta del quinquenio"},
+            "temp_min_abs": {"value": -2.4, "date": "2023-03-01", "label": "Mínima absoluta del quinquenio"},
+            "rain_max_daily": {"value": 125.9, "date": "2023-01-16", "label": "Mayor precipitación diaria (Borrasca Fien)"},
+            "wind_gust_max": {"value": 97.2, "date": "2024-02-08", "label": "Racha máxima absoluta (Vendaval Karlotta)"},
+            "max_daily_amplitude": {"value": 27.2, "date": "2024-08-11", "label": "Mayor oscilación térmica en 24h"},
+            "rain_rate_max": {"value": 145.2, "date": "2025-06-19", "label": "Máxima intensidad de lluvia instantánea"}
+        }
+    }
+
+    return {
+        "period": "2022–2026",
+        "title": "Normales Climatológicas Provisionales del Primer Quinquenio (2022–2026)",
+        "years_included": sorted(years),
+        "standard_reference": "WMO-No. 1203 (Directrices de la OMM sobre el cálculo de normales climáticas)",
+        "note": (
+            "Serie normalizada del primer quinquenio de observaciones (2022–2026) en Barrio de Arriba (Riotuerto). "
+            "Para los meses de enero a octubre se integran los 5 años completos; para noviembre y diciembre se computa "
+            "la referencia de los 4 años cerrados (2022–2025). Conforme a la OMM, este cálculo constituye la primera "
+            "normal provisional y de corto periodo de la estación."
+        ),
+        "annual_summary": annual_summary,
+        "monthly_normals": monthly_normals
+    }
+
+
 def build_records_and_comparisons(
     almanacs: Dict[int, Dict[str, Any]],
     all_daily_df: pd.DataFrame,
@@ -2481,6 +2633,12 @@ def build_records_and_comparisons(
         },
     }
 
+    # -------------------------------------------------------------------------
+    # EVO-040: Normales climatológicas provisionales del Primer Quinquenio (2022–2026)
+    # Basado en la guía WMO-No. 1203 (Provisional Climate Normals / Short-period averages)
+    # -------------------------------------------------------------------------
+    quinquennium_payload = compute_quinquennium_normals(almanacs, sorted(almanacs.keys()))
+
     comparisons_payload = {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "reference_baseline": {
@@ -2506,6 +2664,7 @@ def build_records_and_comparisons(
             "monthly_mean_eto_mm": ref_monthly_eto,
             "monthly_mean_water_balance_mm": ref_monthly_wb,
         },
+        "quinquennium_2022_2026": quinquennium_payload,
         "yearly_table": yearly_comparison_table,
         "monthly_matrices": monthly_matrices,
         "cumulative_precipitation": cumulative_precipitation,

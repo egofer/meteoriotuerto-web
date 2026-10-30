@@ -6063,4 +6063,102 @@ html[data-theme="dark"] .freshness-status-pill.freshness-stale {
   color: var(--accent-forest);
 }
 
+/* ==========================================================================
+   EVO-040: Primer Quinquenio Climatológico (2022–2026) y Normales Provisionales OMM
+   ========================================================================== */
+.quinquennium-hero-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-left: 5px solid var(--accent-forest);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  margin-bottom: 24px;
+}
+
+.quinquennium-badge-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.quinquennium-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.q-kpi-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.q-kpi-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--txt-secondary);
+}
+
+.q-kpi-val {
+  font-family: var(--font-mono);
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.q-kpi-sub {
+  font-size: 0.76rem;
+  color: var(--txt-muted);
+}
+
+.quinquennium-records-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 18px 22px;
+  margin-top: 20px;
+}
+
+.quinquennium-records-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.q-record-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-left: 3px solid var(--border-strong);
+  padding-left: 10px;
+}
+
+.q-rec-title {
+  font-size: 0.76rem;
+  color: var(--txt-secondary);
+  font-weight: 600;
+}
+
+.q-rec-val {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+}
+
+.q-rec-date {
+  font-size: 0.74rem;
+  color: var(--txt-muted);
+}
+
+
 
