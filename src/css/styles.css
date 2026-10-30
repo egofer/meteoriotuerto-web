@@ -6160,5 +6160,146 @@ html[data-theme="dark"] .freshness-status-pill.freshness-stale {
   color: var(--txt-muted);
 }
 
+/* ==========================================================================
+   EVO-038: Accesibilidad Universal WCAG 2.1 / 2.2 AA para Gráficos Chart.js
+   Tablas alternativas vinculadas mediante <details class="chart-a11y-details">
+   ========================================================================== */
+
+.chart-a11y-details {
+  margin-top: 12px;
+  margin-bottom: 16px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-a11y-details[open] {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--accent-forest);
+}
+
+.chart-a11y-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--txt-secondary);
+  background-color: var(--bg-elevated);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.chart-a11y-summary::-webkit-details-marker {
+  display: none;
+}
+
+.chart-a11y-summary:hover,
+.chart-a11y-summary:focus-visible {
+  background-color: var(--bg-subtle);
+  color: var(--accent-forest);
+  outline: 2px solid var(--accent-forest);
+  outline-offset: -2px;
+}
+
+.chart-a11y-summary-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-a11y-summary-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.chart-a11y-summary-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  background-color: var(--accent-forest-soft);
+  color: var(--accent-forest);
+}
+
+.chart-a11y-content {
+  padding: 14px;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+}
+
+.chart-a11y-intro {
+  margin: 0 0 12px 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--txt-muted);
+}
+
+.chart-a11y-table {
+  width: 100%;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+}
+
+.chart-a11y-table:last-child {
+  margin-bottom: 0;
+}
+
+.chart-a11y-table th,
+.chart-a11y-table td {
+  padding: 6px 10px;
+}
+
+/* Modo oscuro adaptativo */
+html[data-theme="dark"] .chart-a11y-details {
+  background-color: var(--bg-surface);
+  border-color: var(--border-color);
+}
+
+html[data-theme="dark"] .chart-a11y-details[open] {
+  border-color: var(--accent-forest);
+}
+
+html[data-theme="dark"] .chart-a11y-summary {
+  background-color: var(--bg-elevated);
+  color: var(--txt-secondary);
+}
+
+html[data-theme="dark"] .chart-a11y-summary:hover,
+html[data-theme="dark"] .chart-a11y-summary:focus-visible {
+  background-color: var(--bg-subtle);
+  color: var(--accent-forest);
+  outline-color: var(--accent-forest);
+}
+
+html[data-theme="dark"] .chart-a11y-summary-badge {
+  background-color: var(--accent-forest-soft);
+  color: var(--accent-forest);
+}
+
+html[data-theme="dark"] .chart-a11y-content {
+  border-top-color: var(--border-color);
+  background-color: var(--bg-surface);
+}
+
+html[data-theme="dark"] .chart-a11y-intro {
+  color: var(--txt-muted);
+}
+
+/* Compatibilidad con impresión */
+@media print {
+  .chart-a11y-details {
+    display: none !important;
+  }
+}
+
 
 

@@ -1346,9 +1346,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.13", sw_js, "Falta cache v1.2.13 en sw.js")
+        self.assertIn("v1.2.14", sw_js, "Falta cache v1.2.14 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.2.13", index_html, "Falta v=1.2.13 en index.html")
+        self.assertIn("v=1.2.14", index_html, "Falta v=1.2.14 en index.html")
 
     def test_weather_underground_realtime_integration(self):
         """
@@ -1472,11 +1472,11 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertNotIn("function renderHomeCharts", app_js, "renderHomeCharts() debe haber sido purgada de app.js")
         self.assertNotIn("renderHomeCharts(", app_js, "No debe haber llamadas residuales a renderHomeCharts()")
 
-        # 4. Comprobar sincronización de caché v1.2.13
+        # 4. Comprobar sincronización de caché v1.2.14
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.13", sw_txt)
-        self.assertIn("app.js?v=1.2.13", index_txt)
+        self.assertIn("v1.2.14", sw_txt)
+        self.assertIn("app.js?v=1.2.14", index_txt)
 
     def test_mej_003_sheetjs_deferred_loading(self):
         """
@@ -1485,14 +1485,14 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         2. sw.js precachea ./src/js/vendor/xlsx.mini.min.js para soporte offline inmediato.
         3. ensureXLSXLoaded() en app.js inyecta dinámicamente el script con fallback a CDN.
         4. exportWorkbookToXLSX() gestiona el cursor 'wait' y desbloquea en bloque finally.
-        5. Versión de caché v1.2.13 sincronizada en sw.js e index.html.
+        5. Versión de caché v1.2.14 sincronizada en sw.js e index.html.
         """
         html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
         self.assertNotIn("xlsx.mini.min.js", html_text, "index.html no debe cargar SheetJS de forma bloqueante en el arranque")
 
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         self.assertIn("./src/js/vendor/xlsx.mini.min.js", sw_txt, "sw.js debe precachear SheetJS para modo offline")
-        self.assertIn("v1.2.13", sw_txt)
+        self.assertIn("v1.2.14", sw_txt)
 
         app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn("async function ensureXLSXLoaded()", app_js)
@@ -1586,12 +1586,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("route === 'metodologia'", fn_body)
         self.assertIn("route === 'glosario'", fn_body)
 
-        # 4. Sincronización de versión de caché v1.2.13
+        # 4. Sincronización de versión de caché v1.2.14
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.13", sw_txt)
-        self.assertIn("app.js?v=1.2.13", index_txt)
-        self.assertIn("styles.css?v=1.2.13", index_txt)
+        self.assertIn("v1.2.14", sw_txt)
+        self.assertIn("app.js?v=1.2.14", index_txt)
+        self.assertIn("styles.css?v=1.2.14", index_txt)
 
     def test_mej_012_schema_org_json_ld_metadata(self):
         """
@@ -1671,12 +1671,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("config.options.animation = false;", app_js)
         self.assertIn("behavior: getScrollBehavior()", app_js)
 
-        # Comprobar versión de caché v1.2.13
+        # Comprobar versión de caché v1.2.14
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.13", sw_txt)
-        self.assertIn("app.js?v=1.2.13", index_txt)
-        self.assertIn("styles.css?v=1.2.13", index_txt)
+        self.assertIn("v1.2.14", sw_txt)
+        self.assertIn("app.js?v=1.2.14", index_txt)
+        self.assertIn("styles.css?v=1.2.14", index_txt)
 
     def test_mej_009_accessible_tables_caption_and_scope(self):
         """
@@ -1684,7 +1684,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         1. Las 19 tablas dinámicas en app.js disponen de su correspondiente etiqueta <caption> descriptiva.
         2. Todas las cabeceras <th> cuentan explícitamente con atributo scope='col' o scope='row' (0 <th> huérfanos).
         3. En styles.css se incluye la regla de estilo para caption (.data-table caption, .table-caption).
-        4. Sincronización de versión de caché v1.2.13 en sw.js e index.html.
+        4. Sincronización de versión de caché v1.2.14 en sw.js e index.html.
         """
         import re
 
@@ -1692,7 +1692,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 1. Verificar que existen tablas y que el 100% tienen caption
         table_matches = re.findall(r'<table\b[^>]*>.*?</table>', app_js, re.DOTALL)
-        self.assertEqual(len(table_matches), 20, f"Se esperaban 20 tablas en app.js, encontradas {len(table_matches)}")
+        self.assertEqual(len(table_matches), 23, f"Se esperaban 23 tablas en app.js, encontradas {len(table_matches)}")
         for idx, tbl in enumerate(table_matches, 1):
             self.assertIn("<caption", tbl, f"La tabla {idx} carece de etiqueta <caption> en app.js")
             self.assertIn('class="table-caption"', tbl, f"La tabla {idx} carece de clase table-caption en <caption>")
@@ -1708,12 +1708,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".data-table caption", css_text)
         self.assertIn("caption-side: top;", css_text)
 
-        # 4. Comprobar sincronización de versión de caché v1.2.13
+        # 4. Comprobar sincronización de versión de caché v1.2.14
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.13", sw_txt)
-        self.assertIn("app.js?v=1.2.13", index_txt)
-        self.assertIn("styles.css?v=1.2.13", index_txt)
+        self.assertIn("v1.2.14", sw_txt)
+        self.assertIn("app.js?v=1.2.14", index_txt)
+        self.assertIn("styles.css?v=1.2.14", index_txt)
 
     def test_mej_006_minified_json_production_output(self):
         """
@@ -1757,11 +1757,11 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("(prefers-color-scheme: dark)", app_js)
         self.assertIn("mediaDark.addEventListener('change'", app_js)
 
-        # Comprobar versión de caché v1.2.13
+        # Comprobar versión de caché v1.2.14
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.13", sw_txt)
-        self.assertIn("app.js?v=1.2.13", html_text)
-        self.assertIn("styles.css?v=1.2.13", html_text)
+        self.assertIn("v1.2.14", sw_txt)
+        self.assertIn("app.js?v=1.2.14", html_text)
+        self.assertIn("styles.css?v=1.2.14", html_text)
 
     def test_mej_008_orphan_image_folder_purged(self):
         """
@@ -1784,7 +1784,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         3. styles.css contiene las reglas para .btn-chart-export, .chart-header-actions y estados hover/dark.
         4. El membrete oficial contiene marca METEORIOTUERTO, Barrio de Arriba, Riotuerto y licencia CC BY 4.0.
         5. Exposición en window.renderChartExportBtn y window.exportChartWithLetterhead.
-        6. Sincronización de versión de caché v1.2.13 en sw.js e index.html.
+        6. Sincronización de versión de caché v1.2.14 en sw.js e index.html.
         """
         app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn("function renderChartExportBtn(", app_js)
@@ -1813,12 +1813,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".chart-header-actions", css_text)
         self.assertIn(".chart-export-svg", css_text)
 
-        # Sincronización de caché v1.2.13
+        # Sincronización de caché v1.2.14
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.13", sw_txt)
-        self.assertIn("app.js?v=1.2.13", index_txt)
-        self.assertIn("styles.css?v=1.2.13", index_txt)
+        self.assertIn("v1.2.14", sw_txt)
+        self.assertIn("app.js?v=1.2.14", index_txt)
+        self.assertIn("styles.css?v=1.2.14", index_txt)
 
     def test_evo_036_explorer_multiannual_and_dual_overlay(self):
         """
@@ -1829,7 +1829,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         4. refreshExplorerResults() soporta renderizado multianual (2022-2026 superpuestos en eje anual 1-ene/31-dic).
         5. refreshExplorerResults() soporta modo dual con doble escala Y (ejes 'y' y 'y1', grid desacoplado).
         6. exportExplorerSelectionToExcel() genera la hoja 'Matriz_Multianual' con alineación de días y años.
-        7. Sincronización de caché v1.2.13 en sw.js e index.html.
+        7. Sincronización de caché v1.2.14 en sw.js e index.html.
         """
         app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
 
@@ -1855,12 +1855,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         # 4. Soporte de exportación a Excel en modo multianual
         self.assertIn("sheets['Matriz_Multianual'] = multiRows", app_js)
 
-        # 5. Sincronización de versión de caché v1.2.13
+        # 5. Sincronización de versión de caché v1.2.14
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.13", sw_txt)
-        self.assertIn("app.js?v=1.2.13", index_txt)
-        self.assertIn("styles.css?v=1.2.13", index_txt)
+        self.assertIn("v1.2.14", sw_txt)
+        self.assertIn("app.js?v=1.2.14", index_txt)
+        self.assertIn("styles.css?v=1.2.14", index_txt)
 
     def test_evo_039_data_freshness_sensor_and_action_resilience(self):
         """
@@ -1871,7 +1871,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         4. index.html contiene el contenedor reactivo #header-freshness-pill y el enlace de telemetría footer-actions-link.
         5. app.js define computeDataFreshness(), actualiza la pastilla en cabecera y la expone en window.computeDataFreshness.
         6. styles.css incluye las clases .freshness-status-pill, .freshness-dot, .freshness-fresh, .freshness-delayed, .freshness-stale.
-        7. Sincronización de versión de caché v1.2.13 en sw.js e index.html.
+        7. Sincronización de versión de caché v1.2.14 en sw.js e index.html.
         """
         # 1. Script check_freshness.py
         check_script = ROOT_DIR / "scripts" / "check_freshness.py"
@@ -1921,11 +1921,11 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".freshness-stale", css_txt)
         self.assertIn(".footer-actions-link", css_txt)
 
-        # 7. Sincronización de caché v1.2.13
+        # 7. Sincronización de caché v1.2.14
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.13", sw_txt)
-        self.assertIn("app.js?v=1.2.13", html_txt)
-        self.assertIn("styles.css?v=1.2.13", html_txt)
+        self.assertIn("v1.2.14", sw_txt)
+        self.assertIn("app.js?v=1.2.14", html_txt)
+        self.assertIn("styles.css?v=1.2.14", html_txt)
 
     def test_evo_037_dynamic_social_cards_and_sharing(self):
         """
@@ -1936,7 +1936,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         4. app.js actualiza dinámicamente og:image, og:image:alt, twitter:image y twitter:image:alt en updateDocumentMetadata().
         5. app.js añade escuchador a #btn-share-page invocando navigator.share o portapapeles.
         6. styles.css contiene la regla para .btn-share-page.
-        7. Sincronización de caché v1.2.13 en sw.js e index.html.
+        7. Sincronización de caché v1.2.14 en sw.js e index.html.
         """
         og_dir = ROOT_DIR / "assets" / "img" / "og"
         self.assertTrue(og_dir.exists(), "Debe existir assets/img/og/")
@@ -1988,10 +1988,10 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
         self.assertIn(".btn-share-page", css_txt)
 
-        # 6. Sincronización de caché v1.2.13
-        self.assertIn("v1.2.13", sw_txt)
-        self.assertIn("app.js?v=1.2.13", html_txt)
-        self.assertIn("styles.css?v=1.2.13", html_txt)
+        # 6. Sincronización de caché v1.2.14
+        self.assertIn("v1.2.14", sw_txt)
+        self.assertIn("app.js?v=1.2.14", html_txt)
+        self.assertIn("styles.css?v=1.2.14", html_txt)
 
     def test_evo_040_quinquennium_normals_and_consolidation(self):
         """
@@ -2003,7 +2003,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         5. Componente interactivo y tabla en src/js/app.js con botón exportador exportQuinquenniumToExcel.
         6. Banner de quinquenio en renderAlmanaque para 2026.
         7. Estilos CSS para el bloque .quinquennium-hero-card y .q-kpi-card en styles.css.
-        8. Sincronización de caché v1.2.13 en sw.js e index.html.
+        8. Sincronización de caché v1.2.14 en sw.js e index.html.
         """
         comp_path = ROOT_DIR / "data" / "comparisons.json"
         comp_data = json.loads(comp_path.read_text(encoding="utf-8"))
@@ -2046,12 +2046,84 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".quinquennium-hero-card", css_txt)
         self.assertIn(".q-kpi-card", css_txt)
 
-        # 5. Sincronización de caché v1.2.13
+        # 5. Sincronización de caché v1.2.14
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         html_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.13", sw_txt)
-        self.assertIn("app.js?v=1.2.13", html_txt)
-        self.assertIn("styles.css?v=1.2.13", html_txt)
+        self.assertIn("v1.2.14", sw_txt)
+        self.assertIn("app.js?v=1.2.14", html_txt)
+        self.assertIn("styles.css?v=1.2.14", html_txt)
+
+    def test_evo_038_universal_accessibility_chart_tables_and_aria(self):
+        """
+        EVO-038: Verifica la accesibilidad universal en gráficos interactivos Chart.js (WCAG 2.1 / 2.2 AA):
+        1. Los 18 lienzos <canvas> disponen de role="img", aria-label descriptivo y aria-describedby="{id}-a11y-desc".
+        2. Existencia en app.js de la función generadora de tablas accesibles renderChartAccessibleTable() y su invocación en createChart().
+        3. Exposición en window de renderChartAccessibleTable y getChartTitleForCanvas.
+        4. Reglas de estilo para .chart-a11y-details, .chart-a11y-summary, .chart-a11y-content, .chart-a11y-intro y .chart-a11y-table en styles.css.
+        5. Versión de caché v1.2.14 sincronizada en sw.js e index.html.
+        """
+        import re
+
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+        index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+
+        # 1. Verificar los 18 canvas con atributos semánticos accesibles
+        expected_canvases = [
+            "chart-alm-waterbalance",
+            "chart-alm-climogram",
+            "chart-alm-temprange",
+            "chart-alm-dailyrain",
+            "chart-alm-windgust",
+            "chart-alm-windrose",
+            "chart-alm-beaufort",
+            "chart-explorer-main",
+            "chart-comp-cum-rain",
+            "chart-comp-rain-anom",
+            "chart-comp-thresholds",
+            "chart-comp-monthly-rain",
+            "chart-comp-monthly-temp",
+            "chart-comp-degree-days",
+            "chart-comp-thermal-distribution",
+            "chart-seasonal-comp",
+            "chart-comp-waterbalance",
+            "chart-h2h-comparison",
+        ]
+
+        canvas_tags = re.findall(r'<canvas\b[^>]*>', app_js)
+        self.assertEqual(len(canvas_tags), 18, f"Se esperaban 18 lienzos canvas, encontrados {len(canvas_tags)}")
+
+        for c_id in expected_canvases:
+            # Buscar el tag canvas específico
+            pattern = rf'<canvas\b[^>]*id="{re.escape(c_id)}"[^>]*>'
+            match = re.search(pattern, app_js)
+            self.assertIsNotNone(match, f"No se encontró el lienzo con id='{c_id}' en app.js")
+            tag_str = match.group(0)
+            self.assertIn('role="img"', tag_str, f"El lienzo '{c_id}' carece de role='img'")
+            self.assertIn('aria-label="', tag_str, f"El lienzo '{c_id}' carece de atributo aria-label")
+            self.assertIn(f'aria-describedby="{c_id}-a11y-desc"', tag_str, f"El lienzo '{c_id}' carece de aria-describedby vinculante")
+
+        # 2. Funciones y lógica en app.js
+        self.assertIn("function renderChartAccessibleTable(", app_js)
+        self.assertIn("function getChartTitleForCanvas(", app_js)
+        self.assertIn("function extractChartPointValue(", app_js)
+        self.assertIn("renderChartAccessibleTable(canvasId, config, detectedTitle);", app_js)
+        self.assertIn("window.renderChartAccessibleTable = renderChartAccessibleTable;", app_js)
+        self.assertIn("window.getChartTitleForCanvas = getChartTitleForCanvas;", app_js)
+
+        # 3. Estilos CSS en styles.css
+        self.assertIn(".chart-a11y-details", css_txt)
+        self.assertIn(".chart-a11y-summary", css_txt)
+        self.assertIn(".chart-a11y-content", css_txt)
+        self.assertIn(".chart-a11y-intro", css_txt)
+        self.assertIn(".chart-a11y-table", css_txt)
+        self.assertIn('html[data-theme="dark"] .chart-a11y-details', css_txt)
+
+        # 4. Sincronización de caché v1.2.14
+        self.assertIn("v1.2.14", sw_txt)
+        self.assertIn("app.js?v=1.2.14", index_txt)
+        self.assertIn("styles.css?v=1.2.14", index_txt)
 
 
 if __name__ == "__main__":

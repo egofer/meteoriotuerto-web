@@ -737,7 +737,295 @@
     }
 
     STATE.charts[key] = new window.Chart(el, config);
+
+    // EVO-038: Accesibilidad universal WCAG 2.1 / 2.2 AA (role="img", aria-label, aria-describedby y tabla alternativa)
+    try {
+      el.setAttribute('role', 'img');
+      const detectedTitle = getChartTitleForCanvas(el, canvasId);
+      el.setAttribute('aria-label', detectedTitle);
+      el.setAttribute('aria-describedby', `${canvasId}-a11y-desc`);
+      renderChartAccessibleTable(canvasId, config, detectedTitle);
+    } catch (err) {
+      console.warn('Error al generar tabla accesible para gráfico ' + canvasId, err);
+    }
+
     return STATE.charts[key];
+  }
+
+  /* ------------------------------------------------------------------------
+   * EVO-038: Accesibilidad universal WCAG 2.1 / 2.2 AA para gráficos Chart.js
+   * Generación automática de tablas textuales alternativas vinculadas
+   * ------------------------------------------------------------------------ */
+  function getChartTitleForCanvas(el, canvasId) {
+    if (!el) return 'Gráfico meteorológico';
+    const panel = el.closest('.chart-panel') || el.closest('.section-block') || el.parentElement;
+    if (panel) {
+      const tEl = panel.querySelector('.chart-panel-title') || panel.querySelector('h3, h4');
+      if (tEl && tEl.textContent.trim()) {
+        return tEl.textContent.trim().replace(/\s+/g, ' ');
+      }
+    }
+    const existing = el.getAttribute('aria-label');
+    return existing || 'Gráfico meteorológico';
+  }
+
+  function extractChartPointValue(val) {
+    if (val === null || val === undefined) return null;
+    if (typeof val === 'number') return isNaN(val) ? null : val;
+    if (typeof val === 'object' && val !== null) {
+      if (typeof val.y === 'number') return isNaN(val.y) ? null : val.y;
+      if (typeof val.value === 'number') return isNaN(val.value) ? null : val.value;
+    }
+    const n = parseFloat(val);
+    return isNaN(n) ? null : n;
+  }
+
+  function getMonthIndexFromChartLabel(label) {
+    if (!label) return -1;
+    const s = String(label).toLowerCase();
+    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    for (let m = 0; m < 12; m++) {
+      if (s.includes(months[m])) return m;
+    }
+    const mMatch = s.match(/(?:^|\D)(0[1-9]|1[0-2])(?:\D|$)/);
+    if (mMatch) {
+      const val = parseInt(mMatch[1], 10);
+      if (val >= 1 && val <= 12) return val - 1;
+    }
+    return -1;
+  }
+
+  function renderChartAccessibleTable(canvasId, config, title) {
+    const canvasEl = document.getElementById(canvasId);
+    if (!canvasEl) return;
+
+    const wrap = canvasEl.closest('.chart-canvas-wrap') || canvasEl.parentElement;
+    if (!wrap) return;
+
+    const descId = `${canvasId}-a11y-desc`;
+    let detailsEl = document.getElementById(descId);
+    if (!detailsEl) {
+      detailsEl = document.createElement('details');
+      detailsEl.className = 'chart-a11y-details';
+      detailsEl.id = descId;
+      wrap.insertAdjacentElement('afterend', detailsEl);
+    }
+
+    const safeTitle = escapeHtml(title || 'Gráfico meteorológico');
+    const rawLabels = config?.data?.labels || [];
+    const rawDatasets = config?.data?.datasets || [];
+    const validDatasets = rawDatasets.filter(
+      (ds) => ds && ds.data && (!ds.label || !String(ds.label).startsWith('__hidden'))
+    );
+
+    if (rawLabels.length === 0 || validDatasets.length === 0) {
+      detailsEl.innerHTML = `
+        <summary class="chart-a11y-summary">
+          <span class="chart-a11y-summary-main">
+            <span class="chart-a11y-summary-icon" aria-hidden="true">📊</span>
+            <span class="chart-a11y-summary-title">Tabla accesible de datos: ${safeTitle}</span>
+          </span>
+          <span class="chart-a11y-summary-badge">0 registros</span>
+        </summary>
+        <div class="chart-a11y-content">
+          <p class="chart-a11y-intro">Alternativa accesible para ${safeTitle}. No hay series de datos tabulares disponibles en este momento.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Distinción entre series cortas (<= 40 puntos) y series de alta frecuencia (> 40 puntos)
+    if (rawLabels.length <= 40) {
+      const headersHtml = validDatasets
+        .map((ds) => `<th scope="col" class="num">${escapeHtml(ds.label || 'Serie')}</th>`)
+        .join('');
+
+      const rowsHtml = rawLabels
+        .map((lbl, idx) => {
+          const cells = validDatasets
+            .map((ds) => {
+              const val = extractChartPointValue(ds.data[idx]);
+              return `<td class="num">${val !== null ? fmtNum(val, 1) : '—'}</td>`;
+            })
+            .join('');
+          return `<tr><th scope="row">${escapeHtml(String(lbl))}</th>${cells}</tr>`;
+        })
+        .join('');
+
+      detailsEl.innerHTML = `
+        <summary class="chart-a11y-summary">
+          <span class="chart-a11y-summary-main">
+            <span class="chart-a11y-summary-icon" aria-hidden="true">📊</span>
+            <span class="chart-a11y-summary-title">Ver tabla accesible de datos: ${safeTitle}</span>
+          </span>
+          <span class="chart-a11y-summary-badge">${rawLabels.length} filas</span>
+        </summary>
+        <div class="chart-a11y-content">
+          <p class="chart-a11y-intro">
+            Alternativa textual accesible (WCAG 2.2 AA) al gráfico interactivo «${safeTitle}».
+            Muestra ${rawLabels.length} registros y ${validDatasets.length} series de datos para lectores de pantalla.
+          </p>
+          <div class="table-responsive">
+            <table class="data-table chart-a11y-table">
+              <caption class="table-caption">Tabla accesible de datos: ${safeTitle}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Periodo / Etiqueta</th>
+                  ${headersHtml}
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    } else {
+      // Series de alta frecuencia (> 40 puntos): Resumen estadístico + desglose mensual agregado
+      const stats = validDatasets.map((ds) => {
+        const vals = ds.data.map(extractChartPointValue).filter((v) => v !== null && !isNaN(v));
+        const count = vals.length;
+        const min = count > 0 ? Math.min(...vals) : null;
+        const max = count > 0 ? Math.max(...vals) : null;
+        const sum = count > 0 ? vals.reduce((a, b) => a + b, 0) : null;
+        const mean = count > 0 ? sum / count : null;
+        return {
+          label: ds.label || 'Serie',
+          count,
+          min,
+          mean,
+          max,
+          sum,
+        };
+      });
+
+      const statsRowsHtml = stats
+        .map(
+          (st) => `
+            <tr>
+              <th scope="row">${escapeHtml(st.label)}</th>
+              <td class="num">${st.count}</td>
+              <td class="num">${st.min !== null ? fmtNum(st.min, 1) : '—'}</td>
+              <td class="num">${st.mean !== null ? fmtNum(st.mean, 1) : '—'}</td>
+              <td class="num">${st.max !== null ? fmtNum(st.max, 1) : '—'}</td>
+              <td class="num">${st.sum !== null ? fmtNum(st.sum, 1) : '—'}</td>
+            </tr>
+          `
+        )
+        .join('');
+
+      // Agregación mensual
+      const monthNames = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+      ];
+      const monthlyBuckets = Array.from({ length: 12 }, () =>
+        validDatasets.map(() => [])
+      );
+
+      let mappedPoints = 0;
+      rawLabels.forEach((lbl, idx) => {
+        const mIdx = getMonthIndexFromChartLabel(lbl);
+        if (mIdx >= 0 && mIdx < 12) {
+          mappedPoints++;
+          validDatasets.forEach((ds, dsIdx) => {
+            const v = extractChartPointValue(ds.data[idx]);
+            if (v !== null && !isNaN(v)) {
+              monthlyBuckets[mIdx][dsIdx].push(v);
+            }
+          });
+        }
+      });
+
+      // Si no se mapearon meses (ej. índices abstractos), particionar en 12 tramos proporcionales
+      if (mappedPoints === 0) {
+        const chunkSize = Math.ceil(rawLabels.length / 12);
+        for (let b = 0; b < 12; b++) {
+          const start = b * chunkSize;
+          const end = Math.min(start + chunkSize, rawLabels.length);
+          for (let i = start; i < end; i++) {
+            validDatasets.forEach((ds, dsIdx) => {
+              const v = extractChartPointValue(ds.data[i]);
+              if (v !== null && !isNaN(v)) {
+                monthlyBuckets[b][dsIdx].push(v);
+              }
+            });
+          }
+        }
+      }
+
+      const monthlyHeadersHtml = validDatasets
+        .map((ds) => `<th scope="col" class="num">${escapeHtml(ds.label || 'Serie')}</th>`)
+        .join('');
+
+      const monthlyRowsHtml = monthNames
+        .map((mName, mIdx) => {
+          const cells = validDatasets
+            .map((ds, dsIdx) => {
+              const arr = monthlyBuckets[mIdx][dsIdx];
+              if (!arr || arr.length === 0) return '<td class="num">—</td>';
+              const isAccum =
+                /precipit|lluvia|acumulad|gdd|hdd|cdd/i.test(ds.label || '') ||
+                /rain|cum/i.test(canvasId);
+              const val = isAccum
+                ? arr.reduce((a, b) => a + b, 0)
+                : arr.reduce((a, b) => a + b, 0) / arr.length;
+              return `<td class="num">${fmtNum(val, 1)}</td>`;
+            })
+            .join('');
+          return `<tr><th scope="row">${escapeHtml(mName)}</th>${cells}</tr>`;
+        })
+        .join('');
+
+      detailsEl.innerHTML = `
+        <summary class="chart-a11y-summary">
+          <span class="chart-a11y-summary-main">
+            <span class="chart-a11y-summary-icon" aria-hidden="true">📊</span>
+            <span class="chart-a11y-summary-title">Ver resumen estadístico y agregación mensual: ${safeTitle}</span>
+          </span>
+          <span class="chart-a11y-summary-badge">${rawLabels.length} observaciones</span>
+        </summary>
+        <div class="chart-a11y-content">
+          <p class="chart-a11y-intro">
+            Alternativa textual accesible (WCAG 2.2 AA) para la serie continua de alta frecuencia «${safeTitle}» (${rawLabels.length} observaciones diarias).
+            Incluye resumen estadístico descriptivo global y tabla de agregación mensual estructurada.
+          </p>
+          <div class="table-responsive" style="margin-bottom:14px">
+            <table class="data-table chart-a11y-table chart-a11y-summary-table">
+              <caption class="table-caption">Resumen estadístico accesible: ${safeTitle}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Serie / Variable</th>
+                  <th scope="col" class="num">Nº registros</th>
+                  <th scope="col" class="num">Mínimo</th>
+                  <th scope="col" class="num">Media</th>
+                  <th scope="col" class="num">Máximo</th>
+                  <th scope="col" class="num">Acumulado</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${statsRowsHtml}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table chart-a11y-table chart-a11y-monthly-table">
+              <caption class="table-caption">Desglose mensual agregado: ${safeTitle}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Mes / Periodo</th>
+                  ${monthlyHeadersHtml}
+                </tr>
+              </thead>
+              <tbody>
+                ${monthlyRowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
   }
 
   /* ------------------------------------------------------------------------
@@ -2355,7 +2643,7 @@
             ${renderChartExportBtn('chart-alm-waterbalance', `Balance hídrico mensual ${alm.year}`)}
           </div>
           <div class="chart-canvas-wrap" style="height:350px">
-            <canvas id="chart-alm-waterbalance"></canvas>
+            <canvas id="chart-alm-waterbalance" role="img" aria-label="Distribución mensual: Precipitación vs Evapotranspiración ET₀" aria-describedby="chart-alm-waterbalance-a11y-desc"></canvas>
           </div>
         </div>
 
@@ -2685,7 +2973,7 @@
               ${renderChartExportBtn('chart-alm-climogram', `Climograma anual ${alm.year}`)}
             </div>
             <div class="chart-canvas-wrap">
-              <canvas id="chart-alm-climogram"></canvas>
+              <canvas id="chart-alm-climogram" role="img" aria-label="Climograma anual: precipitación mensual y temperaturas" aria-describedby="chart-alm-climogram-a11y-desc"></canvas>
             </div>
           </div>
 
@@ -2698,7 +2986,7 @@
               ${renderChartExportBtn('chart-alm-temprange', `Amplitud térmica diaria ${alm.year}`)}
             </div>
             <div class="chart-canvas-wrap">
-              <canvas id="chart-alm-temprange"></canvas>
+              <canvas id="chart-alm-temprange" role="img" aria-label="Evolución y amplitud térmica diaria" aria-describedby="chart-alm-temprange-a11y-desc"></canvas>
             </div>
           </div>
         </div>
@@ -2738,7 +3026,7 @@
               ${renderChartExportBtn('chart-alm-dailyrain', `Precipitación diaria ${alm.year}`)}
             </div>
             <div class="chart-canvas-wrap">
-              <canvas id="chart-alm-dailyrain"></canvas>
+              <canvas id="chart-alm-dailyrain" role="img" aria-label="Precipitación diaria y curva de lluvia acumulada" aria-describedby="chart-alm-dailyrain-a11y-desc"></canvas>
             </div>
           </div>
 
@@ -2751,7 +3039,7 @@
               ${renderChartExportBtn('chart-alm-windgust', `Rachas máximas de viento ${alm.year}`)}
             </div>
             <div class="chart-canvas-wrap">
-              <canvas id="chart-alm-windgust"></canvas>
+              <canvas id="chart-alm-windgust" role="img" aria-label="Rachas máximas diarias de viento" aria-describedby="chart-alm-windgust-a11y-desc"></canvas>
             </div>
           </div>
         </div>
@@ -2796,7 +3084,7 @@
             </div>
 
             <div class="chart-canvas-wrap tall">
-              <canvas id="chart-alm-windrose"></canvas>
+              <canvas id="chart-alm-windrose" role="img" aria-label="Rosa de los vientos de 16 rumbos" aria-describedby="chart-alm-windrose-a11y-desc"></canvas>
             </div>
             <div class="windrose-pattern-note" id="windrose-pattern-note-${alm.year}"></div>
             <div class="windrose-legend-bar">
@@ -2816,7 +3104,7 @@
               ${renderChartExportBtn('chart-alm-beaufort', `Distribución Beaufort ${alm.year}`)}
             </div>
             <div class="chart-canvas-wrap tall">
-              <canvas id="chart-alm-beaufort"></canvas>
+              <canvas id="chart-alm-beaufort" role="img" aria-label="Clasificación de días según la escala de Beaufort" aria-describedby="chart-alm-beaufort-a11y-desc"></canvas>
             </div>
           </div>
         </div>
@@ -5113,7 +5401,7 @@
           </div>
         </div>
         <div class="chart-canvas-wrap tall">
-          <canvas id="chart-explorer-main"></canvas>
+          <canvas id="chart-explorer-main" role="img" aria-label="Serie temporal interactiva del explorador" aria-describedby="chart-explorer-main-a11y-desc"></canvas>
         </div>
       </div>
 
@@ -6333,7 +6621,7 @@
           ${renderChartExportBtn('chart-comp-cum-rain', 'Precipitación acumulada interanual')}
         </div>
         <div class="chart-canvas-wrap" style="height:440px">
-          <canvas id="chart-comp-cum-rain"></canvas>
+          <canvas id="chart-comp-cum-rain" role="img" aria-label="Evolución interanual de la precipitación acumulada" aria-describedby="chart-comp-cum-rain-a11y-desc"></canvas>
         </div>
         <div class="cum-rain-kpis">
           <div class="cum-kpi-box">
@@ -6369,7 +6657,7 @@
             ${renderChartExportBtn('chart-comp-rain-anom', 'Anomalía pluviométrica anual')}
           </div>
           <div class="chart-canvas-wrap">
-            <canvas id="chart-comp-rain-anom"></canvas>
+            <canvas id="chart-comp-rain-anom" role="img" aria-label="Anomalía pluviométrica anual respecto a la media" aria-describedby="chart-comp-rain-anom-a11y-desc"></canvas>
           </div>
         </div>
 
@@ -6382,7 +6670,7 @@
             ${renderChartExportBtn('chart-comp-thresholds', 'Umbrales climáticos por año')}
           </div>
           <div class="chart-canvas-wrap">
-            <canvas id="chart-comp-thresholds"></canvas>
+            <canvas id="chart-comp-thresholds" role="img" aria-label="Comparativa de días de umbrales climáticos por año" aria-describedby="chart-comp-thresholds-a11y-desc"></canvas>
           </div>
         </div>
       </div>
@@ -6397,7 +6685,7 @@
             ${renderChartExportBtn('chart-comp-monthly-rain', 'Precipitación mensual comparada')}
           </div>
           <div class="chart-canvas-wrap">
-            <canvas id="chart-comp-monthly-rain"></canvas>
+            <canvas id="chart-comp-monthly-rain" role="img" aria-label="Precipitación mensual comparada interanual" aria-describedby="chart-comp-monthly-rain-a11y-desc"></canvas>
           </div>
         </div>
 
@@ -6410,7 +6698,7 @@
             ${renderChartExportBtn('chart-comp-monthly-temp', 'Temperatura media mensual comparada')}
           </div>
           <div class="chart-canvas-wrap">
-            <canvas id="chart-comp-monthly-temp"></canvas>
+            <canvas id="chart-comp-monthly-temp" role="img" aria-label="Temperatura media mensual comparada interanual" aria-describedby="chart-comp-monthly-temp-a11y-desc"></canvas>
           </div>
         </div>
       </div>
@@ -6427,7 +6715,7 @@
           ${renderChartExportBtn('chart-comp-degree-days', 'Grados día anuales comparados')}
         </div>
         <div class="chart-canvas-wrap" style="height:360px">
-          <canvas id="chart-comp-degree-days"></canvas>
+          <canvas id="chart-comp-degree-days" role="img" aria-label="Grados día anuales comparados: HDD, CDD y GDD" aria-describedby="chart-comp-degree-days-a11y-desc"></canvas>
         </div>
       </div>
 
@@ -6443,7 +6731,7 @@
           ${renderChartExportBtn('chart-comp-thermal-distribution', 'Reparto de días por bandas térmicas')}
         </div>
         <div class="chart-canvas-wrap" style="height:320px">
-          <canvas id="chart-comp-thermal-distribution"></canvas>
+          <canvas id="chart-comp-thermal-distribution" role="img" aria-label="Reparto de días por bandas térmicas y de confort" aria-describedby="chart-comp-thermal-distribution-a11y-desc"></canvas>
         </div>
       </div>
 
@@ -6490,7 +6778,7 @@
             </div>
           </div>
           <div class="chart-canvas-wrap" style="height:360px">
-            <canvas id="chart-seasonal-comp"></canvas>
+            <canvas id="chart-seasonal-comp" role="img" aria-label="Climatología estacional comparada OMM" aria-describedby="chart-seasonal-comp-a11y-desc"></canvas>
           </div>
         </div>
 
@@ -6601,7 +6889,7 @@
             ${renderChartExportBtn('chart-comp-waterbalance', 'Balance hídrico interanual')}
           </div>
           <div class="chart-canvas-wrap" style="height:380px">
-            <canvas id="chart-comp-waterbalance"></canvas>
+            <canvas id="chart-comp-waterbalance" role="img" aria-label="Balance hídrico del suelo y evapotranspiración interanual" aria-describedby="chart-comp-waterbalance-a11y-desc"></canvas>
           </div>
         </div>
 
@@ -7323,7 +7611,7 @@
           ${renderChartExportBtn('chart-h2h-comparison', `Comparativa cara a cara ${profA.shortLabel} vs ${profB.shortLabel}`)}
         </div>
         <div class="chart-canvas-wrap" style="height:340px">
-          <canvas id="chart-h2h-comparison"></canvas>
+          <canvas id="chart-h2h-comparison" role="img" aria-label="Comparativa climatológica cara a cara entre dos periodos" aria-describedby="chart-h2h-comparison-a11y-desc"></canvas>
         </div>
       </div>
 
@@ -11118,6 +11406,9 @@
     window.computeDataFreshness = computeDataFreshness;
     // EVO-040: Exposición del exportador de normales del quinquenio
     window.exportQuinquenniumToExcel = exportQuinquenniumToExcel;
+    // EVO-038: Exposición de tablas accesibles para interoperabilidad y pruebas WCAG 2.2 AA
+    window.renderChartAccessibleTable = renderChartAccessibleTable;
+    window.getChartTitleForCanvas = getChartTitleForCanvas;
 
     handleRouteChange();
   });
