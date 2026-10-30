@@ -1955,17 +1955,27 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             "og-metodologia.jpg",
             "og-glosario.jpg",
         ]
-        from PIL import Image
+        try:
+            from PIL import Image
+        except ImportError:
+            Image = None
+
         for card_name in expected_cards:
             card_p = og_dir / card_name
             self.assertTrue(card_p.exists(), f"Falta tarjeta {card_name}")
-            with Image.open(card_p) as im:
-                self.assertEqual(im.size, (1200, 630), f"Dimensiones incorrectas en {card_name}")
+            self.assertGreater(card_p.stat().st_size, 50_000, f"Tarjeta {card_name} demasiado pequeña")
+            if Image is not None:
+                with Image.open(card_p) as im:
+                    self.assertEqual(im.size, (1200, 630), f"Dimensiones incorrectas en {card_name}")
 
         # 2. sw.js
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         for card_name in expected_cards:
             self.assertIn(f"./assets/img/og/{card_name}", sw_txt)
+
+        # 2b. requirements.txt para runners CI/CD
+        req_txt = (ROOT_DIR / "requirements.txt").read_text(encoding="utf-8")
+        self.assertIn("Pillow", req_txt, "Pillow debe estar declarado en requirements.txt para runners de CI/CD")
 
         # 3. index.html
         html_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
