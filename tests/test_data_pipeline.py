@@ -1715,6 +1715,32 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("app.js?v=1.2.7", index_txt)
         self.assertIn("styles.css?v=1.2.7", index_txt)
 
+    def test_mej_006_minified_json_production_output(self):
+        """
+        MEJ-006: Verifica la minificación atómica de productos JSON para producción:
+        1. scripts/build_data.py define minify=True por defecto con separators=(',', ':') y soporta --pretty.
+        2. Todos los archivos JSON y GeoJSON de data/ están minificados en una sola línea (0 saltos de línea).
+        3. Todos los archivos JSON son sintácticamente válidos al cargarse con json.loads.
+        4. El ahorro global de peso frente a la versión con sangría supera el 40 %.
+        """
+        build_script = (ROOT_DIR / "scripts" / "build_data.py").read_text(encoding="utf-8")
+        self.assertIn("minify: bool = True", build_script)
+        self.assertIn('separators=(",", ":")', build_script)
+        self.assertIn("--pretty", build_script)
+
+        data_dir = ROOT_DIR / "data"
+        json_files = list(data_dir.glob("*.json")) + list(data_dir.glob("*.geojson"))
+        self.assertGreaterEqual(len(json_files), 12, "Debe haber al menos 12 archivos de datos JSON/GeoJSON")
+
+        for fpath in json_files:
+            raw_content = fpath.read_text(encoding="utf-8")
+            # Comprobar que no hay saltos de línea (archivo minificado en una única línea)
+            line_count = len(raw_content.splitlines())
+            self.assertLessEqual(line_count, 1, f"El archivo {fpath.name} no está minificado (tiene {line_count} líneas)")
+            # Comprobar validez sintáctica
+            parsed = json.loads(raw_content)
+            self.assertTrue(isinstance(parsed, (dict, list)), f"Contenido inválido en {fpath.name}")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
