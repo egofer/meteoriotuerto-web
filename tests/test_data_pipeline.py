@@ -1346,9 +1346,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.9", sw_js, "Falta cache v1.2.9 en sw.js")
+        self.assertIn("v1.2.10", sw_js, "Falta cache v1.2.10 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.2.9", index_html, "Falta v=1.2.9 en index.html")
+        self.assertIn("v=1.2.10", index_html, "Falta v=1.2.10 en index.html")
 
     def test_weather_underground_realtime_integration(self):
         """
@@ -1472,11 +1472,11 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertNotIn("function renderHomeCharts", app_js, "renderHomeCharts() debe haber sido purgada de app.js")
         self.assertNotIn("renderHomeCharts(", app_js, "No debe haber llamadas residuales a renderHomeCharts()")
 
-        # 4. Comprobar sincronización de caché v1.2.9
+        # 4. Comprobar sincronización de caché v1.2.10
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.9", sw_txt)
-        self.assertIn("app.js?v=1.2.9", index_txt)
+        self.assertIn("v1.2.10", sw_txt)
+        self.assertIn("app.js?v=1.2.10", index_txt)
 
     def test_mej_003_sheetjs_deferred_loading(self):
         """
@@ -1485,14 +1485,14 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         2. sw.js precachea ./src/js/vendor/xlsx.mini.min.js para soporte offline inmediato.
         3. ensureXLSXLoaded() en app.js inyecta dinámicamente el script con fallback a CDN.
         4. exportWorkbookToXLSX() gestiona el cursor 'wait' y desbloquea en bloque finally.
-        5. Versión de caché v1.2.9 sincronizada en sw.js e index.html.
+        5. Versión de caché v1.2.10 sincronizada en sw.js e index.html.
         """
         html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
         self.assertNotIn("xlsx.mini.min.js", html_text, "index.html no debe cargar SheetJS de forma bloqueante en el arranque")
 
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         self.assertIn("./src/js/vendor/xlsx.mini.min.js", sw_txt, "sw.js debe precachear SheetJS para modo offline")
-        self.assertIn("v1.2.9", sw_txt)
+        self.assertIn("v1.2.10", sw_txt)
 
         app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn("async function ensureXLSXLoaded()", app_js)
@@ -1586,12 +1586,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("route === 'metodologia'", fn_body)
         self.assertIn("route === 'glosario'", fn_body)
 
-        # 4. Sincronización de versión de caché v1.2.9
+        # 4. Sincronización de versión de caché v1.2.10
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.9", sw_txt)
-        self.assertIn("app.js?v=1.2.9", index_txt)
-        self.assertIn("styles.css?v=1.2.9", index_txt)
+        self.assertIn("v1.2.10", sw_txt)
+        self.assertIn("app.js?v=1.2.10", index_txt)
+        self.assertIn("styles.css?v=1.2.10", index_txt)
 
     def test_mej_012_schema_org_json_ld_metadata(self):
         """
@@ -1671,12 +1671,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("config.options.animation = false;", app_js)
         self.assertIn("behavior: getScrollBehavior()", app_js)
 
-        # Comprobar versión de caché v1.2.9
+        # Comprobar versión de caché v1.2.10
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.9", sw_txt)
-        self.assertIn("app.js?v=1.2.9", index_txt)
-        self.assertIn("styles.css?v=1.2.9", index_txt)
+        self.assertIn("v1.2.10", sw_txt)
+        self.assertIn("app.js?v=1.2.10", index_txt)
+        self.assertIn("styles.css?v=1.2.10", index_txt)
 
     def test_mej_009_accessible_tables_caption_and_scope(self):
         """
@@ -1684,7 +1684,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         1. Las 19 tablas dinámicas en app.js disponen de su correspondiente etiqueta <caption> descriptiva.
         2. Todas las cabeceras <th> cuentan explícitamente con atributo scope='col' o scope='row' (0 <th> huérfanos).
         3. En styles.css se incluye la regla de estilo para caption (.data-table caption, .table-caption).
-        4. Sincronización de versión de caché v1.2.9 en sw.js e index.html.
+        4. Sincronización de versión de caché v1.2.10 en sw.js e index.html.
         """
         import re
 
@@ -1708,12 +1708,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".data-table caption", css_text)
         self.assertIn("caption-side: top;", css_text)
 
-        # 4. Comprobar sincronización de versión de caché v1.2.9
+        # 4. Comprobar sincronización de versión de caché v1.2.10
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.9", sw_txt)
-        self.assertIn("app.js?v=1.2.9", index_txt)
-        self.assertIn("styles.css?v=1.2.9", index_txt)
+        self.assertIn("v1.2.10", sw_txt)
+        self.assertIn("app.js?v=1.2.10", index_txt)
+        self.assertIn("styles.css?v=1.2.10", index_txt)
 
     def test_mej_006_minified_json_production_output(self):
         """
@@ -1757,11 +1757,11 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("(prefers-color-scheme: dark)", app_js)
         self.assertIn("mediaDark.addEventListener('change'", app_js)
 
-        # Comprobar versión de caché v1.2.9
+        # Comprobar versión de caché v1.2.10
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.9", sw_txt)
-        self.assertIn("app.js?v=1.2.9", html_text)
-        self.assertIn("styles.css?v=1.2.9", html_text)
+        self.assertIn("v1.2.10", sw_txt)
+        self.assertIn("app.js?v=1.2.10", html_text)
+        self.assertIn("styles.css?v=1.2.10", html_text)
 
     def test_mej_008_orphan_image_folder_purged(self):
         """
@@ -1784,7 +1784,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         3. styles.css contiene las reglas para .btn-chart-export, .chart-header-actions y estados hover/dark.
         4. El membrete oficial contiene marca METEORIOTUERTO, Barrio de Arriba, Riotuerto y licencia CC BY 4.0.
         5. Exposición en window.renderChartExportBtn y window.exportChartWithLetterhead.
-        6. Sincronización de versión de caché v1.2.9 en sw.js e index.html.
+        6. Sincronización de versión de caché v1.2.10 en sw.js e index.html.
         """
         app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn("function renderChartExportBtn(", app_js)
@@ -1813,12 +1813,54 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".chart-header-actions", css_text)
         self.assertIn(".chart-export-svg", css_text)
 
-        # Sincronización de caché v1.2.9
+        # Sincronización de caché v1.2.10
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.9", sw_txt)
-        self.assertIn("app.js?v=1.2.9", index_txt)
-        self.assertIn("styles.css?v=1.2.9", index_txt)
+        self.assertIn("v1.2.10", sw_txt)
+        self.assertIn("app.js?v=1.2.10", index_txt)
+        self.assertIn("styles.css?v=1.2.10", index_txt)
+
+    def test_evo_036_explorer_multiannual_and_dual_overlay(self):
+        """
+        EVO-036: Verifica el modo de comparación superpuesta multianual y serie dual en el Explorador:
+        1. STATE.explorer incluye chartMode ('single', 'multiannual', 'dual') y variable2.
+        2. renderExplorador() inyecta los selectores id="exp-mode" y id="exp-var2".
+        3. updateFromControls() actualiza chartMode y variable2 gestionando visibilidad de exp-group-var2.
+        4. refreshExplorerResults() soporta renderizado multianual (2022-2026 superpuestos en eje anual 1-ene/31-dic).
+        5. refreshExplorerResults() soporta modo dual con doble escala Y (ejes 'y' y 'y1', grid desacoplado).
+        6. exportExplorerSelectionToExcel() genera la hoja 'Matriz_Multianual' con alineación de días y años.
+        7. Sincronización de caché v1.2.10 en sw.js e index.html.
+        """
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+
+        # 1. Estado inicial de explorador
+        self.assertIn("chartMode: 'single'", app_js)
+        self.assertIn("variable2: 'none'", app_js)
+
+        # 2. Controles de formulario en renderExplorador
+        self.assertIn('id="exp-mode"', app_js)
+        self.assertIn('value="single"', app_js)
+        self.assertIn('value="multiannual"', app_js)
+        self.assertIn('value="dual"', app_js)
+        self.assertIn('id="exp-group-var2"', app_js)
+        self.assertIn('id="exp-var2"', app_js)
+
+        # 3. Lógica de renderizado multianual y dual en refreshExplorerResults
+        self.assertIn("STATE.explorer.chartMode === 'multiannual'", app_js)
+        self.assertIn("STATE.explorer.chartMode === 'dual'", app_js)
+        self.assertIn("y1: {", app_js)
+        self.assertIn("position: 'right'", app_js)
+        self.assertIn("drawOnChartArea: false", app_js)
+
+        # 4. Soporte de exportación a Excel en modo multianual
+        self.assertIn("sheets['Matriz_Multianual'] = multiRows", app_js)
+
+        # 5. Sincronización de versión de caché v1.2.10
+        sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+        index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn("v1.2.10", sw_txt)
+        self.assertIn("app.js?v=1.2.10", index_txt)
+        self.assertIn("styles.css?v=1.2.10", index_txt)
 
 
 if __name__ == "__main__":

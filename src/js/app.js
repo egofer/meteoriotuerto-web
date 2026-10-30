@@ -25,6 +25,8 @@
     recordsRankingKey: 'top_hottest_days',
     explorer: {
       variable: 'temp_mean',
+      variable2: 'none', // EVO-036: 'none' | variable key secundaria para modo dual
+      chartMode: 'single', // EVO-036: 'single' | 'multiannual' | 'dual'
       yearFilter: 'all',
       dateFrom: '2022-01-01',
       dateTo: '2026-10-25',
@@ -4331,9 +4333,45 @@
         r.rain_daily, r.wind_speed, r.wind_gust, r.humidity_mean, r.pressure_rel
       ]);
     });
-    exportWorkbookToXLSX({
-      'Seleccion_MeteoRiotuerto': exportRows
-    }, `meteoriotuerto_seleccion_${dateFrom}_${dateTo}.xlsx`);
+
+    const sheets = {
+      'Seleccion_MeteoRiotuerto': exportRows,
+    };
+
+    // EVO-036: Si el modo multianual está activo, añadir hoja con la matriz comparativa de años
+    if (STATE.explorer.chartMode === 'multiannual') {
+      const vKey = STATE.explorer.variable;
+      const vMeta = EXPLORER_VARIABLES[vKey];
+      const multiHeaders = ['Día del año (MM-DD)', '2022', '2023', '2024', '2025', '2026'];
+      const multiRows = [multiHeaders];
+
+      const sampleDaysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      const byYearDay = { 2022: {}, 2023: {}, 2024: {}, 2025: {}, 2026: {} };
+      rows.forEach((r) => {
+        if (byYearDay[r.year] && r[vKey] !== null && r[vKey] !== undefined) {
+          byYearDay[r.year][r.date.slice(5)] = r[vKey];
+        }
+      });
+
+      sampleDaysInMonth.forEach((maxD, mIdx) => {
+        const mStr = String(mIdx + 1).padStart(2, '0');
+        for (let d = 1; d <= maxD; d++) {
+          const dStr = String(d).padStart(2, '0');
+          const mmdd = `${mStr}-${dStr}`;
+          multiRows.push([
+            mmdd,
+            byYearDay[2022][mmdd] ?? '',
+            byYearDay[2023][mmdd] ?? '',
+            byYearDay[2024][mmdd] ?? '',
+            byYearDay[2025][mmdd] ?? '',
+            byYearDay[2026][mmdd] ?? '',
+          ]);
+        }
+      });
+      sheets['Matriz_Multianual'] = multiRows;
+    }
+
+    exportWorkbookToXLSX(sheets, `meteoriotuerto_seleccion_${dateFrom}_${dateTo}.xlsx`);
   }
 
   function exportAbsoluteRecordsToExcel(rec) {
@@ -4776,14 +4814,23 @@
       return `<option value="${k}" ${sel}>${escapeHtml(v.label)} (${v.unit})</option>`;
     }).join('');
 
+    // EVO-036: Opciones para la 2ª variable en modo comparativo dual
+    const var2OptionsHtml = [
+      `<option value="none" ${STATE.explorer.variable2 === 'none' ? 'selected' : ''}>Desactivada (sin 2ª variable)</option>`,
+      ...Object.entries(EXPLORER_VARIABLES).map(([k, v]) => {
+        const sel = STATE.explorer.variable2 === k ? 'selected' : '';
+        return `<option value="${k}" ${sel}>${escapeHtml(v.label)} (${v.unit})</option>`;
+      }),
+    ].join('');
+
     container.innerHTML = `
       <article class="editorial-hero">
         <div class="editorial-kicker">HERRAMIENTA DE CONSULTA Y REUTILIZACIÓN CIENTÍFICA</div>
         <h2 id="explorador-heading" class="editorial-title">Explorador interactivo del registro histórico (2022–2026)</h2>
         <p class="editorial-lead">
           Consulte, filtre y descargue las observaciones diarias y mensuales registradas por MeteoRiotuerto.
-          Puede acotar cualquier periodo temporal, aislar episodios de lluvia torrencial, heladas, golpes de calor
-          o temporales de viento y exportar los registros resultantes.
+          Puede acotar cualquier periodo temporal, superponer series interanuales sobre el ciclo anual,
+          comparar dos variables con doble escala Y, aislar episodios extremos y exportar los registros resultantes.
         </p>
       </article>
 
@@ -4791,6 +4838,18 @@
         <div class="control-group">
           <label for="exp-var">Variable meteorológica</label>
           <select id="exp-var" class="form-select">${varOptionsHtml}</select>
+        </div>
+        <div class="control-group">
+          <label for="exp-mode">Modo del gráfico</label>
+          <select id="exp-mode" class="form-select">
+            <option value="single" ${STATE.explorer.chartMode === 'single' ? 'selected' : ''}>📈 Cronológico continuo (1 serie)</option>
+            <option value="multiannual" ${STATE.explorer.chartMode === 'multiannual' ? 'selected' : ''}>🗓️ Superposición multianual (2022–2026)</option>
+            <option value="dual" ${STATE.explorer.chartMode === 'dual' ? 'selected' : ''}>⚖️ Doble variable (Eje secundario)</option>
+          </select>
+        </div>
+        <div class="control-group" id="exp-group-var2" style="${STATE.explorer.chartMode === 'dual' ? '' : 'display:none;'}">
+          <label for="exp-var2">2ª Variable comparada</label>
+          <select id="exp-var2" class="form-select">${var2OptionsHtml}</select>
         </div>
         <div class="control-group">
           <label for="exp-year">Filtro rápido de año</label>
@@ -4893,13 +4952,32 @@
 
     const updateFromControls = (resetPage = true) => {
       STATE.explorer.variable = document.getElementById('exp-var').value;
+      STATE.explorer.chartMode = document.getElementById('exp-mode').value;
+      STATE.explorer.variable2 = document.getElementById('exp-var2')?.value || 'none';
       STATE.explorer.dateFrom = document.getElementById('exp-from').value || '2022-01-01';
       STATE.explorer.dateTo = document.getElementById('exp-to').value || '2026-10-25';
       STATE.explorer.episodeFilter = document.getElementById('exp-episode').value;
       STATE.explorer.aggregation = document.getElementById('exp-agg').value;
+
+      const grp2 = document.getElementById('exp-group-var2');
+      if (grp2) grp2.style.display = STATE.explorer.chartMode === 'dual' ? '' : 'none';
+
       if (resetPage) STATE.explorer.page = 1;
       refreshExplorerResults();
     };
+
+    document.getElementById('exp-mode')?.addEventListener('change', (e) => {
+      const mode = e.target.value;
+      STATE.explorer.chartMode = mode;
+      const grp2 = document.getElementById('exp-group-var2');
+      if (grp2) grp2.style.display = mode === 'dual' ? '' : 'none';
+      if (mode === 'dual' && (!STATE.explorer.variable2 || STATE.explorer.variable2 === 'none')) {
+        STATE.explorer.variable2 = STATE.explorer.variable === 'rain_daily' ? 'temp_mean' : 'rain_daily';
+        const v2Sel = document.getElementById('exp-var2');
+        if (v2Sel) v2Sel.value = STATE.explorer.variable2;
+      }
+      updateFromControls(true);
+    });
 
     document.getElementById('exp-year').addEventListener('change', (e) => {
       const val = e.target.value;
@@ -4917,7 +4995,7 @@
       updateFromControls(true);
     });
 
-    ['exp-var', 'exp-from', 'exp-to', 'exp-episode', 'exp-agg'].forEach((id) => {
+    ['exp-var', 'exp-var2', 'exp-from', 'exp-to', 'exp-episode', 'exp-agg'].forEach((id) => {
       document.getElementById(id)?.addEventListener('change', () => updateFromControls(true));
     });
 
@@ -5001,91 +5079,406 @@
 
     const kpiBox = document.getElementById('explorer-kpis');
     if (kpiBox) {
-      kpiBox.innerHTML = `
-        <div class="kpi-card accent-forest">
-          <div class="kpi-label">Jornadas en la selección</div>
-          <div class="kpi-value">${fmtNum(validRows.length, 0)} <span class="kpi-unit">días</span></div>
-          <div class="kpi-meta">Periodo: ${fmtDateES(STATE.explorer.dateFrom, false)} a ${fmtDateES(STATE.explorer.dateTo, false)}</div>
-        </div>
-        <div class="kpi-card accent-rain">
-          <div class="kpi-label">${vMeta.agg === 'sum' ? 'Total acumulado del periodo' : 'Promedio del periodo'}</div>
-          <div class="kpi-value">${fmtNum(vMeta.agg === 'sum' ? sumVal : meanVal, vMeta.dec)} <span class="kpi-unit">${vMeta.unit}</span></div>
-          <div class="kpi-meta">${vMeta.agg === 'sum' ? `Media por día seleccionado: ${fmtNum(meanVal, 1)} ${vMeta.unit}` : escapeHtml(vMeta.label)}</div>
-        </div>
-        <div class="kpi-card accent-heat">
-          <div class="kpi-label">Máximo en la selección</div>
-          <div class="kpi-value">${maxRec ? fmtNum(maxRec[vKey], vMeta.dec) : '—'} <span class="kpi-unit">${vMeta.unit}</span></div>
-          <div class="kpi-meta">${maxRec ? `Registrado el ${fmtDateES(maxRec.date)}` : 'Sin registros'}</div>
-        </div>
-        <div class="kpi-card accent-cold">
-          <div class="kpi-label">Mínimo en la selección</div>
-          <div class="kpi-value">${minRec ? fmtNum(minRec[vKey], vMeta.dec) : '—'} <span class="kpi-unit">${vMeta.unit}</span></div>
-          <div class="kpi-meta">${minRec ? `Registrado el ${fmtDateES(minRec.date)}` : 'Sin registros'}</div>
-        </div>
-      `;
+      if (STATE.explorer.chartMode === 'multiannual') {
+        kpiBox.innerHTML = `
+          <div class="kpi-card accent-forest">
+            <div class="kpi-label">Modo activo</div>
+            <div class="kpi-value">5 <span class="kpi-unit">años</span></div>
+            <div class="kpi-meta">Superposición multianual (2022–2026)</div>
+          </div>
+          <div class="kpi-card accent-rain">
+            <div class="kpi-label">Variable comparada</div>
+            <div class="kpi-value" style="font-size:1.1rem;padding:6px 0;">${escapeHtml(vMeta.label)}</div>
+            <div class="kpi-meta">Unidad: ${vMeta.unit} · Agregación: ${vMeta.agg === 'sum' ? 'Suma acumulada' : 'Media'}</div>
+          </div>
+          <div class="kpi-card accent-heat">
+            <div class="kpi-label">Máximo absoluto en la serie</div>
+            <div class="kpi-value">${maxRec ? fmtNum(maxRec[vKey], vMeta.dec) : '—'} <span class="kpi-unit">${vMeta.unit}</span></div>
+            <div class="kpi-meta">${maxRec ? `${fmtDateES(maxRec.date)} (${maxRec.year})` : 'Sin registros'}</div>
+          </div>
+          <div class="kpi-card accent-cold">
+            <div class="kpi-label">Mínimo absoluto en la serie</div>
+            <div class="kpi-value">${minRec ? fmtNum(minRec[vKey], vMeta.dec) : '—'} <span class="kpi-unit">${vMeta.unit}</span></div>
+            <div class="kpi-meta">${minRec ? `${fmtDateES(minRec.date)} (${minRec.year})` : 'Sin registros'}</div>
+          </div>
+        `;
+      } else if (STATE.explorer.chartMode === 'dual' && STATE.explorer.variable2 && STATE.explorer.variable2 !== 'none') {
+        const v2Key = STATE.explorer.variable2;
+        const v2Meta = EXPLORER_VARIABLES[v2Key];
+        const v2Valid = rows.filter((r) => r[v2Key] !== null && r[v2Key] !== undefined);
+        let v2Sum = 0;
+        let v2Max = null;
+        let v2Min = null;
+        v2Valid.forEach((r) => {
+          const val = r[v2Key];
+          v2Sum += val;
+          if (!v2Max || val > v2Max[v2Key]) v2Max = r;
+          if (!v2Min || val < v2Min[v2Key]) v2Min = r;
+        });
+        const v2Mean = v2Valid.length > 0 ? v2Sum / v2Valid.length : null;
+        kpiBox.innerHTML = `
+          <div class="kpi-card accent-forest">
+            <div class="kpi-label">Jornadas observadas</div>
+            <div class="kpi-value">${fmtNum(validRows.length, 0)} <span class="kpi-unit">días</span></div>
+            <div class="kpi-meta">Periodo: ${fmtDateES(STATE.explorer.dateFrom, false)} a ${fmtDateES(STATE.explorer.dateTo, false)}</div>
+          </div>
+          <div class="kpi-card accent-rain">
+            <div class="kpi-label">Eje izq.: ${escapeHtml(vMeta.label)}</div>
+            <div class="kpi-value">${fmtNum(vMeta.agg === 'sum' ? sumVal : meanVal, vMeta.dec)} <span class="kpi-unit">${vMeta.unit}</span></div>
+            <div class="kpi-meta">${vMeta.agg === 'sum' ? 'Total acumulado' : 'Media diaria'} · Máx: ${maxRec ? fmtNum(maxRec[vKey], vMeta.dec) : '—'}</div>
+          </div>
+          <div class="kpi-card accent-heat">
+            <div class="kpi-label">Eje der.: ${escapeHtml(v2Meta.label)}</div>
+            <div class="kpi-value">${fmtNum(v2Meta.agg === 'sum' ? v2Sum : v2Mean, v2Meta.dec)} <span class="kpi-unit">${v2Meta.unit}</span></div>
+            <div class="kpi-meta">${v2Meta.agg === 'sum' ? 'Total acumulado' : 'Media diaria'} · Máx: ${v2Max ? fmtNum(v2Max[v2Key], v2Meta.dec) : '—'}</div>
+          </div>
+          <div class="kpi-card accent-cold">
+            <div class="kpi-label">Modo superpuesto dual</div>
+            <div class="kpi-value" style="font-size:1.1rem;padding:6px 0;">Doble escala Y</div>
+            <div class="kpi-meta">Eje primario vs secundario</div>
+          </div>
+        `;
+      } else {
+        kpiBox.innerHTML = `
+          <div class="kpi-card accent-forest">
+            <div class="kpi-label">Jornadas en la selección</div>
+            <div class="kpi-value">${fmtNum(validRows.length, 0)} <span class="kpi-unit">días</span></div>
+            <div class="kpi-meta">Periodo: ${fmtDateES(STATE.explorer.dateFrom, false)} a ${fmtDateES(STATE.explorer.dateTo, false)}</div>
+          </div>
+          <div class="kpi-card accent-rain">
+            <div class="kpi-label">${vMeta.agg === 'sum' ? 'Total acumulado del periodo' : 'Promedio del periodo'}</div>
+            <div class="kpi-value">${fmtNum(vMeta.agg === 'sum' ? sumVal : meanVal, vMeta.dec)} <span class="kpi-unit">${vMeta.unit}</span></div>
+            <div class="kpi-meta">${vMeta.agg === 'sum' ? `Media por día seleccionado: ${fmtNum(meanVal, 1)} ${vMeta.unit}` : escapeHtml(vMeta.label)}</div>
+          </div>
+          <div class="kpi-card accent-heat">
+            <div class="kpi-label">Máximo en la selección</div>
+            <div class="kpi-value">${maxRec ? fmtNum(maxRec[vKey], vMeta.dec) : '—'} <span class="kpi-unit">${vMeta.unit}</span></div>
+            <div class="kpi-meta">${maxRec ? `Registrado el ${fmtDateES(maxRec.date)}` : 'Sin registros'}</div>
+          </div>
+          <div class="kpi-card accent-cold">
+            <div class="kpi-label">Mínimo en la selección</div>
+            <div class="kpi-value">${minRec ? fmtNum(minRec[vKey], vMeta.dec) : '—'} <span class="kpi-unit">${vMeta.unit}</span></div>
+            <div class="kpi-meta">${minRec ? `Registrado el ${fmtDateES(minRec.date)}` : 'Sin registros'}</div>
+          </div>
+        `;
+      }
     }
 
     if (redrawChart) {
       const pal = chartPalette();
+      const isDark = STATE.theme === 'dark';
       const titleEl = document.getElementById('explorer-chart-title');
       const subEl = document.getElementById('explorer-chart-sub');
-      if (titleEl) titleEl.textContent = `${vMeta.label} (${vMeta.unit})`;
-      if (subEl) subEl.textContent = `${validRows.length} días con observación entre ${fmtDateES(STATE.explorer.dateFrom, false)} y ${fmtDateES(STATE.explorer.dateTo, false)}`;
 
-      let chartLabels = [];
-      let chartValues = [];
+      if (STATE.explorer.chartMode === 'multiannual') {
+        const availableYears = [2022, 2023, 2024, 2025, 2026];
+        if (titleEl) titleEl.textContent = `Comparativa multianual: ${vMeta.label} (${vMeta.unit})`;
+        if (subEl) subEl.textContent = `Superposición interanual (2022–2026) sobre el ciclo anual · Haga clic en la leyenda para activar/desactivar años`;
 
-      if (STATE.explorer.aggregation === 'monthly') {
-        const byMonth = {};
-        validRows.forEach((r) => {
-          if (!byMonth[r.month]) byMonth[r.month] = [];
-          byMonth[r.month].push(r[vKey]);
-        });
-        chartLabels = Object.keys(byMonth).sort();
-        chartValues = chartLabels.map((m) => {
-          const arr = byMonth[m];
-          if (vMeta.agg === 'sum') return Number(arr.reduce((a, b) => a + b, 0).toFixed(1));
-          if (vMeta.agg === 'max') return Number(Math.max(...arr).toFixed(1));
-          if (vMeta.agg === 'min') return Number(Math.min(...arr).toFixed(1));
-          return Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1));
-        });
-      } else {
-        chartLabels = validRows.map((r) => r.date);
-        chartValues = validRows.map((r) => r[vKey]);
-      }
+        const YEAR_COLORS = {
+          2022: { stroke: isDark ? '#60a5fa' : '#2563eb', fill: 'rgba(37, 99, 235, 0.15)' },
+          2023: { stroke: isDark ? '#34d399' : '#059669', fill: 'rgba(5, 150, 105, 0.15)' },
+          2024: { stroke: isDark ? '#f87171' : '#dc2626', fill: 'rgba(220, 38, 38, 0.15)' },
+          2025: { stroke: isDark ? '#c084fc' : '#7c3aed', fill: 'rgba(124, 58, 237, 0.15)' },
+          2026: { stroke: isDark ? '#fbbf24' : '#d97706', fill: 'rgba(217, 119, 6, 0.15)' },
+        };
 
-      createChart('explorer_main', 'chart-explorer-main', {
-        type: vMeta.type,
-        data: {
-          labels: chartLabels,
-          datasets: [
-            {
-              label: `${vMeta.label} (${vMeta.unit})`,
-              data: chartValues,
-              borderColor: vMeta.color,
-              backgroundColor: vMeta.type === 'bar' ? pal.rainBar : pal.forestFill,
-              borderWidth: vMeta.type === 'bar' ? 1 : 1.5,
-              pointRadius: validRows.length > 120 && STATE.explorer.aggregation === 'daily' ? 0 : 2.5,
-              fill: vMeta.type === 'line',
+        if (STATE.explorer.aggregation === 'monthly') {
+          const labels = MONTH_SHORT_ES;
+          const datasets = availableYears.map((yr) => {
+            const yrRows = rows.filter((r) => r.year === yr && r[vKey] !== null);
+            const byM = {};
+            yrRows.forEach((r) => {
+              const m = parseInt(r.month.split('-')[1], 10);
+              if (!byM[m]) byM[m] = [];
+              byM[m].push(r[vKey]);
+            });
+            const data = [];
+            for (let m = 1; m <= 12; m++) {
+              const arr = byM[m];
+              if (!arr || arr.length === 0) {
+                data.push(null);
+              } else if (vMeta.agg === 'sum') {
+                data.push(Number(arr.reduce((a, b) => a + b, 0).toFixed(1)));
+              } else if (vMeta.agg === 'max') {
+                data.push(Number(Math.max(...arr).toFixed(1)));
+              } else if (vMeta.agg === 'min') {
+                data.push(Number(Math.min(...arr).toFixed(1)));
+              } else {
+                data.push(Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1)));
+              }
+            }
+            const col = YEAR_COLORS[yr] || { stroke: '#94a3b8', fill: 'rgba(148, 163, 184, 0.15)' };
+            return {
+              label: `${yr}`,
+              data,
+              borderColor: col.stroke,
+              backgroundColor: vMeta.type === 'bar' ? col.fill : 'transparent',
+              borderWidth: yr === 2026 ? 2.5 : 2,
+              borderDash: yr === 2026 ? [4, 4] : undefined,
+              pointRadius: 3,
+              fill: false,
               tension: 0.15,
+            };
+          });
+
+          createChart('explorer_main', 'chart-explorer-main', {
+            type: vMeta.type === 'bar' ? 'bar' : 'line',
+            data: { labels, datasets },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: 'index', intersect: false },
+              plugins: {
+                legend: { display: true, labels: { color: pal.text, usePointStyle: true, boxWidth: 10 } },
+                tooltip: {
+                  callbacks: {
+                    label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y !== null ? fmtNum(ctx.parsed.y, vMeta.dec) + ' ' + vMeta.unit : 'Sin dato'}`,
+                  },
+                },
+              },
+              scales: {
+                x: { ticks: { color: pal.text }, grid: { color: pal.grid } },
+                y: {
+                  title: { display: true, text: `${vMeta.label} (${vMeta.unit})`, color: pal.text },
+                  ticks: { color: pal.text },
+                  grid: { color: pal.grid },
+                },
+              },
             },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: { legend: { labels: { color: pal.text } } },
-          scales: {
-            x: { ticks: { color: pal.text, maxTicksLimit: 14 }, grid: { color: pal.grid } },
-            y: {
-              title: { display: true, text: `${vMeta.label} (${vMeta.unit})`, color: pal.text },
-              ticks: { color: pal.text },
-              grid: { color: pal.grid },
+          });
+        } else {
+          // Daily: Eje de 366 días (1 ene a 31 dic)
+          const daysTemplate = [];
+          const labelDisplay = [];
+          const sampleDaysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+          sampleDaysInMonth.forEach((maxD, mIdx) => {
+            const mStr = String(mIdx + 1).padStart(2, '0');
+            for (let d = 1; d <= maxD; d++) {
+              const dStr = String(d).padStart(2, '0');
+              daysTemplate.push(`${mStr}-${dStr}`);
+              labelDisplay.push(`${d} ${MONTH_SHORT_ES[mIdx].toLowerCase()}`);
+            }
+          });
+
+          const datasets = availableYears.map((yr) => {
+            const yrRows = rows.filter((r) => r.year === yr);
+            const mapByDay = {};
+            yrRows.forEach((r) => {
+              const mmdd = r.date.slice(5);
+              if (r[vKey] !== null && r[vKey] !== undefined) {
+                mapByDay[mmdd] = r[vKey];
+              }
+            });
+            const data = daysTemplate.map((mmdd) => (mapByDay[mmdd] !== undefined ? mapByDay[mmdd] : null));
+            const col = YEAR_COLORS[yr] || { stroke: '#94a3b8', fill: 'rgba(148, 163, 184, 0.15)' };
+            return {
+              label: `${yr}`,
+              data,
+              borderColor: col.stroke,
+              backgroundColor: 'transparent',
+              borderWidth: yr === 2026 ? 2.5 : 1.8,
+              borderDash: yr === 2026 ? [4, 3] : undefined,
+              pointRadius: 0,
+              pointHoverRadius: 4,
+              fill: false,
+              tension: 0.1,
+            };
+          });
+
+          createChart('explorer_main', 'chart-explorer-main', {
+            type: 'line',
+            data: { labels: labelDisplay, datasets },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: 'index', intersect: false },
+              plugins: {
+                legend: { display: true, labels: { color: pal.text, usePointStyle: true, boxWidth: 10 } },
+                tooltip: {
+                  callbacks: {
+                    title: (items) => (items.length ? `Día ${items[0].label}` : ''),
+                    label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y !== null ? fmtNum(ctx.parsed.y, vMeta.dec) + ' ' + vMeta.unit : 'Sin dato'}`,
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  ticks: {
+                    color: pal.text,
+                    maxTicksLimit: 12,
+                    callback: function (val) {
+                      return labelDisplay[val] || '';
+                    },
+                  },
+                  grid: { color: pal.grid },
+                },
+                y: {
+                  title: { display: true, text: `${vMeta.label} (${vMeta.unit})`, color: pal.text },
+                  ticks: { color: pal.text },
+                  grid: { color: pal.grid },
+                },
+              },
+            },
+          });
+        }
+      } else if (STATE.explorer.chartMode === 'dual' && STATE.explorer.variable2 && STATE.explorer.variable2 !== 'none') {
+        const v2Key = STATE.explorer.variable2;
+        const v2Meta = EXPLORER_VARIABLES[v2Key];
+        if (titleEl) titleEl.textContent = `${vMeta.label} vs. ${v2Meta.label}`;
+        if (subEl) subEl.textContent = `Superposición simultánea de 2 variables con doble escala (eje izq.: ${vMeta.unit} / eje der.: ${v2Meta.unit}) · ${validRows.length} días`;
+
+        let chartLabels = [];
+        let chartValues1 = [];
+        let chartValues2 = [];
+
+        if (STATE.explorer.aggregation === 'monthly') {
+          const byMonth = {};
+          validRows.forEach((r) => {
+            if (!byMonth[r.month]) byMonth[r.month] = { v1: [], v2: [] };
+            if (r[vKey] !== null) byMonth[r.month].v1.push(r[vKey]);
+            if (r[v2Key] !== null) byMonth[r.month].v2.push(r[v2Key]);
+          });
+          chartLabels = Object.keys(byMonth).sort();
+          chartValues1 = chartLabels.map((m) => {
+            const arr = byMonth[m].v1;
+            if (!arr.length) return null;
+            if (vMeta.agg === 'sum') return Number(arr.reduce((a, b) => a + b, 0).toFixed(1));
+            if (vMeta.agg === 'max') return Number(Math.max(...arr).toFixed(1));
+            if (vMeta.agg === 'min') return Number(Math.min(...arr).toFixed(1));
+            return Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1));
+          });
+          chartValues2 = chartLabels.map((m) => {
+            const arr = byMonth[m].v2;
+            if (!arr.length) return null;
+            if (v2Meta.agg === 'sum') return Number(arr.reduce((a, b) => a + b, 0).toFixed(1));
+            if (v2Meta.agg === 'max') return Number(Math.max(...arr).toFixed(1));
+            if (v2Meta.agg === 'min') return Number(Math.min(...arr).toFixed(1));
+            return Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1));
+          });
+        } else {
+          chartLabels = validRows.map((r) => r.date);
+          chartValues1 = validRows.map((r) => r[vKey]);
+          chartValues2 = validRows.map((r) => r[v2Key]);
+        }
+
+        createChart('explorer_main', 'chart-explorer-main', {
+          data: {
+            labels: chartLabels,
+            datasets: [
+              {
+                type: vMeta.type,
+                label: `${vMeta.label} (${vMeta.unit})`,
+                data: chartValues1,
+                yAxisID: 'y',
+                borderColor: vMeta.color,
+                backgroundColor: vMeta.type === 'bar' ? pal.rainBar : pal.forestFill,
+                borderWidth: vMeta.type === 'bar' ? 1 : 1.8,
+                pointRadius: validRows.length > 120 && STATE.explorer.aggregation === 'daily' ? 0 : 2.5,
+                fill: vMeta.type === 'line' && v2Meta.type !== 'line',
+                tension: 0.15,
+                order: 2,
+              },
+              {
+                type: v2Meta.type,
+                label: `${v2Meta.label} (${v2Meta.unit})`,
+                data: chartValues2,
+                yAxisID: 'y1',
+                borderColor: v2Meta.color,
+                backgroundColor: v2Meta.type === 'bar' ? (pal.ampBand || 'rgba(251, 146, 60, 0.3)') : 'transparent',
+                borderWidth: v2Meta.type === 'bar' ? 1 : 2,
+                borderDash: vMeta.type === 'line' && v2Meta.type === 'line' ? [4, 4] : undefined,
+                pointRadius: validRows.length > 120 && STATE.explorer.aggregation === 'daily' ? 0 : 2.5,
+                fill: false,
+                tension: 0.15,
+                order: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { display: true, labels: { color: pal.text, usePointStyle: true } },
+            },
+            scales: {
+              x: { ticks: { color: pal.text, maxTicksLimit: 14 }, grid: { color: pal.grid } },
+              y: {
+                position: 'left',
+                title: { display: true, text: `${vMeta.label} (${vMeta.unit})`, color: pal.text },
+                ticks: { color: pal.text },
+                grid: { color: pal.grid },
+              },
+              y1: {
+                position: 'right',
+                title: { display: true, text: `${v2Meta.label} (${v2Meta.unit})`, color: pal.text },
+                ticks: { color: pal.text },
+                grid: { drawOnChartArea: false },
+              },
             },
           },
-        },
-      });
+        });
+      } else {
+        // Single variable
+        if (titleEl) titleEl.textContent = `${vMeta.label} (${vMeta.unit})`;
+        if (subEl) subEl.textContent = `${validRows.length} días con observación entre ${fmtDateES(STATE.explorer.dateFrom, false)} y ${fmtDateES(STATE.explorer.dateTo, false)}`;
+
+        let chartLabels = [];
+        let chartValues = [];
+
+        if (STATE.explorer.aggregation === 'monthly') {
+          const byMonth = {};
+          validRows.forEach((r) => {
+            if (!byMonth[r.month]) byMonth[r.month] = [];
+            byMonth[r.month].push(r[vKey]);
+          });
+          chartLabels = Object.keys(byMonth).sort();
+          chartValues = chartLabels.map((m) => {
+            const arr = byMonth[m];
+            if (vMeta.agg === 'sum') return Number(arr.reduce((a, b) => a + b, 0).toFixed(1));
+            if (vMeta.agg === 'max') return Number(Math.max(...arr).toFixed(1));
+            if (vMeta.agg === 'min') return Number(Math.min(...arr).toFixed(1));
+            return Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1));
+          });
+        } else {
+          chartLabels = validRows.map((r) => r.date);
+          chartValues = validRows.map((r) => r[vKey]);
+        }
+
+        createChart('explorer_main', 'chart-explorer-main', {
+          type: vMeta.type,
+          data: {
+            labels: chartLabels,
+            datasets: [
+              {
+                label: `${vMeta.label} (${vMeta.unit})`,
+                data: chartValues,
+                borderColor: vMeta.color,
+                backgroundColor: vMeta.type === 'bar' ? pal.rainBar : pal.forestFill,
+                borderWidth: vMeta.type === 'bar' ? 1 : 1.5,
+                pointRadius: validRows.length > 120 && STATE.explorer.aggregation === 'daily' ? 0 : 2.5,
+                fill: vMeta.type === 'line',
+                tension: 0.15,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { labels: { color: pal.text } } },
+            scales: {
+              x: { ticks: { color: pal.text, maxTicksLimit: 14 }, grid: { color: pal.grid } },
+              y: {
+                title: { display: true, text: `${vMeta.label} (${vMeta.unit})`, color: pal.text },
+                ticks: { color: pal.text },
+                grid: { color: pal.grid },
+              },
+            },
+          },
+        });
+      }
     }
 
     // Tabla paginada (ordenada de más reciente a más antigua)
