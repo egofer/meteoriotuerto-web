@@ -667,6 +667,198 @@
   }
 
   /* ------------------------------------------------------------------------
+   * EVO-035: Exportación de gráficos interactivos a imagen PNG con membrete oficial
+   * ------------------------------------------------------------------------ */
+  function renderChartExportBtn(canvasId, title) {
+    const safeTitle = escapeHtml(title || '');
+    return `
+      <button type="button" class="btn-chart-export" data-export-canvas="${canvasId}" data-export-title="${safeTitle}" title="Descargar imagen PNG con membrete oficial y licencia CC BY 4.0" aria-label="Descargar gráfico ${safeTitle} en formato PNG">
+        <svg class="chart-export-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        <span class="chart-export-text">Guardar PNG</span>
+      </button>
+    `.trim();
+  }
+
+  async function exportChartWithLetterhead(canvasOrId, customTitle, customSubtitle) {
+    const srcCanvas = typeof canvasOrId === 'string' ? document.getElementById(canvasOrId) : canvasOrId;
+    if (!srcCanvas || !srcCanvas.width || !srcCanvas.height) {
+      console.warn('Canvas no encontrado o no inicializado:', canvasOrId);
+      return;
+    }
+
+    // 1. Obtener títulos del panel si no se especificaron
+    const panel = srcCanvas.closest('.chart-panel') || srcCanvas.closest('.section-block') || srcCanvas.parentElement;
+    let chartTitle = customTitle;
+    if (!chartTitle && panel) {
+      const tEl = panel.querySelector('.chart-panel-title') || panel.querySelector('h3, h4');
+      if (tEl) chartTitle = tEl.textContent.trim();
+    }
+    if (!chartTitle) chartTitle = 'Gráfico meteorológico';
+
+    let chartSub = customSubtitle;
+    if (!chartSub && panel) {
+      const sEl = panel.querySelector('.chart-panel-subtitle') || panel.querySelector('.chart-panel-sub, p');
+      if (sEl) chartSub = sEl.textContent.trim();
+    }
+
+    // 2. Colores y tema coherente con el modo activo
+    const isDark = STATE.theme === 'dark';
+    const bg = isDark ? '#0e1714' : '#ffffff';
+    const border = isDark ? '#1e2d27' : '#e2e8f0';
+    const brandColor = isDark ? '#52b788' : '#1b4332';
+    const titleColor = isDark ? '#f1f5f9' : '#0f172a';
+    const subtitleColor = isDark ? '#94a3b8' : '#475569';
+    const dividerColor = isDark ? 'rgba(255, 255, 255, 0.12)' : '#e2e8f0';
+    const footerColor = isDark ? '#94a3b8' : '#64748b';
+
+    // 3. Dimensiones y resolución optimizada (mínimo 1400px para nitidez de impresión y retina)
+    const minWidth = 1400;
+    const srcW = srcCanvas.width;
+    const srcH = srcCanvas.height;
+    const scale = Math.max(1, minWidth / srcW);
+    const targetW = Math.round(srcW * scale);
+    const targetH = Math.round(srcH * scale);
+
+    const padX = Math.round(targetW * 0.04);
+    const exportWidth = targetW + (padX * 2);
+
+    // Alturas proporcionales
+    const headerH = Math.round(exportWidth * 0.095);
+    const footerH = Math.round(exportWidth * 0.045);
+    const exportHeight = headerH + targetH + footerH;
+
+    // 4. Crear canvas en memoria
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = exportWidth;
+    outCanvas.height = exportHeight;
+    const ctx = outCanvas.getContext('2d');
+    if (!ctx) return;
+
+    // Fondo y marco
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, exportWidth, exportHeight);
+
+    ctx.strokeStyle = border;
+    ctx.lineWidth = Math.max(1, Math.round(exportWidth * 0.001));
+    ctx.strokeRect(0, 0, exportWidth, exportHeight);
+
+    const fontStack = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+
+    // Membrete: Fila superior (Marca y localización)
+    const brandSize = Math.round(exportWidth * 0.016);
+    const metaSize = Math.round(exportWidth * 0.0105);
+
+    ctx.fillStyle = brandColor;
+    ctx.font = 'bold ' + brandSize + 'px ' + fontStack;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    const brandY = Math.round(headerH * 0.22);
+    ctx.fillText('🌲 METEORIOTUERTO', padX, brandY);
+
+    const brandW = ctx.measureText('🌲 METEORIOTUERTO').width;
+    ctx.fillStyle = subtitleColor;
+    ctx.font = '500 ' + metaSize + 'px ' + fontStack;
+    ctx.fillText(' · Almanaque Meteorológico', padX + brandW + 8, brandY);
+
+    ctx.textAlign = 'right';
+    ctx.fillText('Barrio de Arriba · Riotuerto (Cantabria) · 43,341° N, 3,670° O · 115 m', exportWidth - padX, brandY);
+
+    // Línea divisoria cabecera
+    const div1Y = Math.round(headerH * 0.42);
+    ctx.strokeStyle = dividerColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padX, div1Y);
+    ctx.lineTo(exportWidth - padX, div1Y);
+    ctx.stroke();
+
+    // Título del gráfico
+    const titleSize = Math.round(exportWidth * 0.020);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = titleColor;
+    ctx.font = 'bold ' + titleSize + 'px ' + fontStack;
+    const titleY = Math.round(headerH * 0.65);
+    ctx.fillText(chartTitle, padX, titleY);
+
+    // Subtítulo del gráfico
+    if (chartSub) {
+      const subSize = Math.round(exportWidth * 0.011);
+      ctx.fillStyle = subtitleColor;
+      ctx.font = 'normal ' + subSize + 'px ' + fontStack;
+      let displaySub = chartSub;
+      const maxSubW = exportWidth - (padX * 2);
+      while (ctx.measureText(displaySub).width > maxSubW && displaySub.length > 5) {
+        displaySub = displaySub.slice(0, -4) + '...';
+      }
+      ctx.fillText(displaySub, padX, Math.round(headerH * 0.88));
+    }
+
+    // Dibujar el lienzo de Chart.js
+    ctx.drawImage(srcCanvas, padX, headerH, targetW, targetH);
+
+    // Pie de página: Línea divisoria
+    const footDivY = exportHeight - footerH + Math.round(footerH * 0.2);
+    ctx.beginPath();
+    ctx.moveTo(padX, footDivY);
+    ctx.lineTo(exportWidth - padX, footDivY);
+    ctx.stroke();
+
+    // Pie de página: Metadatos y licencia
+    const footSize = Math.round(exportWidth * 0.0095);
+    ctx.font = 'normal ' + footSize + 'px ' + fontStack;
+    ctx.fillStyle = footerColor;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    const footTextY = footDivY + Math.round(footerH * 0.45);
+    ctx.fillText('Fuente: Estación Meteorológica Barrio de Arriba · https://egofer.github.io/meteoriotuerto-web/', padX, footTextY);
+
+    const nowStr = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    ctx.textAlign = 'right';
+    ctx.fillText('Licencia CC BY 4.0 · ' + nowStr, exportWidth - padX, footTextY);
+
+    // 5. Descargar archivo PNG
+    const safeTitle = chartTitle
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    const filename = `meteoriotuerto-${safeTitle || 'grafico'}.png`;
+
+    if (outCanvas.toBlob) {
+      outCanvas.toBlob((blob) => {
+        if (!blob) {
+          downloadDataUrl(outCanvas.toDataURL('image/png'), filename);
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+      }, 'image/png');
+    } else {
+      downloadDataUrl(outCanvas.toDataURL('image/png'), filename);
+    }
+  }
+
+  function downloadDataUrl(dataUrl, filename) {
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  /* ------------------------------------------------------------------------
    * VISTA 1: PORTADA DEL ALMANAQUE
    * ------------------------------------------------------------------------ */
   async function renderPortada() {
@@ -2086,6 +2278,7 @@
                 Aporte pluviométrico (barras azules) frente a la demanda evapotranspirativa de referencia (barras naranjas) y balance neto mensual P &minus; ET₀ (línea verde/roja)
               </p>
             </div>
+            ${renderChartExportBtn('chart-alm-waterbalance', `Balance hídrico mensual ${alm.year}`)}
           </div>
           <div class="chart-canvas-wrap" style="height:350px">
             <canvas id="chart-alm-waterbalance"></canvas>
@@ -2406,6 +2599,7 @@
                 <h4 class="chart-panel-title">Climograma anual (${alm.year})</h4>
                 <p class="chart-panel-subtitle">Precipitación acumulada mensual (mm) y temperaturas medias, máximas y mínimas (°C)</p>
               </div>
+              ${renderChartExportBtn('chart-alm-climogram', `Climograma anual ${alm.year}`)}
             </div>
             <div class="chart-canvas-wrap">
               <canvas id="chart-alm-climogram"></canvas>
@@ -2418,6 +2612,7 @@
                 <h4 class="chart-panel-title">Evolución y amplitud térmica diaria (${alm.year})</h4>
                 <p class="chart-panel-subtitle">Banda entre máxima y mínima diaria · Máx.: ${fmtNum(stT.max_abs, 1)} °C | Mín.: ${fmtNum(stT.min_abs, 1)} °C</p>
               </div>
+              ${renderChartExportBtn('chart-alm-temprange', `Amplitud térmica diaria ${alm.year}`)}
             </div>
             <div class="chart-canvas-wrap">
               <canvas id="chart-alm-temprange"></canvas>
@@ -2457,6 +2652,7 @@
                 <h4 class="chart-panel-title">Precipitación diaria y curva de lluvia acumulada (${alm.year})</h4>
                 <p class="chart-panel-subtitle">Hietograma diario (barras, mm) y progresión acumulada anual (línea continua, mm)</p>
               </div>
+              ${renderChartExportBtn('chart-alm-dailyrain', `Precipitación diaria ${alm.year}`)}
             </div>
             <div class="chart-canvas-wrap">
               <canvas id="chart-alm-dailyrain"></canvas>
@@ -2469,6 +2665,7 @@
                 <h4 class="chart-panel-title">Rachas máximas diarias de viento (${alm.year})</h4>
                 <p class="chart-panel-subtitle">Racha máxima diaria (km/h) y umbral de viento fuerte (40 km/h)</p>
               </div>
+              ${renderChartExportBtn('chart-alm-windgust', `Rachas máximas de viento ${alm.year}`)}
             </div>
             <div class="chart-canvas-wrap">
               <canvas id="chart-alm-windgust"></canvas>
@@ -2484,9 +2681,12 @@
                 <h4 class="chart-panel-title">Rosa de los vientos (16 rumbos)</h4>
                 <p class="chart-panel-subtitle" id="windrose-subtitle-${alm.year}">Rumbo predominante: <strong>${alm.wind_analysis?.predominant_sector || stW.predominant_sector}</strong> · Basado en ${fmtNum(alm.wind_analysis?.total_direction_observations || 0, 0)} observaciones (${alm.wind_analysis?.source_resolution || '30 min'})</p>
               </div>
-              <div class="windrose-toggle-group" id="windrose-tools-${alm.year}">
-                <button type="button" class="windrose-toggle-btn active" id="btn-windrose-polar-${alm.year}" title="Rosa náutica polar 360°">🧭 Circular</button>
-                <button type="button" class="windrose-toggle-btn" id="btn-windrose-bar-${alm.year}" title="Histograma de frecuencias en barras">📊 Barras</button>
+              <div class="chart-header-actions">
+                <div class="windrose-toggle-group" id="windrose-tools-${alm.year}">
+                  <button type="button" class="windrose-toggle-btn active" id="btn-windrose-polar-${alm.year}" title="Rosa náutica polar 360°">🧭 Circular</button>
+                  <button type="button" class="windrose-toggle-btn" id="btn-windrose-bar-${alm.year}" title="Histograma de frecuencias en barras">📊 Barras</button>
+                </div>
+                ${renderChartExportBtn('chart-alm-windrose', `Rosa de los vientos ${alm.year}`)}
               </div>
             </div>
 
@@ -2530,6 +2730,7 @@
                 <h4 class="chart-panel-title">Clasificación de días según la escala de Beaufort</h4>
                 <p class="chart-panel-subtitle">Distribución del viento medio diario en el fondo del valle del Covadal</p>
               </div>
+              ${renderChartExportBtn('chart-alm-beaufort', `Distribución Beaufort ${alm.year}`)}
             </div>
             <div class="chart-canvas-wrap tall">
               <canvas id="chart-alm-beaufort"></canvas>
@@ -4647,6 +4848,7 @@
             <button type="button" id="btn-exp-xlsx" class="btn btn-excel">📊 Exportar a Excel (.xlsx)</button>
             <button type="button" id="btn-exp-csv" class="btn">⬇ Exportar (CSV)</button>
             <button type="button" id="btn-exp-json" class="btn">⬇ Exportar (JSON)</button>
+            ${renderChartExportBtn('chart-explorer-main', 'Serie temporal')}
           </div>
         </div>
         <div class="chart-canvas-wrap tall">
@@ -5504,6 +5706,7 @@
             <h4 class="chart-panel-title">💧 Evolución interanual de la precipitación acumulada (curva espagueti)</h4>
             <p class="chart-panel-subtitle">Suma diaria acumulada (1 ene – 31 dic) de cada año y contraste con la curva media de referencia 2022–2025</p>
           </div>
+          ${renderChartExportBtn('chart-comp-cum-rain', 'Precipitación acumulada interanual')}
         </div>
         <div class="chart-canvas-wrap" style="height:440px">
           <canvas id="chart-comp-cum-rain"></canvas>
@@ -5539,6 +5742,7 @@
               <h4 class="chart-panel-title">Anomalía pluviométrica anual respecto a la media 2022–2025</h4>
               <p class="chart-panel-subtitle">Diferencia en milímetros (mm) respecto a la referencia de ${fmtNum(ref.mean_annual_rain_mm, 1)} mm</p>
             </div>
+            ${renderChartExportBtn('chart-comp-rain-anom', 'Anomalía pluviométrica anual')}
           </div>
           <div class="chart-canvas-wrap">
             <canvas id="chart-comp-rain-anom"></canvas>
@@ -5551,6 +5755,7 @@
               <h4 class="chart-panel-title">Comparativa de días de umbrales climáticos por año</h4>
               <p class="chart-panel-subtitle">Heladas (≤0 °C), calor (≥30 °C), lluvia intensa (≥30 mm) y viento fuerte (≥40 km/h)</p>
             </div>
+            ${renderChartExportBtn('chart-comp-thresholds', 'Umbrales climáticos por año')}
           </div>
           <div class="chart-canvas-wrap">
             <canvas id="chart-comp-thresholds"></canvas>
@@ -5565,6 +5770,7 @@
               <h4 class="chart-panel-title">Precipitación mensual comparada (Enero – Diciembre)</h4>
               <p class="chart-panel-subtitle">Evolución mensual por año frente al promedio mensual 2022–2025</p>
             </div>
+            ${renderChartExportBtn('chart-comp-monthly-rain', 'Precipitación mensual comparada')}
           </div>
           <div class="chart-canvas-wrap">
             <canvas id="chart-comp-monthly-rain"></canvas>
@@ -5577,6 +5783,7 @@
               <h4 class="chart-panel-title">Temperatura media mensual comparada (Enero – Diciembre)</h4>
               <p class="chart-panel-subtitle">Curvas térmicas anuales superpuestas (°C)</p>
             </div>
+            ${renderChartExportBtn('chart-comp-monthly-temp', 'Temperatura media mensual comparada')}
           </div>
           <div class="chart-canvas-wrap">
             <canvas id="chart-comp-monthly-temp"></canvas>
@@ -5593,6 +5800,7 @@
               Demanda de calefacción en viviendas (HDD base 15,5 °C), sobrecalentamiento estival (CDD base 21,0 °C) y acumulación de energía biológica para praderas y huertas (GDD base 10,0 °C)
             </p>
           </div>
+          ${renderChartExportBtn('chart-comp-degree-days', 'Grados día anuales comparados')}
         </div>
         <div class="chart-canvas-wrap" style="height:360px">
           <canvas id="chart-comp-degree-days"></canvas>
@@ -5608,6 +5816,7 @@
               Distribución porcentual acumulada (100 %) de los días de cada año según la temperatura máxima diaria: frío riguroso, fresco, templado, agradable, cálido y calor intenso
             </p>
           </div>
+          ${renderChartExportBtn('chart-comp-thermal-distribution', 'Reparto de días por bandas térmicas')}
         </div>
         <div class="chart-canvas-wrap" style="height:320px">
           <canvas id="chart-comp-thermal-distribution"></canvas>
@@ -5646,11 +5855,14 @@
               <h4 class="chart-panel-title" id="seasonal-chart-title">Comparativa estacional de temperatura y precipitación</h4>
               <p class="chart-panel-subtitle" id="seasonal-chart-subtitle">Contraste interanual de trimestres canónicos frente al promedio histórico 2022–2025</p>
             </div>
-            <div class="seasonal-metric-toggles" role="group" aria-label="Métrica estacional para el gráfico">
-              <button type="button" class="seasonal-metric-btn active" data-metric="temp" id="btn-smetric-temp">🌡️ T. Media (°C)</button>
-              <button type="button" class="seasonal-metric-btn" data-metric="rain" id="btn-smetric-rain">💧 Lluvia (mm)</button>
-              <button type="button" class="seasonal-metric-btn" data-metric="extremes" id="btn-smetric-extremes">⚡ Heladas / Calor</button>
-              <button type="button" class="seasonal-metric-btn" data-metric="foehn" id="btn-smetric-foehn">🔥 Días Foehn</button>
+            <div class="chart-header-actions">
+              <div class="seasonal-metric-toggles" role="group" aria-label="Métrica estacional para el gráfico">
+                <button type="button" class="seasonal-metric-btn active" data-metric="temp" id="btn-smetric-temp">🌡️ T. Media (°C)</button>
+                <button type="button" class="seasonal-metric-btn" data-metric="rain" id="btn-smetric-rain">💧 Lluvia (mm)</button>
+                <button type="button" class="seasonal-metric-btn" data-metric="extremes" id="btn-smetric-extremes">⚡ Heladas / Calor</button>
+                <button type="button" class="seasonal-metric-btn" data-metric="foehn" id="btn-smetric-foehn">🔥 Días Foehn</button>
+              </div>
+              ${renderChartExportBtn('chart-seasonal-comp', 'Comparativa estacional OMM')}
             </div>
           </div>
           <div class="chart-canvas-wrap" style="height:360px">
@@ -5762,6 +5974,7 @@
               <h4 class="chart-panel-title">Comparativa interanual: Lluvia anual vs Evapotranspiración ET₀ y Balance neto</h4>
               <p class="chart-panel-subtitle">Precipitación total (mm), Evapotranspiración acumulada ET₀ (mm), Balance neto P &minus; ET₀ (mm) y Balance estival JJA (mm)</p>
             </div>
+            ${renderChartExportBtn('chart-comp-waterbalance', 'Balance hídrico interanual')}
           </div>
           <div class="chart-canvas-wrap" style="height:380px">
             <canvas id="chart-comp-waterbalance"></canvas>
@@ -6344,6 +6557,7 @@
                 : 'Evolución diaria (días 1 al 31) de temperatura media diaria (líneas) y lluvia diaria (barras)'}
             </p>
           </div>
+          ${renderChartExportBtn('chart-h2h-comparison', `Comparativa cara a cara ${profA.shortLabel} vs ${profB.shortLabel}`)}
         </div>
         <div class="chart-canvas-wrap" style="height:340px">
           <canvas id="chart-h2h-comparison"></canvas>
@@ -9882,6 +10096,24 @@
 
     // Escuchar clics globales en accesos directos con scroll suave y términos contextuales
     document.addEventListener('click', (e) => {
+      // EVO-035: Delegación de eventos para exportar gráficos interactivos a imagen PNG con membrete oficial
+      const exportBtn = e.target.closest('.btn-chart-export');
+      if (exportBtn) {
+        e.preventDefault();
+        const canvasId = exportBtn.getAttribute('data-export-canvas');
+        const customTitle = exportBtn.getAttribute('data-export-title');
+        const origHtml = exportBtn.innerHTML;
+        exportBtn.disabled = true;
+        exportBtn.innerHTML = '<span>✓ Guardada!</span>';
+        exportChartWithLetterhead(canvasId, customTitle).finally(() => {
+          setTimeout(() => {
+            exportBtn.innerHTML = origHtml;
+            exportBtn.disabled = false;
+          }, 1600);
+        });
+        return;
+      }
+
       const scrollTrigger = e.target.closest('[data-scroll-to]');
       if (scrollTrigger) {
         const targetId = scrollTrigger.getAttribute('data-scroll-to');
@@ -9950,6 +10182,10 @@
         window.location.hash = `#almanaque/${years[targetIdx]}`;
       }
     });
+
+    // EVO-035: Exposición en window para interoperabilidad, pruebas y consola
+    window.renderChartExportBtn = renderChartExportBtn;
+    window.exportChartWithLetterhead = exportChartWithLetterhead;
 
     handleRouteChange();
   });

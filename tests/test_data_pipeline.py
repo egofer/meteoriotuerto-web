@@ -1346,9 +1346,9 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 4. Comprobar versión de caché en sw.js e index.html
         sw_js = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.8", sw_js, "Falta cache v1.2.8 en sw.js")
+        self.assertIn("v1.2.9", sw_js, "Falta cache v1.2.9 en sw.js")
         index_html = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v=1.2.8", index_html, "Falta v=1.2.8 en index.html")
+        self.assertIn("v=1.2.9", index_html, "Falta v=1.2.9 en index.html")
 
     def test_weather_underground_realtime_integration(self):
         """
@@ -1472,11 +1472,11 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertNotIn("function renderHomeCharts", app_js, "renderHomeCharts() debe haber sido purgada de app.js")
         self.assertNotIn("renderHomeCharts(", app_js, "No debe haber llamadas residuales a renderHomeCharts()")
 
-        # 4. Comprobar sincronización de caché v1.2.8
+        # 4. Comprobar sincronización de caché v1.2.9
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.8", sw_txt)
-        self.assertIn("app.js?v=1.2.8", index_txt)
+        self.assertIn("v1.2.9", sw_txt)
+        self.assertIn("app.js?v=1.2.9", index_txt)
 
     def test_mej_003_sheetjs_deferred_loading(self):
         """
@@ -1485,14 +1485,14 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         2. sw.js precachea ./src/js/vendor/xlsx.mini.min.js para soporte offline inmediato.
         3. ensureXLSXLoaded() en app.js inyecta dinámicamente el script con fallback a CDN.
         4. exportWorkbookToXLSX() gestiona el cursor 'wait' y desbloquea en bloque finally.
-        5. Versión de caché v1.2.8 sincronizada en sw.js e index.html.
+        5. Versión de caché v1.2.9 sincronizada en sw.js e index.html.
         """
         html_text = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
         self.assertNotIn("xlsx.mini.min.js", html_text, "index.html no debe cargar SheetJS de forma bloqueante en el arranque")
 
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         self.assertIn("./src/js/vendor/xlsx.mini.min.js", sw_txt, "sw.js debe precachear SheetJS para modo offline")
-        self.assertIn("v1.2.8", sw_txt)
+        self.assertIn("v1.2.9", sw_txt)
 
         app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn("async function ensureXLSXLoaded()", app_js)
@@ -1586,12 +1586,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("route === 'metodologia'", fn_body)
         self.assertIn("route === 'glosario'", fn_body)
 
-        # 4. Sincronización de versión de caché v1.2.8
+        # 4. Sincronización de versión de caché v1.2.9
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.8", sw_txt)
-        self.assertIn("app.js?v=1.2.8", index_txt)
-        self.assertIn("styles.css?v=1.2.8", index_txt)
+        self.assertIn("v1.2.9", sw_txt)
+        self.assertIn("app.js?v=1.2.9", index_txt)
+        self.assertIn("styles.css?v=1.2.9", index_txt)
 
     def test_mej_012_schema_org_json_ld_metadata(self):
         """
@@ -1671,12 +1671,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("config.options.animation = false;", app_js)
         self.assertIn("behavior: getScrollBehavior()", app_js)
 
-        # Comprobar versión de caché v1.2.8
+        # Comprobar versión de caché v1.2.9
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.8", sw_txt)
-        self.assertIn("app.js?v=1.2.8", index_txt)
-        self.assertIn("styles.css?v=1.2.8", index_txt)
+        self.assertIn("v1.2.9", sw_txt)
+        self.assertIn("app.js?v=1.2.9", index_txt)
+        self.assertIn("styles.css?v=1.2.9", index_txt)
 
     def test_mej_009_accessible_tables_caption_and_scope(self):
         """
@@ -1684,7 +1684,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         1. Las 19 tablas dinámicas en app.js disponen de su correspondiente etiqueta <caption> descriptiva.
         2. Todas las cabeceras <th> cuentan explícitamente con atributo scope='col' o scope='row' (0 <th> huérfanos).
         3. En styles.css se incluye la regla de estilo para caption (.data-table caption, .table-caption).
-        4. Sincronización de versión de caché v1.2.8 en sw.js e index.html.
+        4. Sincronización de versión de caché v1.2.9 en sw.js e index.html.
         """
         import re
 
@@ -1708,12 +1708,12 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".data-table caption", css_text)
         self.assertIn("caption-side: top;", css_text)
 
-        # 4. Comprobar sincronización de versión de caché v1.2.8
+        # 4. Comprobar sincronización de versión de caché v1.2.9
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.2.8", sw_txt)
-        self.assertIn("app.js?v=1.2.8", index_txt)
-        self.assertIn("styles.css?v=1.2.8", index_txt)
+        self.assertIn("v1.2.9", sw_txt)
+        self.assertIn("app.js?v=1.2.9", index_txt)
+        self.assertIn("styles.css?v=1.2.9", index_txt)
 
     def test_mej_006_minified_json_production_output(self):
         """
@@ -1757,11 +1757,11 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("(prefers-color-scheme: dark)", app_js)
         self.assertIn("mediaDark.addEventListener('change'", app_js)
 
-        # Comprobar versión de caché v1.2.8
+        # Comprobar versión de caché v1.2.9
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
-        self.assertIn("v1.2.8", sw_txt)
-        self.assertIn("app.js?v=1.2.8", html_text)
-        self.assertIn("styles.css?v=1.2.8", html_text)
+        self.assertIn("v1.2.9", sw_txt)
+        self.assertIn("app.js?v=1.2.9", html_text)
+        self.assertIn("styles.css?v=1.2.9", html_text)
 
     def test_mej_008_orphan_image_folder_purged(self):
         """
@@ -1775,6 +1775,50 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertTrue(assets_img.exists(), "La carpeta canónica assets/img/ debe existir")
         self.assertTrue((assets_img / "estacion-meteorologica-barrio-de-arriba.jpg").exists())
         self.assertTrue((assets_img / "estacion-meteorologica-barrio-de-arriba.webp").exists())
+
+    def test_evo_035_chart_image_export(self):
+        """
+        EVO-035: Verifica la exportación de gráficos interactivos a imagen PNG con membrete oficial:
+        1. app.js define renderChartExportBtn() y exportChartWithLetterhead().
+        2. Los gráficos principales incluyen botones .btn-chart-export con data-export-canvas.
+        3. styles.css contiene las reglas para .btn-chart-export, .chart-header-actions y estados hover/dark.
+        4. El membrete oficial contiene marca METEORIOTUERTO, Barrio de Arriba, Riotuerto y licencia CC BY 4.0.
+        5. Exposición en window.renderChartExportBtn y window.exportChartWithLetterhead.
+        6. Sincronización de versión de caché v1.2.9 en sw.js e index.html.
+        """
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("function renderChartExportBtn(", app_js)
+        self.assertIn("async function exportChartWithLetterhead(", app_js)
+        self.assertIn("window.renderChartExportBtn = renderChartExportBtn", app_js)
+        self.assertIn("window.exportChartWithLetterhead = exportChartWithLetterhead", app_js)
+
+        # Verificar presencia de botones de exportación en los lienzos principales
+        self.assertIn("renderChartExportBtn('chart-alm-climogram'", app_js)
+        self.assertIn("renderChartExportBtn('chart-alm-temprange'", app_js)
+        self.assertIn("renderChartExportBtn('chart-alm-waterbalance'", app_js)
+        self.assertIn("renderChartExportBtn('chart-alm-windrose'", app_js)
+        self.assertIn("renderChartExportBtn('chart-explorer-main'", app_js)
+        self.assertIn("renderChartExportBtn('chart-comp-cum-rain'", app_js)
+        self.assertIn("renderChartExportBtn('chart-seasonal-comp'", app_js)
+        self.assertIn("renderChartExportBtn('chart-h2h-comparison'", app_js)
+
+        # Verificar contenido editorial del membrete en el motor canvas
+        self.assertIn("METEORIOTUERTO", app_js)
+        self.assertIn("Barrio de Arriba · Riotuerto (Cantabria)", app_js)
+        self.assertIn("Licencia CC BY 4.0", app_js)
+
+        # Verificar CSS
+        css_text = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".btn-chart-export", css_text)
+        self.assertIn(".chart-header-actions", css_text)
+        self.assertIn(".chart-export-svg", css_text)
+
+        # Sincronización de caché v1.2.9
+        sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+        index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn("v1.2.9", sw_txt)
+        self.assertIn("app.js?v=1.2.9", index_txt)
+        self.assertIn("styles.css?v=1.2.9", index_txt)
 
 
 if __name__ == "__main__":

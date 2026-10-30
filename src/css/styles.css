@@ -1648,6 +1648,72 @@ html[data-theme="dark"] .year-pill.active {
   color: var(--txt-muted);
 }
 
+/* EVO-035: Contenedor y botón de exportación de gráficos a imagen PNG con membrete oficial */
+.chart-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-chart-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--txt-muted);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.btn-chart-export:hover,
+.btn-chart-export:focus-visible {
+  color: var(--accent-forest);
+  border-color: var(--accent-forest);
+  background-color: rgba(45, 106, 79, 0.08);
+  outline: none;
+}
+
+[data-theme="dark"] .btn-chart-export:hover,
+[data-theme="dark"] .btn-chart-export:focus-visible {
+  color: #52b788;
+  border-color: #52b788;
+  background-color: rgba(82, 183, 136, 0.12);
+}
+
+.btn-chart-export:disabled {
+  opacity: 0.9;
+  cursor: default;
+  color: #059669;
+  border-color: #059669;
+  background-color: rgba(5, 150, 105, 0.1);
+}
+
+.chart-export-svg {
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
+@media (max-width: 640px) {
+  .btn-chart-export {
+    padding: 3px 8px;
+    font-size: 0.74rem;
+  }
+}
+
+@media print {
+  .btn-chart-export {
+    display: none !important;
+  }
+}
+
 .chart-canvas-wrap {
   position: relative;
   width: 100%;
