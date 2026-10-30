@@ -5945,3 +5945,98 @@ html[data-theme="dark"] .offline-badge.online-restored {
   }
 }
 
+/* ==========================================================================
+   EVO-039: Sensor de frescura y salud de datos (telemetría y estado de pipeline)
+   ========================================================================== */
+.freshness-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-top: 5px;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.freshness-status-pill .freshness-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Estado Óptimo (fresh: <= 2 días de desfase) */
+.freshness-status-pill.freshness-fresh {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.freshness-status-pill.freshness-fresh .freshness-dot {
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
+/* Estado Demora Moderada (delayed: 3 - 4 días de desfase) */
+.freshness-status-pill.freshness-delayed {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.freshness-status-pill.freshness-delayed .freshness-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
+}
+
+/* Estado Alerta / Retención prolongada (stale: > 4 días de desfase) */
+.freshness-status-pill.freshness-stale {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.freshness-status-pill.freshness-stale .freshness-dot {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+}
+
+/* Adaptación para Tema Oscuro */
+html[data-theme="dark"] .freshness-status-pill.freshness-fresh {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+html[data-theme="dark"] .freshness-status-pill.freshness-delayed {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+html[data-theme="dark"] .freshness-status-pill.freshness-stale {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.footer-actions-link {
+  font-size: 0.82rem;
+  color: var(--txt-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.footer-actions-link:hover {
+  color: var(--accent-forest);
+}
+
+

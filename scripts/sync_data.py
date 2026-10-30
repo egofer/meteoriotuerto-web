@@ -41,6 +41,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import build_data  # noqa: E402
+import check_freshness  # noqa: E402
 import validate_data  # noqa: E402
 
 
@@ -345,8 +346,20 @@ def main() -> None:
         action="store_true",
         help="Enviar únicamente el evento repository_dispatch a GitHub API sin procesar localmente.",
     )
+    parser.add_argument(
+        "--check-freshness",
+        action="store_true",
+        help="Evalúa la frescura de datos en data/index.json e informa del estado sin ejecutar la sincronización.",
+    )
 
     args = parser.parse_args()
+
+    if args.check_freshness:
+        idx_p = Path(args.output_dir) / "index.json"
+        fresh_res = check_freshness.evaluate_freshness(idx_p)
+        sym = {"fresh": "[OK]", "delayed": "[AVISO]", "stale": "[ALERTA]", "error": "[ERROR]"}.get(fresh_res["status"], "[INFO]")
+        print(f"{sym} {fresh_res['message']}")
+        sys.exit(0 if fresh_res["is_fresh"] else 1)
 
     if args.dispatch_only:
         ok = trigger_repository_dispatch()

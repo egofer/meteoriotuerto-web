@@ -100,5 +100,5 @@ En la rutina diaria `run_daily.sh` de `ecowitt_downloader`, este comando se ejec
      DISPATCH_TOKEN="..." python3 scripts/sync_data.py --dispatch-only
      ```
 2. **En este repositorio (`egofer/meteoriotuerto-web`):**
-   - El archivo `.github/workflows/deploy.yml` (y su copia en `docs/deploy.yml`) escucha `repository_dispatch: types: [meteoriotuerto_data_updated]`, además del `cron` diario (`30 6 * * *`) y `workflow_dispatch`.
-   - Ejecuta `python3 scripts/sync_data.py --source-dir .cache/meteoriotuerto --output-dir data`, confirma los nuevos JSON en `main` si hubo cambios reales y despliega en GitHub Pages.
+   - El archivo `.github/workflows/deploy.yml` (y su copia en `docs/deploy.yml`) escucha `repository_dispatch: types: [meteoriotuerto_data_updated]`, un `cron` multi-ventana desfasado anti-congestión (`37 6 * * *` matinal, `17 11 * * *` respaldo y `23 18 * * *` vespertino) y `workflow_dispatch`.
+   - Ejecuta `python3 scripts/sync_data.py --source-dir .cache/meteoriotuerto --output-dir data`, audita el sensor de frescura con `python3 scripts/check_freshness.py --max-delay-days 2 --github-actions`, confirma los nuevos JSON en `main` si hubo cambios reales y despliega en GitHub Pages.

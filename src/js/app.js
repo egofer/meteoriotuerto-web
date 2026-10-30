@@ -138,6 +138,78 @@
     return `${d} ${MONTH_SHORT_ES[m - 1].toLowerCase()}.`;
   }
 
+  /* ------------------------------------------------------------------------
+   * EVO-039: Sensor de frescura y telemetría de consolidación de datos
+   * ------------------------------------------------------------------------ */
+  function computeDataFreshness(lastConsolidatedDate, generatedAt) {
+    if (!lastConsolidatedDate || typeof lastConsolidatedDate !== 'string') {
+      return {
+        status: 'unknown',
+        badgeText: 'Cierre no disponible',
+        badgeClass: 'freshness-unknown',
+        dotText: '?',
+        label: 'Sin fecha de consolidación registrada.',
+        daysDelay: 0,
+      };
+    }
+    const parts = lastConsolidatedDate.slice(0, 10).split('-');
+    if (parts.length !== 3) {
+      return {
+        status: 'unknown',
+        badgeText: lastConsolidatedDate,
+        badgeClass: 'freshness-unknown',
+        dotText: '?',
+        label: 'Fecha no estandarizada.',
+        daysDelay: 0,
+      };
+    }
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+    const lastDate = new Date(Date.UTC(y, m, d));
+    const now = new Date();
+    const nowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const diffMs = nowUTC.getTime() - lastDate.getTime();
+    const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+
+    const dateShort = fmtDateES(lastConsolidatedDate, false);
+
+    if (diffDays <= 2) {
+      return {
+        status: 'fresh',
+        badgeText: `Consolidado: ${dateShort} · Al día`,
+        badgeClass: 'freshness-fresh',
+        dotText: '●',
+        label: `Datos consolidados al día con cierre ${dateShort} (${diffDays} día${diffDays === 1 ? '' : 's'} de antigüedad).`,
+        daysDelay: diffDays,
+        lastConsolidatedDate,
+        generatedAt: generatedAt || '',
+      };
+    }
+    if (diffDays <= 4) {
+      return {
+        status: 'delayed',
+        badgeText: `Consolidado: ${dateShort} · Demora ${diffDays}d`,
+        badgeClass: 'freshness-delayed',
+        dotText: '●',
+        label: `Sincronización demorada: último cierre ${dateShort} (${diffDays} días pendientes de consolidación).`,
+        daysDelay: diffDays,
+        lastConsolidatedDate,
+        generatedAt: generatedAt || '',
+      };
+    }
+    return {
+      status: 'stale',
+      badgeText: `Consolidado: ${dateShort} · Retraso ${diffDays}d`,
+      badgeClass: 'freshness-stale',
+      dotText: '●',
+      label: `Retención en la transmisión o mantenimiento: último cierre ${dateShort} (${diffDays} días de desfase).`,
+      daysDelay: diffDays,
+      lastConsolidatedDate,
+      generatedAt: generatedAt || '',
+    };
+  }
+
   function escapeHtml(str) {
     if (str === null || str === undefined) return '';
     return String(str)
@@ -8815,6 +8887,72 @@
           <a href="https://github.com/egofer/meteoriotuerto/" target="_blank" rel="noopener noreferrer" class="btn">Repositorio CSV original en GitHub ↗</a>
         </div>
       </section>
+
+      <!-- EVO-039: Sensor de frescura, salud y telemetría del pipeline de datos -->
+      <section class="section-block" aria-labelledby="sec-pipeline-health">
+        <div class="section-header">
+          <div>
+            <div class="editorial-kicker">MONITORIZACIÓN Y RESILIENCIA DEL ARCHIVO DIGITAL (EVO-039)</div>
+            <h3 id="sec-pipeline-health" class="section-title">⚡ Sensor de frescura y telemetría de sincronización en la nube</h3>
+            <p class="section-subtitle">
+              Diagnóstico de salud del flujo de consolidación automática en GitHub Actions y política de ventanas horarias
+            </p>
+          </div>
+        </div>
+
+        <div class="chronicle-grid">
+          <div class="chronicle-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <h3 style="margin:0">Estado del sensor en tiempo real</h3>
+              <span class="freshness-status-pill ${computeDataFreshness(idx.series_overview.last_consolidated_date, idx.generated_at).badgeClass}">
+                <span class="freshness-dot" aria-hidden="true">●</span>
+                <span>${computeDataFreshness(idx.series_overview.last_consolidated_date, idx.generated_at).badgeText}</span>
+              </span>
+            </div>
+            <p style="margin-bottom:12px;font-size:0.92rem;color:var(--txt-secondary)">
+              ${escapeHtml(computeDataFreshness(idx.series_overview.last_consolidated_date, idx.generated_at).label)}
+            </p>
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;font-size:0.88rem">
+              <li style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--border-color);padding-bottom:4px">
+                <span style="color:var(--txt-secondary)">Último cierre consolidado:</span>
+                <strong class="mono">${idx.series_overview.last_consolidated_date}</strong>
+              </li>
+              <li style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--border-color);padding-bottom:4px">
+                <span style="color:var(--txt-secondary)">Días totales observados:</span>
+                <strong class="mono">${fmtNum(idx.series_overview.total_observed_days, 0)} días</strong>
+              </li>
+              <li style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--border-color);padding-bottom:4px">
+                <span style="color:var(--txt-secondary)">Compilación atómica:</span>
+                <span class="mono" style="font-size:0.8rem">${idx.generated_at || 'No disponible'}</span>
+              </li>
+              <li style="display:flex;justify-content:space-between;padding-top:2px">
+                <span style="color:var(--txt-secondary)">Desfase respecto a hoy:</span>
+                <strong class="mono">${computeDataFreshness(idx.series_overview.last_consolidated_date, idx.generated_at).daysDelay} día(s)</strong>
+              </li>
+            </ul>
+          </div>
+
+          <div class="chronicle-card">
+            <h3>Arquitectura de reintentos anti-congestión (GitHub Actions)</h3>
+            <p style="margin-bottom:10px;font-size:0.9rem">
+              Para garantizar que los datos estén al día incluso ante congestión de servidores públicos o demoras en la API de Ecowitt,
+              el flujo de trabajo de GitHub Actions utiliza una estrategia <strong>multi-ventana en minutos desfasados</strong>:
+            </p>
+            <ol style="padding-left:18px;margin:0 0 12px 0;display:flex;flex-direction:column;gap:6px;font-size:0.88rem;color:var(--txt-secondary)">
+              <li><strong>06:37 UTC (07:37 / 08:37 local):</strong> Ventana matinal primaria desfasada tras la descarga de 05:00 UTC.</li>
+              <li><strong>11:17 UTC:</strong> Ventana de respaldo a media mañana (reintento automático ante incidencias en la primera ventana).</li>
+              <li><strong>18:23 UTC:</strong> Ventana vespertina para consolidación previa al anochecer.</li>
+              <li><strong>repository_dispatch:</strong> Disparo reactivo instantáneo cuando <code>meteoriotuerto</code> confirma nuevos CSVs.</li>
+            </ol>
+            <div style="margin-top:12px">
+              <a href="https://github.com/egofer/meteoriotuerto-web/actions" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="font-size:0.85rem">
+                ⚡ Ver telemetría en GitHub Actions ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+      </section>
     `;
 
     document.getElementById('btn-export-audit-xlsx')?.addEventListener('click', () => {
@@ -10198,9 +10336,20 @@
       if (totalDaysEl) {
         totalDaysEl.textContent = `${fmtNum(idx.series_overview.total_observed_days, 0)} días observados · Act. ${fmtDateES(idx.series_overview.last_consolidated_date, false)}`;
       }
+
+      // EVO-039: Sensor de frescura y telemetría en cabecera
+      const freshness = computeDataFreshness(idx.series_overview.last_consolidated_date, idx.generated_at);
+      const freshnessPill = document.getElementById('header-freshness-pill');
+      const freshnessText = document.getElementById('header-freshness-text');
+      if (freshnessPill && freshnessText) {
+        freshnessPill.className = `freshness-status-pill ${freshness.badgeClass}`;
+        freshnessPill.title = freshness.label;
+        freshnessText.textContent = freshness.badgeText;
+      }
+
       const stampEl = document.getElementById('footer-build-stamp');
       if (stampEl) {
-        stampEl.textContent = `Compilación de datos: ${idx.generated_at}`;
+        stampEl.textContent = `Compilación de datos: ${idx.generated_at} · ${freshness.badgeText}`;
       }
 
       if (route === 'portada') {
@@ -10579,6 +10728,8 @@
     // EVO-035: Exposición en window para interoperabilidad, pruebas y consola
     window.renderChartExportBtn = renderChartExportBtn;
     window.exportChartWithLetterhead = exportChartWithLetterhead;
+    // EVO-039: Exposición del sensor de frescura para pruebas y telemetría
+    window.computeDataFreshness = computeDataFreshness;
 
     handleRouteChange();
   });

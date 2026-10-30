@@ -152,7 +152,7 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Hoja de estilos principal -->
-  <link rel="stylesheet" href="./src/css/styles.css?v=1.2.10">
+  <link rel="stylesheet" href="./src/css/styles.css?v=1.2.11">
 
   <!-- Aplicar tema guardado o preferencia del sistema operativo antes del pintado para evitar parpadeo (MEJ-011) -->
   <script>
@@ -222,6 +222,10 @@
           <div class="edition-label">REGISTRO CONSOLIDADO</div>
           <div class="edition-value mono" id="header-period-range">2022 — 2026</div>
           <div class="edition-sub" id="header-total-days">Estación operativa desde nov. 2020</div>
+          <div class="freshness-status-pill freshness-fresh" id="header-freshness-pill" role="status" aria-live="polite" title="Sensor de frescura de datos (EVO-039)">
+            <span class="freshness-dot" aria-hidden="true">●</span>
+            <span class="freshness-text" id="header-freshness-text">Sincronizando sensor...</span>
+          </div>
         </div>
 
         <!-- Controles rápidos y menú de navegación para móvil (≤768px) -->
@@ -387,6 +391,7 @@
     <div class="container footer-bottom">
       <span>Datos compartidos bajo licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es" target="_blank" rel="noopener noreferrer">CC BY 4.0 (Atribución)</a> con fines divulgativos, educativos y científicos citando la fuente <strong>MeteoRiotuerto</strong>.</span>
       <span id="footer-build-stamp" class="mono"></span>
+      <a href="https://github.com/egofer/meteoriotuerto-web/actions" target="_blank" rel="noopener noreferrer" class="footer-actions-link" title="Consultar telemetría y estado de sincronización en GitHub Actions (EVO-039)">⚡ Telemetría Actions ↗</a>
     </div>
   </footer>
 
@@ -418,6 +423,6 @@
   <!-- Chart.js (v4.4.4 CDN con fallback y carga diferida controlada) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
   <!-- Lógica principal de la aplicación (SheetJS se carga dinámicamente bajo demanda vía ensureXLSXLoaded, MEJ-003) -->
-  <script src="./src/js/app.js?v=1.2.10" defer></script>
+  <script src="./src/js/app.js?v=1.2.11" defer></script>
 </body>
 </html>

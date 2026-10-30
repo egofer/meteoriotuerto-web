@@ -5,8 +5,13 @@ on:
     branches:
       - main
   schedule:
-    # Actualización automática diaria a las 06:30 UTC tras la sincronización de MeteoRiotuerto
-    - cron: '30 6 * * *'
+    # EVO-039: Cron multi-ventana desfasado para mitigar congestión en runners de GitHub Actions
+    # 1. Ventana matinal primaria: 06:37 UTC (minuto impar desfasado tras descarga de 05:00 UTC)
+    - cron: '37 6 * * *'
+    # 2. Ventana de respaldo a media mañana: 11:17 UTC (reintento automático si hubo retraso en API o cola)
+    - cron: '17 11 * * *'
+    # 3. Ventana vespertina: 18:23 UTC (consolidación vespertina)
+    - cron: '23 18 * * *'
   repository_dispatch:
     types:
       - meteoriotuerto_data_updated
@@ -56,6 +61,11 @@ jobs:
           python3 scripts/sync_data.py \
             --source-dir .cache/meteoriotuerto \
             --output-dir data
+
+      - name: Sensor de frescura y telemetría de consolidación (EVO-039)
+        run: |
+          # Evalúa la antigüedad de los datos consolidados y emite diagnóstico en GitHub Actions
+          python3 scripts/check_freshness.py --max-delay-days 2 --github-actions || true
 
       - name: Confirmar nuevos productos JSON en la rama main (si hubo cambios de datos)
         if: github.event_name != 'push'
