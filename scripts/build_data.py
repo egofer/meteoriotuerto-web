@@ -2034,6 +2034,11 @@ def compute_quinquennium_normals(
             if y in almanacs
             and m_idx < len(almanacs[y]["monthly"])
             and almanacs[y]["monthly"][m_idx]["temp_mean"] is not None
+            and (
+                not almanacs[y].get("is_provisional", False)
+                or almanacs[y]["monthly"][m_idx].get("valid_days", 0)
+                >= int(almanacs[y]["monthly"][m_idx].get("calendar_days", 30) * 0.8)
+            )
         ]
 
         if not valid_years:

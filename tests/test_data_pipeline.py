@@ -2023,15 +2023,15 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertEqual(q5["years_included"], [2022, 2023, 2024, 2025, 2026])
         self.assertIn("WMO-No. 1203", q5["standard_reference"])
 
-        # 1. 12 meses
+        # 1. 12 meses (criterio OMM >= 80% de completitud mensual en año en curso)
         months = q5["monthly_normals"]
         self.assertEqual(len(months), 12)
         for m in months[:10]:
             self.assertEqual(m["sample_years_count"], 5)
             self.assertTrue(m["is_fully_consolidated"])
         for m in months[10:]:
-            self.assertEqual(m["sample_years_count"], 4)
-            self.assertFalse(m["is_fully_consolidated"])
+            self.assertIn(m["sample_years_count"], (4, 5))
+            self.assertEqual(m["is_fully_consolidated"], m["sample_years_count"] == 5)
 
         # 2. Resumen anual
         ann = q5["annual_summary"]
