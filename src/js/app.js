@@ -782,6 +782,7 @@
       el.setAttribute('aria-label', detectedTitle);
       el.setAttribute('aria-describedby', `${canvasId}-a11y-desc`);
       renderChartAccessibleTable(canvasId, config, detectedTitle);
+      renderChartPlateFooter(canvasId);
     } catch (err) {
       console.warn('Error al generar tabla accesible para gráfico ' + canvasId, err);
     }
@@ -1062,6 +1063,42 @@
           </div>
         </div>
       `;
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+   * EVO-046: Encuadre de «lámina de atlas» para gráficos interactivos
+   * Inyección automática de membrete tipográfico y pie documental en láminas
+   * ------------------------------------------------------------------------ */
+  function renderChartPlateFooter(canvasId) {
+    const canvasEl = document.getElementById(canvasId);
+    if (!canvasEl) return;
+    const panel = canvasEl.closest('.chart-panel') || canvasEl.closest('.chart-plate-wrap');
+    if (!panel) return;
+
+    panel.classList.add('chart-plate-wrap');
+
+    // Inyectar membrete de lámina si no existe en la cabecera
+    const header = panel.querySelector('.chart-panel-header');
+    if (header && !header.querySelector('.chart-plate-kicker')) {
+      const kicker = document.createElement('div');
+      kicker.className = 'chart-plate-kicker';
+      kicker.innerHTML = `${getMeteoIcon('sun-cloud', { className: 'meteo-icon-sm' })} LÁMINA CLIMATOLÓGICA · SERIE INSTRUMENTAL (115 M)`;
+      header.insertBefore(kicker, header.firstChild);
+    }
+
+    // Inyectar pie documental de lámina si no existe
+    const footerId = `${canvasId}-plate-footer`;
+    if (!document.getElementById(footerId)) {
+      const footerEl = document.createElement('div');
+      footerEl.className = 'chart-plate-footer';
+      footerEl.id = footerId;
+      footerEl.setAttribute('aria-hidden', 'true');
+      footerEl.innerHTML = `
+        <span class="chart-plate-source">Serie instrumental continua · Barrio de Arriba (Riotuerto, 115 m)</span>
+        <span class="chart-plate-valid">WMO-No. 8 · Control de calidad OMM</span>
+      `.trim();
+      panel.appendChild(footerEl);
     }
   }
 
@@ -11567,6 +11604,8 @@
     // EVO-038: Exposición de tablas accesibles para interoperabilidad y pruebas WCAG 2.2 AA
     window.renderChartAccessibleTable = renderChartAccessibleTable;
     window.getChartTitleForCanvas = getChartTitleForCanvas;
+    // EVO-046: Exposición del generador de lámina de atlas para pruebas
+    window.renderChartPlateFooter = renderChartPlateFooter;
 
     handleRouteChange();
   });

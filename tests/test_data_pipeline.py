@@ -2354,6 +2354,35 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".meteo-icon-vignette", css_txt)
         self.assertIn(".meteo-vignette", css_txt)
 
+    def test_evo_046_atlas_chart_plates_and_booktabs_tables(self):
+        """EVO-046: Encuadre de «lámina de atlas» para gráficos interactivos y tablas Booktabs."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Componentes de lámina de atlas en app.js
+        self.assertIn("function renderChartPlateFooter", app_js)
+        self.assertIn("renderChartPlateFooter(canvasId)", app_js)
+        self.assertIn("chart-plate-wrap", app_js)
+        self.assertIn("chart-plate-kicker", app_js)
+        self.assertIn("chart-plate-footer", app_js)
+        self.assertIn("LÁMINA CLIMATOLÓGICA · SERIE INSTRUMENTAL", app_js)
+        self.assertIn("window.renderChartPlateFooter =", app_js)
+
+        # 2. Estilos de lámina de atlas en styles.css
+        self.assertIn(".chart-plate-wrap", css_txt)
+        self.assertIn(".chart-plate-kicker", css_txt)
+        self.assertIn(".chart-plate-footer", css_txt)
+        self.assertIn(".chart-plate-source", css_txt)
+        self.assertIn(".chart-plate-valid", css_txt)
+        self.assertIn("border-top: 3px solid var(--accent-forest)", css_txt)
+
+        # 3. Estilos de tablas Booktabs OMM en styles.css
+        self.assertIn(".data-table", css_txt)
+        self.assertIn("letter-spacing: 0.05em", css_txt)
+        self.assertIn("font-variant-numeric: tabular-nums", css_txt)
+        self.assertIn("border-top: 2px solid var(--border-strong)", css_txt)
+        self.assertIn("border-bottom: 2px solid var(--border-strong)", css_txt)
+
 
 if __name__ == "__main__":
 
