@@ -2316,6 +2316,45 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".almanac-card-top .badge", css_txt)
         self.assertIn("flex-wrap: wrap", css_txt)
 
+    def test_evo_045_traditional_svg_iconography_system(self):
+        """EVO-045: Sistema de iconografía y viñetas meteorológicas tradicionales en SVG."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Catálogo y generador en app.js
+        self.assertIn("const METEO_ICONS", app_js)
+        self.assertIn("function getMeteoIcon", app_js)
+        self.assertIn("'sun':", app_js)
+        self.assertIn("'sun-cloud':", app_js)
+        self.assertIn("'rain-light':", app_js)
+        self.assertIn("'rain-heavy':", app_js)
+        self.assertIn("'wind-foehn':", app_js)
+        self.assertIn("'thermometer':", app_js)
+        self.assertIn("'rain-gauge':", app_js)
+        self.assertIn("'wind-vane':", app_js)
+        self.assertIn("'barometer':", app_js)
+        self.assertIn("'flood-river':", app_js)
+        self.assertIn("'fleuron':", app_js)
+
+        # 2. Inyección en componentes de portada y gaceta
+        self.assertIn("getMeteoIcon('thermometer'", app_js)
+        self.assertIn("getMeteoIcon('rain-gauge'", app_js)
+        self.assertIn("getMeteoIcon('wind-vane'", app_js)
+        self.assertIn("getMeteoIcon('barometer'", app_js)
+        self.assertIn("getMeteoIcon('refresh')", app_js)
+        self.assertIn("getMeteoIcon('flood-river')", app_js)
+        self.assertIn("meteo-vignette", app_js)
+
+        # 3. Reglas de estilo en styles.css
+        self.assertIn(".meteo-icon", css_txt)
+        self.assertIn("stroke: currentColor", css_txt)
+        self.assertIn(".meteo-icon-badge", css_txt)
+        self.assertIn(".meteo-icon-kpi", css_txt)
+        self.assertIn(".meteo-icon-sm", css_txt)
+        self.assertIn(".meteo-icon-vignette", css_txt)
+        self.assertIn(".meteo-vignette", css_txt)
+
 
 if __name__ == "__main__":
+
     unittest.main(verbosity=2)

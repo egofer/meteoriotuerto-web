@@ -227,6 +227,43 @@
   }
 
   /* ------------------------------------------------------------------------
+   * EVO-045: Sistema de iconografía y viñetas meteorológicas tradicionales en SVG
+   * Glifos vectoriales monocolor con estética clásica de grabado/plumilla (currentColor)
+   * ------------------------------------------------------------------------ */
+  const METEO_ICONS = {
+    'sun': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
+    'sun-cloud': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v2M4.93 4.93l1.41 1.41M2 12h2M17.66 6.34l1.41-1.41"/><path d="M15.5 8a4 4 0 0 0-3.8 2.7"/><path d="M6 19a4 4 0 0 1-.7-7.94 5.5 5.5 0 0 1 10.4-1.56A4.5 4.5 0 0 1 19.5 14H6z"/></svg>',
+    'cloud': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19a4 4 0 0 1-.7-7.94 5.5 5.5 0 0 1 10.4-1.56A4.5 4.5 0 0 1 19.5 14H6z"/></svg>',
+    'rain-light': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16a4 4 0 0 1-.7-7.94 5.5 5.5 0 0 1 10.4-1.56A4.5 4.5 0 0 1 19.5 11H6z"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/></svg>',
+    'rain-heavy': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15a4 4 0 0 1-.7-7.94 5.5 5.5 0 0 1 10.4-1.56A4.5 4.5 0 0 1 19.5 10H6z"/><path d="M8 17v5M12 17v5M16 17v5M10 19v4M14 19v4"/></svg>',
+    'storm': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14a4 4 0 0 1-.7-7.94 5.5 5.5 0 0 1 10.4-1.56A4.5 4.5 0 0 1 19.5 9H6z"/><path d="M13 13l-3 4h4l-2 5 6-7h-4l2-2z"/></svg>',
+    'wind': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h12a3 3 0 0 0 0-6 3 3 0 0 0-3 3M2 13h17a3 3 0 0 1 0 6 3 3 0 0 1-3-3M5 18h9a2.5 2.5 0 0 0 0-5"/></svg>',
+    'wind-foehn': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V3M12 3l-4 5M12 3l4 5M4 14c2-2 4-2 6 0s4 2 6 0 4-2 6 0M4 18c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>',
+    'frost': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07l14.14-14.14M12 6l-2-2m4 0l-2 2M12 18l-2 2m4 0l-2-2M6 12l-2-2m0 4l2-2M18 12l2-2m0 4l-2-2"/></svg>',
+    'heat': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>',
+    'cold': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg>',
+    'thermometer': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 14.76V5a2 2 0 0 0-4 0v9.76a4 4 0 1 0 4 0zM12 9v5"/></svg>',
+    'droplet': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
+    'rain-gauge': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v3l-3 4v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V10L6 6V3zM10 13h4M10 16h3"/></svg>',
+    'wind-vane': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V9M12 4V2M7 14h10M12 10l5-4-5-4v3H7v2h5v3zM8 17l4 4 4-4"/></svg>',
+    'barometer': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v2M7 12h2M17 12h-2M12 12l3-3"/><circle cx="12" cy="12" r="1.5"/></svg>',
+    'flood-river': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7c3 0 3 2.5 6 2.5s3-2.5 6-2.5 3 2.5 6 2.5M2 12c3 0 3 2.5 6 2.5s3-2.5 6-2.5 3 2.5 6 2.5M2 17c3 0 3 2.5 6 2.5s3-2.5 6-2.5 3 2.5 6 2.5"/></svg>',
+    'almanac-book': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15zM8 6h8M8 10h5"/></svg>',
+    'calendar-otd': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>',
+    'trophy-record': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v4a6 6 0 0 1-12 0V4zM6 6H3a2 2 0 0 0 0 4h3M18 6h3a2 2 0 0 1 0 4h-3M12 14v4M8 22h8M10 18h4"/></svg>',
+    'refresh': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16M16 16h5v5"/></svg>',
+    'fleuron': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 3 3 5 6 6-3 1-5 3-6 6-1-3-3-5-6-6 3-1 5-3 6-6zM12 14c.5 2 1.5 3 3.5 3.5-2 .5-3 1.5-3.5 3.5-.5-2-1.5-3-3.5-3.5 2-.5 3-1.5 3.5-3.5z"/></svg>',
+    'leaf': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10zM2 21c0-3 1.85-5.36 5.08-6"/></svg>',
+    'sprout': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20h10M12 20v-8M12 12c0-4 3-6 7-6-1 4-3 6-7 6zM12 15c0-3-2-5-5-5 1 3 2 5 5 5z"/></svg>',
+  };
+
+  function getMeteoIcon(name, options = {}) {
+    const cls = options.className || 'meteo-icon';
+    const svgTpl = METEO_ICONS[name] || METEO_ICONS['cloud'];
+    return svgTpl.replace('{CLASS}', cls);
+  }
+
+  /* ------------------------------------------------------------------------
    * Catálogo y cálculo del calendario fenológico y agroclimático de Riotuerto
    * ------------------------------------------------------------------------ */
   const PHENOLOGY_EVENTS = [
@@ -657,20 +694,20 @@
     const dir = Number(live.wind_direction_deg);
     const uvi = Number(live.uv_index) || 0;
 
-    if (rainRate >= 10.0) return '🌧️ <strong>Lluvia torrencial o muy fuerte:</strong> precipitación de alta intensidad en Barrio de Arriba.';
-    if (rainRate > 0.5) return '🌧️ <strong>Lluvia activa:</strong> precipitación en curso en el fondo del valle del Covadal.';
-    if (rainTotal >= 15.0 && rainRate === 0) return '🌦️ <strong>Jornada lluviosa:</strong> acumulación pluviométrica significativa registrada a lo largo del día.';
+    if (rainRate >= 10.0) return `${getMeteoIcon('rain-heavy')} <strong>Lluvia torrencial o muy fuerte:</strong> precipitación de alta intensidad en Barrio de Arriba.`;
+    if (rainRate > 0.5) return `${getMeteoIcon('rain-light')} <strong>Lluvia activa:</strong> precipitación en curso en el fondo del valle del Covadal.`;
+    if (rainTotal >= 15.0 && rainRate === 0) return `${getMeteoIcon('rain-light')} <strong>Jornada lluviosa:</strong> acumulación pluviométrica significativa registrada a lo largo del día.`;
 
     if (dir >= 135 && dir <= 225 && (gust >= 30 || (t >= 18 && hum <= 65))) {
-      return '🍂 <strong>Dinámica de Viento Sur (Efecto Foehn):</strong> flujo descendente de la cordillera con aire seco, racheado y calentamiento adiabático en Riotuerto.';
+      return `${getMeteoIcon('wind-foehn')} <strong>Dinámica de Viento Sur (Efecto Foehn):</strong> flujo descendente de la cordillera con aire seco, racheado y calentamiento adiabático en Riotuerto.`;
     }
 
-    if (gust >= 50) return '💨 <strong>Régimen de viento fuerte o racheado:</strong> precaución en pastizales altos y arboledas del valle.';
-    if (t >= 30) return '🔥 <strong>Calor estival acusado:</strong> temperaturas elevadas en el valle del Covadal.';
-    if (t <= 2) return '❄️ <strong>Ambiente gélido:</strong> temperaturas muy bajas con probable escarcha o helada en cotas sombrías.';
-    if (uvi >= 6) return '☀️ <strong>Radiación solar intensa:</strong> cielos mayormente despejados con índice ultravioleta elevado.';
+    if (gust >= 50) return `${getMeteoIcon('wind')} <strong>Régimen de viento fuerte o racheado:</strong> precaución en pastizales altos y arboledas del valle.`;
+    if (t >= 30) return `${getMeteoIcon('heat')} <strong>Calor estival acusado:</strong> temperaturas elevadas en el valle del Covadal.`;
+    if (t <= 2) return `${getMeteoIcon('frost')} <strong>Ambiente gélido:</strong> temperaturas muy bajas con probable escarcha o helada en cotas sombrías.`;
+    if (uvi >= 6) return `${getMeteoIcon('sun')} <strong>Radiación solar intensa:</strong> cielos mayormente despejados con índice ultravioleta elevado.`;
 
-    return '⛅ <strong>Condiciones estables y templadas:</strong> régimen atmosférico característico del prelitoral cantábrico.';
+    return `${getMeteoIcon('sun-cloud')} <strong>Condiciones estables y templadas:</strong> régimen atmosférico característico del prelitoral cantábrico.`;
   }
 
   function updateTopLiveBadge(live) {
@@ -1328,13 +1365,13 @@
     const curMd = curMonth * 100 + curDay;
     let seasonInfo;
     if (curMd >= 321 && curMd < 621) {
-      seasonInfo = { name: 'Primavera', icon: '🌱', subtitle: 'Floración y primeras siegas' };
+      seasonInfo = { name: 'Primavera', icon: getMeteoIcon('sprout', { className: 'meteo-icon-badge' }), subtitle: 'Floración y primeras siegas' };
     } else if (curMd >= 621 && curMd < 923) {
-      seasonInfo = { name: 'Verano', icon: '☀️', subtitle: 'Estío cantábrico y tormentas orográficas' };
+      seasonInfo = { name: 'Verano', icon: getMeteoIcon('sun', { className: 'meteo-icon-badge' }), subtitle: 'Estío cantábrico y tormentas orográficas' };
     } else if (curMd >= 923 && curMd < 1221) {
-      seasonInfo = { name: 'Otoño', icon: '🍂', subtitle: 'Régimen de suradas y temporales atlánticos' };
+      seasonInfo = { name: 'Otoño', icon: getMeteoIcon('leaf', { className: 'meteo-icon-badge' }), subtitle: 'Régimen de suradas y temporales atlánticos' };
     } else {
-      seasonInfo = { name: 'Invierno', icon: '❄️', subtitle: 'Inversiones en vaguada y temporales del NO' };
+      seasonInfo = { name: 'Invierno', icon: getMeteoIcon('frost', { className: 'meteo-icon-badge' }), subtitle: 'Inversiones en vaguada y temporales del NO' };
     }
 
     container.innerHTML = `
@@ -1373,11 +1410,11 @@
             <!-- Fila de accesos directos principales -->
             <div class="hero-actions">
               <a href="#almanaque/2025" class="btn btn-primary hero-btn" data-scroll-to="sec-almanaques-title">
-                <span>📖 Explorar almanaques anuales</span>
+                <span>${getMeteoIcon('almanac-book')} Explorar almanaques anuales</span>
                 <span aria-hidden="true">↓</span>
               </a>
               <a href="#sec-featured-episodes" class="btn btn-secondary hero-btn" data-scroll-to="sec-featured-episodes">
-                <span>⚡ Grandes acontecimientos</span>
+                <span>${getMeteoIcon('storm')} Grandes acontecimientos</span>
                 <span aria-hidden="true">↓</span>
               </a>
               <a href="${idx.station.links.weathercloud || 'https://app.weathercloud.net/d6619283754'}" target="_blank" rel="noopener noreferrer" class="hero-btn-live" title="Consultar lecturas instantáneas en Weathercloud">
@@ -1459,6 +1496,8 @@
         </div>
       </div>
 
+      <div class="meteo-vignette" aria-hidden="true">${getMeteoIcon('fleuron', { className: 'meteo-icon-vignette' })}</div>
+
       <!-- EVO-044: Biblioteca de Anuarios (Colección de Almanaques Anuales) -->
       <section class="section-block almanac-library-section" aria-labelledby="sec-almanaques-title">
         <div class="section-header">
@@ -1473,6 +1512,8 @@
           ${almanacCardsHtml}
         </div>
       </section>
+
+      <div class="meteo-vignette" aria-hidden="true">${getMeteoIcon('fleuron', { className: 'meteo-icon-vignette' })}</div>
 
       <!-- EVO-043: Crónica periodística de Grandes Acontecimientos Meteorológicos -->
       <section class="section-block" id="sec-featured-episodes" aria-labelledby="sec-featured-episodes-title">
@@ -1491,7 +1532,7 @@
               <div class="episode-card-header">
                 <div class="episode-badge-wrap">
                   <span class="episode-lead-pill">GRAN CRÓNICA DEL ARCHIVO</span>
-                  <span class="episode-badge episode-badge-wet_spell">🌧️ Récord de precipitación</span>
+                  <span class="episode-badge episode-badge-wet_spell">${getMeteoIcon('rain-heavy', { className: 'meteo-icon-badge' })} Récord de precipitación</span>
                   <span class="episode-tag">Temporal invernal del noroeste</span>
                 </div>
                 <span class="episode-date mono">16–18 ene. 2023</span>
@@ -1505,9 +1546,9 @@
               <div class="episode-card-footer">
                 <a href="#almanaque/2023" class="episode-link-primary">Crónica completa en el Almanaque 2023 →</a>
                 <div class="episode-links-secondary">
-                  <a href="#almanaque/2023/mes-01" class="episode-link-subtle">📅 Ver enero 2023</a>
+                  <a href="#almanaque/2023/mes-01" class="episode-link-subtle">${getMeteoIcon('calendar-otd', { className: 'meteo-icon-sm' })} Ver enero 2023</a>
                   <span class="episode-link-divider" aria-hidden="true">·</span>
-                  <a href="#records/episodio/wet-2023-01-11" class="episode-link-subtle">⚡ Episodio extremo ↗</a>
+                  <a href="#records/episodio/wet-2023-01-11" class="episode-link-subtle">${getMeteoIcon('storm', { className: 'meteo-icon-sm' })} Episodio extremo ↗</a>
                   <span class="episode-link-divider" aria-hidden="true">·</span>
                   <a href="#explorador/2023-01-14/2023-01-20/rain" class="episode-link-subtle" title="Ver registros brutos de lluvia en el Explorador">🔍 Datos en Explorador</a>
                 </div>
@@ -1532,7 +1573,7 @@
                 </div>
               </div>
               <div class="episode-lead-note">
-                <span class="lead-note-icon" aria-hidden="true">🌊</span>
+                <span class="lead-note-icon" aria-hidden="true">${getMeteoIcon('flood-river')}</span>
                 <p>
                   <strong>Impacto en el valle:</strong> Acumulado equivalente a un tercio de la lluvia de todo un año, marcando el techo histórico de pluviosidad mensual observado en Barrio de Arriba.
                 </p>
@@ -1544,7 +1585,7 @@
           <article class="episode-featured-card episode-card-secondary episode-card-heat">
             <div class="episode-card-header">
               <div class="episode-badge-wrap">
-                <span class="episode-badge episode-badge-heatwave">🔥 Récord histórico térmico</span>
+                <span class="episode-badge episode-badge-heatwave">${getMeteoIcon('heat', { className: 'meteo-icon-badge' })} Récord histórico térmico</span>
                 <span class="episode-tag">Efecto Foehn / Viento sur</span>
               </div>
               <span class="episode-date mono">11 ago. 2024</span>
@@ -1577,9 +1618,9 @@
             <div class="episode-card-footer">
               <a href="#almanaque/2024" class="episode-link-primary">Crónica en Almanaque 2024 →</a>
               <div class="episode-links-secondary">
-                <a href="#almanaque/2024/mes-08" class="episode-link-subtle">📅 Ver agosto 2024</a>
+                <a href="#almanaque/2024/mes-08" class="episode-link-subtle">${getMeteoIcon('calendar-otd', { className: 'meteo-icon-sm' })} Ver agosto 2024</a>
                 <span class="episode-link-divider" aria-hidden="true">·</span>
-                <a href="#records/rankings/top_hottest_days" class="episode-link-subtle">🔥 Top 10 calor ↗</a>
+                <a href="#records/rankings/top_hottest_days" class="episode-link-subtle">${getMeteoIcon('heat', { className: 'meteo-icon-sm' })} Top 10 calor ↗</a>
                 <span class="episode-link-divider" aria-hidden="true">·</span>
                 <a href="#explorador/2024-08-09/2024-08-13/temp_max" class="episode-link-subtle" title="Ver serie de temperaturas en el Explorador">🔍 Datos</a>
               </div>
@@ -1590,7 +1631,7 @@
           <article class="episode-featured-card episode-card-secondary episode-card-wind">
             <div class="episode-card-header">
               <div class="episode-badge-wrap">
-                <span class="episode-badge episode-badge-foehn_spell">💨 Techo eólico histórico</span>
+                <span class="episode-badge episode-badge-foehn_spell">${getMeteoIcon('wind', { className: 'meteo-icon-badge' })} Techo eólico histórico</span>
                 <span class="episode-tag">Vendaval atlántico de sur</span>
               </div>
               <span class="episode-date mono">8 feb. 2024</span>
@@ -1623,9 +1664,9 @@
             <div class="episode-card-footer">
               <a href="#almanaque/2024" class="episode-link-primary">Crónica en Almanaque 2024 →</a>
               <div class="episode-links-secondary">
-                <a href="#almanaque/2024/mes-02" class="episode-link-subtle">📅 Ver febrero 2024</a>
+                <a href="#almanaque/2024/mes-02" class="episode-link-subtle">${getMeteoIcon('calendar-otd', { className: 'meteo-icon-sm' })} Ver febrero 2024</a>
                 <span class="episode-link-divider" aria-hidden="true">·</span>
-                <a href="#records/rankings/top_windiest_days" class="episode-link-subtle">💨 Top 10 eólico ↗</a>
+                <a href="#records/rankings/top_windiest_days" class="episode-link-subtle">${getMeteoIcon('wind', { className: 'meteo-icon-sm' })} Top 10 eólico ↗</a>
                 <span class="episode-link-divider" aria-hidden="true">·</span>
                 <a href="#explorador/2024-02-06/2024-02-10/wind_gust_max" class="episode-link-subtle" title="Ver rachas de viento en el Explorador">🔍 Datos</a>
               </div>
@@ -1636,7 +1677,7 @@
           <article class="episode-featured-card episode-card-secondary episode-card-storm">
             <div class="episode-card-header">
               <div class="episode-badge-wrap">
-                <span class="episode-badge episode-badge-coldwave">⚡ Diluvio torrencial estival</span>
+                <span class="episode-badge episode-badge-coldwave">${getMeteoIcon('storm', { className: 'meteo-icon-badge' })} Diluvio torrencial estival</span>
                 <span class="episode-tag">Convección vespertina</span>
               </div>
               <span class="episode-date mono">10 jun. 2025</span>
@@ -1669,9 +1710,9 @@
             <div class="episode-card-footer">
               <a href="#almanaque/2025" class="episode-link-primary">Crónica en Almanaque 2025 →</a>
               <div class="episode-links-secondary">
-                <a href="#almanaque/2025/mes-06" class="episode-link-subtle">📅 Ver junio 2025</a>
+                <a href="#almanaque/2025/mes-06" class="episode-link-subtle">${getMeteoIcon('calendar-otd', { className: 'meteo-icon-sm' })} Ver junio 2025</a>
                 <span class="episode-link-divider" aria-hidden="true">·</span>
-                <a href="#records/absolutos" class="episode-link-subtle">⚡ Récords ↗</a>
+                <a href="#records/absolutos" class="episode-link-subtle">${getMeteoIcon('storm', { className: 'meteo-icon-sm' })} Récords ↗</a>
                 <span class="episode-link-divider" aria-hidden="true">·</span>
                 <a href="#explorador/2025-06-08/2025-06-12/rain" class="episode-link-subtle" title="Ver datos de precipitación en el Explorador">🔍 Datos</a>
               </div>
@@ -1857,7 +1898,7 @@
         </div>
         <div class="live-weather-actions">
           <button type="button" id="btn-live-refresh" class="btn-live-action" title="Actualizar lectura instantánea desde Weather Underground">
-            <span class="spin-icon" aria-hidden="true">🔄</span>
+            <span class="spin-icon" aria-hidden="true">${getMeteoIcon('refresh')}</span>
             <span>Actualizar</span>
           </button>
           <a href="${escapeHtml(live.dashboard_url || 'https://www.wunderground.com/dashboard/pws/IRIOTU1')}" target="_blank" rel="noopener noreferrer" class="btn-live-action" title="Abrir estación IRIOTU1 en Weather Underground">
@@ -1876,7 +1917,7 @@
       <div class="live-kpi-grid" aria-label="Condiciones meteorológicas actuales">
         <div class="live-kpi-card">
           <div class="live-kpi-card-header">
-            <span>🌡️ Temperatura</span>
+            <span>${getMeteoIcon('thermometer', { className: 'meteo-icon-kpi' })} Temperatura</span>
             <span class="live-kpi-unit">Extremos del día</span>
           </div>
           <div class="live-kpi-main-val">
@@ -1890,7 +1931,7 @@
 
         <div class="live-kpi-card">
           <div class="live-kpi-card-header">
-            <span>💧 Humedad relativa</span>
+            <span>${getMeteoIcon('droplet', { className: 'meteo-icon-kpi' })} Humedad relativa</span>
             <span class="live-kpi-unit">Higrometría</span>
           </div>
           <div class="live-kpi-main-val">
@@ -1904,7 +1945,7 @@
 
         <div class="live-kpi-card">
           <div class="live-kpi-card-header">
-            <span>🌧️ Precipitación hoy</span>
+            <span>${getMeteoIcon('rain-gauge', { className: 'meteo-icon-kpi' })} Precipitación hoy</span>
             <span class="live-kpi-unit">Pluviometría</span>
           </div>
           <div class="live-kpi-main-val">
@@ -1918,7 +1959,7 @@
 
         <div class="live-kpi-card">
           <div class="live-kpi-card-header">
-            <span>💨 Viento y racha</span>
+            <span>${getMeteoIcon('wind-vane', { className: 'meteo-icon-kpi' })} Viento y racha</span>
             <span class="live-kpi-unit">Anemometría</span>
           </div>
           <div class="live-kpi-main-val">
@@ -1933,7 +1974,7 @@
 
         <div class="live-kpi-card">
           <div class="live-kpi-card-header">
-            <span>🧭 Barometría y Sol</span>
+            <span>${getMeteoIcon('barometer', { className: 'meteo-icon-kpi' })} Barometría y Sol</span>
             <span class="live-kpi-unit">Atmósfera</span>
           </div>
           <div class="live-kpi-main-val">
@@ -1998,7 +2039,7 @@
           return {
             boxClass: 'verdict-record',
             badgeClass: 'badge-record',
-            badgeIcon: '🏆',
+            badgeIcon: getMeteoIcon('trophy-record'),
             badgeText: 'Récord histórico de la serie',
             levelLabel: `Récord absoluto (${r.year})`,
             title: recTitle,
@@ -2017,7 +2058,7 @@
           return {
             boxClass: 'verdict-extreme',
             badgeClass: 'badge-extreme',
-            badgeIcon: ep.type_icon || '⚠️',
+            badgeIcon: ep.type_icon || getMeteoIcon('storm'),
             badgeText: `${ep.type_label || 'Episodio extremo'} (${ep.year})`,
             levelLabel: 'Pico de episodio catalogado',
             title: `Pico álgido de ${ep.type_label?.toLowerCase() || 'episodio'}: ${ep.summary || ''}`,
@@ -2045,7 +2086,7 @@
       return {
         boxClass: 'verdict-anomaly',
         badgeClass: 'badge-anomaly',
-        badgeIcon: '🌧️',
+        badgeIcon: getMeteoIcon('rain-heavy'),
         badgeText: 'Jornada de temporal de lluvia',
         levelLabel: `Anomalía pluviométrica (${maxRain.year})`,
         title: `Temporal lluvioso en ${maxRain.year}: se acumularon ${fmtNum(maxRain.rain, 1)} mm en 24 horas`,
@@ -2058,7 +2099,7 @@
       return {
         boxClass: 'verdict-anomaly',
         badgeClass: 'badge-anomaly',
-        badgeIcon: '🔥',
+        badgeIcon: getMeteoIcon('heat'),
         badgeText: 'Surada / Temperatura anómala',
         levelLabel: `Anomalía térmica cálida (${maxTemp.year})`,
         title: `Calor anómalo en ${maxTemp.year}: el termómetro trepó hasta los ${fmtNum(maxTemp.tmax, 1)} °C`,
@@ -2071,7 +2112,7 @@
       return {
         boxClass: 'verdict-anomaly',
         badgeClass: 'badge-anomaly',
-        badgeIcon: '💨',
+        badgeIcon: getMeteoIcon('wind'),
         badgeText: 'Vendaval destacado en el valle',
         levelLabel: `Racha eólica notable (${maxGust.year})`,
         title: `Fuerte vendaval en ${maxGust.year}: racha máxima registrada de ${fmtNum(maxGust.gust, 1)} km/h`,
@@ -2084,7 +2125,7 @@
       return {
         boxClass: 'verdict-anomaly',
         badgeClass: 'badge-anomaly',
-        badgeIcon: '❄️',
+        badgeIcon: getMeteoIcon('frost'),
         badgeText: 'Madrugada gélida / Helada',
         levelLabel: `Helada en el valle (${minTemp.year})`,
         title: `Madrugada gélida en ${minTemp.year}: el termómetro bajó hasta los ${fmtNum(minTemp.tmin, 1)} °C`,
@@ -2097,7 +2138,7 @@
       return {
         boxClass: 'verdict-anomaly',
         badgeClass: 'badge-anomaly',
-        badgeIcon: '🌡️',
+        badgeIcon: getMeteoIcon('thermometer'),
         badgeText: 'Marcado contraste interanual',
         levelLabel: 'Variabilidad climática reciente',
         title: `Gran disparidad entre años: de ${fmtNum(minTemp.tmin, 1)} °C en ${minTemp.year} a ${fmtNum(maxTemp.tmax, 1)} °C en ${maxTemp.year}`,
@@ -2115,7 +2156,7 @@
       return {
         boxClass: 'verdict-mild',
         badgeClass: 'badge-mild',
-        badgeIcon: '🌦️',
+        badgeIcon: getMeteoIcon('rain-light'),
         badgeText: 'Fecha frecuentemente lluviosa',
         levelLabel: 'Comportamiento habitual',
         title: `Jornada típicamente húmeda: ha llovido en ${rainyYearsCount} de los ${validCount} años observados`,
@@ -2127,7 +2168,7 @@
     return {
       boxClass: 'verdict-mild',
       badgeClass: 'badge-mild',
-      badgeIcon: '🌤️',
+      badgeIcon: getMeteoIcon('sun-cloud'),
       badgeText: 'Jornada apacible en el histórico',
       levelLabel: 'Comportamiento habitual',
       title: `Valores suaves y estables: un ${dayLabel} habitualmente tranquilo en el valle`,
@@ -2212,34 +2253,45 @@
       const hum = ds.humidity_mean[pos];
       const press = ds.pressure_rel[pos];
 
-      // Clasificación sinóptica rápida del día
-      let badgeText = '⛅ Seco y templado';
+      // Clasificación sinóptica rápida del día (EVO-045: Glifos vectoriales SVG)
+      let badgeIconName = 'sun-cloud';
+      let badgeLabel = 'Seco y templado';
       let badgeClass = 'otd-badge-mild';
       if (rain >= 20) {
-        badgeText = '🌧️ Lluvia abundante';
+        badgeIconName = 'rain-heavy';
+        badgeLabel = 'Lluvia abundante';
         badgeClass = 'otd-badge-heavy-rain';
       } else if (rain >= 2) {
-        badgeText = '🌦️ Día lluvioso';
+        badgeIconName = 'rain-light';
+        badgeLabel = 'Día lluvioso';
         badgeClass = 'otd-badge-rain';
       } else if (rain >= 0.2) {
-        badgeText = '💧 Lluvia débil';
+        badgeIconName = 'droplet';
+        badgeLabel = 'Lluvia débil';
         badgeClass = 'otd-badge-light-rain';
       } else if (tmax >= 28) {
-        badgeText = '🔥 Muy cálido / Surada';
+        badgeIconName = 'wind-foehn';
+        badgeLabel = 'Muy cálido / Surada';
         badgeClass = 'otd-badge-hot';
       } else if (tmin <= 0) {
-        badgeText = '❄️ Helada nocturna';
+        badgeIconName = 'frost';
+        badgeLabel = 'Helada nocturna';
         badgeClass = 'otd-badge-frost';
       } else if (gust >= 50) {
-        badgeText = '💨 Racha fuerte';
+        badgeIconName = 'wind';
+        badgeLabel = 'Racha fuerte';
         badgeClass = 'otd-badge-wind';
       } else if (tmax >= 23) {
-        badgeText = '☀️ Cálido y seco';
+        badgeIconName = 'sun';
+        badgeLabel = 'Cálido y seco';
         badgeClass = 'otd-badge-warm';
       } else if (tmean <= 8) {
-        badgeText = '🧣 Frío y seco';
+        badgeIconName = 'cold';
+        badgeLabel = 'Frío y seco';
         badgeClass = 'otd-badge-cold';
       }
+
+      const badgeText = `${getMeteoIcon(badgeIconName, { className: 'meteo-icon-badge' })} ${badgeLabel}`;
 
       return {
         year: y,

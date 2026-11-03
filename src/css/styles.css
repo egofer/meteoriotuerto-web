@@ -1677,6 +1677,73 @@ html[data-theme="dark"] .plate-tag {
   color: var(--txt-primary);
 }
 
+/* ==========================================================================
+   EVO-045: Sistema de iconografía y viñetas meteorológicas tradicionales en SVG
+   ========================================================================== */
+.meteo-icon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.18em;
+  stroke-width: 1.8;
+  stroke: currentColor;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.meteo-icon-badge {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.14em;
+  margin-right: 4px;
+}
+
+.meteo-icon-kpi {
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.16em;
+  margin-right: 5px;
+}
+
+.meteo-icon-sm {
+  width: 0.95em;
+  height: 0.95em;
+  vertical-align: -0.12em;
+  margin-right: 3px;
+}
+
+.meteo-icon-lg {
+  width: 1.4em;
+  height: 1.4em;
+  vertical-align: -0.22em;
+}
+
+.meteo-icon-vignette {
+  width: 1.5em;
+  height: 1.5em;
+  color: var(--accent-forest);
+  opacity: 0.65;
+}
+
+.meteo-vignette {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 36px auto;
+  max-width: 320px;
+}
+
+.meteo-vignette::before,
+.meteo-vignette::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+}
+
 /* Selector de año en la vista de almanaque */
 .year-switcher-bar {
   display: flex;
