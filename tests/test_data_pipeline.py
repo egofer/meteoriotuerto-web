@@ -2298,6 +2298,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("TOMO V", app_js)
         self.assertIn("tome-year-", app_js)
         self.assertIn("Abrir volumen de", app_js)
+        self.assertIn("Tomo consolidado", app_js)
+        self.assertIn("Avance en curso", app_js)
 
         # 2. Comprobaciones en styles.css
         self.assertIn(".almanac-library-section", css_txt)
@@ -2311,6 +2313,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".tome-year-2026", css_txt)
         self.assertIn(".almanac-tome-vol", css_txt)
         self.assertIn(".almanac-tome-card:hover .almanac-tome-spine", css_txt)
+        self.assertIn(".almanac-card-top .badge", css_txt)
+        self.assertIn("flex-wrap: wrap", css_txt)
 
 
 if __name__ == "__main__":

@@ -1531,7 +1531,7 @@ html[data-theme="dark"] .plate-tag {
 
 .almanac-tome-content {
   flex: 1;
-  padding: 20px 22px;
+  padding: 18px 18px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1542,7 +1542,8 @@ html[data-theme="dark"] .plate-tag {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   margin-bottom: 12px;
 }
 
@@ -1563,10 +1564,18 @@ html[data-theme="dark"] .plate-tag {
 
 .almanac-year-num {
   font-family: var(--font-serif);
-  font-size: 2.1rem;
+  font-size: 1.95rem;
   font-weight: 800;
   color: var(--txt-primary);
   line-height: 1;
+}
+
+.almanac-card-top .badge {
+  align-self: flex-start;
+  margin-top: 2px;
+  font-size: 0.68rem;
+  padding: 2.5px 8px;
+  max-width: 100%;
 }
 
 .badge {

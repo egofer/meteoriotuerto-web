@@ -1270,8 +1270,8 @@
       const highlight = YEAR_EDITORIAL_HIGHLIGHTS[y.year] || `Mes más húmedo: ${escapeHtml(y.wettest_month)} (${fmtNum(y.wettest_month_mm, 1)} mm)`;
       const tomeLabel = YEAR_TOMES[y.year] || `TOMO ${y.year}`;
       const badgeHtml = y.is_provisional
-        ? `<span class="badge badge-provisional">Avance en curso · ${fmtNum(y.valid_days, 0)} días</span>`
-        : `<span class="badge badge-complete">Tomo consolidado · ${fmtNum(y.coverage_pct, 1)}%</span>`;
+        ? `<span class="badge badge-provisional">Avance en curso</span>`
+        : `<span class="badge badge-complete">Tomo consolidado</span>`;
 
       return `
         <a href="#almanaque/${y.year}" class="almanac-card almanac-tome-card tome-year-${y.year}" aria-label="Abrir almanaque meteorológico de ${y.year}">
