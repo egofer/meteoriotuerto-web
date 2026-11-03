@@ -1378,12 +1378,12 @@
             <div class="plate-image-wrap">
               <picture>
                 <source srcset="./assets/img/valle-covadal-barrio-de-arriba.webp" type="image/webp">
-                <img src="./assets/img/valle-covadal-barrio-de-arriba.jpg" alt="Panorámica documental del Valle del río Covadal y Barrio de Arriba con las estribaciones hacia el Puerto de Alisas (Riotuerto, Cantabria)" class="frontispiece-img" width="1376" height="768" loading="eager" fetchpriority="high">
+                <img src="./assets/img/valle-covadal-barrio-de-arriba.jpg" alt="Panorámica de Barrio de Arriba y el Valle del río Covadal en Riotuerto (Cantabria, 115 msnm)" class="frontispiece-img" width="1600" height="900" loading="eager" fetchpriority="high">
               </picture>
               <span class="plate-tag">BARRIO DE ARRIBA · 115 M</span>
             </div>
             <figcaption class="plate-caption">
-              <strong>El valle del río Covadal desde Barrio de Arriba:</strong> praderías atlánticas y estribaciones calizas que ascienden hacia la divisoria del Puerto de Alisas (674 m), corredor natural de retenciones orográficas y suradas.
+              <strong>El valle del río Covadal desde Barrio de Arriba:</strong> panorámica del núcleo rural y las praderías cántabras (115 m s. n. m.) con las estribaciones hacia la divisoria montañosa. Fotografía de Jesús Gómez Fernández (<a href="https://commons.wikimedia.org/wiki/File:Barrio_de_Arriba-Riotuerto_01.jpg" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline" title="Ver archivo en Wikimedia Commons">Wikimedia Commons, CC BY-SA 4.0</a>).
             </figcaption>
           </figure>
         </div>

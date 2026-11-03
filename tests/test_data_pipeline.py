@@ -2171,6 +2171,8 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("valle-covadal-barrio-de-arriba.webp", app_js)
         self.assertIn("valle-covadal-barrio-de-arriba.jpg", app_js)
         self.assertIn("El valle del río Covadal desde Barrio de Arriba", app_js)
+        self.assertIn("Barrio_de_Arriba-Riotuerto_01.jpg", app_js)
+        self.assertIn("Wikimedia Commons", app_js)
         self.assertIn("hero-geo-pill", app_js)
         self.assertIn("hero-actions", app_js)
         self.assertIn("hero-btn", app_js)
