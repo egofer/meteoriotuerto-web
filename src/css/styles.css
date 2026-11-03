@@ -5870,9 +5870,9 @@ html[data-theme="dark"] .offline-badge.online-restored {
 
 .featured-episodes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr));
-  gap: 22px;
-  margin-top: 18px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 20px;
 }
 
 .episode-featured-card {
@@ -5908,6 +5908,108 @@ html[data-theme="dark"] .offline-badge.online-restored {
 
 .episode-card-storm {
   border-top: 4px solid #7c3aed;
+}
+
+/* EVO-043: Reportaje de apertura a gran formato */
+.episode-featured-card.episode-card-lead {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 28px;
+  padding: 26px 30px;
+  background: var(--bg-surface);
+  border-top: 4px solid var(--accent-rain, #2563eb);
+  align-items: stretch;
+}
+
+.episode-lead-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.episode-lead-pill {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-rain, #2563eb);
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+}
+
+.episode-title-lead {
+  font-family: var(--font-serif);
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1.28;
+  color: var(--txt-primary);
+  margin-bottom: 16px;
+}
+
+.episode-lead-narrative {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--txt-primary);
+  margin-bottom: 20px;
+}
+
+.episode-lead-sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.episode-kpis-strip.episode-kpis-lead {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 0;
+  background: var(--bg-elevated);
+}
+
+.episode-lead-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--txt-secondary);
+}
+
+.episode-lead-note strong {
+  color: var(--txt-primary);
+}
+
+.lead-note-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Crónicas complementarias secundarias */
+.episode-card-secondary {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.episode-card-secondary .episode-title {
+  font-size: 1.15rem;
+  min-height: 2.8em;
+}
+
+.episode-card-secondary .episode-narrative {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--txt-secondary);
 }
 
 .episode-card-header {
@@ -5965,13 +6067,6 @@ html[data-theme="dark"] .offline-badge.online-restored {
   margin-bottom: 14px;
 }
 
-@media (max-width: 520px) {
-  .episode-kpis-strip {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-}
-
 .episode-kpi {
   display: flex;
   flex-direction: column;
@@ -6005,13 +6100,92 @@ html[data-theme="dark"] .offline-badge.online-restored {
   margin-bottom: 16px;
 }
 
+/* Enlaces editoriales sobrios */
 .episode-card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+}
+
+.episode-link-primary {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent-forest);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.episode-link-primary:hover {
+  color: var(--txt-primary);
+  text-decoration: underline;
+  transform: translateX(2px);
+}
+
+.episode-links-secondary {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border-color);
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--txt-muted);
+}
+
+.episode-link-subtle {
+  color: var(--txt-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.episode-link-subtle:hover {
+  color: var(--txt-primary);
+  text-decoration: underline;
+}
+
+.episode-link-divider {
+  color: var(--border-strong);
+  font-weight: 700;
+}
+
+@media (max-width: 1080px) {
+  .featured-episodes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .episode-featured-card.episode-card-lead {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .episode-kpis-strip.episode-kpis-lead {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .featured-episodes-grid {
+    grid-template-columns: 1fr;
+  }
+  .episode-featured-card.episode-card-lead {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+    padding: 20px 18px;
+  }
+  .episode-kpis-strip.episode-kpis-lead {
+    grid-template-columns: 1fr;
+  }
+  .episode-kpis-strip {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .episode-title-lead {
+    font-size: 1.35rem;
+  }
 }
 
 /* EVO-031: Enlaces bidireccionales cruzados y distintivos de acontecimientos */

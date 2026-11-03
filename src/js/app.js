@@ -1459,7 +1459,7 @@
         </div>
       </section>
 
-      <!-- EVO-027: Escaparate editorial de Grandes Acontecimientos Meteorológicos en Portada -->
+      <!-- EVO-043: Crónica periodística de Grandes Acontecimientos Meteorológicos -->
       <section class="section-block" id="sec-featured-episodes" aria-labelledby="sec-featured-episodes-title">
         <div class="section-header">
           <div>
@@ -1470,20 +1470,36 @@
           <a href="#records" class="btn">Explorar catálogo de 91 episodios extremos →</a>
         </div>
         <div class="featured-episodes-grid">
-          <!-- Episodio 1: Borrasca Fien (2023) -->
-          <article class="episode-featured-card episode-card-rain">
-            <div class="episode-card-header">
-              <div class="episode-badge-wrap">
-                <span class="episode-badge episode-badge-wet_spell">🌧️ Récord de precipitación</span>
-                <span class="episode-tag">Temporal invernal del noroeste</span>
+          <!-- Episodio 1 (Reportaje de apertura): Borrasca Fien (2023) -->
+          <article class="episode-featured-card episode-card-lead episode-card-rain">
+            <div class="episode-lead-main">
+              <div class="episode-card-header">
+                <div class="episode-badge-wrap">
+                  <span class="episode-lead-pill">GRAN CRÓNICA DEL ARCHIVO</span>
+                  <span class="episode-badge episode-badge-wet_spell">🌧️ Récord de precipitación</span>
+                  <span class="episode-tag">Temporal invernal del noroeste</span>
+                </div>
+                <span class="episode-date mono">16–18 ene. 2023</span>
               </div>
-              <span class="episode-date mono">16–18 ene. 2023</span>
-            </div>
-            <div class="episode-card-body">
-              <h3 class="episode-title">
+              <h3 class="episode-title episode-title-lead">
                 Borrasca Fien: 125,9 mm en 24 h y el mes más lluvioso del registro histórico
               </h3>
-              <div class="episode-kpis-strip">
+              <p class="episode-narrative episode-lead-narrative">
+                <span class="drop-cap">D</span>urante la tercera semana de enero de 2023, una sucesión de borrascas atlánticas canalizó un flujo marítimo polar directo contra la cornisa cantábrica. La orografía del valle del Covadal actuó como barrera de retención, descargando 125,9 mm en un solo día en Barrio de Arriba y provocando la crecida de la cuenca del río Miera.
+              </p>
+              <div class="episode-card-footer">
+                <a href="#almanaque/2023" class="episode-link-primary">Crónica completa en el Almanaque 2023 →</a>
+                <div class="episode-links-secondary">
+                  <a href="#almanaque/2023/mes-01" class="episode-link-subtle">📅 Ver enero 2023</a>
+                  <span class="episode-link-divider" aria-hidden="true">·</span>
+                  <a href="#records/episodio/wet-2023-01-11" class="episode-link-subtle">⚡ Episodio extremo ↗</a>
+                  <span class="episode-link-divider" aria-hidden="true">·</span>
+                  <a href="#explorador/2023-01-14/2023-01-20/rain" class="episode-link-subtle" title="Ver registros brutos de lluvia en el Explorador">🔍 Datos en Explorador</a>
+                </div>
+              </div>
+            </div>
+            <div class="episode-lead-sidebar">
+              <div class="episode-kpis-strip episode-kpis-lead">
                 <div class="episode-kpi">
                   <span class="kpi-label">Lluvia en 24 h</span>
                   <strong class="kpi-val val-rain">125,9 mm</strong>
@@ -1500,20 +1516,17 @@
                   <span class="kpi-sub">Mes récord de la serie</span>
                 </div>
               </div>
-              <p class="episode-narrative">
-                Durante la tercera semana de enero de 2023, una sucesión de borrascas atlánticas canalizó un flujo marítimo polar directo contra la cornisa cantábrica. La orografía del valle del Covadal actuó como barrera de retención, descargando 125,9 mm en un solo día en Barrio de Arriba y provocando la crecida de la cuenca del río Miera.
-              </p>
-            </div>
-            <div class="episode-card-footer">
-              <a href="#almanaque/2023" class="btn btn-sm btn-primary">Almanaque 2023 →</a>
-              <a href="#almanaque/2023/mes-01" class="btn btn-sm btn-secondary">📅 Ver enero 2023</a>
-              <a href="#records/episodio/wet-2023-01-11" class="btn btn-sm btn-subtle">⚡ Episodio extremo ↗</a>
-              <a href="#explorador/2023-01-14/2023-01-20/rain" class="btn btn-sm btn-subtle" title="Ver registros brutos de lluvia en el Explorador">🔍 Datos en Explorador</a>
+              <div class="episode-lead-note">
+                <span class="lead-note-icon" aria-hidden="true">🌊</span>
+                <p>
+                  <strong>Impacto en el valle:</strong> Acumulado equivalente a un tercio de la lluvia de todo un año, marcando el techo histórico de pluviosidad mensual observado en Barrio de Arriba.
+                </p>
+              </div>
             </div>
           </article>
 
           <!-- Episodio 2: Ola de calor sahariana y Foehn (2024) -->
-          <article class="episode-featured-card episode-card-heat">
+          <article class="episode-featured-card episode-card-secondary episode-card-heat">
             <div class="episode-card-header">
               <div class="episode-badge-wrap">
                 <span class="episode-badge episode-badge-heatwave">🔥 Récord histórico térmico</span>
@@ -1529,33 +1542,37 @@
                 <div class="episode-kpi">
                   <span class="kpi-label">Temperatura máx.</span>
                   <strong class="kpi-val val-heat">42,1 °C</strong>
-                  <span class="kpi-sub">Registrado a las 14:30 h</span>
+                  <span class="kpi-sub">14:30 h</span>
                 </div>
                 <div class="episode-kpi">
-                  <span class="kpi-label">Humedad relativa</span>
+                  <span class="kpi-label">Humedad mín.</span>
                   <strong class="kpi-val">18 %</strong>
-                  <span class="kpi-sub">Desplome por compresión</span>
+                  <span class="kpi-sub">Compresión</span>
                 </div>
                 <div class="episode-kpi">
-                  <span class="kpi-label">Racha de viento sur</span>
+                  <span class="kpi-label">Racha de sur</span>
                   <strong class="kpi-val">68,4 km/h</strong>
-                  <span class="kpi-sub">Descolgado desde Alisas</span>
+                  <span class="kpi-sub">Desde Alisas</span>
                 </div>
               </div>
               <p class="episode-narrative">
-                Una advección de aire cálido de origen norteafricano combinada con un marcado flujo de viento sur descolgándose ladera abajo desde la divisoria cordillerana provocó un recalentamiento adiabático extremo en el fondo del valle. La temperatura pulverizó el récord de la estación bajo aviso meteorológico rojo en toda Cantabria.
+                Una advección sahariana combinada con un violento flujo catabático de sur descolgándose de la cordillera provocó una compresión adiabática extrema en el fondo del valle, pulverizando el récord térmico comarcal bajo aviso rojo.
               </p>
             </div>
             <div class="episode-card-footer">
-              <a href="#almanaque/2024" class="btn btn-sm btn-primary">Almanaque 2024 →</a>
-              <a href="#almanaque/2024/mes-08" class="btn btn-sm btn-secondary">📅 Ver agosto 2024</a>
-              <a href="#records/rankings/top_hottest_days" class="btn btn-sm btn-subtle">🔥 Top 10 de calor ↗</a>
-              <a href="#explorador/2024-08-09/2024-08-13/temp_max" class="btn btn-sm btn-subtle" title="Ver serie de temperaturas en el Explorador">🔍 Datos en Explorador</a>
+              <a href="#almanaque/2024" class="episode-link-primary">Crónica en Almanaque 2024 →</a>
+              <div class="episode-links-secondary">
+                <a href="#almanaque/2024/mes-08" class="episode-link-subtle">📅 Ver agosto 2024</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#records/rankings/top_hottest_days" class="episode-link-subtle">🔥 Top 10 calor ↗</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#explorador/2024-08-09/2024-08-13/temp_max" class="episode-link-subtle" title="Ver serie de temperaturas en el Explorador">🔍 Datos</a>
+              </div>
             </div>
           </article>
 
           <!-- Episodio 3: Vendaval de la borrasca Karlotta (2024) -->
-          <article class="episode-featured-card episode-card-wind">
+          <article class="episode-featured-card episode-card-secondary episode-card-wind">
             <div class="episode-card-header">
               <div class="episode-badge-wrap">
                 <span class="episode-badge episode-badge-foehn_spell">💨 Techo eólico histórico</span>
@@ -1571,37 +1588,41 @@
                 <div class="episode-kpi">
                   <span class="kpi-label">Racha máx. eólica</span>
                   <strong class="kpi-val val-wind">97,2 km/h</strong>
-                  <span class="kpi-sub">16:00 h (récord absoluto)</span>
+                  <span class="kpi-sub">16:00 h (récord)</span>
                 </div>
                 <div class="episode-kpi">
-                  <span class="kpi-label">Viento medio sost.</span>
+                  <span class="kpi-label">Viento sost.</span>
                   <strong class="kpi-val">38,5 km/h</strong>
-                  <span class="kpi-sub">Fuerza 5–6 Beaufort</span>
+                  <span class="kpi-sub">Fuerza 5–6</span>
                 </div>
                 <div class="episode-kpi">
-                  <span class="kpi-label">Sector dominante</span>
+                  <span class="kpi-label">Sector</span>
                   <strong class="kpi-val">SSW (Sur)</strong>
-                  <span class="kpi-sub">Canalizado desde Alisas</span>
+                  <span class="kpi-sub">Desde Alisas</span>
                 </div>
               </div>
               <p class="episode-narrative">
-                El paso de la profunda ciclogénesis atlántica Karlotta generó un fortísimo gradiente bárico sobre el norte peninsular. En Riotuerto, el viento sur aceleró bruscamente al encajonarse por el valle hacia La Cavada, registrando la racha más violenta de toda la serie observada (97,2 km/h).
+                La profunda ciclogénesis atlántica generó un severo gradiente bárico. En Riotuerto, el viento sur aceleró bruscamente encajonado hacia La Cavada, marcando la racha más impetuosa de la serie instrumental.
               </p>
             </div>
             <div class="episode-card-footer">
-              <a href="#almanaque/2024" class="btn btn-sm btn-primary">Almanaque 2024 →</a>
-              <a href="#almanaque/2024/mes-02" class="btn btn-sm btn-secondary">📅 Ver febrero 2024</a>
-              <a href="#records/rankings/top_windiest_days" class="btn btn-sm btn-subtle">💨 Top 10 eólico ↗</a>
-              <a href="#explorador/2024-02-06/2024-02-10/wind_gust_max" class="btn btn-sm btn-subtle" title="Ver rachas de viento en el Explorador">🔍 Datos en Explorador</a>
+              <a href="#almanaque/2024" class="episode-link-primary">Crónica en Almanaque 2024 →</a>
+              <div class="episode-links-secondary">
+                <a href="#almanaque/2024/mes-02" class="episode-link-subtle">📅 Ver febrero 2024</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#records/rankings/top_windiest_days" class="episode-link-subtle">💨 Top 10 eólico ↗</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#explorador/2024-02-06/2024-02-10/wind_gust_max" class="episode-link-subtle" title="Ver rachas de viento en el Explorador">🔍 Datos</a>
+              </div>
             </div>
           </article>
 
           <!-- Episodio 4: Tormenta torrencial convectiva (2025) -->
-          <article class="episode-featured-card episode-card-storm">
+          <article class="episode-featured-card episode-card-secondary episode-card-storm">
             <div class="episode-card-header">
               <div class="episode-badge-wrap">
                 <span class="episode-badge episode-badge-coldwave">⚡ Diluvio torrencial estival</span>
-                <span class="episode-tag">Convección vespertina severa</span>
+                <span class="episode-tag">Convección vespertina</span>
               </div>
               <span class="episode-date mono">10 jun. 2025</span>
             </div>
@@ -1611,33 +1632,38 @@
               </h3>
               <div class="episode-kpis-strip">
                 <div class="episode-kpi">
-                  <span class="kpi-label">Intensidad máxima</span>
+                  <span class="kpi-label">Tasa instantánea</span>
                   <strong class="kpi-val val-rain">145,2 mm/h</strong>
-                  <span class="kpi-sub">Tasa instantánea récord</span>
+                  <span class="kpi-sub">Récord absoluto</span>
                 </div>
                 <div class="episode-kpi">
-                  <span class="kpi-label">Precipitación 1 h</span>
+                  <span class="kpi-label">Lluvia en 1 h</span>
                   <strong class="kpi-val val-rain">44,2 mm</strong>
                   <span class="kpi-sub">20:00–21:00 h</span>
                 </div>
                 <div class="episode-kpi">
-                  <span class="kpi-label">Total en la jornada</span>
+                  <span class="kpi-label">Total jornada</span>
                   <strong class="kpi-val">62,4 mm</strong>
-                  <span class="kpi-sub">En solo 3 horas</span>
+                  <span class="kpi-sub">En 3 horas</span>
                 </div>
               </div>
               <p class="episode-narrative">
-                Tras una tarde calurosa con más de 27 °C, la entrada de aire frío en capas altas desató una violenta célula tormentosa vespertina anclada sobre el relieve de Riotuerto. La estación registró la mayor intensidad horaria de su historia, descargando 44,2 mm en apenas sesenta minutos.
+                Tras una tarde calurosa superior a 27 °C, la irrupción de aire frío en altura desató una violenta célula convectiva vespertina anclada en el relieve de Riotuerto, descargando con una virulencia pluviométrica inusitada.
               </p>
             </div>
             <div class="episode-card-footer">
-              <a href="#almanaque/2025" class="btn btn-sm btn-primary">Almanaque 2025 →</a>
-              <a href="#almanaque/2025/mes-06" class="btn btn-sm btn-secondary">📅 Ver junio 2025</a>
-              <a href="#records/absolutos" class="btn btn-sm btn-subtle">⚡ Extremos absolutos ↗</a>
-              <a href="#explorador/2025-06-08/2025-06-12/rain" class="btn btn-sm btn-subtle" title="Ver datos de precipitación en el Explorador">🔍 Datos en Explorador</a>
+              <a href="#almanaque/2025" class="episode-link-primary">Crónica en Almanaque 2025 →</a>
+              <div class="episode-links-secondary">
+                <a href="#almanaque/2025/mes-06" class="episode-link-subtle">📅 Ver junio 2025</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#records/absolutos" class="episode-link-subtle">⚡ Récords ↗</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#explorador/2025-06-08/2025-06-12/rain" class="episode-link-subtle" title="Ver datos de precipitación en el Explorador">🔍 Datos</a>
+              </div>
             </div>
           </article>
         </div>
+      </section>
       </section>
 
 

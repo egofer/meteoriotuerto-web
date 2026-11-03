@@ -2242,6 +2242,42 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("app.js?v=1.2.15", index_txt)
         self.assertIn("styles.css?v=1.2.15", index_txt)
 
+    def test_evo_043_chronicle_journalism_episodes_showcase(self):
+        """EVO-043: Tratamiento de crónica periodística para Grandes Acontecimientos Meteorológicos."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Comprobaciones de estructura en app.js
+        self.assertIn("episode-card-lead", app_js)
+        self.assertIn("episode-lead-main", app_js)
+        self.assertIn("episode-lead-pill", app_js)
+        self.assertIn("GRAN CRÓNICA DEL ARCHIVO", app_js)
+        self.assertIn("episode-title-lead", app_js)
+        self.assertIn("episode-lead-narrative", app_js)
+        self.assertIn("episode-lead-sidebar", app_js)
+        self.assertIn("episode-kpis-lead", app_js)
+        self.assertIn("episode-lead-note", app_js)
+        self.assertIn("episode-card-secondary", app_js)
+        self.assertIn("episode-link-primary", app_js)
+        self.assertIn("episode-links-secondary", app_js)
+        self.assertIn("episode-link-subtle", app_js)
+        self.assertIn("episode-link-divider", app_js)
+
+        # 2. Comprobaciones de estilo en styles.css
+        self.assertIn(".featured-episodes-grid", css_txt)
+        self.assertIn(".episode-featured-card.episode-card-lead", css_txt)
+        self.assertIn("grid-column: 1 / -1;", css_txt)
+        self.assertIn(".episode-lead-pill", css_txt)
+        self.assertIn(".episode-title-lead", css_txt)
+        self.assertIn(".episode-lead-narrative", css_txt)
+        self.assertIn(".episode-lead-sidebar", css_txt)
+        self.assertIn(".episode-lead-note", css_txt)
+        self.assertIn(".episode-card-secondary", css_txt)
+        self.assertIn(".episode-link-primary", css_txt)
+        self.assertIn(".episode-links-secondary", css_txt)
+        self.assertIn(".episode-link-subtle", css_txt)
+        self.assertIn(".episode-link-divider", css_txt)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
