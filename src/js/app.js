@@ -1312,7 +1312,7 @@
       <article class="editorial-hero">
         <div class="editorial-kicker">NOTARIO DEL CLIMA DE RIOTUERTO · ARCHIVO HISTÓRICO VERIFICADO</div>
         <h2 id="portada-heading" class="editorial-title">
-          La memoria meteorológica y climatológica de Riotuerto
+          MeteoRiotuerto: la memoria meteorológica y climatológica de Riotuerto
         </h2>
         <p class="editorial-lead">
           <strong>MeteoRiotuerto</strong> documenta, analiza y conserva el registro instrumental de las condiciones
