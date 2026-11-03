@@ -905,6 +905,165 @@ html[data-theme="dark"] .plate-tag {
   }
 }
 
+/* ==========================================================================
+   EVO-042: «La gaceta del día»: Integración armónica en doble columna
+   ========================================================================== */
+.daily-gazette-section {
+  margin-top: 14px;
+  margin-bottom: 34px;
+}
+
+.gazette-header {
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.gazette-masthead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.gazette-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-forest);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.gazette-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--txt-secondary);
+}
+
+.gazette-title {
+  font-family: var(--font-serif);
+  font-size: 1.85rem;
+  line-height: 1.25;
+  font-weight: 800;
+  color: var(--txt-primary);
+  margin: 0 0 8px 0;
+}
+
+.gazette-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.96rem;
+  line-height: 1.5;
+  color: var(--txt-secondary);
+  margin: 0;
+  max-width: 940px;
+}
+
+.daily-gazette-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.daily-gazette-grid .gazette-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.daily-gazette-grid .live-weather-card,
+.daily-gazette-grid .otd-panel {
+  height: 100%;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.daily-gazette-grid .live-weather-card {
+  border-top: 4px solid var(--accent-forest);
+  border-left: 1px solid var(--border-color);
+}
+
+.daily-gazette-grid .live-climatology-contrast {
+  margin-top: auto;
+}
+
+.daily-gazette-grid .live-kpi-grid {
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.daily-gazette-grid .otd-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.daily-gazette-grid .otd-controls {
+  align-self: flex-start;
+}
+
+.daily-gazette-grid .otd-summary-strip {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.daily-gazette-grid .otd-years-grid {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: auto;
+}
+
+.daily-gazette-grid .otd-year-card {
+  padding: 12px;
+}
+
+@media (max-width: 1080px) {
+  .daily-gazette-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .daily-gazette-grid .otd-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .daily-gazette-grid .otd-summary-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .daily-gazette-grid .otd-years-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .gazette-title {
+    font-size: 1.45rem;
+  }
+  .daily-gazette-grid .otd-header {
+    flex-direction: column;
+  }
+  .daily-gazette-grid .otd-summary-strip {
+    grid-template-columns: 1fr;
+  }
+  .daily-gazette-grid .otd-years-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .editorial-columns {
   display: grid;
   grid-template-columns: 2fr 1fr;

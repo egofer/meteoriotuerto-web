@@ -1389,9 +1389,36 @@
         </div>
       </article>
 
-      <!-- EVO-032: Píldora de tiempo actual en directo desde la API de Ecowitt / snapshot de la estación -->
-      <section id="sec-live-weather" class="live-weather-card" aria-labelledby="live-weather-heading">
-        <!-- Renderizado dinámico por renderLiveWeatherWidget() -->
+      <!-- EVO-042: «La gaceta del día»: Integración armónica de la observación actual y la memoria histórica -->
+      <section id="sec-daily-gazette" class="section-block daily-gazette-section" aria-labelledby="gazette-heading">
+        <div class="gazette-header">
+          <div class="gazette-masthead">
+            <span class="gazette-badge">NOTICIA Y MEMORIA</span>
+            <span class="gazette-kicker">EDICIÓN DIARIA DE METEORIOTUERTO · BARRIO DE ARRIBA (115 M)</span>
+          </div>
+          <h2 id="gazette-heading" class="gazette-title">
+            La gaceta del día: el tiempo hoy y en la memoria del archivo
+          </h2>
+          <p class="gazette-subtitle">
+            Cotejo simultáneo entre las condiciones meteorológicas vivas en Barrio de Arriba y el registro histórico documentado en esta misma fecha a lo largo de la serie instrumental (2022–2026).
+          </p>
+        </div>
+
+        <div class="daily-gazette-grid">
+          <!-- Columna A: Observación actual en directo -->
+          <div class="gazette-col gazette-col-live">
+            <div id="sec-live-weather" class="live-weather-card" aria-labelledby="live-weather-heading">
+              <!-- Renderizado dinámico por renderLiveWeatherWidget() -->
+            </div>
+          </div>
+
+          <!-- Columna B: Memoria del día («Tal día como hoy») -->
+          <div class="gazette-col gazette-col-otd">
+            <div class="section-block on-this-day-section" id="sec-on-this-day" aria-labelledby="sec-otd-title" style="margin-bottom: 0;">
+              <div id="on-this-day-widget"></div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- Síntesis cuantitativa del archivo (Indicadores generales en primer plano) -->
@@ -1613,10 +1640,6 @@
         </div>
       </section>
 
-      <!-- EVO-004: Bloque interactivo «Un día como hoy en MeteoRiotuerto» -->
-      <section class="section-block on-this-day-section" id="sec-on-this-day" aria-labelledby="sec-otd-title">
-        <div id="on-this-day-widget"></div>
-      </section>
 
       <!-- Selección de récords históricos destacados -->
       <section class="section-block" aria-labelledby="sec-records-portada">

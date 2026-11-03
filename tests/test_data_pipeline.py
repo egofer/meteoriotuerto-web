@@ -2160,7 +2160,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         self.assertIn("assets/img/valle-covadal-barrio-de-arriba.webp", sw_txt)
         self.assertIn("assets/img/valle-covadal-barrio-de-arriba.jpg", sw_txt)
-        self.assertIn("meteoriotuerto-cache-v1.2.15", sw_txt)
+        self.assertIn("meteoriotuerto-cache-v1.2.", sw_txt)
 
         # 3. app.js
         app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
@@ -2194,6 +2194,45 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 5. index.html
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn("app.js?v=1.2.", index_txt)
+        self.assertIn("styles.css?v=1.2.", index_txt)
+
+    def test_evo_042_daily_gazette_harmonized_grid(self):
+        """EVO-042: Módulo «La gaceta del día» (Tiempo actual en vivo + Efeméride «Tal día como hoy»)."""
+        # 1. Comprobación en app.js
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('id="sec-daily-gazette"', app_js)
+        self.assertIn('daily-gazette-section', app_js)
+        self.assertIn('daily-gazette-grid', app_js)
+        self.assertIn('gazette-col-live', app_js)
+        self.assertIn('gazette-col-otd', app_js)
+        self.assertIn('id="sec-live-weather"', app_js)
+        self.assertIn('id="sec-on-this-day"', app_js)
+        self.assertIn('id="on-this-day-widget"', app_js)
+        self.assertIn('La gaceta del día', app_js)
+
+        # Verificar unicidad del id de efemérides (sin bloques huérfanos duplicados)
+        self.assertEqual(app_js.count('id="sec-on-this-day"'), 1)
+        self.assertEqual(app_js.count('id="on-this-day-widget"'), 1)
+
+        # 2. Comprobación en styles.css
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".daily-gazette-section", css_txt)
+        self.assertIn(".daily-gazette-grid", css_txt)
+        self.assertIn(".gazette-header", css_txt)
+        self.assertIn(".gazette-badge", css_txt)
+        self.assertIn(".gazette-masthead", css_txt)
+        self.assertIn(".gazette-kicker", css_txt)
+        self.assertIn(".gazette-title", css_txt)
+        self.assertIn(".gazette-subtitle", css_txt)
+        self.assertIn(".daily-gazette-grid .live-weather-card", css_txt)
+        self.assertIn(".daily-gazette-grid .otd-panel", css_txt)
+        self.assertIn("@media (max-width: 1080px)", css_txt)
+
+        # 3. Cache buster v1.2.15
+        sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+        index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
+        self.assertIn("meteoriotuerto-cache-v1.2.15", sw_txt)
         self.assertIn("app.js?v=1.2.15", index_txt)
         self.assertIn("styles.css?v=1.2.15", index_txt)
 
