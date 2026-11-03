@@ -80,6 +80,15 @@
     'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
   ];
 
+  // EVO-044 / EVO-047: Mapeo canónico de numeración de volúmenes de archivo histórico
+  const YEAR_TOMES = {
+    2022: 'TOMO I',
+    2023: 'TOMO II',
+    2024: 'TOMO III',
+    2025: 'TOMO IV',
+    2026: 'TOMO V',
+  };
+
   const EXPLORER_VARIABLES = {
     temp_mean: { label: 'Temperatura media diaria', unit: '°C', dec: 1, color: '#1b4332', type: 'line', agg: 'mean' },
     temp_max: { label: 'Temperatura máxima diaria', unit: '°C', dec: 1, color: '#c2410c', type: 'line', agg: 'max' },
@@ -1330,15 +1339,7 @@
       2026: '300 días observados hasta octubre · Récord de amplitud de 25,2 °C (julio) · 1.505,2 mm acumulados',
     };
 
-    // EVO-044: Mapeo de numeración de volúmenes de archivo histórico
-    const YEAR_TOMES = {
-      2022: 'TOMO I',
-      2023: 'TOMO II',
-      2024: 'TOMO III',
-      2025: 'TOMO IV',
-      2026: 'TOMO V',
-    };
-
+    // EVO-044 / EVO-047: Utiliza el mapeo canónico YEAR_TOMES definido a nivel de módulo
     const almanacCardsHtml = yearsSummary.map((y) => {
       const headline = YEAR_EDITORIAL_HEADLINES[y.year] || y.character;
       const highlight = YEAR_EDITORIAL_HIGHLIGHTS[y.year] || `Mes más húmedo: ${escapeHtml(y.wettest_month)} (${fmtNum(y.wettest_month_mm, 1)} mm)`;
@@ -3043,7 +3044,20 @@
       `;
     }).join('');
 
+    const tomeLabel = YEAR_TOMES[alm.year] || `TOMO ${alm.year}`;
+
     container.innerHTML = `
+      <!-- Cabecera editorial del anuario (EVO-047) -->
+      <header class="editorial-masthead" aria-label="Cabecera editorial del anuario">
+        <div class="editorial-masthead-kicker">
+          ${getMeteoIcon('fleuron')} METEORIOTUERTO · ${tomeLabel} (${alm.year}) · SERIE INSTRUMENTAL DE BARRIO DE ARRIBA (115 M)
+        </div>
+        <h1 class="editorial-masthead-title">Almanaque meteorológico anual ${alm.year}</h1>
+        <p class="editorial-masthead-meta">
+          Registro climatológico oficial del municipio de Riotuerto · Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)}%) · ${alm.is_provisional ? 'Avance provisional en curso' : 'Tomo consolidado'}
+        </p>
+      </header>
+
       <!-- Cabecera exclusiva para edición impresa / PDF A4 (EVO-003) -->
       <header class="print-only-header" aria-hidden="true">
         <div>
@@ -3089,15 +3103,15 @@
 
       <div class="chronicle-grid">
         <div class="chronicle-card">
-          <h3>🌡️ Comportamiento térmico</h3>
+          <h3>${getMeteoIcon('thermometer')} Comportamiento térmico</h3>
           <p>${escapeHtml(ed.thermal_notes || '')}</p>
         </div>
         <div class="chronicle-card">
-          <h3>☔ Régimen pluviométrico</h3>
+          <h3>${getMeteoIcon('rain-gauge')} Régimen pluviométrico</h3>
           <p>${escapeHtml(ed.rain_notes || '')}</p>
         </div>
         <div class="chronicle-card">
-          <h3>💨 Dinámica eólica y atmosférica</h3>
+          <h3>${getMeteoIcon('wind-vane')} Dinámica eólica y atmosférica</h3>
           <p>${escapeHtml(ed.wind_notes || '')}</p>
         </div>
       </div>
@@ -3672,6 +3686,9 @@
           </a>
         `}
       </nav>
+
+      <!-- Viñeta de remate tipográfico (EVO-047) -->
+      <div class="meteo-vignette" aria-hidden="true">${getMeteoIcon('fleuron', { className: 'meteo-icon-vignette' })}</div>
     `;
 
     // Eventos del calendario y descarga
@@ -5509,15 +5526,17 @@
     ].join('');
 
     container.innerHTML = `
-      <article class="editorial-hero">
-        <div class="editorial-kicker">HERRAMIENTA DE CONSULTA Y REUTILIZACIÓN CIENTÍFICA</div>
-        <h2 id="explorador-heading" class="editorial-title">Explorador interactivo del registro histórico (2022–2026)</h2>
-        <p class="editorial-lead">
+      <header class="editorial-masthead editorial-hero" aria-label="Cabecera editorial del explorador de series">
+        <div class="editorial-masthead-kicker">
+          ${getMeteoIcon('fleuron')} METEORIOTUERTO · EXPLORADOR DE SERIES DIARIAS Y MATRIZ MULTIANUAL
+        </div>
+        <h2 id="explorador-heading" class="editorial-masthead-title editorial-title">Explorador interactivo del registro histórico (2022–2026)</h2>
+        <p class="editorial-masthead-meta editorial-lead">
           Consulte, filtre y descargue las observaciones diarias y mensuales registradas por MeteoRiotuerto.
           Puede acotar cualquier periodo temporal, superponer series interanuales sobre el ciclo anual,
           comparar dos variables con doble escala Y, aislar episodios extremos y exportar los registros resultantes.
         </p>
-      </article>
+      </header>
 
       <form id="explorer-form" class="controls-toolbar" onsubmit="return false;">
         <div class="control-group">
@@ -5633,6 +5652,9 @@
           </table>
         </div>
       </section>
+
+      <!-- Viñeta de remate tipográfico (EVO-047) -->
+      <div class="meteo-vignette" aria-hidden="true">${getMeteoIcon('fleuron', { className: 'meteo-icon-vignette' })}</div>
     `;
 
     const updateFromControls = (resetPage = true) => {
@@ -6280,31 +6302,31 @@
     const kpiCards = [
       {
         kpiClass: 'kpi-heat',
-        label: '🔥 Ola de calor récord',
+        label: `${getMeteoIcon('heatwave')} Ola de calor récord`,
         val: kpis.longest_heatwave ? `${kpis.longest_heatwave.duration_days} días` : '—',
         sub: kpis.longest_heatwave ? `Pico: ${fmtNum(kpis.longest_heatwave.peak_value, 1)} °C · ${fmtDateES(kpis.longest_heatwave.start_date, false)} al ${fmtDateES(kpis.longest_heatwave.end_date, false)}` : ''
       },
       {
         kpiClass: 'kpi-cold',
-        label: '❄️ Ola de frío récord',
+        label: `${getMeteoIcon('frost')} Ola de frío récord`,
         val: kpis.longest_coldwave ? `${kpis.longest_coldwave.duration_days} días` : '—',
         sub: kpis.longest_coldwave ? `Mínima: ${fmtNum(kpis.longest_coldwave.peak_value, 1)} °C · ${fmtDateES(kpis.longest_coldwave.start_date, false)} al ${fmtDateES(kpis.longest_coldwave.end_date, false)}` : ''
       },
       {
         kpiClass: 'kpi-wet',
-        label: '🌧️ Racha de lluvia récord',
+        label: `${getMeteoIcon('rain-gauge')} Racha de lluvia récord`,
         val: kpis.longest_wet_spell ? `${kpis.longest_wet_spell.duration_days} días` : '—',
         sub: kpis.longest_wet_spell ? `Total: ${fmtNum(kpis.longest_wet_spell.total_rain_mm, 1)} mm · ${fmtDateES(kpis.longest_wet_spell.start_date, false)} al ${fmtDateES(kpis.longest_wet_spell.end_date, false)}` : ''
       },
       {
         kpiClass: 'kpi-dry',
-        label: '☀️ Racha seca récord',
+        label: `${getMeteoIcon('sun')} Racha seca récord`,
         val: kpis.longest_dry_spell ? `${kpis.longest_dry_spell.duration_days} días` : '—',
         sub: kpis.longest_dry_spell ? `Sin lluvia apreciable (<0,2 mm) · ${fmtDateES(kpis.longest_dry_spell.start_date, false)} al ${fmtDateES(kpis.longest_dry_spell.end_date, false)}` : ''
       },
       {
         kpiClass: 'kpi-foehn',
-        label: '💨 Surada más prolongada',
+        label: `${getMeteoIcon('wind-vane')} Surada más prolongada`,
         val: kpis.longest_foehn_spell ? `${kpis.longest_foehn_spell.duration_days} días` : '—',
         sub: kpis.longest_foehn_spell ? `Racha: ${fmtNum(kpis.longest_foehn_spell.peak_value, 1)} km/h · ${fmtDateES(kpis.longest_foehn_spell.start_date, false)} al ${fmtDateES(kpis.longest_foehn_spell.end_date, false)}` : ''
       }
@@ -6319,11 +6341,13 @@
     `).join('');
 
     container.innerHTML = `
-      <article class="editorial-hero">
-        <div class="editorial-kicker">EFEMÉRIDES Y EXTREMOS INSTRUMENTALES</div>
-        <h2 id="records-heading" class="editorial-title">Récords meteorológicos de MeteoRiotuerto</h2>
-        <p class="editorial-lead">${escapeHtml(rec.methodological_disclaimer)}</p>
-      </article>
+      <header class="editorial-masthead editorial-hero" aria-label="Cabecera editorial de la monografía de extremos">
+        <div class="editorial-masthead-kicker">
+          ${getMeteoIcon('fleuron')} METEORIOTUERTO · MONOGRAFÍA DE HITOS Y EXTREMOS · CATÁLOGO DE ${fmtNum(totalEpisodesCount, 0)} EPISODIOS
+        </div>
+        <h2 id="records-heading" class="editorial-masthead-title editorial-title">Récords meteorológicos de MeteoRiotuerto</h2>
+        <p class="editorial-masthead-meta editorial-lead">${escapeHtml(rec.methodological_disclaimer)}</p>
+      </header>
 
       <div class="callout callout-info" style="margin-bottom:24px">
         <strong>Periodo de referencia considerado:</strong> ${escapeHtml(rec.period_covered)} (${fmtNum(rec.total_observed_days, 0)} días con observación validada).
@@ -6491,6 +6515,9 @@
           </table>
         </div>
       </section>
+
+      <!-- Viñeta de remate tipográfico (EVO-047) -->
+      <div class="meteo-vignette" aria-hidden="true">${getMeteoIcon('fleuron', { className: 'meteo-icon-vignette' })}</div>
     `;
 
     document.getElementById('btn-export-abs-records-xlsx')?.addEventListener('click', () => {
@@ -6769,15 +6796,17 @@
     }).join('');
 
     container.innerHTML = `
-      <article class="editorial-hero">
-        <div class="editorial-kicker">PERSPECTIVA INTERANUAL Y VARIABILIDAD CLIMÁTICA</div>
-        <h2 id="comparativas-heading" class="editorial-title">Comparativas entre años (2022–2026)</h2>
-        <p class="editorial-lead">
+      <header class="editorial-masthead editorial-hero" aria-label="Cabecera editorial de comparativas interanuales">
+        <div class="editorial-masthead-kicker">
+          ${getMeteoIcon('fleuron')} METEORIOTUERTO · ANÁLISIS CLIMATOLÓGICO MULTIANUAL Y NORMALES DEL PRIMER QUINQUENIO (2022–2026)
+        </div>
+        <h2 id="comparativas-heading" class="editorial-masthead-title editorial-title">Comparativas entre años (2022–2026)</h2>
+        <p class="editorial-masthead-meta editorial-lead">
           Análisis comparativo del régimen térmico, pluviométrico y de extremos entre los años documentados por
           MeteoRiotuerto. Permite contrastar las anomalías respecto al promedio de la serie completa disponible
           y examinar la variabilidad interanual de cada mes.
         </p>
-      </article>
+      </header>
 
       <div class="callout callout-warning" style="margin-bottom:24px; border-left-width:5px; padding:18px 22px">
         <h4 style="font-size:1rem; font-weight:700; margin-bottom:8px; color:var(--txt-primary)">
@@ -7374,6 +7403,9 @@
           </table>
         </div>
       </section>
+
+      <!-- Viñeta de remate tipográfico (EVO-047) -->
+      <div class="meteo-vignette" aria-hidden="true">${getMeteoIcon('fleuron', { className: 'meteo-icon-vignette' })}</div>
     `;
 
     document.getElementById('chk-include-2026')?.addEventListener('change', (e) => {
@@ -9360,10 +9392,12 @@
     }).join('');
 
     container.innerHTML = `
-      <article class="editorial-hero">
-        <div class="editorial-kicker">TRANSPARENCIA CIENTÍFICA, INSTRUMENTACIÓN Y CONTROL DE CALIDAD</div>
-        <h2 id="metodologia-heading" class="editorial-title">Metodología, criterios estadísticos y fuentes de datos</h2>
-        <p class="editorial-lead">
+      <header class="editorial-masthead editorial-hero" aria-label="Cabecera editorial de metodología y calidad">
+        <div class="editorial-masthead-kicker">
+          ${getMeteoIcon('fleuron')} METEORIOTUERTO · DOCUMENTACIÓN TÉCNICA, SENSORES Y METODOLOGÍA OMM
+        </div>
+        <h2 id="metodologia-heading" class="editorial-masthead-title editorial-title">Metodología, criterios estadísticos y fuentes de datos</h2>
+        <p class="editorial-masthead-meta editorial-lead">
           Para que <strong>MeteoRiotuerto</strong> funcione como un archivo climático verificable y reutilizable,
           esta sección documenta las características geográficas del emplazamiento, el instrumental de medida,
           las definiciones matemáticas de cada indicador y los procedimientos de control de calidad aplicados.
@@ -9378,7 +9412,7 @@
             pero <strong>todavía no permite establecer <abbr class="glossary-term" data-term="normal_climatologica">normales climatológicas de 30 años</abbr> ni atribuir tendencias climáticas seculares con garantías estadísticas</strong>.
           </p>
         </div>
-      </article>
+      </header>
 
       <div class="stats-two-col">
         <div class="chronicle-card">
@@ -9734,6 +9768,9 @@
         </div>
       </section>
       </section>
+
+      <!-- Viñeta de remate tipográfico (EVO-047) -->
+      <div class="meteo-vignette" aria-hidden="true">${getMeteoIcon('fleuron', { className: 'meteo-icon-vignette' })}</div>
     `;
 
     document.getElementById('btn-export-audit-xlsx')?.addEventListener('click', () => {
@@ -9886,10 +9923,12 @@
         }).join('');
 
     container.innerHTML = `
-      <div class="view-intro">
-        <span class="view-kicker">ENCICLOPEDIA Y DIVULGACIÓN LOCAL</span>
-        <h2 class="view-title" id="glosario-heading">Glosario meteorológico y microclimático de Riotuerto</h2>
-        <p class="view-lead">
+      <header class="editorial-masthead editorial-hero view-intro" aria-label="Cabecera editorial del glosario meteorológico">
+        <div class="editorial-masthead-kicker">
+          ${getMeteoIcon('fleuron')} METEORIOTUERTO · GLOSARIO DE CONCEPTOS METEOROLÓGICOS Y TOPOCLIMÁTICOS
+        </div>
+        <h2 class="editorial-masthead-title view-title" id="glosario-heading">Glosario meteorológico y microclimático de Riotuerto</h2>
+        <p class="editorial-masthead-meta view-lead">
           Repertorio de conceptos atmosféricos, biofísicos, estadísticos y orográficos documentados en el valle del río Covadal.
           Todas las definiciones combinan el rigor de los estándares de la Organización Meteorológica Mundial (OMM)
           con el comportamiento real y singular observado en el municipio de Riotuerto.
@@ -9899,7 +9938,7 @@
           <div class="stat-badge"><span class="num">${glo.total_categories}</span> áreas temáticas</div>
           <div class="stat-badge"><span class="num">100 %</span> contextualizado al valle</div>
         </div>
-      </div>
+      </header>
 
       <section class="section-block">
         <div class="glossary-toolbar">
@@ -9943,6 +9982,9 @@
           <a href="./data/glossary.json" download="meteoriotuerto_glossary.json" class="btn btn-primary">⬇ Descargar glosario estructurado (glossary.json)</a>
         </div>
       </section>
+
+      <!-- Viñeta de remate tipográfico (EVO-047) -->
+      <div class="meteo-vignette" aria-hidden="true">${getMeteoIcon('fleuron', { className: 'meteo-icon-vignette' })}</div>
     `;
 
     // Listeners del toolbar y tarjetas
@@ -10460,25 +10502,25 @@
     }).join('');
 
     container.innerHTML = `
-      <section class="section-block" style="padding-bottom: 0;">
-        <div class="section-header">
-          <div>
-            <div class="editorial-kicker">INFORMACIÓN METEOROLÓGICA PRÁCTICA · RIOTUERTO</div>
-            <h2 id="cotidiano-heading" class="section-title">Riotuerto cotidiano</h2>
-            <p class="section-subtitle">
-              El tiempo al servicio de nuestros vecinos: pautas claras para las tareas cotidianas del hogar, la huerta y los prados, junto con la memoria climática de nuestras ocho fiestas patronales
-            </p>
-          </div>
+      <header class="editorial-masthead editorial-hero" aria-label="Cabecera editorial de Riotuerto cotidiano">
+        <div class="editorial-masthead-kicker">
+          ${getMeteoIcon('fleuron')} METEORIOTUERTO · CUADERNO AGROCLIMÁTICO Y CALENDARIO FENOLÓGICO DEL VALLE
         </div>
+        <h2 id="cotidiano-heading" class="editorial-masthead-title section-title">Riotuerto cotidiano</h2>
+        <p class="editorial-masthead-meta section-subtitle">
+          El tiempo al servicio de nuestros vecinos: pautas claras para las tareas cotidianas del hogar, la huerta y los prados, junto con la memoria climática de nuestras ocho fiestas patronales
+        </p>
+      </header>
 
+      <section class="section-block" style="padding-bottom: 0;">
         <!-- Subnavegación de la sección -->
         <div class="cotidiano-nav-wrap">
           <div class="cotidiano-subnav" role="tablist" aria-label="Secciones de Riotuerto cotidiano">
             <button type="button" class="cotidiano-subnav-btn ${activeTab === 'labores' ? 'active' : ''}" data-cotidiano-tab="labores" role="tab" aria-selected="${activeTab === 'labores'}">
-              <span aria-hidden="true">🌾</span> Labores y vida cotidiana
+              <span aria-hidden="true">${getMeteoIcon('sun')}</span> Labores y vida cotidiana
             </button>
             <button type="button" class="cotidiano-subnav-btn ${activeTab === 'fiestas' ? 'active' : ''}" data-cotidiano-tab="fiestas" role="tab" aria-selected="${activeTab === 'fiestas'}">
-              <span aria-hidden="true">🎉</span> Fiestas y tradiciones locales
+              <span aria-hidden="true">${getMeteoIcon('fleuron')}</span> Fiestas y tradiciones locales
             </button>
           </div>
         </div>
@@ -10840,6 +10882,9 @@
           </div>
         </section>
       </div>
+
+      <!-- Viñeta de remate tipográfico (EVO-047) -->
+      <div class="meteo-vignette" aria-hidden="true">${getMeteoIcon('fleuron', { className: 'meteo-icon-vignette' })}</div>
     `;
 
     // 1. Listeners para alternar entre subpestañas 'labores' y 'fiestas'

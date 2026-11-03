@@ -7125,5 +7125,85 @@ html[data-theme="dark"] .chart-a11y-intro {
   }
 }
 
+/* ==========================================================================
+   EVO-047: Foliado editorial, ritmo de espaciados y armonización del sistema
+   ========================================================================== */
+.editorial-masthead {
+  border: 1px solid var(--border-color);
+  border-top: 4px solid var(--accent-forest);
+  border-radius: var(--radius-md);
+  padding: 24px 30px;
+  background: var(--bg-surface);
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.editorial-masthead-kicker {
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--accent-forest);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.editorial-masthead-kicker .meteo-icon {
+  width: 1em;
+  height: 1em;
+  color: var(--accent-forest);
+  opacity: 0.85;
+}
+
+.editorial-masthead-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.65rem, 2.5vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.22;
+  margin: 0 0 10px 0;
+  color: var(--txt-primary);
+  letter-spacing: -0.01em;
+}
+
+.editorial-masthead-meta {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--txt-secondary);
+  margin: 0;
+  max-width: 980px;
+}
+
+/* Modo oscuro para cartelas de foliado editorial */
+html[data-theme="dark"] .editorial-masthead {
+  background: var(--bg-surface);
+  border-color: var(--border-color);
+  border-top-color: var(--accent-forest);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .editorial-masthead-kicker {
+  color: var(--accent-forest);
+}
+
+/* Adaptación responsive para pantallas estrechas */
+@media (max-width: 600px) {
+  .editorial-masthead {
+    padding: 18px 18px;
+    margin-bottom: 24px;
+  }
+  .editorial-masthead-title {
+    font-size: 1.5rem;
+  }
+  .editorial-masthead-meta {
+    font-size: 0.95rem;
+  }
+}
+
 
 

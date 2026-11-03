@@ -2383,6 +2383,38 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("border-top: 2px solid var(--border-strong)", css_txt)
         self.assertIn("border-bottom: 2px solid var(--border-strong)", css_txt)
 
+    def test_evo_047_editorial_foliation_and_design_system_harmony(self):
+        """EVO-047: Foliado editorial, ritmo de espaciados y armonización del sistema de diseño."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Reglas de estilo para cartelas de foliado editorial (.editorial-masthead)
+        self.assertIn(".editorial-masthead", css_txt)
+        self.assertIn(".editorial-masthead-kicker", css_txt)
+        self.assertIn(".editorial-masthead-title", css_txt)
+        self.assertIn(".editorial-masthead-meta", css_txt)
+        self.assertIn('html[data-theme="dark"] .editorial-masthead', css_txt)
+        self.assertIn('letter-spacing: 0.10em', css_txt)
+
+        # 2. Cartelas foliadas en todas las páginas internas en app.js
+        self.assertIn("SERIE INSTRUMENTAL DE BARRIO DE ARRIBA (115 M)", app_js)
+        self.assertIn("MONOGRAFÍA DE HITOS Y EXTREMOS · CATÁLOGO DE", app_js)
+        self.assertIn("CUADERNO AGROCLIMÁTICO Y CALENDARIO FENOLÓGICO DEL VALLE", app_js)
+        self.assertIn("ANÁLISIS CLIMATOLÓGICO MULTIANUAL Y NORMALES DEL PRIMER QUINQUENIO (2022–2026)", app_js)
+        self.assertIn("EXPLORADOR DE SERIES DIARIAS Y MATRIZ MULTIANUAL", app_js)
+        self.assertIn("DOCUMENTACIÓN TÉCNICA, SENSORES Y METODOLOGÍA OMM", app_js)
+        self.assertIn("GLOSARIO DE CONCEPTOS METEOROLÓGICOS Y TOPOCLIMÁTICOS", app_js)
+
+        # 3. Armonización vectorial: sustitución de emojis por glifos SVG en crónicas y extremos
+        self.assertIn("getMeteoIcon('thermometer')", app_js)
+        self.assertIn("getMeteoIcon('heatwave')", app_js)
+        self.assertIn("getMeteoIcon('frost')", app_js)
+
+        # 4. Viñetas de remate tipográfico (.meteo-vignette con fleuron) al pie de las vistas
+        self.assertGreaterEqual(app_js.count("class=\"meteo-vignette\""), 7,
+                                "Debe haber viñetas de remate tipográfico en portada y las vistas internas")
+
+
 
 if __name__ == "__main__":
 
