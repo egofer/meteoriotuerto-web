@@ -1461,86 +1461,159 @@ html[data-theme="dark"] .plate-tag {
   margin-top: 2px;
 }
 
-/* Tarjetas de almanaques anuales en portada */
-.almanac-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
-  gap: 18px;
+/* ==========================================================================
+   EVO-044: Biblioteca de anuarios meteorológicos (Colección de tomos anuales)
+   ========================================================================== */
+.almanac-library-section {
+  margin-bottom: 38px;
 }
 
-.almanac-card {
+.almanac-cards-grid,
+.almanac-library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.almanac-card,
+.almanac-tome-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.2s ease;
   text-decoration: none;
   color: inherit;
+  overflow: hidden;
 }
 
-.almanac-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
+.almanac-card:hover,
+.almanac-tome-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md), 0 10px 24px rgba(0, 0, 0, 0.08);
   border-color: var(--accent-forest);
   color: inherit;
 }
 
+/* Franja vertical de lomo encuadernado */
+.almanac-tome-spine {
+  width: 9px;
+  flex-shrink: 0;
+  background: var(--accent-forest);
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+  transition: width 0.2s ease, opacity 0.2s ease;
+}
+
+.almanac-tome-card:hover .almanac-tome-spine {
+  width: 13px;
+}
+
+/* Lomo cromático de cada tomo según carácter meteorológico */
+.tome-year-2022 .almanac-tome-spine {
+  background: linear-gradient(180deg, #d97706, #92400e);
+}
+.tome-year-2023 .almanac-tome-spine {
+  background: linear-gradient(180deg, #2563eb, #1e40af);
+}
+.tome-year-2024 .almanac-tome-spine {
+  background: linear-gradient(180deg, #dc2626, #991b1b);
+}
+.tome-year-2025 .almanac-tome-spine {
+  background: linear-gradient(180deg, #10b981, #065f46);
+}
+.tome-year-2026 .almanac-tome-spine {
+  background: linear-gradient(180deg, #0d9488, #115e59);
+}
+
+.almanac-tome-content {
+  flex: 1;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
 .almanac-card-top {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.almanac-tome-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.almanac-tome-vol {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--txt-muted);
 }
 
 .almanac-year-num {
   font-family: var(--font-serif);
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--accent-forest);
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: var(--txt-primary);
   line-height: 1;
 }
 
 .badge {
   display: inline-block;
   padding: 3px 9px;
-  font-size: 0.72rem;
+  font-size: 0.70rem;
   font-weight: 700;
   border-radius: 999px;
   letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .badge-complete {
   background: var(--accent-forest-soft);
   color: var(--accent-forest);
+  border: 1px solid rgba(16, 185, 129, 0.28);
 }
 
 .badge-provisional {
   background: var(--accent-solar-soft);
   color: var(--accent-solar);
+  border: 1px solid rgba(245, 158, 11, 0.35);
 }
 
 .almanac-character {
   font-family: var(--font-serif);
   font-size: 1.05rem;
-  font-weight: 700;
-  line-height: 1.35;
+  line-height: 1.38;
   color: var(--txt-primary);
-  margin-top: 8px;
-  margin-bottom: 8px;
+  margin-top: 6px;
+  margin-bottom: 10px;
+}
+
+.almanac-character em {
+  font-style: italic;
+  font-weight: 600;
 }
 
 .almanac-headline {
-  font-size: 0.81rem;
+  font-size: 0.80rem;
   color: var(--txt-secondary);
   margin-bottom: 14px;
   line-height: 1.5;
   background: var(--bg-subtle);
   border: 1px solid var(--border-color);
-  padding: 6px 10px;
+  border-left: 3px solid var(--accent-forest);
+  padding: 8px 10px;
   border-radius: var(--radius-sm);
 }
 
@@ -1557,7 +1630,7 @@ html[data-theme="dark"] .plate-tag {
 .almanac-mini-stats div span {
   display: block;
   color: var(--txt-muted);
-  font-size: 0.72rem;
+  font-size: 0.70rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   font-weight: 600;
@@ -1566,7 +1639,7 @@ html[data-theme="dark"] .plate-tag {
 
 .almanac-mini-stats div strong {
   font-family: var(--font-mono);
-  font-size: 0.95rem;
+  font-size: 0.96rem;
   font-weight: 700;
   color: var(--txt-primary);
 }
@@ -1575,7 +1648,8 @@ html[data-theme="dark"] .plate-tag {
   display: block;
   font-size: 0.72rem;
   color: var(--txt-secondary);
-  margin-top: 1px;
+  margin-top: 2px;
+  line-height: 1.3;
 }
 
 .almanac-card-cta {
@@ -1585,6 +1659,13 @@ html[data-theme="dark"] .plate-tag {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-color);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.almanac-tome-card:hover .almanac-card-cta {
+  color: var(--txt-primary);
 }
 
 /* Selector de año en la vista de almanaque */

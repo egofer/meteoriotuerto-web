@@ -1239,7 +1239,7 @@
     const rec = idx.headline_records;
     const yearsSummary = [...idx.years_summary].sort((a, b) => b.year - a.year);
 
-    // EVO-029: Titulares sinópticos de autor y efemérides destacadas por año
+    // EVO-029 & EVO-044: Titulares sinópticos de autor y efemérides destacadas por tomo anual
     const YEAR_EDITORIAL_HEADLINES = {
       2022: 'Año cálido y seco con estío prolongado y marcadas suradas otoñales',
       2023: 'Grandes contrastes: el temporal Fien (509,8 mm en enero) y acusada sequía estival',
@@ -1256,50 +1256,64 @@
       2026: '300 días observados hasta octubre · Récord de amplitud de 25,2 °C (julio) · 1.505,2 mm acumulados',
     };
 
+    // EVO-044: Mapeo de numeración de volúmenes de archivo histórico
+    const YEAR_TOMES = {
+      2022: 'TOMO I',
+      2023: 'TOMO II',
+      2024: 'TOMO III',
+      2025: 'TOMO IV',
+      2026: 'TOMO V',
+    };
+
     const almanacCardsHtml = yearsSummary.map((y) => {
       const headline = YEAR_EDITORIAL_HEADLINES[y.year] || y.character;
       const highlight = YEAR_EDITORIAL_HIGHLIGHTS[y.year] || `Mes más húmedo: ${escapeHtml(y.wettest_month)} (${fmtNum(y.wettest_month_mm, 1)} mm)`;
+      const tomeLabel = YEAR_TOMES[y.year] || `TOMO ${y.year}`;
       const badgeHtml = y.is_provisional
-        ? `<span class="badge badge-provisional">Avance provisional · ${fmtNum(y.valid_days, 0)} días</span>`
-        : `<span class="badge badge-complete">Anuario consolidado · ${fmtNum(y.coverage_pct, 1)}%</span>`;
+        ? `<span class="badge badge-provisional">Avance en curso · ${fmtNum(y.valid_days, 0)} días</span>`
+        : `<span class="badge badge-complete">Tomo consolidado · ${fmtNum(y.coverage_pct, 1)}%</span>`;
 
       return `
-        <a href="#almanaque/${y.year}" class="almanac-card" aria-label="Abrir almanaque meteorológico de ${y.year}">
-          <div>
+        <a href="#almanaque/${y.year}" class="almanac-card almanac-tome-card tome-year-${y.year}" aria-label="Abrir almanaque meteorológico de ${y.year}">
+          <div class="almanac-tome-spine" aria-hidden="true"></div>
+          <div class="almanac-tome-content">
             <div class="almanac-card-top">
-              <span class="almanac-year-num">${y.year}</span>
+              <div class="almanac-tome-meta">
+                <span class="almanac-tome-vol">${tomeLabel}</span>
+                <span class="almanac-year-num">${y.year}</span>
+              </div>
               ${badgeHtml}
             </div>
-            <div class="almanac-character">${escapeHtml(headline)}</div>
+            <div class="almanac-character">
+              <em>${escapeHtml(headline)}</em>
+            </div>
             <p class="almanac-headline">
               ${escapeHtml(highlight)}
             </p>
-          </div>
-          <div>
             <div class="almanac-mini-stats">
-              <div>
-                <span>Precipitación anual</span>
+              <div class="almanac-stat-item">
+                <span>Precipitación</span>
                 <strong>${fmtNum(y.rain_total_mm, 1)} mm</strong>
                 <small>${fmtNum(y.rain_days_02, 0)} días de lluvia</small>
               </div>
-              <div>
-                <span>Temperatura media</span>
+              <div class="almanac-stat-item">
+                <span>Temperatura</span>
                 <strong>${fmtNum(y.temp_mean, 1)} °C</strong>
                 <small>${fmtNum(y.temp_min_abs, 1)} / ${fmtNum(y.temp_max_abs, 1)} °C</small>
               </div>
-              <div>
+              <div class="almanac-stat-item">
                 <span>Techo eólico</span>
                 <strong>${fmtNum(y.wind_gust_max_kmh, 1)} km/h</strong>
                 <small>${fmtDateES(y.wind_gust_max_date, false)}</small>
               </div>
-              <div>
+              <div class="almanac-stat-item">
                 <span>Surada (Foehn)</span>
                 <strong>${y.foehn_days !== undefined ? fmtNum(y.foehn_days, 0) + ' días' : '—'}</strong>
-                <small>Compresión adiabática</small>
+                <small>Flujo catabático</small>
               </div>
             </div>
             <div class="almanac-card-cta">
-              <span>Consultar almanaque ${y.year}</span>
+              <span>Abrir volumen de ${y.year}</span>
               <span aria-hidden="true">→</span>
             </div>
           </div>
@@ -1445,16 +1459,17 @@
         </div>
       </div>
 
-      <!-- Colección de Almanaques Anuales -->
-      <section class="section-block" aria-labelledby="sec-almanaques-title">
+      <!-- EVO-044: Biblioteca de Anuarios (Colección de Almanaques Anuales) -->
+      <section class="section-block almanac-library-section" aria-labelledby="sec-almanaques-title">
         <div class="section-header">
           <div>
-            <h2 id="sec-almanaques-title" class="section-title">Almanaques meteorológicos anuales</h2>
-            <p class="section-subtitle">Seleccione un año para abrir su crónica sinóptica, gráficas diarias, rosa de vientos y tablas mensuales</p>
+            <div class="editorial-kicker">BIBLIOTECA DOCUMENTAL DE METEORIOTUERTO · SERIE INSTRUMENTAL (2022–2026)</div>
+            <h2 id="sec-almanaques-title" class="section-title">Colección de almanaques y anuarios meteorológicos</h2>
+            <p class="section-subtitle">Cinco volúmenes de archivo: crónicas sinópticas, climogramas diarios, balances hídricos y registros continuos de Barrio de Arriba</p>
           </div>
           <a href="#comparativas" class="btn">Comparar todos los años →</a>
         </div>
-        <div class="almanac-cards-grid">
+        <div class="almanac-cards-grid almanac-library-grid">
           ${almanacCardsHtml}
         </div>
       </section>

@@ -2278,6 +2278,40 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".episode-link-subtle", css_txt)
         self.assertIn(".episode-link-divider", css_txt)
 
+    def test_evo_044_almanac_library_and_tome_cards(self):
+        """EVO-044: Rediseño de la colección de almanaques anuales como «Biblioteca de anuarios»."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Comprobaciones en app.js
+        self.assertIn("almanac-library-section", app_js)
+        self.assertIn("almanac-library-grid", app_js)
+        self.assertIn("almanac-tome-card", app_js)
+        self.assertIn("almanac-tome-spine", app_js)
+        self.assertIn("almanac-tome-content", app_js)
+        self.assertIn("almanac-tome-meta", app_js)
+        self.assertIn("almanac-tome-vol", app_js)
+        self.assertIn("TOMO I", app_js)
+        self.assertIn("TOMO II", app_js)
+        self.assertIn("TOMO III", app_js)
+        self.assertIn("TOMO IV", app_js)
+        self.assertIn("TOMO V", app_js)
+        self.assertIn("tome-year-", app_js)
+        self.assertIn("Abrir volumen de", app_js)
+
+        # 2. Comprobaciones en styles.css
+        self.assertIn(".almanac-library-section", css_txt)
+        self.assertIn(".almanac-library-grid", css_txt)
+        self.assertIn(".almanac-tome-card", css_txt)
+        self.assertIn(".almanac-tome-spine", css_txt)
+        self.assertIn(".tome-year-2022", css_txt)
+        self.assertIn(".tome-year-2023", css_txt)
+        self.assertIn(".tome-year-2024", css_txt)
+        self.assertIn(".tome-year-2025", css_txt)
+        self.assertIn(".tome-year-2026", css_txt)
+        self.assertIn(".almanac-tome-vol", css_txt)
+        self.assertIn(".almanac-tome-card:hover .almanac-tome-spine", css_txt)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
