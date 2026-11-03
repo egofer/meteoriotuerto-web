@@ -2229,7 +2229,13 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".daily-gazette-grid .otd-panel", css_txt)
         self.assertIn("@media (max-width: 1080px)", css_txt)
 
-        # 3. Cache buster v1.2.15
+        # 3. Control de desbordamiento de etiquetas e indicadores
+        self.assertIn("white-space: normal", css_txt)
+        self.assertIn("word-break: break-word", css_txt)
+        self.assertIn(".live-kpi-card-header .live-kpi-unit", css_txt)
+        self.assertIn(".daily-gazette-grid .live-kpi-grid", css_txt)
+
+        # 4. Cache buster v1.2.15
         sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
         index_txt = (ROOT_DIR / "index.html").read_text(encoding="utf-8")
         self.assertIn("meteoriotuerto-cache-v1.2.15", sw_txt)

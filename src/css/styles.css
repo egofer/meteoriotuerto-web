@@ -1000,8 +1000,42 @@ html[data-theme="dark"] .plate-tag {
 }
 
 .daily-gazette-grid .live-kpi-grid {
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 1081px) {
+  .daily-gazette-grid .live-kpi-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .daily-gazette-grid .live-kpi-grid .live-kpi-card:nth-child(1),
+  .daily-gazette-grid .live-kpi-grid .live-kpi-card:nth-child(2),
+  .daily-gazette-grid .live-kpi-grid .live-kpi-card:nth-child(3) {
+    grid-column: span 2;
+  }
+  .daily-gazette-grid .live-kpi-grid .live-kpi-card:nth-child(4),
+  .daily-gazette-grid .live-kpi-grid .live-kpi-card:nth-child(5) {
+    grid-column: span 3;
+  }
+}
+
+.daily-gazette-grid .live-kpi-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+}
+
+.daily-gazette-grid .live-kpi-card-header .live-kpi-unit {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--txt-muted);
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+  text-align: right;
+  margin-left: auto;
 }
 
 .daily-gazette-grid .otd-header {
@@ -1022,13 +1056,33 @@ html[data-theme="dark"] .plate-tag {
 }
 
 .daily-gazette-grid .otd-years-grid {
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 12px;
   margin-top: auto;
 }
 
 .daily-gazette-grid .otd-year-card {
-  padding: 12px;
+  padding: 12px 14px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.daily-gazette-grid .otd-year-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+}
+
+.daily-gazette-grid .otd-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: normal;
+  max-width: 100%;
+  word-break: break-word;
+  box-sizing: border-box;
 }
 
 @media (max-width: 1080px) {
@@ -1045,7 +1099,7 @@ html[data-theme="dark"] .plate-tag {
     grid-template-columns: repeat(2, 1fr);
   }
   .daily-gazette-grid .otd-years-grid {
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
   }
 }
 
@@ -1060,6 +1114,9 @@ html[data-theme="dark"] .plate-tag {
     grid-template-columns: 1fr;
   }
   .daily-gazette-grid .otd-years-grid {
+    grid-template-columns: 1fr;
+  }
+  .daily-gazette-grid .live-kpi-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -3479,6 +3536,8 @@ html[data-theme="dark"] .otd-verdict-badge.badge-mild {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  overflow: hidden;
+  box-sizing: border-box;
   transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -3498,7 +3557,8 @@ html[data-theme="dark"] .otd-verdict-badge.badge-mild {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 4px 6px;
   margin-bottom: 10px;
 }
 
@@ -3520,9 +3580,13 @@ html[data-theme="dark"] .otd-verdict-badge.badge-mild {
   align-items: center;
   padding: 2px 7px;
   border-radius: 999px;
-  font-size: 0.69rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  white-space: nowrap;
+  line-height: 1.25;
+  white-space: normal;
+  max-width: 100%;
+  word-break: break-word;
+  box-sizing: border-box;
 }
 
 .otd-badge-heavy-rain {
@@ -6190,6 +6254,8 @@ html[data-theme="dark"] .offline-badge.online-restored {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  overflow: hidden;
+  box-sizing: border-box;
   transition: transform 0.15s ease;
 }
 
@@ -6200,15 +6266,27 @@ html[data-theme="dark"] .offline-badge.online-restored {
 
 .live-kpi-card-header {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 6px;
-  font-size: 0.76rem;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  font-size: 0.74rem;
   font-weight: 600;
   color: var(--txt-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 6px;
+}
+
+.live-kpi-card-header .live-kpi-unit {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--txt-muted);
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+  text-align: right;
+  margin-left: auto;
 }
 
 .live-kpi-main-val {
