@@ -1307,43 +1307,85 @@
       `;
     }).join('');
 
+    // EVO-041: Selector pasivo de estación astronómica para la cartela del frontispicio
+    const nowDt = new Date();
+    const curMonth = nowDt.getMonth() + 1;
+    const curDay = nowDt.getDate();
+    const curMd = curMonth * 100 + curDay;
+    let seasonInfo;
+    if (curMd >= 321 && curMd < 621) {
+      seasonInfo = { name: 'Primavera', icon: '🌱', subtitle: 'Floración y primeras siegas' };
+    } else if (curMd >= 621 && curMd < 923) {
+      seasonInfo = { name: 'Verano', icon: '☀️', subtitle: 'Estío cantábrico y tormentas orográficas' };
+    } else if (curMd >= 923 && curMd < 1221) {
+      seasonInfo = { name: 'Otoño', icon: '🍂', subtitle: 'Régimen de suradas y temporales atlánticos' };
+    } else {
+      seasonInfo = { name: 'Invierno', icon: '❄️', subtitle: 'Inversiones en vaguada y temporales del NO' };
+    }
+
     container.innerHTML = `
-      <!-- Bloque editorial de bienvenida simplificado y de carga ágil (EVO-026) -->
-      <article class="editorial-hero">
-        <div class="editorial-kicker">NOTARIO DEL CLIMA DE RIOTUERTO · ARCHIVO HISTÓRICO VERIFICADO</div>
+      <!-- Bloque editorial de bienvenida: Frontispicio del Valle del Covadal (EVO-026 / EVO-041) -->
+      <article class="editorial-hero frontispiece-hero">
+        <div class="frontispiece-header-row">
+          <div class="editorial-kicker">NOTARIO DEL CLIMA DE RIOTUERTO · ARCHIVO HISTÓRICO Y MEMORIA ATMOSFÉRICA LOCAL</div>
+          <span class="frontispiece-season-badge" title="Estación astronómica actual en Riotuerto">
+            <span class="season-badge-dot" aria-hidden="true">${seasonInfo.icon}</span>
+            <span>${seasonInfo.name} en el valle · ${seasonInfo.subtitle}</span>
+          </span>
+        </div>
+
         <h2 id="portada-heading" class="editorial-title">
           MeteoRiotuerto: la memoria meteorológica y climatológica de Riotuerto
         </h2>
-        <p class="editorial-lead">
-          <strong>MeteoRiotuerto</strong> documenta, analiza y conserva el registro instrumental de las condiciones
-          atmosféricas observadas en <strong>Barrio de Arriba (municipio de Riotuerto, Cantabria)</strong>.
-          Concebido como un almanaque anual riguroso y abierto, transforma las lecturas de la estación automática
-          en crónicas sinópticas, efemérides y series históricas al servicio del vecindario, aficionados e investigadores.
-        </p>
 
-        <!-- Pastilla de localización geográfica sintética -->
-        <div class="hero-geo-pill mono" aria-label="Emplazamiento de la estación">
-          <span>📍 Barrio de Arriba · Riotuerto (Cantabria)</span>
-          <span class="geo-divider" aria-hidden="true">·</span>
-          <span><a href="${idx.station.links.openstreetmap || 'https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670'}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline" title="Ver coordenadas en OpenStreetMap">43.341° N, 3.670° W</a></span>
-          <span class="geo-divider" aria-hidden="true">·</span>
-          <span>115 m s. n. m.</span>
-        </div>
+        <div class="frontispiece-layout">
+          <div class="frontispiece-main-col">
+            <p class="editorial-lead">
+              <span class="drop-cap">M</span><strong>eteoRiotuerto</strong> documenta, analiza y custodia el registro instrumental continuo de las condiciones
+              atmosféricas observadas en <strong>Barrio de Arriba (municipio de Riotuerto, Cantabria)</strong>.
+              Concebido con la vocación y cercanía de los almanaques tradicionales, transforma cada lectura de la estación automática
+              en crónicas sinópticas, efemérides y memoria climática al servicio del vecindario, investigadores y aficionados a la meteorología.
+            </p>
 
-        <!-- Fila de accesos directos principales -->
-        <div class="hero-actions">
-          <a href="#almanaque/2025" class="btn btn-primary hero-btn" data-scroll-to="sec-almanaques-title">
-            <span>📖 Explorar almanaques anuales</span>
-            <span aria-hidden="true">↓</span>
-          </a>
-          <a href="#sec-featured-episodes" class="btn btn-secondary hero-btn" data-scroll-to="sec-featured-episodes">
-            <span>⚡ Grandes acontecimientos</span>
-            <span aria-hidden="true">↓</span>
-          </a>
-          <a href="${idx.station.links.weathercloud || 'https://app.weathercloud.net/d6619283754'}" target="_blank" rel="noopener noreferrer" class="hero-btn-live" title="Consultar lecturas instantáneas en Weathercloud">
-            <span class="pulse-dot" aria-hidden="true"></span>
-            <span>Tiempo actual en vivo (Weathercloud) ↗</span>
-          </a>
+            <!-- Pastilla de localización geográfica sintética -->
+            <div class="hero-geo-pill mono" aria-label="Emplazamiento de la estación">
+              <span>📍 Barrio de Arriba · Riotuerto (Cantabria)</span>
+              <span class="geo-divider" aria-hidden="true">·</span>
+              <span><a href="${idx.station.links.openstreetmap || 'https://www.openstreetmap.org/?mlat=43.341&mlon=-3.670#map=15/43.341/-3.670'}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline" title="Ver coordenadas en OpenStreetMap">43.341° N, 3.670° W</a></span>
+              <span class="geo-divider" aria-hidden="true">·</span>
+              <span>115 m s. n. m.</span>
+            </div>
+
+            <!-- Fila de accesos directos principales -->
+            <div class="hero-actions">
+              <a href="#almanaque/2025" class="btn btn-primary hero-btn" data-scroll-to="sec-almanaques-title">
+                <span>📖 Explorar almanaques anuales</span>
+                <span aria-hidden="true">↓</span>
+              </a>
+              <a href="#sec-featured-episodes" class="btn btn-secondary hero-btn" data-scroll-to="sec-featured-episodes">
+                <span>⚡ Grandes acontecimientos</span>
+                <span aria-hidden="true">↓</span>
+              </a>
+              <a href="${idx.station.links.weathercloud || 'https://app.weathercloud.net/d6619283754'}" target="_blank" rel="noopener noreferrer" class="hero-btn-live" title="Consultar lecturas instantáneas en Weathercloud">
+                <span class="pulse-dot" aria-hidden="true"></span>
+                <span>Tiempo actual en vivo (Weathercloud) ↗</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Lámina fotográfica documental del valle del Covadal (EVO-041) -->
+          <figure class="frontispiece-plate" aria-label="Fotografía panorámica del Valle del Covadal">
+            <div class="plate-image-wrap">
+              <picture>
+                <source srcset="./assets/img/valle-covadal-barrio-de-arriba.webp" type="image/webp">
+                <img src="./assets/img/valle-covadal-barrio-de-arriba.jpg" alt="Panorámica documental del Valle del río Covadal y Barrio de Arriba con las estribaciones hacia el Puerto de Alisas (Riotuerto, Cantabria)" class="frontispiece-img" width="1376" height="768" loading="eager" fetchpriority="high">
+              </picture>
+              <span class="plate-tag">BARRIO DE ARRIBA · 115 M</span>
+            </div>
+            <figcaption class="plate-caption">
+              <strong>El valle del río Covadal desde Barrio de Arriba:</strong> praderías atlánticas y estribaciones calizas que ascienden hacia la divisoria del Puerto de Alisas (674 m), corredor natural de retenciones orográficas y suradas.
+            </figcaption>
+          </figure>
         </div>
       </article>
 

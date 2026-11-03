@@ -735,6 +735,176 @@ html[data-theme="dark"] .nav-link.active {
   background: var(--bg-elevated);
 }
 
+/* ==========================================================================
+   EVO-041: Frontispicio editorial de portada y anclaje paisajístico
+   ========================================================================== */
+.frontispiece-hero {
+  border: 1px solid var(--border-color);
+  border-top: 4px solid var(--accent-forest);
+  border-radius: var(--radius-md);
+  padding: 28px 32px 24px;
+  background: var(--bg-surface);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.frontispiece-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 8px;
+}
+
+.frontispiece-season-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: var(--accent-forest);
+  background: var(--accent-forest-soft);
+  padding: 3px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(27, 67, 50, 0.16);
+  letter-spacing: 0.01em;
+}
+
+.season-badge-dot {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.frontispiece-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 0.95fr;
+  gap: 26px 34px;
+  align-items: start;
+  margin-top: 8px;
+}
+
+.frontispiece-main-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.drop-cap {
+  float: left;
+  font-family: var(--font-serif);
+  font-size: 3.35rem;
+  line-height: 0.82;
+  font-weight: 700;
+  color: var(--accent-forest);
+  padding-right: 10px;
+  padding-top: 3px;
+  margin-bottom: -4px;
+}
+
+/* Lámina fotográfica documental del valle (passe-partout editorial) */
+.frontispiece-plate {
+  margin: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.plate-image-wrap {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--bg-subtle);
+  aspect-ratio: 16 / 9;
+}
+
+.frontispiece-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.frontispiece-img:hover {
+  transform: scale(1.025);
+}
+
+.plate-tag {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  background: rgba(19, 42, 33, 0.88);
+  color: #e9f2ee;
+  padding: 3px 8px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.plate-caption {
+  font-family: var(--font-serif);
+  font-size: 0.82rem;
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--txt-secondary);
+  padding: 8px 4px 2px;
+}
+
+.plate-caption strong {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--txt-primary);
+}
+
+/* Adaptaciones para el frontispicio en modo oscuro */
+html[data-theme="dark"] .frontispiece-hero {
+  border-top-color: var(--accent-forest);
+}
+
+html[data-theme="dark"] .frontispiece-season-badge {
+  background: var(--accent-forest-soft);
+  color: var(--accent-forest);
+  border-color: rgba(82, 183, 136, 0.28);
+}
+
+html[data-theme="dark"] .frontispiece-plate {
+  background: var(--bg-surface);
+  border-color: var(--border-color);
+}
+
+html[data-theme="dark"] .plate-tag {
+  background: rgba(7, 13, 11, 0.92);
+  color: #ecf2ef;
+}
+
+@media (max-width: 960px) {
+  .frontispiece-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .frontispiece-hero {
+    padding: 22px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frontispiece-img:hover {
+    transform: none;
+  }
+}
+
 .editorial-columns {
   display: grid;
   grid-template-columns: 2fr 1fr;

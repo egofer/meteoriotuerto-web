@@ -4,7 +4,7 @@
  * Permite consultar almanaques, datos históricos y gráficos en el campo o zonas sin cobertura.
  */
 
-const CACHE_NAME = 'meteoriotuerto-cache-v1.2.14';
+const CACHE_NAME = 'meteoriotuerto-cache-v1.2.15';
 
 const PRECACHE_ASSETS = [
   './',
@@ -22,6 +22,8 @@ const PRECACHE_ASSETS = [
   './apple-touch-icon.png',
   './assets/img/estacion-meteorologica-barrio-de-arriba.jpg',
   './assets/img/estacion-meteorologica-barrio-de-arriba.webp',
+  './assets/img/valle-covadal-barrio-de-arriba.jpg',
+  './assets/img/valle-covadal-barrio-de-arriba.webp',
   './assets/img/og/og-portada.jpg',
   './assets/img/og/og-almanaque-2022.jpg',
   './assets/img/og/og-almanaque-2023.jpg',
