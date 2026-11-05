@@ -2484,6 +2484,29 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("param === 'cronicas'", app_js)
         self.assertIn("param === 'mensuales'", app_js)
 
+    def test_inc_031_dropdown_hover_bridge_and_mobile_menu_overflow(self):
+        """INC-031 / INC-032: Búfer de hover en submenús desplegables y contención horizontal del botón Menú en móviles."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Puente de hover invisible en CSS (hitbox bridge) para evitar cierre por movimiento diagonal
+        self.assertIn(".nav-dropdown-menu::before", css_txt)
+        self.assertIn(".nav-item-dropdown.is-open .nav-dropdown-menu", css_txt)
+        self.assertIn(".nav-item-dropdown.is-open .dropdown-caret", css_txt)
+
+        # 2. Búfer de retardo en JavaScript (hover intent timer) para desplazamientos diagonales del ratón
+        self.assertIn("closeTimer = setTimeout", app_js)
+        self.assertIn("dropdown.classList.add('is-open')", app_js)
+        self.assertIn("dropdown.classList.remove('is-open')", app_js)
+
+        # 3. Prevención global de desbordamiento horizontal en viewport
+        self.assertIn("overflow-x: hidden", css_txt)
+
+        # 4. Ajustes responsive en cabecera móvil (≤768px y ≤360px)
+        self.assertIn(".site-header .container", css_txt)
+        self.assertIn("text-overflow: ellipsis", css_txt)
+        self.assertIn("@media (max-width: 360px)", css_txt)
+
 
 
 if __name__ == "__main__":

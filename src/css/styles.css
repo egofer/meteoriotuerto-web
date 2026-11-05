@@ -98,6 +98,7 @@ html[data-theme="dark"] {
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  overflow-x: hidden;
 }
 
 body {
@@ -109,6 +110,9 @@ body {
   display: flex;
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 .mono {
@@ -480,16 +484,18 @@ a:hover {
 }
 
 .nav-item-dropdown:hover .dropdown-caret,
-.nav-item-dropdown:focus-within .dropdown-caret {
+.nav-item-dropdown:focus-within .dropdown-caret,
+.nav-item-dropdown.is-open .dropdown-caret {
   transform: rotate(180deg);
   opacity: 1;
 }
 
 .nav-dropdown-menu {
   position: absolute;
-  top: calc(100% + 4px);
+  top: 100%;
+  margin-top: 2px;
   left: 0;
-  min-width: 275px;
+  min-width: 280px;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -500,13 +506,27 @@ a:hover {
   display: none;
 }
 
+/* Puente invisible (hitbox bridge) para impedir el cierre por salto de píxeles o movimiento diagonal del ratón */
+.nav-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: -12px;
+  right: -12px;
+  height: 18px;
+  background: transparent;
+  pointer-events: auto;
+  z-index: 1;
+}
+
 .nav-item-dropdown:hover .nav-dropdown-menu,
 .nav-item-dropdown:focus-within .nav-dropdown-menu,
+.nav-item-dropdown.is-open .nav-dropdown-menu,
 .nav-dropdown-menu.is-open {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
   gap: 4px;
-  animation: navDropdownFade 0.16s ease-out;
+  animation: navDropdownFade 0.15s ease-out;
 }
 
 @keyframes navDropdownFade {
@@ -3006,31 +3026,54 @@ html[data-theme="dark"] .btn-excel:hover {
     position: sticky;
     top: 0;
     z-index: 200;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+
+  .site-header .container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* 3. Fila de marca horizontal sin desbordamientos */
   .brand-row {
+    display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: space-between !important;
     padding-bottom: 0 !important;
     border-bottom: none !important;
-    gap: 8px;
+    gap: 6px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
   }
 
   .brand-link {
-    gap: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
   }
 
   .brand-emblem {
-    width: 34px !important;
-    height: 34px !important;
+    width: 32px !important;
+    height: 32px !important;
     border-radius: 8px !important;
+    flex-shrink: 0 !important;
   }
 
   .brand-emblem img {
-    width: 26px !important;
-    height: 26px !important;
+    width: 24px !important;
+    height: 24px !important;
   }
 
   /* Ocultar elementos secundarios redundantes en la cabecera fija */
@@ -3041,16 +3084,38 @@ html[data-theme="dark"] .btn-excel:hover {
   }
 
   .brand-title {
-    font-size: 1.25rem !important;
-    line-height: 1.1 !important;
+    font-size: clamp(0.98rem, 4.2vw, 1.22rem) !important;
+    line-height: 1.15 !important;
     margin: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
   }
 
-  /* Mostrar controles móviles en cabecera */
+  /* Mostrar controles móviles en cabecera sin desbordamiento */
   .mobile-header-controls {
     display: flex !important;
-    align-items: center;
-    gap: 8px;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+  }
+
+  .btn-mobile-icon {
+    width: 34px !important;
+    height: 34px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .btn-mobile-nav {
+    height: 34px !important;
+    padding: 0 8px !important;
+    gap: 5px !important;
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
 
   /* 4. Menú de navegación colapsable y accesible */
@@ -3064,8 +3129,8 @@ html[data-theme="dark"] .btn-excel:hover {
     flex-direction: column;
     position: absolute;
     top: calc(100% + 8px);
-    left: -20px;
-    right: -20px;
+    left: -12px !important;
+    right: -12px !important;
     background: var(--bg-surface);
     border-bottom: 2px solid var(--border-color);
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
@@ -3152,6 +3217,10 @@ html[data-theme="dark"] .btn-excel:hover {
     min-width: auto;
   }
 
+  .nav-dropdown-menu::before {
+    display: none !important;
+  }
+
   .nav-dropdown-link {
     padding: 10px 12px;
     border: 1px solid var(--border-color);
@@ -3183,6 +3252,38 @@ html[data-theme="dark"] .btn-excel:hover {
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+}
+
+/* Optimización extra para pantallas muy estrechas (≤360px como Galaxy Fold o pantallas compactas) */
+@media (max-width: 360px) {
+  .site-header .container {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .nav-list {
+    left: -8px !important;
+    right: -8px !important;
+  }
+
+  .brand-emblem {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .brand-emblem img {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .brand-title {
+    font-size: 0.94rem !important;
+  }
+
+  .btn-mobile-nav {
+    padding: 0 6px !important;
+    font-size: 0.78rem !important;
   }
 }
 

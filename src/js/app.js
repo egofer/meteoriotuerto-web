@@ -11957,6 +11957,83 @@
       }
     } catch (e) {}
 
+    // INC-031: Gestión robusta de submenús desplegables (Almanaques anuales y Archivo y Análisis)
+    // Elimina el problema de cierre accidental al mover el ratón con búfer de retardo (hover bridge y timer)
+    document.querySelectorAll('#main-nav .nav-item-dropdown').forEach((dropdown) => {
+      const trigger = dropdown.querySelector('.nav-dropdown-trigger');
+      const menu = dropdown.querySelector('.nav-dropdown-menu');
+      if (!trigger || !menu) return;
+
+      let closeTimer = null;
+
+      const openDropdown = () => {
+        if (closeTimer) {
+          clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+        dropdown.classList.add('is-open');
+        menu.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      };
+
+      const closeDropdown = (immediate = false) => {
+        if (closeTimer) {
+          clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+        if (immediate) {
+          dropdown.classList.remove('is-open');
+          menu.classList.remove('is-open');
+          trigger.setAttribute('aria-expanded', 'false');
+        } else {
+          // Búfer de cortesía de 280 ms para permitir desplazamiento diagonal cómodo del ratón
+          closeTimer = setTimeout(() => {
+            dropdown.classList.remove('is-open');
+            menu.classList.remove('is-open');
+            trigger.setAttribute('aria-expanded', 'false');
+          }, 280);
+        }
+      };
+
+      dropdown.addEventListener('mouseenter', openDropdown);
+      dropdown.addEventListener('mouseleave', () => closeDropdown(false));
+      menu.addEventListener('mouseenter', openDropdown);
+      menu.addEventListener('mouseleave', () => closeDropdown(false));
+
+      // En escritorio, permitir alternar con clic en el disparador
+      trigger.addEventListener('click', (e) => {
+        if (window.innerWidth > 768) {
+          const isOpen = dropdown.classList.contains('is-open');
+          if (isOpen) {
+            closeDropdown(true);
+          } else {
+            openDropdown();
+          }
+        }
+      });
+
+      // Teclado: Escape cierra el submenú y devuelve el foco
+      dropdown.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && dropdown.classList.contains('is-open')) {
+          e.stopPropagation();
+          closeDropdown(true);
+          trigger.focus();
+        }
+      });
+    });
+
+    // Cerrar desplegables de escritorio al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#main-nav .nav-item-dropdown')) {
+        document.querySelectorAll('#main-nav .nav-item-dropdown.is-open, #main-nav .nav-dropdown-menu.is-open').forEach((el) => {
+          el.classList.remove('is-open');
+        });
+        document.querySelectorAll('#main-nav .nav-dropdown-trigger[aria-expanded="true"]').forEach((trig) => {
+          trig.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
+
     // Menú de navegación accesible para dispositivos móviles
     const navToggle = document.getElementById('nav-toggle');
     const mainNav = document.getElementById('main-nav');
@@ -11976,6 +12053,13 @@
             navToggle.setAttribute('aria-expanded', 'false');
             navToggle.classList.remove('active');
           }
+          // Cerrar también cualquier desplegable de escritorio abierto
+          document.querySelectorAll('#main-nav .nav-item-dropdown.is-open, #main-nav .nav-dropdown-menu.is-open').forEach((el) => {
+            el.classList.remove('is-open');
+          });
+          document.querySelectorAll('#main-nav .nav-dropdown-trigger[aria-expanded="true"]').forEach((trig) => {
+            trig.setAttribute('aria-expanded', 'false');
+          });
         });
       });
 
