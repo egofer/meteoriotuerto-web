@@ -2414,6 +2414,76 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertGreaterEqual(app_js.count("class=\"meteo-vignette\""), 7,
                                 "Debe haber viñetas de remate tipográfico en portada y las vistas internas")
 
+    def test_evo_048_records_and_episodes_ux_overhaul(self):
+        """EVO-048: Rediseño integral de la sección de Acontecimientos y Récords."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # 1. Glifos vectoriales SVG nuevos en METEO_ICONS
+        self.assertIn("'download':", app_js)
+        self.assertIn("'search':", app_js)
+
+        # 2. Subnavegación rápida de anclas (.records-subnav) y enlaces de salto suave
+        self.assertIn("class=\"records-subnav\"", app_js)
+        self.assertIn("data-records-scroll=\"sec-abs-records\"", app_js)
+        self.assertIn("data-records-scroll=\"sec-major-events\"", app_js)
+        self.assertIn("data-records-scroll=\"sec-rankings\"", app_js)
+        self.assertIn("data-records-scroll=\"sec-monthly-records\"", app_js)
+        self.assertIn("data-records-scroll=\"sec-episodes-catalog\"", app_js)
+        self.assertIn(".records-subnav", css_txt)
+        self.assertIn(".records-subnav-link", css_txt)
+
+        # 3. Tarjetas interactivas de extremos absolutos con iconos a plumilla y enlaces a Explorador
+        self.assertIn("kpi-card-interactive", app_js)
+        self.assertIn("kpi-card-icon", app_js)
+        self.assertIn("Ver día en el Explorador", app_js)
+        self.assertIn(".kpi-card-interactive", css_txt)
+        self.assertIn(".kpi-action-link", css_txt)
+
+        # 4. Sala de Grandes Crónicas en #records (#sec-major-events)
+        self.assertIn("id=\"sec-major-events\"", app_js)
+        self.assertIn("Grandes acontecimientos meteorológicos que marcaron Riotuerto", app_js)
+        self.assertIn("Borrasca Fien: 125,9 mm en 24 h", app_js)
+        self.assertIn("42,1 °C en Barrio de Arriba", app_js)
+        self.assertIn("Borrasca Karlotta: vendaval de 97,2 km/h", app_js)
+
+        # 5. Rankings Top 10 con selector por píldoras, podio y barras de datos
+        self.assertIn("ranking-pills-bar", app_js)
+        self.assertIn("ranking-pill-btn", app_js)
+        self.assertIn("rank-badge-gold", app_js)
+        self.assertIn("rank-badge-silver", app_js)
+        self.assertIn("rank-badge-bronze", app_js)
+        self.assertIn("data-bar-wrap", app_js)
+        self.assertIn("data-bar-fill", app_js)
+        self.assertIn(".ranking-pills-bar", css_txt)
+        self.assertIn(".rank-badge-gold", css_txt)
+        self.assertIn(".data-bar-wrap", css_txt)
+
+        # 6. Matriz mensual con tarjetas de meses hito
+        self.assertIn("monthly-highlights-grid", app_js)
+        self.assertIn("monthly-highlight-card", app_js)
+        self.assertIn("Mes más lluvioso registrado", app_js)
+        self.assertIn("Mes más seco de la serie", app_js)
+        self.assertIn("Mes con mayor temperatura media", app_js)
+        self.assertIn(".monthly-highlights-grid", css_txt)
+        self.assertIn(".monthly-highlight-card", css_txt)
+
+        # 7. Catálogo de episodios con buscador, tarjetas KPI clickables y conmutador de vista
+        self.assertIn("id=\"input-episodes-search\"", app_js)
+        self.assertIn("episode-kpi-card-clickable", app_js)
+        self.assertIn("id=\"btn-episodes-view-table\"", app_js)
+        self.assertIn("id=\"btn-episodes-view-cards\"", app_js)
+        self.assertIn("id=\"episodes-cards-wrap\"", app_js)
+        self.assertIn("episode-catalog-card", app_js)
+        self.assertIn(".episodes-search-box", css_txt)
+        self.assertIn(".episodes-cards-grid", css_txt)
+        self.assertIn(".episode-catalog-card", css_txt)
+        self.assertIn(".btn-toggle", css_txt)
+
+        # 8. Compatibilidad y enrutamiento SPA profundo
+        self.assertIn("param === 'cronicas'", app_js)
+        self.assertIn("param === 'mensuales'", app_js)
+
 
 
 if __name__ == "__main__":

@@ -7205,5 +7205,458 @@ html[data-theme="dark"] .editorial-masthead-kicker {
   }
 }
 
+/* ==========================================================================
+   EVO-048: Rediseño integral de Acontecimientos y Récords
+   ========================================================================== */
+
+/* 1. Subnavegación de anclas rápidas */
+.records-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.records-subnav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 0.81rem;
+  font-weight: 600;
+  color: var(--txt-secondary);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.records-subnav-link:hover {
+  background: var(--bg-surface);
+  color: var(--accent-forest);
+  border-color: var(--accent-forest);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.records-subnav-link .subnav-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.records-subnav-link .meteo-icon {
+  width: 13px;
+  height: 13px;
+}
+
+/* 2. Tarjetas interactivas de extremos absolutos */
+.kpi-card-interactive {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.kpi-card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.kpi-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.kpi-card-icon {
+  display: inline-flex;
+  color: var(--txt-muted);
+  opacity: 0.85;
+}
+
+.kpi-card-icon .meteo-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.kpi-action {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.kpi-action-link {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--accent-forest);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kpi-action-link:hover {
+  text-decoration: underline;
+}
+
+.kpi-action-link .meteo-icon {
+  width: 12px;
+  height: 12px;
+}
+
+/* 3. Selector de Rankings por píldoras */
+.ranking-pills-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.ranking-pill-btn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 0.81rem;
+  font-weight: 600;
+  color: var(--txt-secondary);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ranking-pill-btn:hover {
+  background: var(--bg-surface);
+  color: var(--txt-primary);
+}
+
+.ranking-pill-btn.active {
+  background: var(--accent-forest) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-forest) !important;
+  box-shadow: 0 2px 6px rgba(27, 67, 50, 0.25);
+}
+
+html[data-theme="dark"] .ranking-pill-btn.active {
+  background: var(--accent-forest-hover) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-forest-hover) !important;
+}
+
+.ranking-pill-btn .meteo-icon {
+  width: 13px;
+  height: 13px;
+}
+
+/* 4. Podio y micro-barras de datos (Data-bars) */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  font-size: 0.80rem;
+  padding: 2px 6px;
+  line-height: 1.2;
+}
+
+.rank-badge-gold {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.rank-badge-silver {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #94a3b8;
+}
+
+.rank-badge-bronze {
+  background: #ffedd5;
+  color: #9a3412;
+  border: 1px solid #ea580c;
+}
+
+.rank-badge-default {
+  color: var(--txt-muted);
+}
+
+html[data-theme="dark"] .rank-badge-gold {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border-color: #f59e0b;
+}
+
+html[data-theme="dark"] .rank-badge-silver {
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  border-color: #64748b;
+}
+
+html[data-theme="dark"] .rank-badge-bronze {
+  background: rgba(234, 88, 12, 0.2);
+  color: #fdba74;
+  border-color: #ea580c;
+}
+
+.val-cell-bar {
+  padding-right: 8px !important;
+}
+
+.data-bar-wrap {
+  position: relative;
+  width: 100%;
+  min-width: 115px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 2px 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.data-bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  border-radius: 3px;
+  opacity: 0.16;
+  transition: width 0.3s ease;
+}
+
+.data-bar-fill.bar-heat { background: #ea580c; }
+.data-bar-fill.bar-cold { background: #0284c7; }
+.data-bar-fill.bar-rain { background: #2563eb; }
+.data-bar-fill.bar-wind { background: #d97706; }
+.data-bar-fill.bar-default { background: var(--accent-forest); }
+
+.data-bar-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* 5. Tarjetas de Meses hito en efemérides mensuales */
+.monthly-highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.monthly-highlight-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-forest);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+.monthly-highlight-card.hl-rain { border-left-color: #2563eb; }
+.monthly-highlight-card.hl-dry { border-left-color: #d97706; }
+.monthly-highlight-card.hl-heat { border-left-color: #ea580c; }
+
+.monthly-highlight-label {
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--txt-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.monthly-highlight-label .meteo-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.monthly-highlight-val {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--txt-primary);
+  line-height: 1.2;
+}
+
+.monthly-highlight-meta {
+  font-size: 0.78rem;
+  color: var(--txt-secondary);
+}
+
+/* 6. Buscador, conmutador de vista y catálogo de fichas */
+.episodes-search-box {
+  position: relative;
+  flex: 1 1 240px;
+  max-width: 380px;
+}
+
+.episodes-search-input {
+  width: 100%;
+  padding: 7px 12px 7px 32px;
+  font-size: 0.82rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--txt-primary);
+  transition: border-color 0.18s ease;
+}
+
+.episodes-search-input:focus {
+  border-color: var(--accent-forest);
+  outline: none;
+}
+
+.episodes-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--txt-muted);
+  display: inline-flex;
+  pointer-events: none;
+}
+
+.episodes-search-icon .meteo-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.view-mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.btn-toggle {
+  background: var(--bg-subtle);
+  border: none;
+  border-right: 1px solid var(--border-color);
+  padding: 6px 12px;
+  font-size: 0.80rem;
+  font-weight: 600;
+  color: var(--txt-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.18s ease;
+}
+
+.btn-toggle:last-child {
+  border-right: none;
+}
+
+.btn-toggle:hover {
+  background: var(--bg-surface);
+  color: var(--txt-primary);
+}
+
+.btn-toggle.active {
+  background: var(--accent-forest) !important;
+  color: #ffffff !important;
+}
+
+.btn-toggle .meteo-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.episode-kpi-card-clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.episode-kpi-card-clickable:hover {
+  border-color: var(--accent-forest);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.episodes-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.episode-catalog-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.episode-catalog-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.episode-catalog-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.episode-catalog-dates {
+  font-size: 0.86rem;
+  color: var(--txt-primary);
+  line-height: 1.35;
+}
+
+.episode-catalog-dur {
+  color: var(--txt-muted);
+  font-size: 0.80rem;
+  margin-left: 4px;
+}
+
+.episode-catalog-peak {
+  font-size: 0.84rem;
+  padding: 8px 10px;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.episode-catalog-summary {
+  font-size: 0.80rem;
+  color: var(--txt-secondary);
+  line-height: 1.45;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.episode-catalog-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-color);
+  font-size: 0.78rem;
+}
+
+
 
 

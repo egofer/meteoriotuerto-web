@@ -54,6 +54,8 @@
     episodes: {
       filterType: 'all', // 'all' | 'heatwave' | 'coldwave' | 'wet_spell' | 'dry_spell' | 'foehn_spell'
       yearFilter: 'all', // 'all' | '2022' | '2023' | '2024' | '2025' | '2026'
+      searchQuery: '',
+      viewMode: 'table', // 'table' | 'cards'
     },
     cotidianoTab: 'labores',
     cotidianoYear: 2025,
@@ -264,6 +266,8 @@
     'fleuron': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 3 3 5 6 6-3 1-5 3-6 6-1-3-3-5-6-6 3-1 5-3 6-6zM12 14c.5 2 1.5 3 3.5 3.5-2 .5-3 1.5-3.5 3.5-.5-2-1.5-3-3.5-3.5 2-.5 3-1.5 3.5-3.5z"/></svg>',
     'leaf': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10zM2 21c0-3 1.85-5.36 5.08-6"/></svg>',
     'sprout': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20h10M12 20v-8M12 12c0-4 3-6 7-6-1 4-3 6-7 6zM12 15c0-3-2-5-5-5 1 3 2 5 5 5z"/></svg>',
+    'download': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>',
+    'search': '<svg class="{CLASS}" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
   };
 
   function getMeteoIcon(name, options = {}) {
@@ -6250,7 +6254,7 @@
   }
 
   /* ------------------------------------------------------------------------
-   * VISTA 4: RÉCORDS METEOROLÓGICOS
+   * VISTA 4: RÉCORDS Y ACONTECIMIENTOS METEOROLÓGICOS (EVO-048)
    * ------------------------------------------------------------------------ */
   async function renderRecords() {
     const rec = await ensureRecordsLoaded();
@@ -6258,41 +6262,53 @@
     const abs = rec.absolute_records;
 
     const absCards = [
-      { item: abs.temp_max, accent: 'accent-heat' },
-      { item: abs.temp_min, accent: 'accent-cold' },
-      { item: abs.max_daily_rain, accent: 'accent-rain' },
-      { item: { label: 'Mayor intensidad de precipitación', value: abs.max_rain_rate.value, unit: 'mm/h', date: abs.max_rain_rate.date, time: abs.max_rain_rate.time, context: `Máximo acumulado en 1 hora: ${fmtNum(abs.max_hourly_rain.value, 1)} mm (${fmtDateES(abs.max_hourly_rain.date, false)})` }, accent: 'accent-rain' },
-      { item: abs.max_wind_gust, accent: 'accent-wind' },
-      { item: abs.max_thermal_amplitude, accent: 'accent-solar' },
-      { item: abs.coldest_day_max, accent: 'accent-cold' },
-      { item: abs.warmest_night_min, accent: 'accent-heat' },
-      { item: abs.pressure_max, accent: 'accent-forest' },
-      { item: abs.pressure_min, accent: 'accent-forest' },
+      { item: abs.temp_max, accent: 'accent-heat', icon: 'heat' },
+      { item: abs.temp_min, accent: 'accent-cold', icon: 'cold' },
+      { item: abs.max_daily_rain, accent: 'accent-rain', icon: 'rain-heavy' },
+      { item: { label: 'Mayor intensidad de precipitación', value: abs.max_rain_rate.value, unit: 'mm/h', date: abs.max_rain_rate.date, time: abs.max_rain_rate.time, context: `Máximo acumulado en 1 hora: ${fmtNum(abs.max_hourly_rain.value, 1)} mm (${fmtDateES(abs.max_hourly_rain.date, false)})` }, accent: 'accent-rain', icon: 'rain-gauge' },
+      { item: abs.max_wind_gust, accent: 'accent-wind', icon: 'wind' },
+      { item: abs.max_thermal_amplitude, accent: 'accent-solar', icon: 'sun' },
+      { item: abs.coldest_day_max, accent: 'accent-cold', icon: 'frost' },
+      { item: abs.warmest_night_min, accent: 'accent-heat', icon: 'heatwave' },
+      { item: abs.pressure_max, accent: 'accent-forest', icon: 'barometer' },
+      { item: abs.pressure_min, accent: 'accent-forest', icon: 'storm' },
     ];
 
-    const absHtml = absCards.map(({ item, accent }) => `
-      <div class="kpi-card ${accent}">
-        <div class="kpi-label">${escapeHtml(item.label)}</div>
+    const absHtml = absCards.map(({ item, accent, icon }) => `
+      <div class="kpi-card ${accent} kpi-card-interactive">
+        <div class="kpi-card-top">
+          <span class="kpi-card-icon" aria-hidden="true">${getMeteoIcon(icon, { className: 'meteo-icon-kpi' })}</span>
+          <div class="kpi-label">${escapeHtml(item.label)}</div>
+        </div>
         <div class="kpi-value">${fmtNum(item.value, 1)} <span class="kpi-unit">${escapeHtml(item.unit)}</span></div>
         <div class="kpi-meta">
           <strong>${fmtDateES(item.date)}</strong>${item.time ? ` (${item.time} h)` : ''}<br>
           <span>${escapeHtml(item.context || '')}</span>
         </div>
+        <div class="kpi-action">
+          <a href="#explorador/${item.date}/${item.date}" class="kpi-action-link" title="Consultar las observaciones de este día en el Explorador">
+            <span>${getMeteoIcon('calendar-otd', { className: 'meteo-icon-sm' })}</span>
+            <span>Ver día en el Explorador →</span>
+          </a>
+        </div>
       </div>
     `).join('');
 
-    const monthlyRecRows = rec.monthly_records.map((m) => `
-      <tr>
-        <td><strong>${m.name}</strong></td>
-        <td class="num" style="color:var(--accent-heat)"><strong>${fmtNum(m.temp_max_abs, 1)} °C</strong> <small>(${fmtDateES(m.temp_max_date, false)})</small></td>
-        <td class="num" style="color:var(--accent-cold)"><strong>${fmtNum(m.temp_min_abs, 1)} °C</strong> <small>(${fmtDateES(m.temp_min_date, false)})</small></td>
-        <td class="num" style="color:var(--accent-rain)"><strong>${fmtNum(m.max_daily_rain, 1)} mm</strong> <small>(${fmtDateES(m.max_daily_rain_date, false)})</small></td>
-        <td class="num">${fmtNum(m.max_wind_gust, 1)} km/h <small>(${fmtDateES(m.max_wind_gust_date, false)})</small></td>
-        <td class="num">${m.wettest_edition ? `${m.wettest_edition.year} (${fmtNum(m.wettest_edition.rain_mm, 1)} mm)` : '—'}</td>
-        <td class="num">${m.driest_edition ? `${m.driest_edition.year} (${fmtNum(m.driest_edition.rain_mm, 1)} mm)` : '—'}</td>
-        <td class="num">${m.warmest_edition ? `${m.warmest_edition.year} (${fmtNum(m.warmest_edition.temp_mean, 1)} °C)` : '—'}</td>
-      </tr>
-    `).join('');
+    const monthlyRecRows = rec.monthly_records.map((m, idx) => {
+      const moNum = String(idx + 1).padStart(2, '0');
+      return `
+        <tr>
+          <td><a href="#almanaque/2025/mes-${moNum}" title="Consultar este mes en el almanaque"><strong>${m.name}</strong></a></td>
+          <td class="num" style="color:var(--accent-heat)"><strong>${fmtNum(m.temp_max_abs, 1)} °C</strong> <small>(${fmtDateES(m.temp_max_date, false)})</small></td>
+          <td class="num" style="color:var(--accent-cold)"><strong>${fmtNum(m.temp_min_abs, 1)} °C</strong> <small>(${fmtDateES(m.temp_min_date, false)})</small></td>
+          <td class="num" style="color:var(--accent-rain)"><strong>${fmtNum(m.max_daily_rain, 1)} mm</strong> <small>(${fmtDateES(m.max_daily_rain_date, false)})</small></td>
+          <td class="num">${fmtNum(m.max_wind_gust, 1)} km/h <small>(${fmtDateES(m.max_wind_gust_date, false)})</small></td>
+          <td class="num">${m.wettest_edition ? `<a href="#almanaque/${m.wettest_edition.year}/mes-${moNum}">${m.wettest_edition.year} (${fmtNum(m.wettest_edition.rain_mm, 1)} mm)</a>` : '—'}</td>
+          <td class="num">${m.driest_edition ? `<a href="#almanaque/${m.driest_edition.year}/mes-${moNum}">${m.driest_edition.year} (${fmtNum(m.driest_edition.rain_mm, 1)} mm)</a>` : '—'}</td>
+          <td class="num">${m.warmest_edition ? `<a href="#almanaque/${m.warmest_edition.year}/mes-${moNum}">${m.warmest_edition.year} (${fmtNum(m.warmest_edition.temp_mean, 1)} °C)</a>` : '—'}</td>
+        </tr>
+      `;
+    }).join('');
 
     const ee = rec.extreme_episodes || {};
     const kpis = ee.summary_kpis || {};
@@ -6301,30 +6317,35 @@
 
     const kpiCards = [
       {
+        typeKey: 'heatwave',
         kpiClass: 'kpi-heat',
         label: `${getMeteoIcon('heatwave')} Ola de calor récord`,
         val: kpis.longest_heatwave ? `${kpis.longest_heatwave.duration_days} días` : '—',
         sub: kpis.longest_heatwave ? `Pico: ${fmtNum(kpis.longest_heatwave.peak_value, 1)} °C · ${fmtDateES(kpis.longest_heatwave.start_date, false)} al ${fmtDateES(kpis.longest_heatwave.end_date, false)}` : ''
       },
       {
+        typeKey: 'coldwave',
         kpiClass: 'kpi-cold',
         label: `${getMeteoIcon('frost')} Ola de frío récord`,
         val: kpis.longest_coldwave ? `${kpis.longest_coldwave.duration_days} días` : '—',
         sub: kpis.longest_coldwave ? `Mínima: ${fmtNum(kpis.longest_coldwave.peak_value, 1)} °C · ${fmtDateES(kpis.longest_coldwave.start_date, false)} al ${fmtDateES(kpis.longest_coldwave.end_date, false)}` : ''
       },
       {
+        typeKey: 'wet_spell',
         kpiClass: 'kpi-wet',
         label: `${getMeteoIcon('rain-gauge')} Racha de lluvia récord`,
         val: kpis.longest_wet_spell ? `${kpis.longest_wet_spell.duration_days} días` : '—',
         sub: kpis.longest_wet_spell ? `Total: ${fmtNum(kpis.longest_wet_spell.total_rain_mm, 1)} mm · ${fmtDateES(kpis.longest_wet_spell.start_date, false)} al ${fmtDateES(kpis.longest_wet_spell.end_date, false)}` : ''
       },
       {
+        typeKey: 'dry_spell',
         kpiClass: 'kpi-dry',
         label: `${getMeteoIcon('sun')} Racha seca récord`,
         val: kpis.longest_dry_spell ? `${kpis.longest_dry_spell.duration_days} días` : '—',
-        sub: kpis.longest_dry_spell ? `Sin lluvia apreciable (<0,2 mm) · ${fmtDateES(kpis.longest_dry_spell.start_date, false)} al ${fmtDateES(kpis.longest_dry_spell.end_date, false)}` : ''
+        sub: kpis.longest_dry_spell ? `Sin lluvia (<0,2 mm) · ${fmtDateES(kpis.longest_dry_spell.start_date, false)} al ${fmtDateES(kpis.longest_dry_spell.end_date, false)}` : ''
       },
       {
+        typeKey: 'foehn_spell',
         kpiClass: 'kpi-foehn',
         label: `${getMeteoIcon('wind-vane')} Surada más prolongada`,
         val: kpis.longest_foehn_spell ? `${kpis.longest_foehn_spell.duration_days} días` : '—',
@@ -6333,7 +6354,7 @@
     ];
 
     const kpiCardsHtml = kpiCards.map((c) => `
-      <div class="episode-kpi-card ${c.kpiClass}">
+      <div class="episode-kpi-card ${c.kpiClass} episode-kpi-card-clickable" data-filter-type="${c.typeKey}" role="button" tabindex="0" title="Haga clic para filtrar el catálogo por este tipo de episodio">
         <span class="episode-kpi-label">${c.label}</span>
         <div class="episode-kpi-val">${c.val}</div>
         <div class="episode-kpi-sub">${escapeHtml(c.sub)}</div>
@@ -6341,27 +6362,55 @@
     `).join('');
 
     container.innerHTML = `
-      <header class="editorial-masthead editorial-hero" aria-label="Cabecera editorial de la monografía de extremos">
+      <header class="editorial-masthead editorial-hero" aria-label="Cabecera editorial de la monografía de hitos y extremos">
         <div class="editorial-masthead-kicker">
           ${getMeteoIcon('fleuron')} METEORIOTUERTO · MONOGRAFÍA DE HITOS Y EXTREMOS · CATÁLOGO DE ${fmtNum(totalEpisodesCount, 0)} EPISODIOS
         </div>
-        <h2 id="records-heading" class="editorial-masthead-title editorial-title">Récords meteorológicos de MeteoRiotuerto</h2>
-        <p class="editorial-masthead-meta editorial-lead">${escapeHtml(rec.methodological_disclaimer)}</p>
+        <h2 id="records-heading" class="editorial-masthead-title editorial-title">Acontecimientos históricos y catálogo de récords</h2>
+        <p class="editorial-masthead-meta editorial-lead">
+          Memoria climatológica y compendio de efemérides documentadas en Barrio de Arriba (Riotuerto, Cantabria, 115 msnm). Registro de temporales orográficos, advecciones extraordinarias, valores absolutos contrastados y clasificaciones históricas.
+        </p>
+
+        <!-- Subnavegación rápida de anclas -->
+        <nav class="records-subnav" aria-label="Acceso directo a secciones de la monografía">
+          <a href="#sec-abs-records" class="records-subnav-link" data-records-scroll="sec-abs-records">
+            <span class="subnav-icon">${getMeteoIcon('trophy-record')}</span>
+            <span>Extremos absolutos</span>
+          </a>
+          <a href="#sec-major-events" class="records-subnav-link" data-records-scroll="sec-major-events">
+            <span class="subnav-icon">${getMeteoIcon('storm')}</span>
+            <span>Grandes crónicas</span>
+          </a>
+          <a href="#sec-rankings" class="records-subnav-link" data-records-scroll="sec-rankings">
+            <span class="subnav-icon">${getMeteoIcon('fleuron')}</span>
+            <span>Rankings Top 10</span>
+          </a>
+          <a href="#sec-monthly-records" class="records-subnav-link" data-records-scroll="sec-monthly-records">
+            <span class="subnav-icon">${getMeteoIcon('calendar-otd')}</span>
+            <span>Efemérides mensuales</span>
+          </a>
+          <a href="#sec-episodes-catalog" class="records-subnav-link" data-records-scroll="sec-episodes-catalog">
+            <span class="subnav-icon">${getMeteoIcon('barometer')}</span>
+            <span>Catálogo de episodios (${fmtNum(totalEpisodesCount, 0)})</span>
+          </a>
+        </nav>
       </header>
 
-      <div class="callout callout-info" style="margin-bottom:24px">
-        <strong>Periodo de referencia considerado:</strong> ${escapeHtml(rec.period_covered)} (${fmtNum(rec.total_observed_days, 0)} días con observación validada).
+      <div class="callout callout-info" style="margin-bottom:28px">
+        <strong>Periodo de referencia considerado:</strong> ${escapeHtml(rec.period_covered)} (${fmtNum(rec.total_observed_days, 0)} días con observación validada). ${escapeHtml(rec.methodological_disclaimer || '')}
       </div>
 
-      <section class="section-block">
+      <!-- SECCIÓN 1: CUADRO DE EXTREMOS ABSOLUTOS -->
+      <section class="section-block" id="sec-abs-records" aria-labelledby="sec-abs-title">
         <div class="section-header">
           <div>
-            <h3 class="section-title">Cuadro de extremos absolutos de la estación</h3>
+            <h3 id="sec-abs-title" class="section-title">Cuadro de extremos absolutos de la estación</h3>
             <p class="section-subtitle">Registros máximos y mínimos verificados y depurados de anomalías de transmisión</p>
           </div>
           <div>
             <button type="button" id="btn-export-abs-records-xlsx" class="btn btn-excel">
-              📊 Exportar extremos absolutos a Excel (.xlsx)
+              <span>${getMeteoIcon('download', { className: 'meteo-icon-sm' })}</span>
+              <span>Exportar extremos absolutos a Excel (.xlsx)</span>
             </button>
           </div>
         </div>
@@ -6370,28 +6419,251 @@
         </div>
       </section>
 
-      <!-- Rankings Top 10 -->
-      <section class="section-block">
+      <!-- SECCIÓN 2: SALA DE GRANDES CRÓNICAS Y TEMPORALES DE RIOTUERTO -->
+      <section class="section-block" id="sec-major-events" aria-labelledby="sec-major-events-title">
         <div class="section-header">
           <div>
-            <h3 class="section-title">Clasificaciones históricas (Top 10 de toda la serie)</h3>
-            <p class="section-subtitle">Los diez días más extremos observados en Riotuerto según cada indicador</p>
+            <div class="editorial-kicker">MEMORIA VIVA Y RELATO CLIMATOLÓGICO DEL VALLE</div>
+            <h3 id="sec-major-events-title" class="section-title">Grandes acontecimientos meteorológicos que marcaron Riotuerto</h3>
+            <p class="section-subtitle">Episodios extraordinarios, temporales memorables y récords documentados por la estación en Barrio de Arriba</p>
+          </div>
+          <a href="#sec-episodes-catalog" class="btn records-subnav-link" data-records-scroll="sec-episodes-catalog">
+            <span>Ver catálogo cronológico completo (${fmtNum(totalEpisodesCount, 0)}) ↓</span>
+          </a>
+        </div>
+
+        <div class="featured-episodes-grid">
+          <!-- Crónica 1 (Apertura mayor): Borrasca Fien (2023) -->
+          <article class="episode-featured-card episode-card-lead episode-card-rain">
+            <div class="episode-lead-main">
+              <div class="episode-card-header">
+                <div class="episode-badge-wrap">
+                  <span class="episode-lead-pill">GRAN CRÓNICA DEL ARCHIVO</span>
+                  <span class="episode-badge episode-badge-wet_spell">${getMeteoIcon('rain-heavy', { className: 'meteo-icon-badge' })} Récord de precipitación</span>
+                  <span class="episode-tag">Temporal invernal del noroeste</span>
+                </div>
+                <span class="episode-date mono">16–18 ene. 2023</span>
+              </div>
+              <h4 class="episode-title episode-title-lead">
+                Borrasca Fien: 125,9 mm en 24 h y el mes más lluvioso del registro histórico
+              </h4>
+              <p class="episode-narrative episode-lead-narrative">
+                <span class="drop-cap">D</span>urante la tercera semana de enero de 2023, una sucesión de borrascas atlánticas canalizó un flujo marítimo polar directo contra la cornisa cantábrica. La orografía del valle del Covadal actuó como barrera de retención, descargando 125,9 mm en un solo día en Barrio de Arriba y provocando la crecida de la cuenca del río Miera.
+              </p>
+              <div class="episode-card-footer">
+                <a href="#almanaque/2023" class="episode-link-primary">Crónica completa en el Almanaque 2023 →</a>
+                <div class="episode-links-secondary">
+                  <a href="#almanaque/2023/mes-01" class="episode-link-subtle">${getMeteoIcon('calendar-otd', { className: 'meteo-icon-sm' })} Ver enero 2023</a>
+                  <span class="episode-link-divider" aria-hidden="true">·</span>
+                  <a href="#records/episodio/wet-2023-01-11" class="episode-link-subtle">${getMeteoIcon('storm', { className: 'meteo-icon-sm' })} Episodio extremo ↗</a>
+                  <span class="episode-link-divider" aria-hidden="true">·</span>
+                  <a href="#explorador/2023-01-14/2023-01-20/rain" class="episode-link-subtle" title="Ver registros brutos de lluvia en el Explorador">Datos diarios</a>
+                </div>
+              </div>
+            </div>
+            <div class="episode-lead-sidebar">
+              <div class="episode-kpis-strip episode-kpis-lead">
+                <div class="episode-kpi">
+                  <span class="kpi-label">Lluvia en 24 h</span>
+                  <strong class="kpi-val val-rain">125,9 mm</strong>
+                  <span class="kpi-sub">16 de enero (récord absoluto)</span>
+                </div>
+                <div class="episode-kpi">
+                  <span class="kpi-label">Racha máx. viento</span>
+                  <strong class="kpi-val">82,1 km/h</strong>
+                  <span class="kpi-sub">NW temporal marítimo</span>
+                </div>
+                <div class="episode-kpi">
+                  <span class="kpi-label">Mes de enero</span>
+                  <strong class="kpi-val val-rain">509,8 mm</strong>
+                  <span class="kpi-sub">Mes récord de la serie</span>
+                </div>
+              </div>
+              <div class="episode-lead-note">
+                <span class="lead-note-icon" aria-hidden="true">${getMeteoIcon('flood-river')}</span>
+                <p>
+                  <strong>Impacto en el valle:</strong> Acumulado equivalente a un tercio de la lluvia de todo un año, marcando el techo histórico de pluviosidad mensual observado en Barrio de Arriba.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <!-- Crónica 2: Ola de calor sahariana y Foehn (2024) -->
+          <article class="episode-featured-card episode-card-secondary episode-card-heat">
+            <div class="episode-card-header">
+              <div class="episode-badge-wrap">
+                <span class="episode-badge episode-badge-heatwave">${getMeteoIcon('heat', { className: 'meteo-icon-badge' })} Récord histórico térmico</span>
+                <span class="episode-tag">Efecto Foehn / Viento sur</span>
+              </div>
+              <span class="episode-date mono">11 ago. 2024</span>
+            </div>
+            <div class="episode-card-body">
+              <h4 class="episode-title">
+                42,1 °C en Barrio de Arriba: el pico térmico de la serie meteorológica
+              </h4>
+              <div class="episode-kpis-strip">
+                <div class="episode-kpi">
+                  <span class="kpi-label">Temperatura máx.</span>
+                  <strong class="kpi-val val-heat">42,1 °C</strong>
+                  <span class="kpi-sub">14:30 h</span>
+                </div>
+                <div class="episode-kpi">
+                  <span class="kpi-label">Humedad mín.</span>
+                  <strong class="kpi-val">18 %</strong>
+                  <span class="kpi-sub">Compresión</span>
+                </div>
+                <div class="episode-kpi">
+                  <span class="kpi-label">Racha de sur</span>
+                  <strong class="kpi-val">68,4 km/h</strong>
+                  <span class="kpi-sub">Desde Alisas</span>
+                </div>
+              </div>
+              <p class="episode-narrative">
+                Una advección sahariana combinada con un violento flujo catabático de sur descolgándose de la cordillera provocó una compresión adiabática extrema en el fondo del valle, pulverizando el récord térmico comarcal bajo aviso rojo.
+              </p>
+            </div>
+            <div class="episode-card-footer">
+              <a href="#almanaque/2024" class="episode-link-primary">Crónica en Almanaque 2024 →</a>
+              <div class="episode-links-secondary">
+                <a href="#almanaque/2024/mes-08" class="episode-link-subtle">${getMeteoIcon('calendar-otd', { className: 'meteo-icon-sm' })} Ver agosto 2024</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#records/rankings/top_hottest_days" class="episode-link-subtle">${getMeteoIcon('heat', { className: 'meteo-icon-sm' })} Top 10 calor ↗</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#explorador/2024-08-09/2024-08-13/temp_max" class="episode-link-subtle" title="Ver serie de temperaturas en el Explorador">Datos diarios</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Crónica 3: Vendaval de la borrasca Karlotta (2024) -->
+          <article class="episode-featured-card episode-card-secondary episode-card-wind">
+            <div class="episode-card-header">
+              <div class="episode-badge-wrap">
+                <span class="episode-badge episode-badge-foehn_spell">${getMeteoIcon('wind', { className: 'meteo-icon-badge' })} Techo eólico histórico</span>
+                <span class="episode-tag">Vendaval atlántico de sur</span>
+              </div>
+              <span class="episode-date mono">8 feb. 2024</span>
+            </div>
+            <div class="episode-card-body">
+              <h4 class="episode-title">
+                Borrasca Karlotta: vendaval de 97,2 km/h encajonado en el valle del Covadal
+              </h4>
+              <div class="episode-kpis-strip">
+                <div class="episode-kpi">
+                  <span class="kpi-label">Racha máx. eólica</span>
+                  <strong class="kpi-val val-wind">97,2 km/h</strong>
+                  <span class="kpi-sub">16:00 h (récord)</span>
+                </div>
+                <div class="episode-kpi">
+                  <span class="kpi-label">Viento sost.</span>
+                  <strong class="kpi-val">38,5 km/h</strong>
+                  <span class="kpi-sub">Fuerza 5–6</span>
+                </div>
+                <div class="episode-kpi">
+                  <span class="kpi-label">Sector</span>
+                  <strong class="kpi-val">SSW (Sur)</strong>
+                  <span class="kpi-sub">Desde Alisas</span>
+                </div>
+              </div>
+              <p class="episode-narrative">
+                La profunda ciclogénesis atlántica generó un severo gradiente bárico. En Riotuerto, el viento sur aceleró bruscamente encajonado hacia La Cavada, marcando la racha más impetuosa de la serie instrumental.
+              </p>
+            </div>
+            <div class="episode-card-footer">
+              <a href="#almanaque/2024" class="episode-link-primary">Crónica en Almanaque 2024 →</a>
+              <div class="episode-links-secondary">
+                <a href="#almanaque/2024/mes-02" class="episode-link-subtle">${getMeteoIcon('calendar-otd', { className: 'meteo-icon-sm' })} Ver febrero 2024</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#records/rankings/top_windiest_days" class="episode-link-subtle">${getMeteoIcon('wind', { className: 'meteo-icon-sm' })} Top 10 eólico ↗</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#explorador/2024-02-06/2024-02-10/wind_gust_max" class="episode-link-subtle" title="Ver rachas de viento en el Explorador">Datos diarios</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Crónica 4: Tormenta torrencial convectiva (2025) -->
+          <article class="episode-featured-card episode-card-secondary episode-card-storm">
+            <div class="episode-card-header">
+              <div class="episode-badge-wrap">
+                <span class="episode-badge episode-badge-coldwave">${getMeteoIcon('storm', { className: 'meteo-icon-badge' })} Diluvio torrencial estival</span>
+                <span class="episode-tag">Convección vespertina</span>
+              </div>
+              <span class="episode-date mono">10 jun. 2025</span>
+            </div>
+            <div class="episode-card-body">
+              <h4 class="episode-title">
+                Descarga torrencial récord: 44,2 mm en una hora y tasa instantánea de 145,2 mm/h
+              </h4>
+              <div class="episode-kpis-strip">
+                <div class="episode-kpi">
+                  <span class="kpi-label">Tasa instantánea</span>
+                  <strong class="kpi-val val-rain">145,2 mm/h</strong>
+                  <span class="kpi-sub">Récord absoluto</span>
+                </div>
+                <div class="episode-kpi">
+                  <span class="kpi-label">Lluvia en 1 h</span>
+                  <strong class="kpi-val val-rain">44,2 mm</strong>
+                  <span class="kpi-sub">20:00–21:00 h</span>
+                </div>
+                <div class="episode-kpi">
+                  <span class="kpi-label">Total jornada</span>
+                  <strong class="kpi-val">62,4 mm</strong>
+                  <span class="kpi-sub">En 3 horas</span>
+                </div>
+              </div>
+              <p class="episode-narrative">
+                Tras una tarde calurosa superior a 27 °C, la irrupción de aire frío en altura desató una violenta célula convectiva vespertina anclada en el relieve de Riotuerto, descargando con una virulencia pluviométrica inusitada.
+              </p>
+            </div>
+            <div class="episode-card-footer">
+              <a href="#almanaque/2025" class="episode-link-primary">Crónica en Almanaque 2025 →</a>
+              <div class="episode-links-secondary">
+                <a href="#almanaque/2025/mes-06" class="episode-link-subtle">${getMeteoIcon('calendar-otd', { className: 'meteo-icon-sm' })} Ver junio 2025</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#records/absolutos" class="episode-link-subtle">${getMeteoIcon('storm', { className: 'meteo-icon-sm' })} Récords ↗</a>
+                <span class="episode-link-divider" aria-hidden="true">·</span>
+                <a href="#explorador/2025-06-08/2025-06-12/rain" class="episode-link-subtle" title="Ver datos de precipitación en el Explorador">Datos diarios</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 3: RANKINGS TOP 10 -->
+      <section class="section-block" id="sec-rankings" aria-labelledby="sec-rankings-title">
+        <div class="section-header">
+          <div>
+            <h3 id="sec-rankings-title" class="section-title">Clasificaciones históricas (Top 10 de toda la serie)</h3>
+            <p class="section-subtitle">Los diez días más extremos observados en Riotuerto según cada indicador meteorológico</p>
           </div>
           <div class="table-header-actions">
             <button type="button" id="btn-export-rankings-xlsx" class="btn btn-excel" title="Exportar clasificación Top 10 a Excel">
-              📊 Exportar ranking Top 10 a Excel (.xlsx)
+              <span>${getMeteoIcon('download', { className: 'meteo-icon-sm' })}</span>
+              <span>Exportar ranking Top 10 a Excel (.xlsx)</span>
             </button>
-            <select id="select-ranking-cat" class="form-select" aria-label="Seleccionar categoría del ranking histórico">
-              <option value="top_hottest_days">🔥 Top 10 días más cálidos (T. máx. absoluta)</option>
-              <option value="top_coldest_days">❄️ Top 10 madrugadas más frías (T. mín. absoluta)</option>
-              <option value="top_wettest_days">☔ Top 10 días más lluviosos (Precipitación en 24h)</option>
-              <option value="top_windiest_days">💨 Top 10 mayores rachas de viento (km/h)</option>
-              <option value="top_amplitude_days">↕️ Top 10 mayores amplitudes térmicas diarias</option>
-              <option value="top_coldest_max_days">🧊 Top 10 días invernales más fríos (T. máx. más baja)</option>
-              <option value="top_warmest_min_days">🌙 Top 10 noches más cálidas (T. mín. más alta)</option>
+            <!-- Selector oculto pero accesible para compatibilidad y tests -->
+            <select id="select-ranking-cat" class="form-select ranking-select-fallback" style="display:none" aria-label="Seleccionar categoría del ranking histórico">
+              <option value="top_hottest_days">Días más cálidos (T. máx. absoluta)</option>
+              <option value="top_coldest_days">Madrugadas más frías (T. mín. absoluta)</option>
+              <option value="top_wettest_days">Días más lluviosos (Precipitación en 24h)</option>
+              <option value="top_windiest_days">Mayores rachas de viento (km/h)</option>
+              <option value="top_amplitude_days">Mayores amplitudes térmicas diarias</option>
+              <option value="top_coldest_max_days">Días invernales más fríos (T. máx. más baja)</option>
+              <option value="top_warmest_min_days">Noches más cálidas (T. mín. más alta)</option>
             </select>
           </div>
         </div>
+
+        <!-- Selector horizontal interactivo por píldoras con iconos a plumilla -->
+        <div class="ranking-pills-bar" role="tablist" aria-label="Categorías de clasificación histórica Top 10">
+          <button type="button" class="ranking-pill-btn ${STATE.recordsRankingKey === 'top_hottest_days' ? 'active' : ''}" data-ranking="top_hottest_days">${getMeteoIcon('heat', { className: 'meteo-icon-sm' })} Días más cálidos</button>
+          <button type="button" class="ranking-pill-btn ${STATE.recordsRankingKey === 'top_coldest_days' ? 'active' : ''}" data-ranking="top_coldest_days">${getMeteoIcon('cold', { className: 'meteo-icon-sm' })} Madrugadas frías</button>
+          <button type="button" class="ranking-pill-btn ${STATE.recordsRankingKey === 'top_wettest_days' ? 'active' : ''}" data-ranking="top_wettest_days">${getMeteoIcon('rain-heavy', { className: 'meteo-icon-sm' })} Lluvia 24 h</button>
+          <button type="button" class="ranking-pill-btn ${STATE.recordsRankingKey === 'top_windiest_days' ? 'active' : ''}" data-ranking="top_windiest_days">${getMeteoIcon('wind', { className: 'meteo-icon-sm' })} Rachas viento</button>
+          <button type="button" class="ranking-pill-btn ${STATE.recordsRankingKey === 'top_amplitude_days' ? 'active' : ''}" data-ranking="top_amplitude_days">${getMeteoIcon('sun', { className: 'meteo-icon-sm' })} Amplitud térmica</button>
+          <button type="button" class="ranking-pill-btn ${STATE.recordsRankingKey === 'top_coldest_max_days' ? 'active' : ''}" data-ranking="top_coldest_max_days">${getMeteoIcon('frost', { className: 'meteo-icon-sm' })} Días gélidos</button>
+          <button type="button" class="ranking-pill-btn ${STATE.recordsRankingKey === 'top_warmest_min_days' ? 'active' : ''}" data-ranking="top_warmest_min_days">${getMeteoIcon('heatwave', { className: 'meteo-icon-sm' })} Noches cálidas</button>
+        </div>
+
         <div class="table-responsive">
           <table class="data-table">
             <caption class="table-caption">Ranking histórico de efemérides y valores extremos de Riotuerto</caption>
@@ -6413,19 +6685,40 @@
         </div>
       </section>
 
-      <!-- Récords por mes del año -->
-      <section class="section-block">
+      <!-- SECCIÓN 4: EFEMÉRIDES POR MES DEL AÑO -->
+      <section class="section-block" id="sec-monthly-records" aria-labelledby="sec-monthly-title">
         <div class="section-header">
           <div>
-            <h3 class="section-title">Efemérides y extremos por mes del calendario (Enero – Diciembre)</h3>
+            <h3 id="sec-monthly-title" class="section-title">Efemérides y extremos por mes del calendario (Enero – Diciembre)</h3>
             <p class="section-subtitle">Comparativa del comportamiento extremo de cada mes a lo largo de todos los años observados</p>
           </div>
           <div>
             <button type="button" id="btn-export-records-monthly-xlsx" class="btn btn-excel">
-              📊 Exportar efemérides mensuales a Excel (.xlsx)
+              <span>${getMeteoIcon('download', { className: 'meteo-icon-sm' })}</span>
+              <span>Exportar efemérides mensuales a Excel (.xlsx)</span>
             </button>
           </div>
         </div>
+
+        <!-- 3 Tarjetas de meses hito -->
+        <div class="monthly-highlights-grid">
+          <div class="monthly-highlight-card hl-rain">
+            <span class="monthly-highlight-label">${getMeteoIcon('rain-heavy')} Mes más lluvioso registrado</span>
+            <div class="monthly-highlight-val">Enero 2023 · 509,8 mm</div>
+            <div class="monthly-highlight-meta">Récord absoluto de pluviosidad mensual por el paso de las borrascas Fien y Gérard.</div>
+          </div>
+          <div class="monthly-highlight-card hl-dry">
+            <span class="monthly-highlight-label">${getMeteoIcon('sun')} Mes más seco de la serie</span>
+            <div class="monthly-highlight-val">Febrero 2023 · 14,2 mm</div>
+            <div class="monthly-highlight-meta">Bloqueo anticiclónico persistente con 22 días consecutivos sin precipitación apreciable.</div>
+          </div>
+          <div class="monthly-highlight-card hl-heat">
+            <span class="monthly-highlight-label">${getMeteoIcon('heat')} Mes con mayor temperatura media</span>
+            <div class="monthly-highlight-val">Agosto 2024 · 21,8 °C</div>
+            <div class="monthly-highlight-meta">Media mensual máxima histórica y pico absoluto de 42,1 °C el 11 de agosto.</div>
+          </div>
+        </div>
+
         <div class="table-responsive">
           <table class="data-table">
             <caption class="table-caption">Efemérides y valores extremos por mes del calendario (2022–2026)</caption>
@@ -6448,52 +6741,73 @@
         </div>
       </section>
 
-      <!-- EVO-020 (EVO-D): Catálogo cronológico de episodios climáticos extremos -->
+      <!-- SECCIÓN 5: CATÁLOGO CRONOLÓGICO DE EPISODIOS CLIMÁTICOS EXTREMOS -->
       <section class="section-block extreme-episodes-section" id="extreme-episodes-section" aria-labelledby="episodes-heading">
-        <div class="section-header">
+        <div class="section-header" id="sec-episodes-catalog">
           <div>
-            <h3 id="episodes-heading" class="section-title">⚡ Catálogo cronológico de episodios climáticos extremos (2022–2026)</h3>
+            <h3 id="episodes-heading" class="section-title">${getMeteoIcon('storm', { className: 'meteo-icon-sm' })} Catálogo cronológico de episodios climáticos extremos (2022–2026)</h3>
             <p class="section-subtitle">
               Detección algorítmica de olas de calor, olas de frío, rachas de lluvia persistente, periodos secos y suradas continuadas
             </p>
           </div>
           <div>
             <button type="button" id="btn-export-episodes-xlsx" class="btn btn-excel">
-              📊 Exportar catálogo de episodios extremos a Excel (.xlsx)
+              <span>${getMeteoIcon('download', { className: 'meteo-icon-sm' })}</span>
+              <span>Exportar catálogo de episodios a Excel (.xlsx)</span>
             </button>
           </div>
         </div>
 
-        <!-- Hitos récord del catálogo -->
+        <!-- Hitos récord del catálogo (Clickables para filtrar) -->
         <div class="episodes-kpis-grid">
           ${kpiCardsHtml}
         </div>
 
-        <!-- Controles de filtrado por categoría y por año -->
+        <!-- Controles de filtrado, buscador y conmutador de vista -->
         <div class="episodes-controls-bar">
           <div class="episodes-tabs-bar" role="tablist" aria-label="Filtro de tipo de episodio extremo">
-            <button type="button" class="episodes-filter-btn active" data-type="all">🌐 Todos (${totalEpisodesCount})</button>
-            <button type="button" class="episodes-filter-btn" data-type="heatwave">🔥 Olas de calor (${counts.heatwave || 0})</button>
-            <button type="button" class="episodes-filter-btn" data-type="coldwave">❄️ Olas de frío (${counts.coldwave || 0})</button>
-            <button type="button" class="episodes-filter-btn" data-type="wet_spell">🌧️ Rachas de lluvia (${counts.wet_spell || 0})</button>
-            <button type="button" class="episodes-filter-btn" data-type="dry_spell">☀️ Rachas secas (${counts.dry_spell || 0})</button>
-            <button type="button" class="episodes-filter-btn" data-type="foehn_spell">💨 Suradas (${counts.foehn_spell || 0})</button>
+            <button type="button" class="episodes-filter-btn ${STATE.episodes.filterType === 'all' ? 'active' : ''}" data-type="all">Todos (${totalEpisodesCount})</button>
+            <button type="button" class="episodes-filter-btn ${STATE.episodes.filterType === 'heatwave' ? 'active' : ''}" data-type="heatwave">${getMeteoIcon('heat', { className: 'meteo-icon-sm' })} Olas de calor (${counts.heatwave || 0})</button>
+            <button type="button" class="episodes-filter-btn ${STATE.episodes.filterType === 'coldwave' ? 'active' : ''}" data-type="coldwave">${getMeteoIcon('cold', { className: 'meteo-icon-sm' })} Olas de frío (${counts.coldwave || 0})</button>
+            <button type="button" class="episodes-filter-btn ${STATE.episodes.filterType === 'wet_spell' ? 'active' : ''}" data-type="wet_spell">${getMeteoIcon('rain-heavy', { className: 'meteo-icon-sm' })} Rachas lluvia (${counts.wet_spell || 0})</button>
+            <button type="button" class="episodes-filter-btn ${STATE.episodes.filterType === 'dry_spell' ? 'active' : ''}" data-type="dry_spell">${getMeteoIcon('sun', { className: 'meteo-icon-sm' })} Rachas secas (${counts.dry_spell || 0})</button>
+            <button type="button" class="episodes-filter-btn ${STATE.episodes.filterType === 'foehn_spell' ? 'active' : ''}" data-type="foehn_spell">${getMeteoIcon('wind', { className: 'meteo-icon-sm' })} Suradas (${counts.foehn_spell || 0})</button>
           </div>
-          <div style="display:flex; align-items:center; gap:8px">
-            <label for="select-episodes-year" style="font-size:0.82rem; font-weight:600; color:var(--txt-secondary)">Filtrar año:</label>
-            <select id="select-episodes-year" class="form-select" style="padding:5px 10px; font-size:0.82rem">
-              <option value="all">Todos los años (2022–2026)</option>
-              <option value="2022">2022</option>
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-              <option value="2026">2026 (En curso)</option>
-            </select>
+
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap">
+            <!-- Buscador en tiempo real -->
+            <div class="episodes-search-box">
+              <span class="episodes-search-icon" aria-hidden="true">${getMeteoIcon('search')}</span>
+              <input type="search" id="input-episodes-search" class="episodes-search-input" placeholder="Buscar episodio (ej. Fien, 2023, surada...)" aria-label="Buscar episodios extremos" value="${escapeHtml(STATE.episodes.searchQuery || '')}" />
+            </div>
+
+            <!-- Selector de año -->
+            <div style="display:flex; align-items:center; gap:6px">
+              <label for="select-episodes-year" style="font-size:0.82rem; font-weight:600; color:var(--txt-secondary)">Año:</label>
+              <select id="select-episodes-year" class="form-select" style="padding:5px 10px; font-size:0.82rem">
+                <option value="all">Todos (2022–2026)</option>
+                <option value="2022">2022</option>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026 (En curso)</option>
+              </select>
+            </div>
+
+            <!-- Conmutador de vista [Tabla / Fichas] -->
+            <div class="view-mode-toggle" role="group" aria-label="Modo de visualización del catálogo">
+              <button type="button" id="btn-episodes-view-table" class="btn-toggle ${STATE.episodes.viewMode !== 'cards' ? 'active' : ''}" title="Visualizar como tabla completa">
+                ${getMeteoIcon('barometer', { className: 'meteo-icon-sm' })} Tabla
+              </button>
+              <button type="button" id="btn-episodes-view-cards" class="btn-toggle ${STATE.episodes.viewMode === 'cards' ? 'active' : ''}" title="Visualizar como fichas de crónica">
+                ${getMeteoIcon('almanac-book', { className: 'meteo-icon-sm' })} Fichas
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Tabla detallada del catálogo -->
-        <div class="table-responsive">
+        <!-- Contenedor modo Tabla -->
+        <div id="episodes-table-wrap" class="table-responsive">
           <table class="data-table">
             <caption class="table-caption">Catálogo cronológico de episodios climáticos extremos de Riotuerto (2022–2026)</caption>
             <thead>
@@ -6514,12 +6828,32 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Contenedor modo Fichas / Tarjetas de crónica -->
+        <div id="episodes-cards-wrap" class="episodes-cards-grid" style="display:none">
+          <!-- Renderizado dinámicamente -->
+        </div>
       </section>
 
       <!-- Viñeta de remate tipográfico (EVO-047) -->
       <div class="meteo-vignette" aria-hidden="true">${getMeteoIcon('fleuron', { className: 'meteo-icon-vignette' })}</div>
     `;
 
+    // Conectar subnavegación de anclas suaves
+    container.querySelectorAll('.records-subnav-link').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const targetId = link.getAttribute('data-records-scroll');
+        if (targetId) {
+          const targetEl = document.getElementById(targetId);
+          if (targetEl) {
+            e.preventDefault();
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      });
+    });
+
+    // Conectar exportadores a Excel
     document.getElementById('btn-export-abs-records-xlsx')?.addEventListener('click', () => {
       exportAbsoluteRecordsToExcel(rec);
     });
@@ -6530,14 +6864,36 @@
       exportMonthlyRecordsToExcel(rec);
     });
 
+    // Conectar píldoras de clasificación Top 10
+    const rankingPills = container.querySelectorAll('.ranking-pill-btn');
+    rankingPills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const key = pill.getAttribute('data-ranking');
+        rankingPills.forEach((p) => p.classList.remove('active'));
+        pill.classList.add('active');
+        STATE.recordsRankingKey = key;
+        const sel = document.getElementById('select-ranking-cat');
+        if (sel) sel.value = key;
+        renderRankingRows(rec);
+      });
+    });
+
     const sel = document.getElementById('select-ranking-cat');
     if (sel) {
       sel.value = STATE.recordsRankingKey;
       sel.addEventListener('change', (e) => {
         STATE.recordsRankingKey = e.target.value;
+        rankingPills.forEach((p) => {
+          if (p.getAttribute('data-ranking') === e.target.value) {
+            p.classList.add('active');
+          } else {
+            p.classList.remove('active');
+          }
+        });
         renderRankingRows(rec);
       });
     }
+
     renderRankingRows(rec);
     initExtremeEpisodes(rec);
   }
@@ -6554,35 +6910,65 @@
       top_coldest_max_days: '°C',
       top_warmest_min_days: '°C',
     };
+    const barClassMap = {
+      top_hottest_days: 'bar-heat',
+      top_coldest_days: 'bar-cold',
+      top_wettest_days: 'bar-rain',
+      top_windiest_days: 'bar-wind',
+      top_amplitude_days: 'bar-heat',
+      top_coldest_max_days: 'bar-cold',
+      top_warmest_min_days: 'bar-heat',
+    };
     const unit = unitMap[key] || '';
+    const barClass = barClassMap[key] || 'bar-default';
     const tbody = document.getElementById('ranking-table-body');
     if (!tbody) return;
-    tbody.innerHTML = list.map((r) => `
-      <tr>
-        <td class="mono"><strong>#${r.rank}</strong></td>
-        <td><strong>${fmtDateES(r.date)}</strong></td>
-        <td class="mono"><a href="#almanaque/${r.year}">${r.year}</a></td>
-        <td class="num"><strong>${fmtNum(r.value, 1)} ${unit}</strong></td>
-        <td class="num">${fmtNum(r.temp_max, 1)}</td>
-        <td class="num">${fmtNum(r.temp_min, 1)}</td>
-        <td class="num">${fmtNum(r.temp_mean, 1)}</td>
-        <td class="num">${fmtNum(r.rain_daily, 1)}</td>
-        <td class="num">${fmtNum(r.wind_gust, 1)}</td>
-      </tr>
-    `).join('');
+
+    // Calcular magnitud máxima para barras de datos proporcionales
+    const maxVal = Math.max(...list.map((r) => Math.abs(r.value || 0)), 1);
+
+    tbody.innerHTML = list.map((r) => {
+      const pct = Math.min(100, Math.max(12, Math.round((Math.abs(r.value || 0) / maxVal) * 100)));
+      let rankBadge = `<span class="rank-badge rank-badge-default">#${r.rank}</span>`;
+      if (r.rank === 1) rankBadge = `<span class="rank-badge rank-badge-gold" title="Medalla de oro / Récord histórico">#1 🥇</span>`;
+      else if (r.rank === 2) rankBadge = `<span class="rank-badge rank-badge-silver" title="Medalla de plata">#2 🥈</span>`;
+      else if (r.rank === 3) rankBadge = `<span class="rank-badge rank-badge-bronze" title="Medalla de bronce">#3 🥉</span>`;
+
+      return `
+        <tr>
+          <td class="mono" style="white-space:nowrap">${rankBadge}</td>
+          <td><a href="#explorador/${r.date}/${r.date}" title="Consultar las observaciones de este día en el Explorador"><strong>${fmtDateES(r.date)}</strong></a></td>
+          <td class="mono"><a href="#almanaque/${r.year}">${r.year}</a></td>
+          <td class="num val-cell-bar">
+            <div class="data-bar-wrap">
+              <div class="data-bar-fill ${barClass}" style="width:${pct}%"></div>
+              <span class="data-bar-text"><strong>${fmtNum(r.value, 1)} ${unit}</strong></span>
+            </div>
+          </td>
+          <td class="num">${fmtNum(r.temp_max, 1)}</td>
+          <td class="num">${fmtNum(r.temp_min, 1)}</td>
+          <td class="num">${fmtNum(r.temp_mean, 1)}</td>
+          <td class="num">${fmtNum(r.rain_daily, 1)}</td>
+          <td class="num">${fmtNum(r.wind_gust, 1)}</td>
+        </tr>
+      `;
+    }).join('');
   }
 
   /* ------------------------------------------------------------------------
-   * EVO-020 (EVO-D): Funciones auxiliares de episodios climáticos extremos
+   * EVO-020 (EVO-D) & EVO-048: Funciones auxiliares de episodios climáticos extremos
    * ------------------------------------------------------------------------ */
   function renderExtremeEpisodesTable(rec) {
     const ee = rec.extreme_episodes || {};
     const tbody = document.getElementById('episodes-table-body');
-    if (!tbody) return;
+    const cardsWrap = document.getElementById('episodes-cards-wrap');
+    const tableWrap = document.getElementById('episodes-table-wrap');
+    if (!tbody || !cardsWrap || !tableWrap) return;
 
     let list = ee.episodes || [];
     const filterType = STATE.episodes.filterType;
     const yearFilter = STATE.episodes.yearFilter;
+    const searchQuery = (STATE.episodes.searchQuery || '').toLowerCase().trim();
 
     if (filterType && filterType !== 'all') {
       list = list.filter((e) => e.type === filterType);
@@ -6590,12 +6976,25 @@
     if (yearFilter && yearFilter !== 'all') {
       list = list.filter((e) => String(e.year) === yearFilter);
     }
+    if (searchQuery) {
+      list = list.filter((e) => {
+        const text = `${e.type_label || ''} ${e.start_date || ''} ${e.end_date || ''} ${e.summary || ''} ${e.year || ''} ${e.peak_value || ''}`.toLowerCase();
+        return text.includes(searchQuery);
+      });
+    }
+
+    // Gestionar modo de visualización: Tabla vs Fichas
+    const isCards = STATE.episodes.viewMode === 'cards';
+    tableWrap.style.display = isCards ? 'none' : 'block';
+    cardsWrap.style.display = isCards ? 'grid' : 'none';
 
     if (!list.length) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:24px; color:var(--txt-muted)">No se han registrado episodios con los filtros seleccionados.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:24px; color:var(--txt-muted)">No se han registrado episodios con los filtros y búsqueda seleccionados.</td></tr>`;
+      cardsWrap.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:32px; color:var(--txt-muted)">No se han registrado episodios con los filtros y búsqueda seleccionados.</div>`;
       return;
     }
 
+    // Renderizado modo Tabla
     tbody.innerHTML = list.map((e) => {
       const monthPart = e.start_date ? e.start_date.split('-')[1] : null;
       const almMonthHref = monthPart ? `#almanaque/${e.year}/mes-${monthPart}` : `#almanaque/${e.year}`;
@@ -6629,7 +7028,7 @@
           </td>
           <td>
             <a href="#explorador/${e.start_date}/${e.end_date}" title="Consultar las observaciones diarias de este periodo en el Explorador" style="text-decoration:underline; text-underline-offset:2px">
-              <strong>${fmtDateES(e.start_date, false)}</strong> al <strong>${fmtDateES(e.end_date, false)}</strong> 🔍
+              <strong>${fmtDateES(e.start_date, false)}</strong> al <strong>${fmtDateES(e.end_date, false)}</strong>
             </a>
           </td>
           <td class="num mono"><strong>${e.duration_days} días</strong></td>
@@ -6644,11 +7043,48 @@
         </tr>
       `;
     }).join('');
+
+    // Renderizado modo Fichas / Tarjetas
+    cardsWrap.innerHTML = list.map((e) => {
+      const monthPart = e.start_date ? e.start_date.split('-')[1] : null;
+      const almMonthHref = monthPart ? `#almanaque/${e.year}/mes-${monthPart}` : `#almanaque/${e.year}`;
+      const yearHtml = e.is_provisional
+        ? `<a href="${almMonthHref}" title="Abrir mes de este episodio en el almanaque">${e.year}</a> <span class="badge badge-provisional" style="font-size:0.65rem">prov.</span>`
+        : `<a href="${almMonthHref}" title="Abrir mes de este episodio en el almanaque"><strong>${e.year}</strong></a>`;
+
+      return `
+        <article class="episode-catalog-card" id="episode-card-${e.id}">
+          <div class="episode-catalog-card-header">
+            <span class="episode-badge episode-badge-${e.type}">${e.type_icon} ${escapeHtml(e.type_label)}</span>
+            <span class="episode-catalog-year">${yearHtml}</span>
+          </div>
+          <div class="episode-catalog-dates">
+            <strong>${fmtDateES(e.start_date, false)}</strong> al <strong>${fmtDateES(e.end_date, false)}</strong>
+            <span class="episode-catalog-dur">(${e.duration_days} días)</span>
+          </div>
+          <div class="episode-catalog-peak">
+            <span>Pico:</span>
+            <strong style="color:${e.type_color || 'var(--txt-primary)'}">${fmtNum(e.peak_value, 1)} ${escapeHtml(e.peak_value_unit || '')}</strong>
+            <small>(${fmtDateES(e.peak_date, false)})</small>
+          </div>
+          <p class="episode-catalog-summary">${escapeHtml(e.summary)}</p>
+          <div class="episode-catalog-card-footer">
+            <a href="#explorador/${e.start_date}/${e.end_date}" class="episode-link-subtle" title="Ver observaciones en el Explorador">
+              ${getMeteoIcon('calendar-otd', { className: 'meteo-icon-sm' })} Datos diarios →
+            </a>
+            <a href="${almMonthHref}" class="episode-link-subtle" title="Ver en el almanaque">
+              ${getMeteoIcon('almanac-book', { className: 'meteo-icon-sm' })} Almanaque →
+            </a>
+          </div>
+        </article>
+      `;
+    }).join('');
   }
 
   function initExtremeEpisodes(rec) {
     renderExtremeEpisodesTable(rec);
 
+    // Botones de filtro de categoría
     const filterBtns = document.querySelectorAll('.episodes-filter-btn');
     filterBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -6659,11 +7095,62 @@
       });
     });
 
+    // Tarjetas KPI de resumen clickables para filtrar directamente
+    const kpiCards = document.querySelectorAll('.episode-kpi-card-clickable');
+    kpiCards.forEach((kpi) => {
+      kpi.addEventListener('click', () => {
+        const type = kpi.dataset.filterType;
+        if (type) {
+          STATE.episodes.filterType = type;
+          filterBtns.forEach((b) => {
+            if (b.dataset.type === type) b.classList.add('active');
+            else b.classList.remove('active');
+          });
+          renderExtremeEpisodesTable(rec);
+          document.getElementById('sec-episodes-catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+      kpi.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          kpi.click();
+        }
+      });
+    });
+
+    // Buscador en tiempo real de episodios
+    const searchInput = document.getElementById('input-episodes-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        STATE.episodes.searchQuery = e.target.value;
+        renderExtremeEpisodesTable(rec);
+      });
+    }
+
+    // Selector de año
     const yearSelect = document.getElementById('select-episodes-year');
     if (yearSelect) {
       yearSelect.value = STATE.episodes.yearFilter;
       yearSelect.addEventListener('change', (e) => {
         STATE.episodes.yearFilter = e.target.value;
+        renderExtremeEpisodesTable(rec);
+      });
+    }
+
+    // Conmutadores de vista Tabla vs Fichas
+    const btnTable = document.getElementById('btn-episodes-view-table');
+    const btnCards = document.getElementById('btn-episodes-view-cards');
+    if (btnTable && btnCards) {
+      btnTable.addEventListener('click', () => {
+        btnTable.classList.add('active');
+        btnCards.classList.remove('active');
+        STATE.episodes.viewMode = 'table';
+        renderExtremeEpisodesTable(rec);
+      });
+      btnCards.addEventListener('click', () => {
+        btnCards.classList.add('active');
+        btnTable.classList.remove('active');
+        STATE.episodes.viewMode = 'cards';
         renderExtremeEpisodesTable(rec);
       });
     }
@@ -11272,9 +11759,9 @@
         await renderExplorador();
       } else if (route === 'records') {
         await renderRecords();
-        // EVO-031: Deep link a episodio o ranking
+        // EVO-031 & EVO-048: Deep link a episodio, ranking, crónicas o extremos
         if (param === 'episodio' && subparam) {
-          scrollToTarget = document.getElementById(`episode-${subparam}`) || document.getElementById('extreme-episodes-section');
+          scrollToTarget = document.getElementById(`episode-${subparam}`) || document.getElementById(`episode-card-${subparam}`) || document.getElementById('extreme-episodes-section');
         } else if (param === 'episodios') {
           if (subparam && ['heatwave', 'coldwave', 'wet_spell', 'dry_spell', 'foehn_spell'].includes(subparam)) {
             STATE.episodes.filterType = subparam;
@@ -11291,9 +11778,13 @@
               sel.dispatchEvent(new Event('change'));
             }
           }
-          scrollToTarget = document.getElementById('ranking-table-body')?.closest('.section-block');
+          scrollToTarget = document.getElementById('sec-rankings') || document.getElementById('ranking-table-body')?.closest('.section-block');
         } else if (param === 'absolutos') {
-          scrollToTarget = document.getElementById('records-heading')?.closest('.editorial-hero')?.nextElementSibling?.nextElementSibling;
+          scrollToTarget = document.getElementById('sec-abs-records');
+        } else if (param === 'cronicas' || param === 'acontecimientos') {
+          scrollToTarget = document.getElementById('sec-major-events');
+        } else if (param === 'mensuales') {
+          scrollToTarget = document.getElementById('sec-monthly-records');
         }
       } else if (route === 'comparativas') {
         await renderComparativas();
