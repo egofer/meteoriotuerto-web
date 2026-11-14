@@ -11491,7 +11491,7 @@
    * MEJ-005 / EVO-037: Actualización dinámica de document.title y metadatos SEO / Open Graph
    * ------------------------------------------------------------------------ */
   function updateDocumentMetadata(route, param, subparam, idx) {
-    let title = 'MeteoRiotuerto — Almanaque meteorológico y climatológico digital de Riotuerto';
+    let title = 'MeteoRiotuerto — Almanaque climatológico de Riotuerto';
     let desc = 'Archivo histórico, anuario estadístico y notario del clima del municipio de Riotuerto (Barrio de Arriba, Cantabria, 115 msnm). Observaciones, almanaques anuales, récords, comparativas y metodología.';
     let url = 'https://egofer.github.io/meteoriotuerto-web/';
     let imageRel = 'assets/img/og/og-portada.jpg';

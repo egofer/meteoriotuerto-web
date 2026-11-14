@@ -1519,7 +1519,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
             '<meta property="og:type" content="website">',
             '<meta property="og:locale" content="es_ES">',
             '<meta property="og:site_name" content="MeteoRiotuerto">',
-            '<meta property="og:title" content="MeteoRiotuerto — Almanaque meteorológico y climatológico digital de Riotuerto">',
+            '<meta property="og:title" content="MeteoRiotuerto — Almanaque climatológico de Riotuerto">',
             '<meta property="og:url" content="https://egofer.github.io/meteoriotuerto-web/">',
             '<meta property="og:image" content="https://egofer.github.io/meteoriotuerto-web/assets/img/og/og-portada.jpg">',
             '<meta property="og:image:secure_url" content="https://egofer.github.io/meteoriotuerto-web/assets/img/og/og-portada.jpg">',
@@ -1536,7 +1536,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         # 3. Twitter Cards
         expected_twitter = [
             '<meta name="twitter:card" content="summary_large_image">',
-            '<meta name="twitter:title" content="MeteoRiotuerto — Almanaque meteorológico y climatológico digital de Riotuerto">',
+            '<meta name="twitter:title" content="MeteoRiotuerto — Almanaque climatológico de Riotuerto">',
             '<meta name="twitter:image" content="https://egofer.github.io/meteoriotuerto-web/assets/img/og/og-portada.jpg">',
         ]
         for tw_tag in expected_twitter:
