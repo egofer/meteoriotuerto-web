@@ -21,6 +21,11 @@ logs/
 # Documentación interna de contexto, memoria y sesiones locales (nunca publicar en GitHub)
 contexto/
 /contexto/
+PROJECT_CONTEXT.md
+PROJECT_STATUS.md
+DECISIONS.md
+FILE_INDEX.md
+REPRODUCTION.md
 scratch/
 tmp/
 temp/
