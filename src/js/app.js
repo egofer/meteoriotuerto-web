@@ -1434,10 +1434,10 @@
         <div class="frontispiece-layout">
           <div class="frontispiece-main-col">
             <p class="editorial-lead">
-              <span class="drop-cap">M</span><strong>eteoRiotuerto</strong> documenta, analiza y custodia el registro instrumental continuo de las condiciones
-              atmosféricas observadas en <strong>Barrio de Arriba (municipio de Riotuerto, Cantabria)</strong>.
-              Concebido con la vocación y cercanía de los almanaques tradicionales, transforma cada lectura de la estación automática
-              en crónicas sinópticas, efemérides y memoria climática al servicio del vecindario, investigadores y aficionados a la meteorología.
+              <span class="drop-cap">M</span><strong>eteoRiotuerto</strong> documenta, analiza y custodia el registro continuo obtenido por una
+              <strong>estación meteorológica automática particular</strong> instalada en <strong>Barrio de Arriba (municipio de Riotuerto, Cantabria)</strong>, sin vinculación con redes oficiales como AEMET.
+              Concebido con la vocación y cercanía de los almanaques tradicionales, transforma sus lecturas
+              en crónicas sinópticas, efemérides y memoria climática local al servicio del vecindario, investigadores y aficionados a la meteorología.
             </p>
 
             <!-- Pastilla de localización geográfica sintética -->
@@ -3209,7 +3209,7 @@
           <div class="chart-panel-header">
             <div>
               <h4 class="chart-panel-title">Calendario diario de observación (${alm.year})</h4>
-              <p class="chart-panel-subtitle">Mapa de calor día a día (1 a 31 de cada mes). Pase el cursor sobre cualquier celda para ver el detalle diario.</p>
+              <p class="chart-panel-subtitle">Mapa de calor día a día (1 a 31 de cada mes). Toque o pase el cursor sobre cualquier celda para ver el detalle diario.</p>
             </div>
             <div class="btn-group" role="group" aria-label="Variable del calendario anual">
               <button type="button" id="btn-cal-rain" class="btn ${STATE.calendarMode === 'rain' ? 'btn-primary' : ''}">
@@ -3221,10 +3221,11 @@
             </div>
           </div>
           <div id="almanac-calendar-container" class="calendar-heatmap-wrap"></div>
+          <div id="cal-day-inspector" class="cal-day-inspector" aria-live="polite"></div>
           <div class="calendar-event-legend" aria-label="Leyenda de acontecimientos">
             <span class="legend-item"><span class="legend-dot"></span> <strong>Punto rojo:</strong> día parte de un episodio catalogado</span>
             <span class="legend-item"><span class="legend-box"></span> <strong>Borde dorado:</strong> día pico de intensidad</span>
-            <span class="legend-item"><em>(Pase el cursor por cualquier celda para ver el detalle y el badge del episodio)</em></span>
+            <span class="legend-item"><em>(Toque o pase el cursor por cualquier celda para ver el detalle y el badge del episodio)</em></span>
           </div>
         </div>
 
@@ -3841,7 +3842,7 @@
         const val = rec ? (mode === 'rain' ? rec.rain : rec.tmean) : null;
 
         if (!rec || val === null || val === undefined) {
-          bodyRows += `<td class="cal-cell missing-day" title="${fmtDateES(iso)}: Sin datos">—</td>`;
+          bodyRows += `<td class="cal-cell missing-day" title="${fmtDateES(iso)}: Sin datos" data-date="${iso}" data-missing="1" tabindex="0" role="button" aria-label="${fmtDateES(iso)}: Sin datos">—</td>`;
           continue;
         }
 
@@ -3858,12 +3859,85 @@
         if (epForDay) {
           tooltip += ` · ⚡ [Episodio: ${epForDay.type_label} (${fmtNum(epForDay.peak_value, 1)} ${epForDay.peak_value_unit})]`;
         }
-        bodyRows += `<td id="cal-cell-${iso}" class="cal-cell${eventClasses}" style="${style}" title="${escapeHtml(tooltip)}" data-date="${iso}">${disp}</td>`;
+        bodyRows += `<td id="cal-cell-${iso}" class="cal-cell${eventClasses}" style="${style}" title="${escapeHtml(tooltip)}" data-date="${iso}" tabindex="0" role="button" aria-label="${escapeHtml(tooltip)}">${disp}</td>`;
       }
       bodyRows += '</tr>';
     }
 
     wrap.innerHTML = `<table class="calendar-matrix" aria-label="Calendario diario de ${alm.year}"><caption class="table-caption">Matriz de calendario diario de ${mode === 'rain' ? 'precipitación (mm)' : 'temperatura media (°C)'} de ${alm.year}</caption><thead>${dayHeaders}</thead><tbody>${bodyRows}</tbody></table>`;
+
+    // Visor interactivo táctil y de clic para inspeccionar cualquier día (móvil y escritorio)
+    const inspector = document.getElementById('cal-day-inspector');
+    const renderDayInspector = (iso) => {
+      if (!inspector || !iso) return;
+      wrap.querySelectorAll('.cal-cell.cal-cell-selected').forEach((c) => c.classList.remove('cal-cell-selected'));
+      const activeCell = wrap.querySelector(`.cal-cell[data-date="${iso}"]`);
+      if (activeCell) activeCell.classList.add('cal-cell-selected');
+
+      const rec = byDate[iso];
+      if (!rec || (rec.rain === null && rec.tmean === null)) {
+        inspector.innerHTML = `
+          <div class="cal-day-inspector-header">
+            <strong class="cal-day-inspector-date">${fmtDateES(iso, true)}</strong>
+            <span class="cal-day-inspector-muted">Sin datos registrados para esta fecha</span>
+          </div>
+        `;
+        return;
+      }
+
+      const epForDay = episodesList.find((e) => e.start_date <= iso && iso <= e.end_date);
+      const isPeak = epForDay && epForDay.peak_date === iso;
+      const epBadgeHtml = epForDay
+        ? `<div class="cal-day-episode-badge${isPeak ? ' is-peak' : ''}">
+             <span>⚡ <strong>${escapeHtml(epForDay.type_label)}</strong> (${fmtNum(epForDay.peak_value, 1)} ${escapeHtml(epForDay.peak_value_unit)})${isPeak ? ' · Día pico' : ''}</span>
+             ${epForDay.id ? `<a href="#records/episodio/${encodeURIComponent(epForDay.id)}" class="cal-day-ep-link">Ver episodio →</a>` : ''}
+           </div>`
+        : '';
+
+      inspector.innerHTML = `
+        <div class="cal-day-inspector-header">
+          <strong class="cal-day-inspector-date">📅 ${fmtDateES(iso, true)}</strong>
+          <a href="#explorador/${iso}/${iso}" class="cal-day-explorer-link">🔍 Ver día en Explorador</a>
+        </div>
+        <div class="cal-day-metrics">
+          <div class="cal-day-metric"><span class="cal-day-metric-lbl">T. media</span><strong>${fmtNum(rec.tmean, 1)} °C</strong></div>
+          <div class="cal-day-metric"><span class="cal-day-metric-lbl">Mín / Máx</span><strong>${fmtNum(rec.tmin, 1)} / ${fmtNum(rec.tmax, 1)} °C</strong></div>
+          <div class="cal-day-metric"><span class="cal-day-metric-lbl">Lluvia</span><strong>${fmtNum(rec.rain, 1)} mm</strong></div>
+          <div class="cal-day-metric"><span class="cal-day-metric-lbl">Racha máx.</span><strong>${fmtNum(rec.gust, 1)} km/h</strong></div>
+        </div>
+        ${epBadgeHtml}
+      `;
+    };
+
+    // Delegación de eventos táctil/clic y teclado sobre las celdas de la matriz
+    wrap.onclick = (ev) => {
+      const cell = ev.target.closest('.cal-cell[data-date]');
+      if (cell) {
+        renderDayInspector(cell.getAttribute('data-date'));
+      }
+    };
+    wrap.onkeydown = (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        const cell = ev.target.closest('.cal-cell[data-date]');
+        if (cell) {
+          ev.preventDefault();
+          renderDayInspector(cell.getAttribute('data-date'));
+        }
+      }
+    };
+
+    // Preseleccionar el día más destacado del año según el modo activo para mostrar un ejemplo inmediato
+    let defaultDate = null;
+    if (mode === 'rain' && alm.stats?.precipitation?.max_daily_date) {
+      defaultDate = alm.stats.precipitation.max_daily_date;
+    } else if (mode === 'temp' && alm.stats?.temperature?.max_abs_date) {
+      defaultDate = alm.stats.temperature.max_abs_date;
+    } else if (ds.dates && ds.dates.length > 0) {
+      defaultDate = ds.dates[ds.dates.length - 1];
+    }
+    if (defaultDate) {
+      renderDayInspector(defaultDate);
+    }
   }
 
   function getCalendarCellStyle(val, mode) {
@@ -4044,6 +4118,8 @@
       });
     }
 
+    const isMobileChart = typeof window !== 'undefined' && window.innerWidth <= 640;
+
     createChart('alm_dailyrain', 'chart-alm-dailyrain', {
       type: 'bar',
       data: {
@@ -4055,7 +4131,7 @@
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: { labels: { color: pal.text } },
+          legend: { labels: { color: pal.text, boxWidth: isMobileChart ? 10 : 16, font: { size: isMobileChart ? 11 : 12 } } },
           tooltip: {
             callbacks: {
               label: (ctx) => `${ctx.dataset.label}: ${fmtNum(ctx.parsed.y, 1)} mm`,
@@ -4063,18 +4139,18 @@
           },
         },
         scales: {
-          x: { ticks: { color: pal.text, maxTicksLimit: 12 }, grid: { color: pal.grid } },
+          x: { ticks: { color: pal.text, maxTicksLimit: isMobileChart ? 6 : 12, font: { size: isMobileChart ? 10 : 11 } }, grid: { color: pal.grid } },
           y: {
             beginAtZero: true,
-            title: { display: true, text: 'Lluvia diaria (mm)', color: pal.text },
-            ticks: { color: pal.text },
+            title: { display: !isMobileChart, text: 'Lluvia diaria (mm)', color: pal.text },
+            ticks: { color: pal.text, font: { size: isMobileChart ? 10 : 11 } },
             grid: { color: pal.grid },
           },
           y1: {
             position: 'right',
             beginAtZero: true,
-            title: { display: true, text: 'Acumulado anual (mm)', color: pal.text },
-            ticks: { color: pal.text },
+            title: { display: !isMobileChart, text: 'Acumulado anual (mm)', color: pal.text },
+            ticks: { color: pal.text, font: { size: isMobileChart ? 10 : 11 } },
             grid: { drawOnChartArea: false },
           },
         },
@@ -4103,13 +4179,13 @@
         responsive: true,
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { labels: { color: pal.text } } },
+        plugins: { legend: { labels: { color: pal.text, font: { size: isMobileChart ? 11 : 12 } } } },
         scales: {
-          x: { ticks: { color: pal.text, maxTicksLimit: 12 }, grid: { color: pal.grid } },
+          x: { ticks: { color: pal.text, maxTicksLimit: isMobileChart ? 6 : 12, font: { size: isMobileChart ? 10 : 11 } }, grid: { color: pal.grid } },
           y: {
             beginAtZero: true,
-            title: { display: true, text: 'Racha máxima (km/h)', color: pal.text },
-            ticks: { color: pal.text },
+            title: { display: !isMobileChart, text: 'Racha máxima (km/h)', color: pal.text },
+            ticks: { color: pal.text, font: { size: isMobileChart ? 10 : 11 } },
             grid: { color: pal.grid },
           },
         },
@@ -4124,7 +4200,7 @@
     createChart('alm_beaufort', 'chart-alm-beaufort', {
       type: 'bar',
       data: {
-        labels: bft.map((b) => b.label),
+        labels: bft.map((b) => isMobileChart ? b.label.replace(/\s*km\/h/g, '') : b.label),
         datasets: [
           {
             label: 'Número de días',
@@ -4138,15 +4214,15 @@
         indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: pal.text } } },
+        plugins: { legend: { labels: { color: pal.text, font: { size: isMobileChart ? 11 : 12 } } } },
         scales: {
           x: {
             beginAtZero: true,
-            title: { display: true, text: 'Días en el año', color: pal.text },
-            ticks: { color: pal.text },
+            title: { display: !isMobileChart, text: 'Días en el año', color: pal.text },
+            ticks: { color: pal.text, font: { size: isMobileChart ? 10 : 11 } },
             grid: { color: pal.grid },
           },
-          y: { ticks: { color: pal.text }, grid: { color: pal.grid } },
+          y: { ticks: { color: pal.text, font: { size: isMobileChart ? 10 : 11 } }, grid: { color: pal.grid } },
         },
       },
     });

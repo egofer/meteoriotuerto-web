@@ -149,6 +149,7 @@ a:hover {
 .container {
   width: 100%;
   max-width: 1280px;
+  min-width: 0;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -621,8 +622,17 @@ html[data-theme="dark"] .nav-link.active {
 /* Contenido principal */
 .site-main {
   flex: 1;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding-top: 28px;
   padding-bottom: 56px;
+}
+
+.view-section,
+.section-block {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .loading-state {
@@ -1919,7 +1929,7 @@ html[data-theme="dark"] .year-pill.active {
 /* Crónica narrativa del almanaque */
 .chronicle-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 18px;
   margin-bottom: 28px;
 }
@@ -1951,7 +1961,7 @@ html[data-theme="dark"] .year-pill.active {
 /* Línea de episodios destacados */
 .episodes-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 14px;
 }
 
@@ -2007,7 +2017,7 @@ html[data-theme="dark"] .year-pill.active {
 /* EVO-006: Grados día de calefacción, refrigeración y desarrollo agrícola */
 .degree-days-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
   gap: 20px;
   margin-bottom: 28px;
 }
@@ -2201,9 +2211,11 @@ html[data-theme="dark"] .year-pill.active {
 /* Contenedores de gráficos */
 .charts-grid-2 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr));
   gap: 22px;
   margin-bottom: 24px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* ==========================================================================
@@ -2212,6 +2224,10 @@ html[data-theme="dark"] .year-pill.active {
 .chart-panel,
 .chart-plate-wrap {
   position: relative;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-top: 3px solid var(--accent-forest);
@@ -2234,6 +2250,12 @@ html[data-theme="dark"] .year-pill.active {
   gap: 12px;
   margin-bottom: 14px;
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+.chart-panel-header > div {
+  min-width: 0;
+  flex: 1 1 200px;
 }
 
 .chart-plate-kicker {
@@ -2247,6 +2269,7 @@ html[data-theme="dark"] .year-pill.active {
   margin-bottom: 4px;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
@@ -2365,7 +2388,14 @@ html[data-theme="dark"] .year-pill.active {
 .chart-canvas-wrap {
   position: relative;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 330px;
+  overflow: hidden;
+}
+
+.chart-canvas-wrap canvas {
+  max-width: 100% !important;
 }
 
 .chart-canvas-wrap.tall {
@@ -2544,6 +2574,9 @@ html[data-theme="dark"] .btn-windrose-filter.active {
 
 /* Calendario matricial anual interactivo (12 x 31) */
 .calendar-heatmap-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 14px;
@@ -2600,10 +2633,141 @@ html[data-theme="dark"] .btn-windrose-filter.active {
   transition: transform 0.1s ease;
 }
 
-.cal-cell:hover {
+.cal-cell[data-date] {
+  cursor: pointer;
+}
+
+.cal-cell:hover,
+.cal-cell:focus-visible {
   transform: scale(1.18);
   z-index: 5;
   outline: 2px solid var(--txt-primary);
+}
+
+.cal-cell.cal-cell-selected {
+  transform: scale(1.16);
+  z-index: 6;
+  outline: 2px solid var(--accent-forest);
+  box-shadow: 0 0 0 2px var(--bg-surface);
+}
+
+/* Visor táctil / interactivo del día seleccionado en la matriz 12x31 */
+.cal-day-inspector {
+  margin-top: 12px;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-forest);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.cal-day-inspector:empty {
+  display: none;
+}
+
+.cal-day-inspector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cal-day-inspector-date {
+  font-family: var(--font-serif);
+  font-size: 0.98rem;
+  color: var(--txt-primary);
+}
+
+.cal-day-inspector-muted {
+  font-size: 0.82rem;
+  color: var(--txt-muted);
+}
+
+.cal-day-explorer-link {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-forest);
+  text-decoration: none;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  white-space: nowrap;
+}
+
+.cal-day-explorer-link:hover {
+  border-color: var(--accent-forest);
+  background: var(--accent-forest-soft);
+}
+
+.cal-day-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+  gap: 8px;
+}
+
+.cal-day-metric {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cal-day-metric-lbl {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--txt-muted);
+}
+
+.cal-day-metric strong {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  color: var(--txt-primary);
+}
+
+.cal-day-episode-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-heat-soft);
+  border: 1px solid rgba(194, 65, 12, 0.28);
+  color: var(--txt-primary);
+  font-size: 0.8rem;
+}
+
+.cal-day-episode-badge.is-peak {
+  border-color: #d97706;
+  background: var(--accent-solar-soft);
+}
+
+.cal-day-ep-link {
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--accent-forest);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.cal-day-ep-link:hover {
+  text-decoration: underline;
 }
 
 .cal-cell.invalid-day {
@@ -2624,6 +2788,8 @@ html[data-theme="dark"] .btn-windrose-filter.active {
 /* Tablas de datos */
 .table-responsive {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--bg-surface);
@@ -2866,9 +3032,11 @@ html[data-theme="dark"] .btn-excel:hover {
 /* Ficha técnica en 2 columnas */
 .stats-two-col {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
   gap: 20px;
   margin-bottom: 28px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Pie de página */
@@ -2993,13 +3161,13 @@ html[data-theme="dark"] .btn-excel:hover {
 /* Responsividad móvil y tableta */
 @media (min-width: 769px) and (max-width: 900px) {
   .editorial-columns {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .charts-grid-2 {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .footer-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
   }
   .brand-row {
@@ -3242,15 +3410,15 @@ html[data-theme="dark"] .btn-excel:hover {
   }
 
   .editorial-columns {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .charts-grid-2 {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .footer-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
   }
 }
@@ -3299,11 +3467,14 @@ html[data-theme="dark"] .btn-excel:hover {
 }
 
 @media (max-width: 600px) {
+  .container {
+    padding: 0 12px;
+  }
   .hide-sm {
     display: none;
   }
   .editorial-hero {
-    padding: 20px 18px;
+    padding: 20px 16px;
   }
   .hero-actions {
     flex-direction: column;
@@ -3322,10 +3493,32 @@ html[data-theme="dark"] .btn-excel:hover {
     padding: 6px 10px;
   }
   .stats-two-col {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .chart-panel,
+  .chart-plate-wrap {
+    padding: 14px 12px;
   }
   .chart-canvas-wrap {
     height: 270px;
+  }
+  .chart-canvas-wrap.tall {
+    height: 320px;
+  }
+  .windrose-filter-bar {
+    padding: 8px;
+    gap: 8px;
+  }
+  .windrose-month-selector {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .select-windrose-month {
+    flex: 1;
+    min-width: 0;
+  }
+  .chart-plate-footer {
+    font-size: 0.7rem;
   }
 }
 
@@ -5379,7 +5572,7 @@ html[data-theme="dark"] .topography-mode-btn.active {
 
 .topography-explanation-panel {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
   gap: 16px;
 }
 
@@ -5479,7 +5672,7 @@ html[data-theme="dark"] .topo-metric-val {
    ========================================================================== */
 .seasonal-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 16px;
   margin-top: 14px;
 }
@@ -7093,6 +7286,9 @@ html[data-theme="dark"] .freshness-status-pill.freshness-stale {
 .chart-a11y-details {
   margin-top: 12px;
   margin-bottom: 16px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -7109,7 +7305,8 @@ html[data-theme="dark"] .freshness-status-pill.freshness-stale {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px 10px;
   padding: 10px 14px;
   font-size: 0.84rem;
   font-weight: 600;
@@ -7137,16 +7334,20 @@ html[data-theme="dark"] .freshness-status-pill.freshness-stale {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex: 1 1 200px;
 }
 
 .chart-a11y-summary-icon {
   font-size: 1rem;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .chart-a11y-summary-badge {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   padding: 2px 8px;
   font-size: 0.72rem;
   font-weight: 600;
@@ -7159,6 +7360,9 @@ html[data-theme="dark"] .freshness-status-pill.freshness-stale {
   padding: 14px;
   border-top: 1px solid var(--border-color);
   background-color: var(--bg-surface);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .chart-a11y-intro {
@@ -7548,7 +7752,7 @@ html[data-theme="dark"] .rank-badge-bronze {
 /* 5. Tarjetas de Meses hito en efemérides mensuales */
 .monthly-highlights-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
@@ -7689,7 +7893,7 @@ html[data-theme="dark"] .rank-badge-bronze {
 
 .episodes-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
   gap: 14px;
   margin-top: 16px;
 }
