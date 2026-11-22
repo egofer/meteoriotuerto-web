@@ -1863,6 +1863,75 @@
   }
 
   /* ------------------------------------------------------------------------
+   * Cálculo astronómico de orto y ocaso solar (ecuación NOAA) para Barrio de Arriba
+   * ------------------------------------------------------------------------ */
+  function computeSolarTimes(dateStr, lat = 43.341, lon = -3.670) {
+    try {
+      const targetStr = (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr))
+        ? dateStr
+        : new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' });
+      const [y, m, d] = targetStr.split('-').map(Number);
+      if (!y || !m || !d) return null;
+
+      const utcNoon = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+      const madridStr = utcNoon.toLocaleString('en-US', { timeZone: 'Europe/Madrid', hour12: false });
+      const madridDate = new Date(`${madridStr} UTC`);
+      const tzOffsetHours = (madridDate - utcNoon) / 3600000;
+
+      const startOfYear = Date.UTC(y, 0, 0);
+      const doy = Math.floor((Date.UTC(y, m - 1, d) - startOfYear) / 86400000);
+      const daysInYear = ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) ? 366 : 365;
+
+      const gamma = ((2 * Math.PI) / daysInYear) * (doy - 1);
+      const eqtime = 229.18 * (
+        0.000075 +
+        0.001868 * Math.cos(gamma) -
+        0.032077 * Math.sin(gamma) -
+        0.014615 * Math.cos(2 * gamma) -
+        0.040849 * Math.sin(2 * gamma)
+      );
+      const decl = (
+        0.006918 -
+        0.399912 * Math.cos(gamma) +
+        0.070257 * Math.sin(gamma) -
+        0.006758 * Math.cos(2 * gamma) +
+        0.000907 * Math.sin(2 * gamma) -
+        0.002697 * Math.cos(3 * gamma) +
+        0.00148 * Math.sin(3 * gamma)
+      );
+
+      const latRad = (lat * Math.PI) / 180;
+      const zenithRad = (90.833 * Math.PI) / 180;
+      const cosHa = (Math.cos(zenithRad) / (Math.cos(latRad) * Math.cos(decl))) - Math.tan(latRad) * Math.tan(decl);
+      if (cosHa < -1 || cosHa > 1) return null;
+
+      const haDeg = (Math.acos(cosHa) * 180) / Math.PI;
+      const sunriseUtcMin = 720 - 4 * (lon + haDeg) - eqtime;
+      const sunsetUtcMin = 720 - 4 * (lon - haDeg) - eqtime;
+
+      const fmtMin = (totalMin) => {
+        const localMin = Math.round(totalMin + tzOffsetHours * 60);
+        const wrapped = ((localMin % 1440) + 1440) % 1440;
+        const hh = String(Math.floor(wrapped / 60)).padStart(2, '0');
+        const mm = String(wrapped % 60).padStart(2, '0');
+        return `${hh}:${mm}`;
+      };
+
+      const dayLenMin = Math.round(sunsetUtcMin - sunriseUtcMin);
+      const dh = Math.floor(dayLenMin / 60);
+      const dm = dayLenMin % 60;
+
+      return {
+        sunrise: fmtMin(sunriseUtcMin),
+        sunset: fmtMin(sunsetUtcMin),
+        duration: `${dh} h ${String(dm).padStart(2, '0')} min`,
+      };
+    } catch (_err) {
+      return null;
+    }
+  }
+
+  /* ------------------------------------------------------------------------
    * EVO-034: Renderizado del widget de tiempo actual en directo (Weather Underground + Ecowitt)
    * ------------------------------------------------------------------------ */
   function renderLiveWeatherWidget(live, ref) {
@@ -1928,6 +1997,11 @@
       ? `Tendencia: <strong>${live.pressure_trend_hpa >= 0 ? '+' : ''}${fmtNum(live.pressure_trend_hpa, 2)} hPa/3h</strong>`
       : 'Presión relativa a nivel del mar';
 
+    const solarTimes = computeSolarTimes(liveDate);
+    const solarHtml = solarTimes
+      ? `<span class="live-solar-times">${getMeteoIcon('sun', { className: 'meteo-icon-sm' })} Orto: <strong>${solarTimes.sunrise} h</strong> · Ocaso: <strong>${solarTimes.sunset} h</strong> <span class="live-solar-dur">(${solarTimes.duration} de luz)</span></span>`
+      : '';
+
     wrap.innerHTML = `
       <div class="live-weather-header">
         <div class="live-weather-title-wrap">
@@ -1937,6 +2011,7 @@
           </span>
           <h3 id="live-weather-heading" class="live-weather-title">Tiempo actual en Barrio de Arriba</h3>
           <span class="live-weather-time">Observación del <strong>${fmtDateES(liveDate, false)}</strong> a las <strong>${escapeHtml(liveTime)} h</strong>${relTime ? ` <em class="live-rel-time">(${relTime})</em>` : ''}</span>
+          ${solarHtml}
         </div>
         <div class="live-weather-actions">
           <button type="button" id="btn-live-refresh" class="btn-live-action" title="Actualizar lectura instantánea desde Weather Underground">

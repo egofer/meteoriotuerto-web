@@ -2527,6 +2527,11 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn(".chart-canvas-wrap canvas", css_txt)
         self.assertIn("isMobileChart", app_js)
 
+        # 3. Cálculo astronómico de orto y ocaso en la cabecera de tiempo actual
+        self.assertIn("function computeSolarTimes(", app_js)
+        self.assertIn('class="live-solar-times"', app_js)
+        self.assertIn(".live-solar-times", css_txt)
+
 
 
 if __name__ == "__main__":

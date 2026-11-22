@@ -6917,6 +6917,25 @@ html[data-theme="dark"] .offline-badge.online-restored {
   color: var(--txt-muted);
 }
 
+.live-solar-times {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--txt-secondary);
+  margin-top: 2px;
+}
+
+.live-solar-times strong {
+  font-family: var(--font-mono);
+  color: var(--txt-primary);
+}
+
+.live-solar-dur {
+  color: var(--txt-muted);
+}
+
 .live-weather-actions {
   display: flex;
   align-items: center;
