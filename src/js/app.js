@@ -1121,7 +1121,7 @@
   function renderChartExportBtn(canvasId, title) {
     const safeTitle = escapeHtml(title || '');
     return `
-      <button type="button" class="btn-chart-export" data-export-canvas="${canvasId}" data-export-title="${safeTitle}" title="Descargar imagen PNG con membrete oficial y licencia CC BY 4.0" aria-label="Descargar gráfico ${safeTitle} en formato PNG">
+      <button type="button" class="btn-chart-export" data-export-canvas="${canvasId}" data-export-title="${safeTitle}" title="Descargar imagen PNG con membrete de MeteoRiotuerto y licencia CC BY 4.0" aria-label="Descargar gráfico ${safeTitle} en formato PNG">
         <svg class="chart-export-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
           <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -3058,7 +3058,7 @@
         </div>
         <h1 class="editorial-masthead-title">Almanaque meteorológico anual ${alm.year}</h1>
         <p class="editorial-masthead-meta">
-          Registro climatológico oficial del municipio de Riotuerto · Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)}%) · ${alm.is_provisional ? 'Avance provisional en curso' : 'Tomo consolidado'}
+          Registro climatológico local de la estación MeteoRiotuerto · Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)}%) · ${alm.is_provisional ? 'Avance provisional en curso' : 'Tomo consolidado'}
         </p>
       </header>
 
@@ -10188,7 +10188,7 @@
               normaliza diferencias de cabeceras (25, 28 y 31 columnas) y separadores decimales, elimina bloques duplicados
               en las exportaciones brutas de 30 minutos (2023 y 2024) y anula paquetes de radiofrecuencia corruptos
               verificados (como el registro nocturno del <code>31/05/2024 04:30</code> con <code>-14,6 °C</code> y
-              <code>1.655,2 W/m²</code>, que ya había sido corregido en la tabla diaria oficial).
+              <code>1.655,2 W/m²</code>, que ya había sido corregido en la tabla diaria consolidada).
             </p>
           </div>
 

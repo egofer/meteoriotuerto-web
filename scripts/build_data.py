@@ -225,7 +225,7 @@ EDITORIAL_CHRONICLES: Dict[int, Dict[str, Any]] = {
         ],
         "data_note": (
             "Serie anual con 359 días válidos sobre 366 (98,1 % de cobertura). El registro espurio de radiofrecuencia "
-            "del 31 de mayo a las 04:30 en el archivo semihorario fue filtrado y corregido en la serie diaria oficial."
+            "del 31 de mayo a las 04:30 en el archivo semihorario fue filtrado y corregido en la serie diaria consolidada."
         ),
     },
     2025: {
