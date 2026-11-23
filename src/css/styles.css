@@ -95,6 +95,19 @@ html[data-theme="dark"] {
   padding: 0;
 }
 
+[hidden] {
+  display: none !important;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
 html {
   scroll-behavior: smooth;
   font-size: 16px;
@@ -2851,12 +2864,16 @@ html[data-theme="dark"] .btn-windrose-filter.active {
 
 .data-table th,
 .data-table td {
-  padding: 11px 14px;
+  padding: 9px 10px;
   border-top: none;
   border-left: none;
   border-right: none;
   border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
+}
+
+.data-table td:not(.num):not(.mono) {
+  white-space: normal;
 }
 
 .data-table tbody tr:last-child td,
@@ -7980,6 +7997,208 @@ html[data-theme="dark"] .rank-badge-bronze {
   border-top: 1px dashed var(--border-color);
   font-size: 0.78rem;
 }
+
+/* ==========================================================================
+   ACT-10: Comparativa Year-to-Date (YTD) y Lámina Resumen en 1 página (A4 / PNG)
+   ========================================================================== */
+.ytd-comparison-section {
+  border-left: 4px solid var(--accent-forest);
+  padding-left: 16px;
+}
+
+.broadsheet-details {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.broadsheet-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  cursor: pointer;
+  background: var(--bg-elevated);
+  list-style: none;
+}
+
+.broadsheet-summary::-webkit-details-marker {
+  display: none;
+}
+
+.broadsheet-sheet {
+  padding: 22px;
+  border-top: 2px solid var(--border-strong);
+  background: var(--bg-page);
+}
+
+.broadsheet-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--accent-forest);
+  margin-bottom: 12px;
+}
+
+.broadsheet-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent-forest);
+  text-transform: uppercase;
+}
+
+.broadsheet-title {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  margin: 4px 0;
+  color: var(--txt-primary);
+}
+
+.broadsheet-sub {
+  font-size: 0.78rem;
+  color: var(--txt-muted);
+  font-family: var(--font-mono);
+}
+
+.broadsheet-year-badge {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  padding: 6px 16px;
+  background: var(--accent-forest);
+  color: #ffffff;
+  border-radius: var(--radius-sm);
+  line-height: 1.1;
+}
+
+.broadsheet-lead {
+  font-size: 0.88rem;
+  color: var(--txt-secondary);
+  margin-bottom: 14px;
+  line-height: 1.45;
+}
+
+.broadsheet-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.broadsheet-kpi {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-top: 3px solid var(--accent-forest);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.broadsheet-kpi-lbl {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--txt-muted);
+}
+
+.broadsheet-kpi-val {
+  font-family: var(--font-mono);
+  font-size: 1.12rem;
+  color: var(--txt-primary);
+}
+
+.broadsheet-kpi small {
+  font-size: 0.72rem;
+  color: var(--txt-secondary);
+}
+
+.broadsheet-episodes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.broadsheet-ep-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
+.broadsheet-ep-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  color: var(--accent-forest);
+  margin-bottom: 4px;
+}
+
+.broadsheet-ep-title {
+  font-size: 0.80rem;
+  font-weight: 600;
+  color: var(--txt-primary);
+  line-height: 1.3;
+}
+
+.broadsheet-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-strong);
+  font-size: 0.74rem;
+  color: var(--txt-muted);
+}
+
+@media print {
+  body.print-mode-broadsheet #view-almanaque > *:not(#sec-almanac-broadsheet) {
+    display: none !important;
+  }
+
+  body.print-mode-broadsheet #sec-almanac-broadsheet {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body.print-mode-broadsheet .broadsheet-summary {
+    display: none !important;
+  }
+
+  body.print-mode-broadsheet .broadsheet-details,
+  body.print-mode-broadsheet .broadsheet-sheet {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  body.print-mode-broadsheet .broadsheet-kpi-strip {
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  body.print-mode-broadsheet .broadsheet-episodes-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 6px !important;
+  }
+}
+
 
 
 

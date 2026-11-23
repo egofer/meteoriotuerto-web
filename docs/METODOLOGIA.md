@@ -39,7 +39,7 @@ Antes de generar los productos JSON, el motor de procesamiento (`scripts/build_d
 4. **Año 2025 (`riotuerto_2025_daily.csv` y `riotuerto_2025_30min.csv`):**
    - Serie prácticamente íntegra con **364 días válidos sobre 365 (99,7 %)** y **17.244 registros semihorarios**. Incorpora la variable de déficit de presión de vapor (`VPD`) a partir de agosto de 2025.
 5. **Año 2026 (`riotuerto_2026_daily.csv` y `riotuerto_2026_30min.csv`):**
-   - Año actualmente en curso con **298 días válidos (100 % del periodo transcurrido entre el 01/01/2026 y el 25/10/2026)** y **14.197 registros semihorarios**. Se identifica en toda la web con etiqueta de **carácter provisional** y se excluye del cálculo de la media interanual de referencia (2022–2025).
+   - Año actualmente en curso con **325 días válidos consolidados hasta el 21/11/2026 (100 % del periodo transcurrido, con actualización diaria automatizada vía GitHub Actions)** y **15.565 registros semihorarios**. Se identifica en toda la web con etiqueta de **carácter provisional** y se excluye del cálculo de la media interanual de referencia (2022–2025).
 
 ---
 

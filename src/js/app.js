@@ -29,7 +29,7 @@
       chartMode: 'single', // EVO-036: 'single' | 'multiannual' | 'dual'
       yearFilter: 'all',
       dateFrom: '2022-01-01',
-      dateTo: '2026-10-25',
+      dateTo: '',
       aggregation: 'daily', // 'daily' | 'monthly'
       episodeFilter: 'all',
       searchQuery: '',
@@ -89,7 +89,17 @@
     2024: 'TOMO III',
     2025: 'TOMO IV',
     2026: 'TOMO V',
+    2027: 'TOMO VI',
   };
+
+  function getAvailableYears() {
+    return STATE.cache.index?.series_overview?.years_available || [2022, 2023, 2024, 2025, 2026];
+  }
+
+  function isProvisionalYear(year) {
+    const prov = STATE.cache.index?.series_overview?.provisional_years || [2026];
+    return prov.includes(Number(year));
+  }
 
   const EXPLORER_VARIABLES = {
     temp_mean: { label: 'Temperatura media diaria', unit: '°C', dec: 1, color: '#1b4332', type: 'line', agg: 'mean' },
@@ -1327,12 +1337,19 @@
     const yearsSummary = [...idx.years_summary].sort((a, b) => b.year - a.year);
 
     // EVO-029 & EVO-044: Titulares sinópticos de autor y efemérides destacadas por tomo anual
+    const lastConsDate = overview.last_consolidated_date || '2026-11-21';
+    const lastConsMonthIdx = parseInt(lastConsDate.split('-')[1], 10) - 1;
+    const lastConsMonthName = (MONTH_NAMES_ES[lastConsMonthIdx] || 'Noviembre').toLowerCase();
+    const y2026Summary = yearsSummary.find((item) => item.year === 2026);
+    const y2026Days = y2026Summary?.valid_days ?? 325;
+    const y2026Rain = fmtNum(y2026Summary?.rain_total_mm ?? 1580.8, 1);
+
     const YEAR_EDITORIAL_HEADLINES = {
       2022: 'Año cálido y seco con estío prolongado y marcadas suradas otoñales',
       2023: 'Grandes contrastes: el temporal Fien (509,8 mm en enero) y acusada sequía estival',
       2024: 'Récord absoluto de calor (42,1 °C) y temporales atlánticos de viento sur',
       2025: 'Pluviosidad abundante y gran regularidad estacional en el valle',
-      2026: 'Avance provisional del año en curso (registro consolidado hasta octubre)',
+      2026: `Avance provisional del año en curso (registro consolidado hasta ${lastConsMonthName})`,
     };
 
     const YEAR_EDITORIAL_HIGHLIGHTS = {
@@ -1340,7 +1357,7 @@
       2023: 'Temporal Fien: 125,9 mm en 24 h y enero récord (509,8 mm) · Máxima de 40,4 °C en agosto',
       2024: 'Récord histórico de 42,1 °C (11 ago.) · Vendaval Karlotta de 97,2 km/h · 2.047,9 mm anuales',
       2025: 'Descarga torrencial récord de 145,2 mm/h en junio · 1.706,9 mm anuales con 218 días de lluvia',
-      2026: '300 días observados hasta octubre · Récord de amplitud de 25,2 °C (julio) · 1.505,2 mm acumulados',
+      2026: `${y2026Days} días observados hasta ${lastConsMonthName} · Récord de amplitud de 25,2 °C (julio) · ${y2026Rain} mm acumulados`,
     };
 
     // EVO-044 / EVO-047: Utiliza el mapeo canónico YEAR_TOMES definido a nivel de módulo
@@ -2337,7 +2354,7 @@
     const isToday = month === todayMonth && day === todayDay;
     const mmdd = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayLabel = `${day} de ${MONTH_NAMES_ES[month - 1].toLowerCase()}`;
-    const lastObsDate = idx.series_overview.last_observation_date || '2026-10-25';
+    const lastObsDate = idx.series_overview.last_consolidated_date || idx.series_overview.last_observation_date || '2026-12-31';
 
     // Extraer registros diarios para cada año en la fecha MM-DD
     const yearEntries = years.map((y) => {
@@ -2351,8 +2368,10 @@
         const isLeapYear = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
         if (mmdd === '02-29' && !isLeapYear) {
           missingReason = `Año no bisiesto (febrero de ${y} tuvo 28 días).`;
-        } else if (y === 2023 && month >= 9) {
-          missingReason = 'Laguna instrumental documentada por parada de la estación (sep.–dic. 2023).';
+        } else if (y === 2023 && isoTarget >= '2023-09-22' && isoTarget <= '2023-10-12') {
+          missingReason = 'Laguna instrumental documentada por parada de la estación (22 sep.–12 oct. 2023).';
+        } else if (y === 2023) {
+          missingReason = 'Jornada puntual sin registro válido en la serie diaria de 2023.';
         } else if (isoTarget > lastObsDate) {
           missingReason = `Fecha aún no alcanzada en el año en curso (cierre actual: ${fmtDateES(lastObsDate, false)}).`;
         }
@@ -2935,11 +2954,663 @@
     `;
   }
 
+  /* ------------------------------------------------------------------------
+   * ACT-10 (Parte 1): Comparativa Year-to-Date (a igual fecha acumulada)
+   * ------------------------------------------------------------------------ */
+  function computeYearToDateComparison(alm, allAlmanacs) {
+    if (!alm || !alm.is_provisional || !alm.last_observed_date) return null;
+    const mmdd = alm.last_observed_date.slice(5); // 'MM-DD'
+    const [mStr, dStr] = mmdd.split('-');
+    const cutoffMonthIdx = parseInt(mStr, 10) - 1;
+    const cutoffDay = parseInt(dStr, 10);
+    const cutoffLabel = `${cutoffDay} de ${(MONTH_NAMES_ES[cutoffMonthIdx] || '').toLowerCase()}`;
+
+    const years = getAvailableYears().slice().sort((a, b) => a - b);
+    const rows = [];
+
+    years.forEach((y) => {
+      const yAlm = allAlmanacs[y];
+      const ds = yAlm?.daily_series;
+      if (!ds || !Array.isArray(ds.dates)) return;
+
+      const limitIso = `${y}-${mmdd}`;
+      let validDays = 0;
+      let tSum = 0;
+      let tMaxAbs = -Infinity;
+      let tMaxDate = null;
+      let tMinAbs = Infinity;
+      let tMinDate = null;
+      let rainSum = 0;
+      let rainDays02 = 0;
+      let hotDays30 = 0;
+      let frostDays = 0;
+      let foehnDays = 0;
+      let maxGust = 0;
+
+      for (let i = 0; i < ds.dates.length; i += 1) {
+        const dIso = ds.dates[i];
+        if (dIso > limitIso) continue;
+        const tm = ds.temp_mean?.[i];
+        const tx = ds.temp_max?.[i];
+        const tn = ds.temp_min?.[i];
+        const rn = ds.rain_daily?.[i];
+        const wg = ds.wind_gust?.[i];
+        const ff = ds.foehn_flag?.[i];
+
+        if (tm !== null && tm !== undefined) {
+          validDays += 1;
+          tSum += tm;
+        }
+        if (tx !== null && tx !== undefined) {
+          if (tx > tMaxAbs) {
+            tMaxAbs = tx;
+            tMaxDate = dIso;
+          }
+          if (tx >= 30.0) hotDays30 += 1;
+        }
+        if (tn !== null && tn !== undefined) {
+          if (tn < tMinAbs) {
+            tMinAbs = tn;
+            tMinDate = dIso;
+          }
+          if (tn <= 0.0) frostDays += 1;
+        }
+        if (rn !== null && rn !== undefined) {
+          rainSum += rn;
+          if (rn >= 0.2) rainDays02 += 1;
+        }
+        if (wg !== null && wg !== undefined && wg > maxGust) {
+          maxGust = wg;
+        }
+        if (ff === 1) foehnDays += 1;
+      }
+
+      rows.push({
+        year: y,
+        isProvisional: isProvisionalYear(y),
+        validDays,
+        tempMean: validDays > 0 ? Number((tSum / validDays).toFixed(1)) : null,
+        tempMaxAbs: tMaxAbs > -Infinity ? Number(tMaxAbs.toFixed(1)) : null,
+        tempMaxDate,
+        tempMinAbs: tMinAbs < Infinity ? Number(tMinAbs.toFixed(1)) : null,
+        tempMinDate,
+        rainTotal: Number(rainSum.toFixed(1)),
+        rainDays02,
+        hotDays30,
+        frostDays,
+        foehnDays,
+        maxGust: Number(maxGust.toFixed(1)),
+      });
+    });
+
+    const refRows = rows.filter((r) => !r.isProvisional && r.validDays > 0);
+    const curRow = rows.find((r) => r.year === alm.year);
+    if (!curRow || refRows.length === 0) return null;
+
+    const avg = (arr) => arr.reduce((acc, v) => acc + v, 0) / arr.length;
+    const refTempMean = Number(avg(refRows.map((r) => r.tempMean)).toFixed(2));
+    const refRainTotal = Number(avg(refRows.map((r) => r.rainTotal)).toFixed(1));
+    const refRainDays02 = Number(avg(refRows.map((r) => r.rainDays02)).toFixed(1));
+    const refHotDays30 = Number(avg(refRows.map((r) => r.hotDays30)).toFixed(1));
+    const refFrostDays = Number(avg(refRows.map((r) => r.frostDays)).toFixed(1));
+    const refFoehnDays = Number(avg(refRows.map((r) => r.foehnDays)).toFixed(1));
+
+    const tempAnomC = Number((curRow.tempMean - refTempMean).toFixed(2));
+    const rainAnomMm = Number((curRow.rainTotal - refRainTotal).toFixed(1));
+    const rainAnomPct = refRainTotal > 0 ? Number(((rainAnomMm / refRainTotal) * 100).toFixed(1)) : 0;
+
+    return {
+      mmdd,
+      cutoffLabel,
+      rows,
+      curRow,
+      refYearsLabel: `${refRows[0].year}–${refRows[refRows.length - 1].year}`,
+      ref: {
+        tempMean: refTempMean,
+        rainTotal: refRainTotal,
+        rainDays02: refRainDays02,
+        hotDays30: refHotDays30,
+        frostDays: refFrostDays,
+        foehnDays: refFoehnDays,
+      },
+      anomalies: {
+        tempAnomC,
+        rainAnomMm,
+        rainAnomPct,
+        rainDaysDiff: Number((curRow.rainDays02 - refRainDays02).toFixed(1)),
+        hotDaysDiff: Number((curRow.hotDays30 - refHotDays30).toFixed(1)),
+      },
+    };
+  }
+
+  function renderYearToDateComparisonHtml(alm, allAlmanacs) {
+    const ytd = computeYearToDateComparison(alm, allAlmanacs);
+    if (!ytd) return '';
+
+    const { cutoffLabel, rows, curRow, ref, refYearsLabel, anomalies } = ytd;
+    const tSign = anomalies.tempAnomC >= 0 ? '+' : '';
+    const rSign = anomalies.rainAnomMm >= 0 ? '+' : '';
+    const rPctSign = anomalies.rainAnomPct >= 0 ? '+' : '';
+
+    const tableRowsHtml = rows.map((r) => {
+      const isCur = r.year === alm.year;
+      const rowStyle = isCur ? 'style="background:var(--accent-forest-soft);font-weight:600"' : '';
+      return `
+        <tr ${rowStyle}>
+          <th scope="row"><strong>${r.year}</strong>${r.isProvisional ? ' <span class="badge badge-provisional">En curso</span>' : ''}</th>
+          <td class="num">${r.validDays} d</td>
+          <td class="num"><strong>${fmtNum(r.tempMean, 1)} °C</strong></td>
+          <td class="num" style="color:var(--accent-heat)">${fmtNum(r.tempMaxAbs, 1)} °C <small>(${fmtDateShortMonth(r.tempMaxDate)})</small></td>
+          <td class="num" style="color:var(--accent-cold)">${fmtNum(r.tempMinAbs, 1)} °C <small>(${fmtDateShortMonth(r.tempMinDate)})</small></td>
+          <td class="num" style="color:var(--accent-rain)"><strong>${fmtNum(r.rainTotal, 1)} mm</strong></td>
+          <td class="num">${r.rainDays02}</td>
+          <td class="num">${r.hotDays30}</td>
+          <td class="num">${r.frostDays}</td>
+          <td class="num">${r.foehnDays}</td>
+          <td class="num">${fmtNum(r.maxGust, 1)} km/h</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <section id="sec-ytd-comparison" class="section-block ytd-comparison-section">
+        <div class="section-header">
+          <div>
+            <span class="editorial-kicker">HOMOGENEIDAD TEMPORAL · COMPARATIVA A IGUAL FECHA ACUMULADA (YTD)</span>
+            <h3 class="section-title">¿Cómo va ${alm.year} respecto al mismo periodo (1 de enero – ${escapeHtml(cutoffLabel)}) de años anteriores?</h3>
+            <p class="section-subtitle">
+              Para evitar el sesgo de comparar un año en curso contra ejercicios de 12 meses cerrados, esta tabla acota todos los años
+              exactamente al tramo <strong>1 de enero – ${escapeHtml(cutoffLabel)}</strong>.
+            </p>
+          </div>
+        </div>
+
+        <div class="kpi-grid" style="margin-bottom:18px">
+          <div class="kpi-card accent-forest">
+            <div class="kpi-label">T. media YTD (1 ene – ${escapeHtml(cutoffLabel)})</div>
+            <div class="kpi-value">${fmtNum(curRow.tempMean, 1)} <span class="kpi-unit">°C</span></div>
+            <div class="kpi-meta">Media ${refYearsLabel} a igual fecha: ${fmtNum(ref.tempMean, 2)} °C (<strong>${tSign}${fmtNum(anomalies.tempAnomC, 2)} °C</strong>)</div>
+          </div>
+          <div class="kpi-card accent-rain">
+            <div class="kpi-label">Lluvia acumulada a igual fecha</div>
+            <div class="kpi-value">${fmtNum(curRow.rainTotal, 1)} <span class="kpi-unit">mm</span></div>
+            <div class="kpi-meta">Media ${refYearsLabel} a igual fecha: ${fmtNum(ref.rainTotal, 1)} mm (<strong>${rSign}${fmtNum(anomalies.rainAnomMm, 1)} mm · ${rPctSign}${fmtNum(anomalies.rainAnomPct, 1)}%</strong>)</div>
+          </div>
+          <div class="kpi-card accent-wind">
+            <div class="kpi-label">Días de lluvia (≥0,2 mm) a igual fecha</div>
+            <div class="kpi-value">${curRow.rainDays02} <span class="kpi-unit">días</span></div>
+            <div class="kpi-meta">Promedio ${refYearsLabel} hasta el ${escapeHtml(cutoffLabel)}: ${fmtNum(ref.rainDays02, 1)} días</div>
+          </div>
+          <div class="kpi-card accent-heat">
+            <div class="kpi-label">Calor (≥30 °C) y Suradas a igual fecha</div>
+            <div class="kpi-value">${curRow.hotDays30} <span class="kpi-unit">d ≥30 °C</span></div>
+            <div class="kpi-meta">Media ${refYearsLabel}: ${fmtNum(ref.hotDays30, 1)} d ≥30 °C · Suradas/Foehn: <strong>${curRow.foehnDays} d</strong> (ref.: ${fmtNum(ref.foehnDays, 1)} d)</div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <caption class="table-caption">Comparativa interanual a igual fecha acumulada (1 de enero – ${escapeHtml(cutoffLabel)}) en Barrio de Arriba</caption>
+            <thead>
+              <tr>
+                <th scope="col">Año</th>
+                <th scope="col" class="num">Días obs.</th>
+                <th scope="col" class="num">T. media</th>
+                <th scope="col" class="num">T. máx. abs.</th>
+                <th scope="col" class="num">T. mín. abs.</th>
+                <th scope="col" class="num">Lluvia acum.</th>
+                <th scope="col" class="num">Días ≥0,2 mm</th>
+                <th scope="col" class="num">Días ≥30 °C</th>
+                <th scope="col" class="num">Heladas ≤0 °C</th>
+                <th scope="col" class="num">Surada / Foehn</th>
+                <th scope="col" class="num">Racha máx.</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRowsHtml}
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row">Media ref. YTD (${refYearsLabel})</th>
+                <td class="num">—</td>
+                <td class="num">${fmtNum(ref.tempMean, 2)} °C</td>
+                <td class="num">—</td>
+                <td class="num">—</td>
+                <td class="num">${fmtNum(ref.rainTotal, 1)} mm</td>
+                <td class="num">${fmtNum(ref.rainDays02, 1)}</td>
+                <td class="num">${fmtNum(ref.hotDays30, 1)}</td>
+                <td class="num">${fmtNum(ref.frostDays, 1)}</td>
+                <td class="num">${fmtNum(ref.foehnDays, 1)}</td>
+                <td class="num">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+    `;
+  }
+
+  /* ------------------------------------------------------------------------
+   * ACT-10 (Parte 2): Ficha resumen «Anuario en una lámina» (1 pág. A4 y PNG)
+   * ------------------------------------------------------------------------ */
+  function renderAlmanacBroadsheetHtml(alm, idx) {
+    const stT = alm.stats.temperature;
+    const stP = alm.stats.precipitation;
+    const stW = alm.stats.wind;
+    const stA = alm.stats.atmosphere_and_solar;
+    const dd = alm.stats.degree_days || { hdd_15_5: 0, cdd_21_0: 0, gdd_10_0: 0 };
+    const cov = alm.coverage;
+    const ed = alm.editorial || {};
+    const tomeLabel = YEAR_TOMES[alm.year] || `TOMO ${alm.year}`;
+
+    const monthCompactRows = (alm.monthly || []).map((m) => {
+      if (!m || m.valid_days === 0) {
+        return `
+          <tr>
+            <th scope="row">${escapeHtml(m?.name || '—')}</th>
+            <td class="num" colspan="8" style="text-align:center;color:var(--txt-muted)">Sin registros consolidados</td>
+          </tr>
+        `;
+      }
+      return `
+        <tr>
+          <th scope="row"><strong>${escapeHtml(m.name)}</strong></th>
+          <td class="num">${fmtNum(m.temp_mean, 1)} °C</td>
+          <td class="num">${fmtNum(m.temp_max_abs, 1)} °C</td>
+          <td class="num">${fmtNum(m.temp_min_abs, 1)} °C</td>
+          <td class="num"><strong>${fmtNum(m.rain_total, 1)} mm</strong></td>
+          <td class="num">${fmtNum(m.rain_days_02, 0)} d</td>
+          <td class="num">${fmtNum(m.wind_gust_max, 1)} km/h</td>
+          <td class="num">${fmtNum(m.foehn_days ?? 0, 0)} d</td>
+          <td class="num">${fmtNum(m.hdd_15_5, 0)} / ${fmtNum(m.gdd_10_0, 0)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    const compactEpisodes = (ed.episodes || []).slice(0, 5).map((ep) => `
+      <div class="broadsheet-ep-card">
+        <div class="broadsheet-ep-top">
+          <span class="mono">${fmtDateES(ep.date, false)}</span>
+          <strong>${escapeHtml(ep.value)}</strong>
+        </div>
+        <div class="broadsheet-ep-title">${escapeHtml(ep.title)}</div>
+      </div>
+    `).join('');
+
+    return `
+      <section id="sec-almanac-broadsheet" class="section-block almanac-broadsheet-section">
+        <details id="broadsheet-preview-details" class="broadsheet-details">
+          <summary class="broadsheet-summary">
+            <div>
+              <span class="editorial-kicker" style="margin:0">PLIEGO SINÓPTICO DE COLECCIÓN · ${tomeLabel}</span>
+              <h3 class="section-title" style="margin:2px 0 0 0;font-size:1.15rem">📄 Anuario ${alm.year} en una lámina (Ficha resumen de 1 página A4 / PNG)</h3>
+            </div>
+            <div class="btn-group">
+              <button type="button" id="btn-print-broadsheet-inline" class="btn btn-sm btn-print" title="Imprimir únicamente esta lámina resumen en 1 página A4">🖨️ Imprimir lámina (1 pág.)</button>
+              <button type="button" id="btn-dl-broadsheet-png-inline" class="btn btn-sm btn-primary" title="Descargar lámina resumen en imagen PNG de alta resolución">🖼️ Descargar PNG</button>
+            </div>
+          </summary>
+
+          <div id="almanac-broadsheet-sheet" class="broadsheet-sheet">
+            <header class="broadsheet-header">
+              <div>
+                <div class="broadsheet-kicker">METEORIOTUERTO · ${tomeLabel} · ARCHIVO CLIMATOLÓGICO DE BARRIO DE ARRIBA (RIOTUERTO, CANTABRIA)</div>
+                <h3 class="broadsheet-title">Lámina sinóptica anual ${alm.year} — ${escapeHtml(ed.character || '')}</h3>
+                <p class="broadsheet-sub">Coordenadas: 43.341° N, 3.670° W · Altitud: 115 m s. n. m. · Estación: ${escapeHtml(idx.station.hardware.station_model)} · Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)}%)</p>
+              </div>
+              <div class="broadsheet-year-badge">${alm.year}</div>
+            </header>
+
+            <p class="broadsheet-lead"><strong>${escapeHtml(ed.headline || '')}.</strong> ${escapeHtml(ed.synoptic_summary || '')}</p>
+
+            <div class="broadsheet-kpi-strip">
+              <div class="broadsheet-kpi">
+                <span class="broadsheet-kpi-lbl">T. Media anual</span>
+                <strong class="broadsheet-kpi-val">${fmtNum(stT.mean, 1)} °C</strong>
+                <small>Máx. med: ${fmtNum(stT.max_mean, 1)} · Mín. med: ${fmtNum(stT.min_mean, 1)}</small>
+              </div>
+              <div class="broadsheet-kpi">
+                <span class="broadsheet-kpi-lbl">T. Máxima abs.</span>
+                <strong class="broadsheet-kpi-val" style="color:var(--accent-heat)">${fmtNum(stT.max_abs, 1)} °C</strong>
+                <small>${fmtDateShortMonth(stT.max_abs_date)} · ${stT.hot_days_ge_30} d ≥30 °C</small>
+              </div>
+              <div class="broadsheet-kpi">
+                <span class="broadsheet-kpi-lbl">T. Mínima abs.</span>
+                <strong class="broadsheet-kpi-val" style="color:var(--accent-cold)">${fmtNum(stT.min_abs, 1)} °C</strong>
+                <small>${fmtDateShortMonth(stT.min_abs_date)} · ${stT.frost_days_le_0} heladas</small>
+              </div>
+              <div class="broadsheet-kpi">
+                <span class="broadsheet-kpi-lbl">Precipitación</span>
+                <strong class="broadsheet-kpi-val" style="color:var(--accent-rain)">${fmtNum(stP.total_mm, 1)} mm</strong>
+                <small>${stP.days_ge_02mm} d lluvia · Máx: ${fmtNum(stP.max_daily_mm, 1)} mm</small>
+              </div>
+              <div class="broadsheet-kpi">
+                <span class="broadsheet-kpi-lbl">Techo eólico</span>
+                <strong class="broadsheet-kpi-val">${fmtNum(stW.max_gust_kmh, 1)} km/h</strong>
+                <small>${fmtDateShortMonth(stW.max_gust_date)} · ${stW.days_gust_ge_40} d ≥40 km/h</small>
+              </div>
+              <div class="broadsheet-kpi">
+                <span class="broadsheet-kpi-lbl">Suradas y Sol</span>
+                <strong class="broadsheet-kpi-val">${stW.foehn_days ?? 0} d Foehn</strong>
+                <small>${stA.estimated_sunshine_hours !== null ? `${fmtNum(stA.estimated_sunshine_hours, 0)} h sol` : `HR med: ${fmtNum(stA.humidity_mean_pct, 1)}%`}</small>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table broadsheet-table">
+                <caption class="table-caption">Cuadro sinóptico mensual de la lámina resumen anual ${alm.year} en Barrio de Arriba</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Mes</th>
+                    <th scope="col" class="num">T. media</th>
+                    <th scope="col" class="num">T. máx. abs.</th>
+                    <th scope="col" class="num">T. mín. abs.</th>
+                    <th scope="col" class="num">Lluvia</th>
+                    <th scope="col" class="num">Días lluvia</th>
+                    <th scope="col" class="num">Racha máx.</th>
+                    <th scope="col" class="num">Foehn</th>
+                    <th scope="col" class="num">HDD / GDD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${monthCompactRows}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th scope="row">Total / Media ${alm.year}</th>
+                    <td class="num">${fmtNum(stT.mean, 1)} °C</td>
+                    <td class="num">${fmtNum(stT.max_abs, 1)} °C</td>
+                    <td class="num">${fmtNum(stT.min_abs, 1)} °C</td>
+                    <td class="num">${fmtNum(stP.total_mm, 1)} mm</td>
+                    <td class="num">${stP.days_ge_02mm} d</td>
+                    <td class="num">${fmtNum(stW.max_gust_kmh, 1)} km/h</td>
+                    <td class="num">${stW.foehn_days ?? 0} d</td>
+                    <td class="num">${fmtNum(dd.hdd_15_5, 0)} / ${fmtNum(dd.gdd_10_0, 0)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div class="broadsheet-episodes-grid">
+              ${compactEpisodes}
+            </div>
+
+            <footer class="broadsheet-footer">
+              <span><strong>MeteoRiotuerto</strong> · Notario del clima del valle del Covadal · Licencia Creative Commons CC BY 4.0</span>
+              <span class="mono">https://egofer.github.io/meteoriotuerto-web/#almanaque/${alm.year}</span>
+            </footer>
+          </div>
+        </details>
+      </section>
+    `;
+  }
+
+  function exportAlmanacBroadsheetPNG(alm, idx) {
+    const W = 1400;
+    const H = 1760;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const stT = alm.stats.temperature;
+    const stP = alm.stats.precipitation;
+    const stW = alm.stats.wind;
+    const stA = alm.stats.atmosphere_and_solar;
+    const dd = alm.stats.degree_days || { hdd_15_5: 0, gdd_10_0: 0 };
+    const cov = alm.coverage;
+    const ed = alm.editorial || {};
+    const tomeLabel = YEAR_TOMES[alm.year] || `TOMO ${alm.year}`;
+
+    // Fondo pergamino editorial
+    ctx.fillStyle = '#f6f4ee';
+    ctx.fillRect(0, 0, W, H);
+
+    // Marco exterior doble
+    ctx.strokeStyle = '#1b4332';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(28, 28, W - 56, H - 56);
+    ctx.strokeStyle = '#b8b19f';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(36, 36, W - 72, H - 72);
+
+    // Cabecera institucional verde bosque
+    ctx.fillStyle = '#132a21';
+    ctx.fillRect(52, 52, W - 104, 150);
+
+    ctx.fillStyle = '#a7f3d0';
+    ctx.font = '700 15px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(`METEORIOTUERTO · ${tomeLabel} · ARCHIVO CLIMATOLÓGICO DE BARRIO DE ARRIBA (RIOTUERTO, CANTABRIA)`, 80, 92);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '700 36px "Newsreader", Georgia, serif';
+    ctx.fillText(`Almanaque Meteorológico Anual ${alm.year} — Lámina Resumen`, 80, 140);
+
+    ctx.fillStyle = '#d8e6e0';
+    ctx.font = '500 16px "JetBrains Mono", monospace';
+    ctx.fillText(
+      `43.341° N, 3.670° W · 115 m s. n. m. · Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)}%) · ${alm.is_provisional ? 'Avance provisional' : 'Anuario consolidado'}`,
+      80,
+      176
+    );
+
+    // Titular sinóptico
+    ctx.fillStyle = '#16211d';
+    ctx.font = '700 22px "Newsreader", Georgia, serif';
+    const headlineText = (ed.headline || `Síntesis climatológica de ${alm.year}`).slice(0, 115);
+    ctx.fillText(headlineText, 60, 244);
+
+    ctx.fillStyle = '#394843';
+    ctx.font = '400 16px "Plus Jakarta Sans", sans-serif';
+    const summaryText = (ed.synoptic_summary || '').slice(0, 145) + ((ed.synoptic_summary || '').length > 145 ? '…' : '');
+    ctx.fillText(summaryText, 60, 274);
+
+    // 6 tarjetas KPI
+    const kpis = [
+      { lbl: 'T. MEDIA ANUAL', val: `${fmtNum(stT.mean, 1)} °C`, sub: `Máx. med: ${fmtNum(stT.max_mean, 1)} · Mín: ${fmtNum(stT.min_mean, 1)}`, col: '#1b4332' },
+      { lbl: 'MÁXIMA ABSOLUTA', val: `${fmtNum(stT.max_abs, 1)} °C`, sub: `${fmtDateShortMonth(stT.max_abs_date)} · ${stT.hot_days_ge_30} d ≥30 °C`, col: '#c2410c' },
+      { lbl: 'MÍNIMA ABSOLUTA', val: `${fmtNum(stT.min_abs, 1)} °C`, sub: `${fmtDateShortMonth(stT.min_abs_date)} · ${stT.frost_days_le_0} heladas`, col: '#0e7490' },
+      { lbl: 'PRECIPITACIÓN', val: `${fmtNum(stP.total_mm, 1)} mm`, sub: `${stP.days_ge_02mm} d lluvia · Máx: ${fmtNum(stP.max_daily_mm, 1)} mm`, col: '#0369a1' },
+      { lbl: 'RACHA MÁXIMA', val: `${fmtNum(stW.max_gust_kmh, 1)} km/h`, sub: `${fmtDateShortMonth(stW.max_gust_date)} · ${stW.days_gust_ge_40} d ≥40 km/h`, col: '#0f766e' },
+      { lbl: 'SURADAS Y SOL', val: `${stW.foehn_days ?? 0} d Foehn`, sub: stA.estimated_sunshine_hours !== null ? `${fmtNum(stA.estimated_sunshine_hours, 0)} h sol est.` : `HR med: ${fmtNum(stA.humidity_mean_pct, 1)}%`, col: '#b45309' },
+    ];
+
+    const cardW = 204;
+    const cardGap = 12;
+    kpis.forEach((k, idxK) => {
+      const x = 56 + idxK * (cardW + cardGap);
+      const y = 304;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x, y, cardW, 118);
+      ctx.fillStyle = k.col;
+      ctx.fillRect(x, y, cardW, 5);
+      ctx.strokeStyle = '#d8d3c4';
+      ctx.strokeRect(x, y, cardW, 118);
+
+      ctx.fillStyle = '#5c6e68';
+      ctx.font = '700 12px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(k.lbl, x + 12, y + 28);
+
+      ctx.fillStyle = k.col;
+      ctx.font = '700 26px "JetBrains Mono", monospace';
+      ctx.fillText(k.val, x + 12, y + 68);
+
+      ctx.fillStyle = '#394843';
+      ctx.font = '400 12px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(k.sub, x + 12, y + 98);
+    });
+
+    // Tabla mensual (12 meses)
+    const tblX = 56;
+    const tblY = 456;
+    const tblW = W - 112;
+    ctx.fillStyle = '#16211d';
+    ctx.font = '700 20px "Newsreader", Georgia, serif';
+    ctx.fillText(`Cuadro sinóptico mensual de ${alm.year}`, tblX, tblY - 12);
+
+    const cols = [
+      { name: 'MES', x: tblX + 14, align: 'left' },
+      { name: 'T. MEDIA', x: tblX + 260, align: 'right' },
+      { name: 'T. MÁX. ABS.', x: tblX + 410, align: 'right' },
+      { name: 'T. MÍN. ABS.', x: tblX + 560, align: 'right' },
+      { name: 'LLUVIA (MM)', x: tblX + 725, align: 'right' },
+      { name: 'DÍAS LLUVIA', x: tblX + 875, align: 'right' },
+      { name: 'RACHA MÁX.', x: tblX + 1025, align: 'right' },
+      { name: 'FOEHN', x: tblX + 1140, align: 'right' },
+      { name: 'HDD / GDD', x: tblX + 1270, align: 'right' },
+    ];
+
+    ctx.fillStyle = '#eeeadd';
+    ctx.fillRect(tblX, tblY, tblW, 38);
+    ctx.strokeStyle = '#1b4332';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(tblX, tblY);
+    ctx.lineTo(tblX + tblW, tblY);
+    ctx.moveTo(tblX, tblY + 38);
+    ctx.lineTo(tblX + tblW, tblY + 38);
+    ctx.stroke();
+
+    ctx.fillStyle = '#16211d';
+    ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
+    cols.forEach((c) => {
+      ctx.textAlign = c.align;
+      ctx.fillText(c.name, c.x, tblY + 24);
+    });
+
+    const rowH = 48;
+    (alm.monthly || []).forEach((m, i) => {
+      const ry = tblY + 38 + i * rowH;
+      ctx.fillStyle = i % 2 === 0 ? '#ffffff' : '#fbfaf6';
+      ctx.fillRect(tblX, ry, tblW, rowH);
+      ctx.strokeStyle = '#d8d3c4';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(tblX, ry + rowH);
+      ctx.lineTo(tblX + tblW, ry + rowH);
+      ctx.stroke();
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#16211d';
+      ctx.font = '700 15px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(m.name, cols[0].x, ry + 30);
+
+      if (!m || m.valid_days === 0) {
+        ctx.fillStyle = '#5c6e68';
+        ctx.font = '400 14px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText('Mes aún no observado o sin registros consolidados', cols[1].x, ry + 30);
+        return;
+      }
+
+      const vals = [
+        `${fmtNum(m.temp_mean, 1)} °C`,
+        `${fmtNum(m.temp_max_abs, 1)} °C`,
+        `${fmtNum(m.temp_min_abs, 1)} °C`,
+        `${fmtNum(m.rain_total, 1)} mm`,
+        `${fmtNum(m.rain_days_02, 0)} d`,
+        `${fmtNum(m.wind_gust_max, 1)} km/h`,
+        `${fmtNum(m.foehn_days ?? 0, 0)} d`,
+        `${fmtNum(m.hdd_15_5, 0)} / ${fmtNum(m.gdd_10_0, 0)}`,
+      ];
+      ctx.font = '500 15px "JetBrains Mono", monospace';
+      vals.forEach((v, idxV) => {
+        ctx.textAlign = 'right';
+        ctx.fillStyle = idxV === 3 ? '#0369a1' : idxV === 1 ? '#c2410c' : idxV === 2 ? '#0e7490' : '#16211d';
+        ctx.fillText(v, cols[idxV + 1].x, ry + 30);
+      });
+    });
+
+    // Fila resumen anual
+    const footY = tblY + 38 + 12 * rowH;
+    ctx.fillStyle = '#e3efe9';
+    ctx.fillRect(tblX, footY, tblW, 44);
+    ctx.strokeStyle = '#1b4332';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(tblX, footY);
+    ctx.lineTo(tblX + tblW, footY);
+    ctx.moveTo(tblX, footY + 44);
+    ctx.lineTo(tblX + tblW, footY + 44);
+    ctx.stroke();
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#132a21';
+    ctx.font = '700 15px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(`TOTAL / MEDIA ${alm.year}`, cols[0].x, footY + 28);
+
+    const footVals = [
+      `${fmtNum(stT.mean, 1)} °C`,
+      `${fmtNum(stT.max_abs, 1)} °C`,
+      `${fmtNum(stT.min_abs, 1)} °C`,
+      `${fmtNum(stP.total_mm, 1)} mm`,
+      `${stP.days_ge_02mm} d`,
+      `${fmtNum(stW.max_gust_kmh, 1)} km/h`,
+      `${stW.foehn_days ?? 0} d`,
+      `${fmtNum(dd.hdd_15_5, 0)} / ${fmtNum(dd.gdd_10_0, 0)}`,
+    ];
+    ctx.font = '700 15px "JetBrains Mono", monospace';
+    footVals.forEach((v, idxV) => {
+      ctx.textAlign = 'right';
+      ctx.fillText(v, cols[idxV + 1].x, footY + 28);
+    });
+
+    // Hitos del año
+    ctx.textAlign = 'left';
+    const epY = footY + 86;
+    ctx.fillStyle = '#16211d';
+    ctx.font = '700 20px "Newsreader", Georgia, serif';
+    ctx.fillText(`Efemérides e hitos destacados de ${alm.year}`, tblX, epY - 14);
+
+    const eps = (ed.episodes || []).slice(0, 5);
+    const epW = 246;
+    const epGap = 14;
+    eps.forEach((ep, idxE) => {
+      const ex = tblX + idxE * (epW + epGap);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(ex, epY, epW, 118);
+      ctx.strokeStyle = '#b8b19f';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(ex, epY, epW, 118);
+
+      ctx.fillStyle = '#1b4332';
+      ctx.font = '700 13px "JetBrains Mono", monospace';
+      ctx.fillText(`${fmtDateES(ep.date, false)} · ${ep.value}`, ex + 12, epY + 26);
+
+      ctx.fillStyle = '#16211d';
+      ctx.font = '700 14px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText((ep.title || '').slice(0, 28), ex + 12, epY + 54);
+
+      ctx.fillStyle = '#5c6e68';
+      ctx.font = '400 12px "Plus Jakarta Sans", sans-serif';
+      const d1 = (ep.description || '').slice(0, 34);
+      const d2 = (ep.description || '').slice(34, 68);
+      ctx.fillText(d1, ex + 12, epY + 80);
+      if (d2) ctx.fillText(d2 + ((ep.description || '').length > 68 ? '…' : ''), ex + 12, epY + 98);
+    });
+
+    // Pie de lámina CC BY 4.0
+    ctx.fillStyle = '#132a21';
+    ctx.fillRect(52, H - 96, W - 104, 44);
+    ctx.fillStyle = '#e9f2ee';
+    ctx.font = '600 14px "Plus Jakarta Sans", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('MeteoRiotuerto — Archivo climatológico de Barrio de Arriba (Riotuerto, Cantabria) · Licencia CC BY 4.0', 76, H - 68);
+    ctx.textAlign = 'right';
+    ctx.font = '500 14px "JetBrains Mono", monospace';
+    ctx.fillText(`https://egofer.github.io/meteoriotuerto-web/#almanaque/${alm.year}`, W - 76, H - 68);
+
+    downloadDataUrl(canvas.toDataURL('image/png'), `meteoriotuerto_lamina_anual_${alm.year}.png`);
+  }
+
   async function renderAlmanaque(year) {
     const [idx, alm] = await Promise.all([
       ensureIndexLoaded(),
       ensureAlmanacLoaded(year),
     ]);
+    if (alm.is_provisional) {
+      await ensureAllAlmanacsLoaded();
+    }
 
     STATE.selectedYear = alm.year;
     const container = document.getElementById('view-almanaque');
@@ -3006,12 +3677,12 @@
       : `<span class="year-step-btn disabled" aria-disabled="true" title="Primer año disponible de la serie">← Inicio</span>`;
 
     const nextBtnHtml = nextYear
-      ? `<a href="#almanaque/${nextYear}" class="year-step-btn" title="Ir al almanaque de ${nextYear} (Atajo: Alt + →)" aria-label="Año siguiente ${nextYear}">${nextYear === 2026 ? '2026 (Prov.)' : nextYear} →</a>`
+      ? `<a href="#almanaque/${nextYear}" class="year-step-btn" title="Ir al almanaque de ${nextYear} (Atajo: Alt + →)" aria-label="Año siguiente ${nextYear}">${isProvisionalYear(nextYear) ? `${nextYear} (Prov.)` : nextYear} →</a>`
       : `<span class="year-step-btn disabled" aria-disabled="true" title="Último año disponible de la serie">Actual →</span>`;
 
     const pillsHtml = yearsAvailable.map((y) => {
       const isAct = y === alm.year ? 'active' : '';
-      const label = y === 2026 ? '2026 (Prov.)' : String(y);
+      const label = isProvisionalYear(y) ? `${y} (Prov.)` : String(y);
       return `<a href="#almanaque/${y}" class="year-pill ${isAct}">${label}</a>`;
     }).join('');
 
@@ -3165,7 +3836,9 @@
           <span class="year-pills-sep" aria-hidden="true"></span>
           ${nextBtnHtml}
           <span class="year-pills-sep" aria-hidden="true"></span>
-          <button type="button" id="btn-print-almanac-top" class="btn btn-print" title="Imprimir o guardar como informe PDF en formato A4">🖨️ Imprimir / PDF</button>
+          <button type="button" id="btn-print-broadsheet" class="btn btn-print" title="Imprimir ficha resumen del anuario en una sola lámina A4">📄 Lámina 1 pág.</button>
+          <button type="button" id="btn-download-broadsheet-png" class="btn btn-subtle" title="Descargar lámina resumen anual en imagen PNG de alta resolución">🖼️ Lámina PNG</button>
+          <button type="button" id="btn-print-almanac-top" class="btn btn-print" title="Imprimir o guardar como informe PDF completo en formato A4">🖨️ Imprimir / PDF</button>
         </div>
       </div>
 
@@ -3228,6 +3901,9 @@
           <div class="kpi-meta">Pico validado: ${fmtNum(stA.solar_max_wm2 || stA.solar_max_raw_wm2, 1)} W/m² · UV máx.: ${stA.uvi_max ?? stA.uvi_max_raw ?? '—'}</div>
         </div>
       </div>
+
+      ${renderYearToDateComparisonHtml(alm, STATE.cache.almanacs)}
+      ${renderAlmanacBroadsheetHtml(alm, idx)}
 
       <!-- Episodios meteorológicos destacados del año -->
       <section class="section-block">
@@ -3812,6 +4488,37 @@
     };
     document.getElementById('btn-print-almanac-top')?.addEventListener('click', triggerPrint);
     document.getElementById('btn-print-almanac')?.addEventListener('click', triggerPrint);
+
+    const triggerBroadsheetPrint = (e) => {
+      if (e) e.stopPropagation();
+      const detailsEl = document.getElementById('broadsheet-preview-details');
+      const wasOpen = detailsEl ? detailsEl.open : false;
+      if (detailsEl) detailsEl.open = true;
+      document.body.classList.add('print-mode-broadsheet');
+      const wasDark = STATE.theme === 'dark';
+      if (wasDark) {
+        STATE.theme = 'light';
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+      setTimeout(() => {
+        window.print();
+        document.body.classList.remove('print-mode-broadsheet');
+        if (detailsEl && !wasOpen) detailsEl.open = false;
+        if (wasDark) {
+          STATE.theme = 'dark';
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      }, 150);
+    };
+    document.getElementById('btn-print-broadsheet')?.addEventListener('click', triggerBroadsheetPrint);
+    document.getElementById('btn-print-broadsheet-inline')?.addEventListener('click', triggerBroadsheetPrint);
+
+    const triggerBroadsheetPng = (e) => {
+      if (e) e.stopPropagation();
+      exportAlmanacBroadsheetPNG(alm, idx);
+    };
+    document.getElementById('btn-download-broadsheet-png')?.addEventListener('click', triggerBroadsheetPng);
+    document.getElementById('btn-dl-broadsheet-png-inline')?.addEventListener('click', triggerBroadsheetPng);
 
     // Controles interactivos de la rosa de los vientos (EVO-017 y EVO-033)
     const btnPolar = document.getElementById(`btn-windrose-polar-${alm.year}`);
@@ -5056,7 +5763,7 @@
       ann.records_lustrum?.temp_max_abs?.value,
       2024,
       ann.records_lustrum?.temp_min_abs?.value,
-      2023,
+      2024,
       ann.rain_total_mm,
       ann.rain_days_02,
       ann.rain_days_10,
@@ -5082,10 +5789,10 @@
       [],
       ['Hito climatológico', 'Valor récord', 'Unidad', 'Fecha', 'Contexto sinóptico'],
       ['Temperatura máxima absoluta', ann.records_lustrum?.temp_max_abs?.value, '°C', ann.records_lustrum?.temp_max_abs?.date, 'Ola de calor histórica en agosto de 2024'],
-      ['Temperatura mínima absoluta', ann.records_lustrum?.temp_min_abs?.value, '°C', ann.records_lustrum?.temp_min_abs?.date, 'Helada por inversión térmica en marzo de 2023'],
+      ['Temperatura mínima absoluta', ann.records_lustrum?.temp_min_abs?.value, '°C', ann.records_lustrum?.temp_min_abs?.date, 'Helada por inversión térmica en enero de 2024'],
       ['Precipitación máxima en 24 h', ann.records_lustrum?.rain_max_daily?.value, 'mm', ann.records_lustrum?.rain_max_daily?.date, 'Temporal atlántico histórico (Borrasca Fien)'],
       ['Racha máxima absoluta de viento', ann.records_lustrum?.wind_gust_max?.value, 'km/h', ann.records_lustrum?.wind_gust_max?.date, 'Vendaval del sur / surada (Borrasca Karlotta)'],
-      ['Mayor oscilación térmica en 24 h', ann.records_lustrum?.max_daily_amplitude?.value, '°C', ann.records_lustrum?.max_daily_amplitude?.date, 'Amplitud térmica extrema el 11 de agosto de 2024'],
+      ['Mayor oscilación térmica en 24 h', ann.records_lustrum?.max_daily_amplitude?.value, '°C', ann.records_lustrum?.max_daily_amplitude?.date, 'Amplitud térmica extrema el 6 de julio de 2026'],
       ['Máxima intensidad de precipitación', ann.records_lustrum?.rain_rate_max?.value, 'mm/h', ann.records_lustrum?.rain_rate_max?.date, 'Tormenta torrencial convectiva en junio de 2025']
     ];
 
@@ -5352,12 +6059,16 @@
       } else {
         if (m30.embedded_daily_removed > 0) notes.push(`Depuradas ${m30.embedded_daily_removed} filas diarias incrustadas.`);
         if (m30.duplicates_removed > 0) notes.push(`Eliminados ${m30.duplicates_removed} timestamps duplicados.`);
-        if (m30.out_of_year_removed > 0) notes.push(`Excluidas ${m30.out_of_year_removed} filas fuera del año natural.`);
+        if (m30.out_of_year_removed > 0) {
+          notes.push(m30.out_of_year_removed === 1 ? 'Excluida 1 fila fuera del año natural.' : `Excluidas ${m30.out_of_year_removed} filas fuera del año natural.`);
+        }
         if (m30.glitches_filtered && m30.glitches_filtered.length > 0) {
           notes.push(`Filtrado pico RF espurio (${m30.glitches_filtered.length}).`);
         }
       }
-      if (cov.missing_days > 0) notes.push(`${cov.missing_days} días sin observación.`);
+      if (cov.missing_days > 0) {
+        notes.push(cov.missing_days === 1 ? '1 día sin observación.' : `${cov.missing_days} días sin observación.`);
+      }
       if (alm.is_provisional) notes.push(`Año en curso hasta ${alm.last_observed_date}.`);
 
       rows.push([
@@ -5663,8 +6374,12 @@
    * VISTA 3: EXPLORADOR DE DATOS HISTÓRICOS
    * ------------------------------------------------------------------------ */
   async function renderExplorador() {
-    await ensureAllAlmanacsLoaded();
+    await Promise.all([ensureIndexLoaded(), ensureAllAlmanacsLoaded()]);
     const container = document.getElementById('view-explorador');
+    const maxObsDate = STATE.cache.index?.series_overview?.last_consolidated_date || '2026-12-31';
+    if (!STATE.explorer.dateTo) {
+      STATE.explorer.dateTo = maxObsDate;
+    }
 
     const varOptionsHtml = Object.entries(EXPLORER_VARIABLES).map(([k, v]) => {
       const sel = STATE.explorer.variable === k ? 'selected' : '';
@@ -5723,11 +6438,11 @@
         </div>
         <div class="control-group">
           <label for="exp-from">Desde fecha</label>
-          <input type="date" id="exp-from" class="form-input" value="${STATE.explorer.dateFrom}" min="2022-01-01" max="2026-10-25">
+          <input type="date" id="exp-from" class="form-input" value="${STATE.explorer.dateFrom}" min="2022-01-01" max="${maxObsDate}">
         </div>
         <div class="control-group">
           <label for="exp-to">Hasta fecha</label>
-          <input type="date" id="exp-to" class="form-input" value="${STATE.explorer.dateTo}" min="2022-01-01" max="2026-10-25">
+          <input type="date" id="exp-to" class="form-input" value="${STATE.explorer.dateTo}" min="2022-01-01" max="${maxObsDate}">
         </div>
         <div class="control-group">
           <label for="exp-episode">Filtro de umbral / episodio</label>
@@ -5817,7 +6532,7 @@
       STATE.explorer.chartMode = document.getElementById('exp-mode').value;
       STATE.explorer.variable2 = document.getElementById('exp-var2')?.value || 'none';
       STATE.explorer.dateFrom = document.getElementById('exp-from').value || '2022-01-01';
-      STATE.explorer.dateTo = document.getElementById('exp-to').value || '2026-10-25';
+      STATE.explorer.dateTo = document.getElementById('exp-to').value || maxObsDate;
       STATE.explorer.episodeFilter = document.getElementById('exp-episode').value;
       STATE.explorer.aggregation = document.getElementById('exp-agg').value;
 
@@ -5846,10 +6561,10 @@
       STATE.explorer.yearFilter = val;
       if (val === 'all') {
         document.getElementById('exp-from').value = '2022-01-01';
-        document.getElementById('exp-to').value = '2026-10-25';
+        document.getElementById('exp-to').value = maxObsDate;
       } else if (val === '2026') {
         document.getElementById('exp-from').value = '2026-01-01';
-        document.getElementById('exp-to').value = '2026-10-25';
+        document.getElementById('exp-to').value = maxObsDate;
       } else {
         document.getElementById('exp-from').value = `${val}-01-01`;
         document.getElementById('exp-to').value = `${val}-12-31`;
@@ -8247,7 +8962,7 @@
     if (!profA.hasData || !profB.hasData) {
       verdictHtml = `
         <div class="h2h-verdict-box">
-          <strong>⚠️ Periodo sin observaciones consolidadas:</strong> Uno de los meses seleccionados pertenece a la parte aún no transcurrida del año en curso 2026. Seleccione un mes entre enero y octubre para contrastar datos observados.
+          <strong>⚠️ Periodo sin observaciones consolidadas:</strong> Uno de los meses seleccionados pertenece a la parte aún no transcurrida del año en curso 2026. Seleccione un mes que ya cuente con observaciones consolidadas para contrastar datos.
         </div>
       `;
     } else {
@@ -9688,10 +10403,10 @@
       physicalDescription: 'Cuando las borrascas o frentes atlánticos se aproximan por el oeste, se canaliza un potente flujo del sector Sur-Sudoeste sobre la cordillera cantábrica. El aire húmedo se ve forzado a ascender por la vertiente sur perdiendo humedad por condensación. Al rebasar el collado del Puerto de Alisas (674 m) y desplomarse hacia el fondo del valle del Covadal (115 m), experimenta compresión adiabática seca: se recalienta a un ritmo de +1 °C por cada 100 m de descenso y su humedad relativa se desploma violentamente.',
       territorialImpact: 'Provoca desecación repentina de praderas y vegetación arbórea, aceleración eólica canalizada por el desfiladero con rachas huracanadas en Barrio de Arriba y riesgo extremo de incendios forestales. Históricamente se conoce como «el viento de las castañas» por favorecer su caída en otoño, y altera el biorritmo vecinal por ionización positiva y subidas térmicas fulgurantes en pleno invierno.',
       records: [
-        { label: 'Racha máxima histórica', val: '86,4 km/h', sub: 'SW · 27 de marzo de 2024' },
-        { label: 'Desplome de humedad', val: '22 %', sub: 'Mínimo del registro con Surada' },
-        { label: 'Salto térmico en 3h', val: '+12,8 °C', sub: 'Típico amanecer con viento sur' },
-        { label: 'Noches tropicales', val: '4 noches', sub: 'Tª mín ≥20 °C en el año 2026' },
+        { label: 'Racha máxima histórica', val: '97,2 km/h', sub: 'Sur / Karlotta · 8 de febrero de 2024' },
+        { label: 'Desplome de humedad', val: '15 %', sub: 'Mínimo del registro con Surada' },
+        { label: 'Techo térmico con Foehn', val: '42,1 °C', sub: '11 de agosto de 2024 (aviso rojo)' },
+        { label: 'Noches tropicales', val: '5 noches', sub: '1 en 2023 y 4 en el verano de 2026' },
       ],
     },
     orographic: {
@@ -9703,10 +10418,10 @@
       physicalDescription: 'Tras el paso de frentes fríos o con vientos marítimos del noroeste («gallego»), masas de aire polar marítimo muy húmedas procedentes del golfo de Vizcaya penetran tierra adentro por el curso bajo del río Miera desde la ría de Cubas (a solo 14 km de Riotuerto). Al encontrarse con la rampa orográfica del valle del Covadal y la barrera frontal del Puerto de Alisas (674 m), el aire no puede rodear el relieve y asciende forzado. El enfriamiento por expansión adiabática satura la masa de aire, generando densas nubes estratiformes encajonadas y precipitaciones orográficas copiosas.',
       territorialImpact: 'Explica por qué Riotuerto registra pluviometrías anuales extraordinarias (entre 1.600 y más de 2.100 mm), superando con creces los acumulados de la franja costera de Santander. Proporciona una productividad forrajera excepcional para los pastizales cántabros y alimenta el caudal ininterrumpido del río Covadal y los acuíferos kársticos, aunque incrementa el riesgo de encharcamiento en vegas llanas en temporales de invierno.',
       records: [
-        { label: 'Precipitación anual récord', val: '2.124,4 mm', sub: 'Año histórico 2024' },
-        { label: 'Máxima lluvia en 24h', val: '83,8 mm', sub: '7 de octubre de 2026' },
-        { label: 'Días de lluvia apreciable', val: '184 días', sub: 'Promedio anual ≥0,2 mm' },
-        { label: 'Humedad relativa media', val: '82,5 %', sub: 'Régimen oceánico hiperhúmedo' },
+        { label: 'Precipitación anual récord', val: '2.140,4 mm', sub: 'Año histórico 2023 (2.047,9 mm en 2024)' },
+        { label: 'Máxima lluvia en 24h', val: '125,9 mm', sub: '16 de enero de 2023 (borrasca Fien)' },
+        { label: 'Días de lluvia apreciable', val: '219 días', sub: 'Promedio anual ≥0,2 mm (2022–2025)' },
+        { label: 'Humedad relativa media', val: '84,3 %', sub: 'Régimen oceánico hiperhúmedo' },
       ],
     },
     inversion: {
@@ -9719,7 +10434,7 @@
       territorialImpact: 'Genera las heladas más intensas del año en el fondo de valle (alcanzando hasta -3,1 °C) y formación de densa escarcha blanca sobre prados y techados, mientras que las viviendas situadas a media ladera (Monte, Rucandio) registran valores varios grados más suaves. Con frecuencia favorece la aparición de nieblas de irradiación matinales que se disipan rápidamente con el calentamiento solar.',
       records: [
         { label: 'Mínima absoluta del valle', val: '-3,1 °C', sub: '20 de enero de 2024' },
-        { label: 'Días de helada al año', val: '8 a 14 días', sub: 'Tª mín ≤0 °C en Barrio de Arriba' },
+        { label: 'Días de helada al año', val: '3 a 20 días', sub: 'Promedio 11,8 días/año (Tª mín ≤0 °C)' },
         { label: 'Diferencial térmico fondo/ladera', val: '3 a 5 °C', sub: 'Más frío en el valle que en cumbres' },
         { label: 'Calma eólica nocturna', val: '<1,0 km/h', sub: 'Ausencia de turbulencia' },
       ],
@@ -10005,13 +10720,15 @@
       } else {
         if (m30.embedded_daily_removed > 0) notes.push(`Depuradas ${m30.embedded_daily_removed} filas diarias incrustadas.`);
         if (m30.duplicates_removed > 0) notes.push(`Eliminados ${fmtNum(m30.duplicates_removed, 0)} timestamps duplicados.`);
-        if (m30.out_of_year_removed > 0) notes.push(`Excluidas ${m30.out_of_year_removed} filas fuera del año natural.`);
+        if (m30.out_of_year_removed > 0) {
+          notes.push(m30.out_of_year_removed === 1 ? 'Excluida 1 fila fuera del año natural.' : `Excluidas ${m30.out_of_year_removed} filas fuera del año natural.`);
+        }
         if (m30.glitches_filtered && m30.glitches_filtered.length > 0) {
           notes.push(`Filtrado pico RF espurio (${m30.glitches_filtered.length}).`);
         }
       }
       if (cov.missing_days > 0) {
-        notes.push(`${cov.missing_days} días sin observación.`);
+        notes.push(cov.missing_days === 1 ? '1 día sin observación.' : `${cov.missing_days} días sin observación.`);
       }
       if (alm.is_provisional) {
         notes.push(`Año en curso hasta ${alm.last_observed_date}.`);
@@ -11464,7 +12181,7 @@
             <!-- Tabla histórica de los 5 años -->
             <div class="table-responsive">
               <table class="data-table">
-                <caption class="table-caption">Comportamiento meteorológico histórico registrado durante la fiesta de ${escapeHtml(activeStat.name)} (2022–2026)</caption>
+                <caption class="table-caption">Comportamiento meteorológico histórico registrado durante la fiesta de ${escapeHtml(f.name)} (2022–2026)</caption>
                 <thead>
                   <tr>
                     <th scope="col">Año</th>
@@ -11648,16 +12365,21 @@
     let imageRel = 'assets/img/og/og-portada.jpg';
     let imageAlt = 'MeteoRiotuerto — Notario del clima y archivo meteorológico de Barrio de Arriba (Cantabria)';
 
+    const metaLastConsDate = STATE.cache.index?.series_overview?.last_consolidated_date || '2026-11-21';
+    const metaLastMonthIdx = parseInt(metaLastConsDate.split('-')[1], 10) - 1;
+    const metaLastMonthName = (MONTH_NAMES_ES[metaLastMonthIdx] || 'Noviembre').toLowerCase();
+
     const YEAR_EDITORIAL_HEADLINES = {
       2022: 'Año cálido y seco con estío prolongado y marcadas suradas otoñales',
       2023: 'Grandes contrastes: el temporal Fien (509,8 mm en enero) y acusada sequía estival',
       2024: 'Récord absoluto de calor (42,1 °C) y temporales atlánticos de viento sur',
       2025: 'Pluviosidad abundante y gran regularidad estacional en el valle',
-      2026: 'Avance provisional del año en curso (registro consolidado hasta octubre)',
+      2026: `Avance provisional del año en curso (registro consolidado hasta ${metaLastMonthName})`,
     };
 
     if (route === 'almanaque') {
-      const targetYear = param && [2022, 2023, 2024, 2025, 2026].includes(Number(param))
+      const availYears = getAvailableYears();
+      const targetYear = param && availYears.includes(Number(param))
         ? Number(param)
         : STATE.selectedYear || 2025;
       url = `https://egofer.github.io/meteoriotuerto-web/#almanaque/${targetYear}`;
@@ -11833,6 +12555,17 @@
       sublink.classList.toggle('active-sub', isSubAct);
     });
 
+    // Cerrar menú móvil si estaba desplegado al cambiar de ruta por hash
+    const mainNavEl = document.getElementById('main-nav');
+    const navToggleEl = document.getElementById('nav-toggle');
+    if (mainNavEl && mainNavEl.classList.contains('nav-open')) {
+      mainNavEl.classList.remove('nav-open');
+      if (navToggleEl) {
+        navToggleEl.setAttribute('aria-expanded', 'false');
+        navToggleEl.classList.remove('active');
+      }
+    }
+
     // Ocultar todas las secciones y destruir gráficos previos
     destroyChartsInPrefix('');
     document.querySelectorAll('.view-section').forEach((sec) => {
@@ -11848,6 +12581,11 @@
 
     try {
       const idx = await ensureIndexLoaded();
+      const availYears = getAvailableYears();
+      const periodRangeEl = document.getElementById('header-period-range');
+      if (periodRangeEl && availYears.length > 0) {
+        periodRangeEl.textContent = `${availYears[0]} — ${availYears[availYears.length - 1]}`;
+      }
       const totalDaysEl = document.getElementById('header-total-days');
       if (totalDaysEl) {
         totalDaysEl.textContent = `${fmtNum(idx.series_overview.total_observed_days, 0)} días observados · Act. ${fmtDateES(idx.series_overview.last_consolidated_date, false)}`;
@@ -11873,7 +12611,7 @@
       } else if (route === 'cotidiano' || route === 'fiestas') {
         await renderCotidiano(param, subparam);
       } else if (route === 'almanaque') {
-        const targetYear = param && [2022, 2023, 2024, 2025, 2026].includes(Number(param))
+        const targetYear = param && availYears.includes(Number(param))
           ? Number(param)
           : STATE.selectedYear || 2025;
         await renderAlmanaque(targetYear);

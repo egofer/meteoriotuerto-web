@@ -103,12 +103,16 @@ def generate_almanac_card(year: int, alm_data: Dict[str, Any], out_path: Path) -
     """Genera tarjeta Open Graph para un almanaque anual específico con sus métricas reales."""
     img, draw = create_base_canvas()
 
+    last_obs_2026 = str(alm_data.get("last_observed_date") or "2026-11-21")
+    m_idx_2026 = int(last_obs_2026.split("-")[1]) if "-" in last_obs_2026 else 11
+    months_es = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+    m_label_2026 = months_es[m_idx_2026 - 1] if 1 <= m_idx_2026 <= 12 else "el último cierre"
     headline_map = {
         2022: "Año cálido y seco con estío prolongado y marcadas suradas otoñales",
         2023: "Grandes contrastes: el temporal Fien (509,8 mm en enero) y acusada sequía estival",
         2024: "Récord absoluto de calor (42,1 °C) y temporales atlánticos de viento sur",
         2025: "Pluviosidad abundante y gran regularidad estacional en el valle",
-        2026: "Avance provisional del año en curso (registro consolidado hasta octubre)",
+        2026: f"Avance provisional del año en curso (registro consolidado hasta {m_label_2026})",
     }
     headline = headline_map.get(year, f"Anuario meteorológico y climatológico completo de {year}")
 

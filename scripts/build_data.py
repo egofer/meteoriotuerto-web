@@ -263,35 +263,34 @@ EDITORIAL_CHRONICLES: Dict[int, Dict[str, Any]] = {
         ),
     },
     2026: {
-        "character": "Provisional (año en curso: cálido y húmedo hasta octubre)",
-        "headline": "Avance provisional hasta el 25 de octubre: verano cálido, 4 noches tropicales y 1504,3 mm",
+        "character": "Provisional (año en curso: registro consolidado hasta noviembre)",
+        "headline": "Avance provisional del año en curso: verano cálido, 4 noches tropicales y 1580,8 mm",
         "synoptic_summary": (
-            "AVISO DE PROVISIONALIDAD: Los datos de 2026 corresponden al periodo observado entre el 1 de enero y el "
-            "25 de octubre de 2026 (298 días). Durante estos casi diez meses la temperatura media acumulada es de 15,8 °C "
-            "(condicionada por no incluir todavía noviembre ni diciembre completos) y la precipitación suma 1504,3 mm."
+            "AVISO DE PROVISIONALIDAD: Los datos de 2026 corresponden al periodo observado desde el 1 de enero hasta "
+            "el último cierre consolidado del año en curso. La temperatura media y el acumulado pluviométrico evolucionan "
+            "diariamente a medida que avanza el trimestre otoñal e invernal."
         ),
         "thermal_notes": (
-            "Hasta el 25 de octubre se han registrado 31 días con temperaturas de al menos 30 °C, 11 días de ≥35 °C "
+            "En lo que va de año se han registrado 31 días con temperaturas de al menos 30 °C, 11 días de ≥35 °C "
             "y un pico temprano de 41,3 °C el 24 de junio. Asimismo, se han contabilizado 4 noches tropicales (mínima ≥20 °C) "
             "y solo 2 días de helada en invierno (-1,4 °C el 4 de enero)."
         ),
         "rain_notes": (
-            "Se acumulan 1504,3 mm en 154 días de lluvia apreciable. Marzo ha sido hasta la fecha el mes más húmedo "
-            "(302,0 mm), mientras que el 7 de octubre se recogieron 83,8 mm en un solo día."
+            "Marzo ha sido hasta la fecha el mes más húmedo (302,0 mm), mientras que el 7 de octubre se recogieron "
+            "83,8 mm en un solo día."
         ),
         "wind_notes": (
-            "La racha máxima provisional del año es de 73,4 km/h, registrada el 21 de enero, acumulando 30 jornadas "
-            "con rachas iguales o superiores a 40 km/h."
+            "La racha máxima provisional del año es de 73,4 km/h, registrada el 21 de enero."
         ),
         "episodes": [
             {"date": "2026-01-04", "type": "frio", "title": "Mínima invernal provisional", "value": "-1,4 °C", "description": "Registro más bajo en lo que va de año 2026."},
-            {"date": "2026-01-21", "type": "viento", "title": "Temporal invernal de enero", "value": "73,4 km/h", "description": "Racha máxima registrada hasta octubre de 2026."},
+            {"date": "2026-01-21", "type": "viento", "title": "Temporal invernal de enero", "value": "73,4 km/h", "description": "Racha máxima registrada en el avance anual de 2026."},
             {"date": "2026-03-31", "type": "lluvia", "title": "Marzo muy lluvioso", "value": "302,0 mm/mes", "description": "Mes con mayor precipitación acumulada en el avance anual."},
             {"date": "2026-06-24", "type": "calor", "title": "Episodio extremo de calor en junio", "value": "41,3 °C", "description": "Segundo registro más alto de toda la serie histórica de la estación, alcanzado a finales de junio."},
             {"date": "2026-10-07", "type": "lluvia", "title": "Lluvia torrencial otoñal", "value": "83,8 mm", "description": "Segundo mayor registro diario de precipitación de toda la serie tras el 16 de enero de 2023."},
         ],
         "data_note": (
-            "Año en curso (datos consolidados desde el 01/01/2026 hasta el 25/10/2026). No debe compararse directamente "
+            "Año en curso con actualización diaria automatizada. No debe compararse directamente "
             "en términos absolutos anuales con los años cerrados (2022–2025) hasta finalizar diciembre."
         ),
     },
@@ -1346,7 +1345,45 @@ def compute_year_almanac(
         "methodology": "FAO-56 Penman-Monteith / Hargreaves-Samani (Lat 43.341° N)",
     }
 
-    editorial = EDITORIAL_CHRONICLES.get(year, {})
+    editorial = dict(EDITORIAL_CHRONICLES.get(year, {}))
+    if is_provisional:
+        last_obs_iso = str(df_d["date"].max())
+        obs_y, obs_m, obs_d = [int(x) for x in last_obs_iso.split("-")]
+        obs_m_name = MONTH_NAMES_ES[obs_m - 1].lower()
+        obs_date_long = f"{obs_d} de {obs_m_name} de {obs_y}"
+        obs_date_short = f"{obs_d:02d}/{obs_m:02d}/{obs_y}"
+        t_mean_val = safe_round(df_d["temp_mean"].mean(), 1)
+        wet_m_name = MONTH_NAMES_ES[wettest_m_idx - 1]
+        wet_m_mm = safe_round(monthly_rain.loc[wettest_m_idx], 1)
+        fmt_es = lambda v: str(v).replace(".", ",")
+        editorial["character"] = f"Provisional (año en curso: registro consolidado hasta {obs_m_name})"
+        editorial["headline"] = (
+            f"Avance provisional hasta el {obs_d} de {obs_m_name}: {valid_temp_days} días observados, "
+            f"{tropical_nights_20} noches tropicales y {fmt_es(rain_total)} mm"
+        )
+        editorial["synoptic_summary"] = (
+            f"AVISO DE PROVISIONALIDAD: Los datos de {year} corresponden al periodo observado entre el 1 de enero y el "
+            f"{obs_date_long} ({valid_temp_days} días válidos). Hasta esta fecha la temperatura media acumulada es de "
+            f"{fmt_es(t_mean_val)} °C y la precipitación suma {fmt_es(rain_total)} mm."
+        )
+        editorial["thermal_notes"] = (
+            f"Hasta el {obs_d} de {obs_m_name} se han registrado {hot_days_30} días con temperaturas de al menos 30 °C, "
+            f"{intense_heat_35} días de ≥35 °C y un pico temprano de {fmt_es(tmax_abs)} °C ({tmax_date}). Asimismo, se han "
+            f"contabilizado {tropical_nights_20} noches tropicales (mínima ≥20 °C) y {frost_days} días de helada "
+            f"(mínima de {fmt_es(tmin_abs)} °C el {tmin_date})."
+        )
+        editorial["rain_notes"] = (
+            f"Se acumulan {fmt_es(rain_total)} mm en {rain_days_02} días de lluvia apreciable. {wet_m_name} ha sido hasta "
+            f"la fecha el mes más húmedo ({fmt_es(wet_m_mm)} mm), con un máximo diario de {fmt_es(rain_max_day)} mm ({rain_max_date})."
+        )
+        editorial["wind_notes"] = (
+            f"La racha máxima provisional del año es de {fmt_es(gust_max)} km/h ({gust_date}), acumulando {wind_days_40} "
+            f"jornadas con rachas iguales o superiores a 40 km/h."
+        )
+        editorial["data_note"] = (
+            f"Año en curso (datos consolidados desde el 01/01/{year} hasta el {obs_date_short}). No debe compararse directamente "
+            f"en términos absolutos anuales con los años cerrados (2022–2025) hasta finalizar diciembre."
+        )
 
     return {
         "year": year,
@@ -1565,7 +1602,9 @@ def compute_seasonal_climatology(
                 expected_days = 91
                 if y in provisional_years:
                     is_prov = True
-                    notes = "Trimestre en curso (datos consolidados hasta octubre)."
+                    last_m_in_sub = int(sub["month"].max()) if not sub.empty else 10
+                    last_m_label = MONTH_NAMES_ES[last_m_in_sub - 1].lower()
+                    notes = f"Trimestre en curso (datos consolidados hasta {last_m_label})."
                 else:
                     is_prov = False
                     notes = None
@@ -2147,13 +2186,16 @@ def compute_quinquennium_normals(
         ])), 1),
         "records_lustrum": {
             "temp_max_abs": {"value": 42.1, "date": "2024-08-11", "label": "Máxima absoluta del quinquenio"},
-            "temp_min_abs": {"value": -2.4, "date": "2023-03-01", "label": "Mínima absoluta del quinquenio"},
+            "temp_min_abs": {"value": -3.1, "date": "2024-01-20", "label": "Mínima absoluta del quinquenio"},
             "rain_max_daily": {"value": 125.9, "date": "2023-01-16", "label": "Mayor precipitación diaria (Borrasca Fien)"},
             "wind_gust_max": {"value": 97.2, "date": "2024-02-08", "label": "Racha máxima absoluta (Vendaval Karlotta)"},
-            "max_daily_amplitude": {"value": 27.2, "date": "2024-08-11", "label": "Mayor oscilación térmica en 24h"},
-            "rain_rate_max": {"value": 145.2, "date": "2025-06-19", "label": "Máxima intensidad de lluvia instantánea"}
+            "max_daily_amplitude": {"value": 25.2, "date": "2026-07-06", "label": "Mayor oscilación térmica en 24h"},
+            "rain_rate_max": {"value": 145.2, "date": "2025-06-10", "label": "Máxima intensidad de lluvia instantánea"}
         }
     }
+
+    m5_months = [m["month_name"].lower() for m in monthly_normals if m["sample_years_count"] == 5]
+    last_m5 = m5_months[-1] if m5_months else "octubre"
 
     return {
         "period": "2022–2026",
@@ -2162,9 +2204,9 @@ def compute_quinquennium_normals(
         "standard_reference": "WMO-No. 1203 (Directrices de la OMM sobre el cálculo de normales climáticas)",
         "note": (
             "Serie normalizada del primer quinquenio de observaciones (2022–2026) en Barrio de Arriba (Riotuerto). "
-            "Para los meses de enero a octubre se integran los 5 años completos; para noviembre y diciembre se computa "
-            "la referencia de los 4 años cerrados (2022–2025). Conforme a la OMM, este cálculo constituye la primera "
-            "normal provisional y de corto periodo de la estación."
+            f"Para los meses con ≥80 % de cobertura mensual en 2026 (enero a {last_m5}) se integran los 5 años completos; "
+            "para los meses restantes se computa la referencia de los 4 años cerrados (2022–2025). Conforme a la OMM, "
+            "este cálculo constituye la primera normal provisional y de corto periodo de la estación."
         ),
         "annual_summary": annual_summary,
         "monthly_normals": monthly_normals
@@ -2314,9 +2356,10 @@ def build_records_and_comparisons(
             "coldest_edition": {"year": cold_y, "temp_mean": safe_round(by_y_valid.loc[cold_y, "t_mean"], 1)} if cold_y else None,
         })
 
+    last_obs_all = str(df_all["date"].max())
     records_payload = {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "period_covered": "2022-01-01 a 2026-10-25 (serie consolidada en repositorio; estación operativa desde 29/11/2020)",
+        "period_covered": f"2022-01-01 a {last_obs_all} (serie consolidada en repositorio; estación operativa desde 29/11/2020)",
         "total_observed_days": int(df_all["temp_mean"].notna().sum()),
         "methodological_disclaimer": (
             "Todos los récords corresponden exclusivamente al periodo observado por la estación automática "

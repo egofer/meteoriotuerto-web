@@ -1148,7 +1148,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("Grandes contrastes: el temporal Fien (509,8 mm en enero) y acusada sequía estival", app_js)
         self.assertIn("Récord absoluto de calor (42,1 °C) y temporales atlánticos de viento sur", app_js)
         self.assertIn("Pluviosidad abundante y gran regularidad estacional en el valle", app_js)
-        self.assertIn("Avance provisional del año en curso (registro consolidado hasta octubre)", app_js)
+        self.assertIn("Avance provisional del año en curso (registro consolidado hasta ${lastConsMonthName})", app_js)
 
         # 3. Métricas clave en tarjetas
         self.assertIn("Precipitación anual", app_js)
@@ -1692,7 +1692,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 1. Verificar que existen tablas y que el 100% tienen caption
         table_matches = re.findall(r'<table\b[^>]*>.*?</table>', app_js, re.DOTALL)
-        self.assertEqual(len(table_matches), 23, f"Se esperaban 23 tablas en app.js, encontradas {len(table_matches)}")
+        self.assertEqual(len(table_matches), 25, f"Se esperaban 25 tablas en app.js, encontradas {len(table_matches)}")
         for idx, tbl in enumerate(table_matches, 1):
             self.assertIn("<caption", tbl, f"La tabla {idx} carece de etiqueta <caption> en app.js")
             self.assertIn('class="table-caption"', tbl, f"La tabla {idx} carece de clase table-caption en <caption>")
@@ -2040,7 +2040,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("records_lustrum", ann)
         rl = ann["records_lustrum"]
         self.assertEqual(rl["temp_max_abs"]["value"], 42.1)
-        self.assertEqual(rl["temp_min_abs"]["value"], -2.4)
+        self.assertEqual(rl["temp_min_abs"]["value"], -3.1)
         self.assertEqual(rl["rain_max_daily"]["value"], 125.9)
         self.assertEqual(rl["wind_gust_max"]["value"], 97.2)
 
@@ -2531,6 +2531,92 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("function computeSolarTimes(", app_js)
         self.assertIn('class="live-solar-times"', app_js)
         self.assertIn(".live-solar-times", css_txt)
+
+    def test_act_01_and_act_02_dynamic_dates_and_scientific_consistency(self):
+        """ACT-01 y ACT-02: Verifica ausencia de límites fijos al 2026-10-25, coherencia de récords en TOPOGRAPHY_DATA y glosario sin LaTeX crudo."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        glo_txt = (ROOT_DIR / "data" / "glossary.json").read_text(encoding="utf-8")
+        idx = json.loads((ROOT_DIR / "data" / "index.json").read_text(encoding="utf-8"))
+        rec = json.loads((ROOT_DIR / "data" / "records.json").read_text(encoding="utf-8"))
+
+        # ACT-01: Sin fechas congeladas al 2026-10-25 ni textos estáticos de octubre en app.js y records.json
+        self.assertNotIn("2026-10-25", app_js)
+        self.assertNotIn("hasta octubre", app_js)
+        self.assertIn(idx["series_overview"]["last_consolidated_date"], rec["period_covered"])
+
+        # ACT-02: TOPOGRAPHY_DATA y glosario coherentes con records.json y libres de LaTeX crudo
+        self.assertIn("97,2 km/h", app_js)
+        self.assertIn("2.140,4 mm", app_js)
+        self.assertIn("125,9 mm", app_js)
+        self.assertNotIn("2.124,4 mm", app_js)
+        self.assertNotIn("$P_", glo_txt)
+        self.assertNotIn("41,6 °C", glo_txt)
+        self.assertNotIn("87,4 mm", glo_txt)
+        self.assertNotIn("129,5 mm/h", glo_txt)
+
+    def test_act_03_and_act_04_offline_badge_fiestas_caption_and_sw_matching(self):
+        """ACT-03 y ACT-04: Verifica regla [hidden], caption con f.name en #fiestas e ignoreSearch en sw.js."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        sw_txt = (ROOT_DIR / "sw.js").read_text(encoding="utf-8")
+
+        # ACT-03: Regla [hidden] global en CSS y f.name en el caption de festividades
+        self.assertIn("[hidden]", css_txt)
+        self.assertIn("display: none !important;", css_txt)
+        self.assertIn("durante la fiesta de ${escapeHtml(f.name)}", app_js)
+        self.assertNotIn("durante la fiesta de ${escapeHtml(activeStat.name)}", app_js)
+
+        # ACT-04: Emparejamiento ignoreSearch en sw.js y separación de tarjetas OG del precache bloqueante
+        self.assertIn("ignoreSearch: true", sw_txt)
+        self.assertIn("SOCIAL_OG_ASSETS", sw_txt)
+        precache_block = sw_txt.split("const PRECACHE_ASSETS = [")[1].split("];")[0]
+        self.assertNotIn("assets/img/og/", precache_block)
+
+    def test_act_05_to_act_09_tables_search_dynamic_years_and_concordance(self):
+        """ACT-05 a ACT-09: Densidad de tablas, buscador sin doble X, parametrización de años, concordancia y optimización WebP."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+        met_txt = (ROOT_DIR / "docs" / "METODOLOGIA.md").read_text(encoding="utf-8")
+
+        # ACT-05: Densidad de tablas y eliminación de botón nativo de búsqueda duplicado
+        self.assertIn("padding: 9px 10px;", css_txt)
+        self.assertIn(".data-table td:not(.num):not(.mono)", css_txt)
+        self.assertIn("::-webkit-search-cancel-button", css_txt)
+
+        # ACT-06: Funciones dinámicas de años disponibles y provisionales
+        self.assertIn("function getAvailableYears()", app_js)
+        self.assertIn("function isProvisionalYear(year)", app_js)
+
+        # ACT-07: Concordancia singular/plural en auditoría y optimización de imágenes WebP (< 300 KB)
+        self.assertIn("Excluida 1 fila fuera del año natural.", app_js)
+        self.assertIn("1 día sin observación.", app_js)
+        self.assertNotIn("25/10/2026", met_txt)
+        img_station = ROOT_DIR / "assets" / "img" / "estacion-meteorologica-barrio-de-arriba.webp"
+        img_valley = ROOT_DIR / "assets" / "img" / "valle-covadal-barrio-de-arriba.webp"
+        self.assertLess(img_station.stat().st_size, 320_000)
+        self.assertLess(img_valley.stat().st_size, 250_000)
+
+    def test_act_10_ytd_comparison_and_broadsheet_summary(self):
+        """ACT-10: Verifica comparativa Year-to-Date (a igual fecha acumulada) y ficha resumen 'Anuario en una lámina' (A4 / PNG)."""
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+        css_txt = (ROOT_DIR / "src" / "css" / "styles.css").read_text(encoding="utf-8")
+
+        # Parte 1: Comparativa Year-to-Date (YTD) para año provisional
+        self.assertIn("function computeYearToDateComparison(alm, allAlmanacs)", app_js)
+        self.assertIn("function renderYearToDateComparisonHtml(alm, allAlmanacs)", app_js)
+        self.assertIn('id="sec-ytd-comparison"', app_js)
+        self.assertIn("Media ref. YTD", app_js)
+        self.assertIn(".ytd-comparison-section", css_txt)
+
+        # Parte 2: Anuario en una lámina (impresión A4 de 1 página y exportación PNG en cliente)
+        self.assertIn("function renderAlmanacBroadsheetHtml(alm, idx)", app_js)
+        self.assertIn("function exportAlmanacBroadsheetPNG(alm, idx)", app_js)
+        self.assertIn('id="sec-almanac-broadsheet"', app_js)
+        self.assertIn('id="btn-print-broadsheet"', app_js)
+        self.assertIn('id="btn-download-broadsheet-png"', app_js)
+        self.assertIn("meteoriotuerto_lamina_anual_", app_js)
+        self.assertIn("body.print-mode-broadsheet", css_txt)
+        self.assertIn(".broadsheet-sheet", css_txt)
 
 
 

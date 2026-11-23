@@ -24,18 +24,6 @@ const PRECACHE_ASSETS = [
   './assets/img/estacion-meteorologica-barrio-de-arriba.webp',
   './assets/img/valle-covadal-barrio-de-arriba.jpg',
   './assets/img/valle-covadal-barrio-de-arriba.webp',
-  './assets/img/og/og-portada.jpg',
-  './assets/img/og/og-almanaque-2022.jpg',
-  './assets/img/og/og-almanaque-2023.jpg',
-  './assets/img/og/og-almanaque-2024.jpg',
-  './assets/img/og/og-almanaque-2025.jpg',
-  './assets/img/og/og-almanaque-2026.jpg',
-  './assets/img/og/og-records.jpg',
-  './assets/img/og/og-comparativas.jpg',
-  './assets/img/og/og-cotidiano.jpg',
-  './assets/img/og/og-explorador.jpg',
-  './assets/img/og/og-metodologia.jpg',
-  './assets/img/og/og-glosario.jpg',
   './src/css/styles.css',
   './src/js/app.js',
   './src/js/vendor/xlsx.mini.min.js',
@@ -51,6 +39,22 @@ const PRECACHE_ASSETS = [
   './data/almanac_2024.json',
   './data/almanac_2025.json',
   './data/almanac_2026.json'
+];
+
+// Tarjetas Open Graph para rastreadores sociales (excluidas del precache bloqueante inicial para ahorrar 1,3 MB)
+const SOCIAL_OG_ASSETS = [
+  './assets/img/og/og-portada.jpg',
+  './assets/img/og/og-almanaque-2022.jpg',
+  './assets/img/og/og-almanaque-2023.jpg',
+  './assets/img/og/og-almanaque-2024.jpg',
+  './assets/img/og/og-almanaque-2025.jpg',
+  './assets/img/og/og-almanaque-2026.jpg',
+  './assets/img/og/og-records.jpg',
+  './assets/img/og/og-comparativas.jpg',
+  './assets/img/og/og-cotidiano.jpg',
+  './assets/img/og/og-explorador.jpg',
+  './assets/img/og/og-metodologia.jpg',
+  './assets/img/og/og-glosario.jpg'
 ];
 
 // Instalación: precachea todos los recursos críticos
@@ -95,7 +99,7 @@ self.addEventListener('fetch', (event) => {
         }
         return networkRes;
       }).catch(() => {
-        return caches.match(req).then((cached) => cached || caches.match('./index.html'));
+        return caches.match(req, { ignoreSearch: true }).then((cached) => cached || caches.match('./index.html'));
       })
     );
     return;
@@ -121,7 +125,7 @@ self.addEventListener('fetch', (event) => {
     }
   }
 
-  // 3. Recursos locales (datos JSON, scripts, estilos e imágenes): Network-First con fallback a Cache
+  // 3. Recursos locales (datos JSON, scripts, estilos e imágenes): Network-First con fallback a Cache (ignorando ?v= en fallback)
   event.respondWith(
     fetch(req).then((networkRes) => {
       if (networkRes && networkRes.status === 200) {
@@ -130,7 +134,7 @@ self.addEventListener('fetch', (event) => {
       }
       return networkRes;
     }).catch(() => {
-      return caches.match(req).then((cached) => {
+      return caches.match(req, { ignoreSearch: true }).then((cached) => {
         if (cached) return cached;
         // Fallback para imágenes no encontradas
         if (req.destination === 'image') {
