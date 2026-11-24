@@ -253,6 +253,7 @@ EDITORIAL_CHRONICLES: Dict[int, Dict[str, Any]] = {
         "episodes": [
             {"date": "2025-01-14", "type": "frio", "title": "Helada invernal bajo bloqueo anticiclónico", "value": "-2,2 °C", "description": "Temperatura mínima anual durante una secuencia de inversiones térmicas en enero."},
             {"date": "2025-01-26", "type": "viento", "title": "Impacto de la borrasca Herminia", "value": "86,4 km/h", "description": "Racha máxima anual registrada a las 08:00 h durante el paso de la profunda borrasca Herminia."},
+            {"date": "2025-03-29", "type": "eclipse", "title": "Eclipse solar parcial de primavera", "value": "212,5 W/m² (-59 %)", "description": "Ocultación solar del ~24 % (máx. 11:43 h CET) con meseta térmica de 1 h en 12,1 °C y caída del índice UV de 5 a 2."},
             {"date": "2025-06-10", "type": "lluvia", "title": "Tormenta convectiva de alta intensidad", "value": "145,2 mm/h", "description": "Mayor tasa instantánea de precipitación y 44,2 mm en una hora a las 20:30 h."},
             {"date": "2025-08-15", "type": "calor", "title": "Advección cálida y efecto Foehn de agosto", "value": "40,2 °C", "description": "Temperatura máxima anual precedida por una mínima de 19,4 °C la jornada anterior."},
             {"date": "2025-11-24", "type": "lluvia", "title": "Temporal lluvioso del noroeste en noviembre", "value": "67,8 mm", "description": "Máximo diario anual en un mes de noviembre que totalizó 286,4 mm."},
@@ -287,6 +288,7 @@ EDITORIAL_CHRONICLES: Dict[int, Dict[str, Any]] = {
             {"date": "2026-01-21", "type": "viento", "title": "Temporal invernal de enero", "value": "73,4 km/h", "description": "Racha máxima registrada en el avance anual de 2026."},
             {"date": "2026-03-31", "type": "lluvia", "title": "Marzo muy lluvioso", "value": "302,0 mm/mes", "description": "Mes con mayor precipitación acumulada en el avance anual."},
             {"date": "2026-06-24", "type": "calor", "title": "Episodio extremo de calor en junio", "value": "41,3 °C", "description": "Segundo registro más alto de toda la serie histórica de la estación, alcanzado a finales de junio."},
+            {"date": "2026-08-12", "type": "eclipse", "title": "Eclipse solar total en Cantabria", "value": "2,9 W/m² · Calma", "description": "Totalidad a las 20:27 h CEST (1 min 04 s): caída radiativa del -94 % y desplome súbito del viento de 2,6 a 0,6 km/h."},
             {"date": "2026-10-07", "type": "lluvia", "title": "Lluvia torrencial otoñal", "value": "83,8 mm", "description": "Segundo mayor registro diario de precipitación de toda la serie tras el 16 de enero de 2023."},
         ],
         "data_note": (
@@ -1495,8 +1497,134 @@ def compute_year_almanac(
         },
         "wind_analysis": wind_analysis,
         "foehn_analysis": foehn_analysis,
+        "eclipse_observation": build_eclipse_observation(year, df_30),
         "monthly": monthly_list,
         "daily_series": daily_series,
+    }
+
+
+ECLIPSE_EVENTS_META: Dict[int, Dict[str, Any]] = {
+    2025: {
+        "date": "2025-03-29",
+        "title": "Eclipse solar parcial del 29 de marzo de 2025",
+        "eclipse_type": "Solar parcial (~24 % de ocultación del disco solar)",
+        "timezone_label": "CET (UTC+1)",
+        "timings": {
+            "first_contact": "10:48 h",
+            "maximum": "11:43 h",
+            "last_contact": "12:33 h",
+            "magnitude": "0,24",
+        },
+        "window": ("10:00", "13:30"),
+        "peak_slots": ["11:30", "12:00"],
+        "phase_labels": {
+            "10:00": "Rampa matinal previa",
+            "10:30": "Previo al 1.er contacto",
+            "11:00": "Inicio parcial (10:48 h)",
+            "11:30": "Fase ascendente hacia el máximo",
+            "12:00": "Tras el máximo (11:43 h)",
+            "12:30": "Salida / fin del eclipse (12:33 h)",
+            "13:00": "Recuperación radiativa plena",
+            "13:30": "Mediodía solar pos-eclipse",
+        },
+        "highlights": [
+            {"label": "Caída de irradiancia", "value": "516,1 → 212,5 W/m²", "sub": "-58,8 % entre las 11:00 y las 12:00 h (UV 5 → 2)"},
+            {"label": "Respuesta térmica", "value": "Meseta en 12,1 °C", "sub": "Frenazo de 1 h en plena rampa de calentamiento matinal"},
+            {"label": "Brisa convectiva", "value": "4,6 → 3,0 km/h", "sub": "Reducción del -35 % en el máximo (racha 11,1 → 7,2 km/h)"},
+        ],
+        "physical_summary": (
+            "El eclipse parcial sorprendió al valle del Covadal en plena rampa de calentamiento matinal (+1,1 °C cada 30 min "
+            "entre las 09:30 y las 11:00 h). Durante la hora central del fenómeno (11:00–12:00 h CET), el ascenso termométrico "
+            "se detuvo en seco en 12,1 °C (retrocediendo el máximo del intervalo de 12,7 a 12,4 °C), el índice UV cayó de 5 a 2 "
+            "y la brisa amainó de 4,6 a 3,0 km/h."
+        ),
+        "methodological_note": (
+            "Rigor instrumental: aquella mañana discurrió con nubosidad posfrontal variable (1,8 mm de madrugada), por lo que "
+            "la caída observada de irradiancia (-58,8 %) suma la ocultación astronómica (~24 % del disco solar) y la atenuación "
+            "por estratocúmulos pasajeros."
+        ),
+    },
+    2026: {
+        "date": "2026-08-12",
+        "title": "Eclipse solar total del 12 de agosto de 2026",
+        "eclipse_type": "Solar total (100 % · 1 min 04 s de totalidad en Cantabria)",
+        "timezone_label": "CEST (UTC+2)",
+        "timings": {
+            "first_contact": "19:31:22 h",
+            "totality_window": "20:26:57 – 20:28:01 h",
+            "maximum": "20:27:29 h",
+            "last_contact": "21:20:09 h (ocaso)",
+            "magnitude": "1,003",
+        },
+        "window": ("18:30", "21:30"),
+        "peak_slots": ["20:00", "20:30"],
+        "phase_labels": {
+            "18:30": "Tarde soleada previa (Tmáx día: 31,5 °C)",
+            "19:00": "Previo al 1.er contacto",
+            "19:30": "Inicio parcial (19:31:22 h · Sol < 9°)",
+            "20:00": "Fase parcial avanzada (~55 % oculto)",
+            "20:30": "Totalidad (20:27 h · 1 min 04 s)",
+            "21:00": "Salida parcial / puesta de sol",
+            "21:30": "Crepúsculo nocturno",
+        },
+        "highlights": [
+            {"label": "Desplome radiativo", "value": "45,0 → 2,9 W/m²", "sub": "-72 % a las 20:00 h y -93,6 % en el tramo de totalidad (frente a 22,0 W/m² el 13/08)"},
+            {"label": "«Viento del eclipse»", "value": "2,6 → 0,6 km/h", "sub": "Calma súbita (-77 %) en la totalidad por estabilización superficial"},
+            {"label": "Respuesta térmica", "value": "25,4 → 24,3 °C (-1,1 °C)", "sub": "Amortiguada por el bajo ángulo solar (<9°) y masa cálida húmeda (88–90 % HR)"},
+        ],
+        "physical_summary": (
+            "Primer eclipse solar total visible en la península ibérica en más de un siglo, cuya franja de totalidad cruzó de lleno "
+            "Cantabria al atardecer. En Barrio de Arriba, partiendo de la tarde con mayor insolación de esa semana (45,0 W/m² a las "
+            "19:30 h), la radiación se hundió un -72,2 % a las 20:00 h (12,5 W/m², frente a 28,6–29,9 W/m² en días vecinos) hasta "
+            "quedar en 2,9 W/m² de media semihoraria en el intervalo de la totalidad (20:30 h), acompañada de un desplome brusco "
+            "del viento de 2,6 a 0,6 km/h."
+        ),
+        "methodological_note": (
+            "Contexto termodinámico: el descenso térmico durante la hora del eclipse fue moderado (-1,1 °C) debido a la baja elevación "
+            "solar sobre el relieve occidental (<9°) y a la entrada simultánea de una masa de aire cálido y muy húmedo (88–92 % HR) "
+            "que pocas horas después dejó el récord histórico de noche más cálida de la estación (21,2 °C en la madrugada del 13/08/2026)."
+        ),
+    },
+}
+
+
+def build_eclipse_observation(year: int, df_30: Optional[pd.DataFrame]) -> Optional[Dict[str, Any]]:
+    """Extrae la cápsula documental e intradiaria (30 min) para años con eclipses solares notables en Cantabria."""
+    meta = ECLIPSE_EVENTS_META.get(year)
+    if not meta:
+        return None
+
+    records_30m: List[Dict[str, Any]] = []
+    if df_30 is not None and not df_30.empty:
+        h_start, h_end = meta["window"]
+        sub = df_30[df_30["date"] == meta["date"]].copy()
+        for _, r in sub.iterrows():
+            hm = r["dt"].strftime("%H:%M")
+            if h_start <= hm <= h_end:
+                records_30m.append({
+                    "time": hm,
+                    "phase": meta["phase_labels"].get(hm, ""),
+                    "is_peak": hm in meta["peak_slots"],
+                    "solar_wm2": safe_round(r.get("solar"), 1),
+                    "uvi": int(r["uvi"]) if pd.notna(r.get("uvi")) else 0,
+                    "temp_mean_c": safe_round(r.get("temp_mean"), 1),
+                    "temp_max_c": safe_round(r.get("temp_max"), 1),
+                    "temp_min_c": safe_round(r.get("temp_min"), 1),
+                    "humidity_pct": safe_round(r.get("humidity_mean"), 0),
+                    "wind_speed_kmh": safe_round(r.get("wind_speed"), 1),
+                    "wind_gust_kmh": safe_round(r.get("wind_gust"), 1),
+                })
+
+    return {
+        "date": meta["date"],
+        "title": meta["title"],
+        "eclipse_type": meta["eclipse_type"],
+        "timezone_label": meta["timezone_label"],
+        "timings": meta["timings"],
+        "highlights": meta["highlights"],
+        "physical_summary": meta["physical_summary"],
+        "methodological_note": meta["methodological_note"],
+        "intraday_30min": records_30m,
     }
 
 

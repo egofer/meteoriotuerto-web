@@ -3,7 +3,7 @@
 Publicación digital, archivo histórico y notario del clima local de **Barrio de Arriba, municipio de Riotuerto (Cantabria, España · 115 m s. n. m.)**, elaborada a partir de los registros instrumentales de la estación meteorológica automática **MeteoRiotuerto**.
 
 - **Web en producción:** [https://egofer.github.io/meteoriotuerto-web/](https://egofer.github.io/meteoriotuerto-web/)
-- **Última actualización documental:** `2026-11-23`
+- **Última actualización documental:** `2026-11-24`
 
 ---
 
@@ -20,11 +20,11 @@ Publicación digital, archivo histórico y notario del clima local de **Barrio d
 
 ## Objetivos iniciales y alcance alcanzado
 
-- **Estado actual:** Proyecto finalizado en su alcance planificado (`EVO-001` a `EVO-048`, `MEJ-001` a `MEJ-012`, actuaciones de auditoría `ACT-01` a `ACT-10` e incidencias `INC-001` a `INC-033` cerradas) y en **operación continua** mediante sincronización diaria automatizada en GitHub Actions.
+- **Estado actual:** Proyecto finalizado en su alcance planificado (`EVO-001` a `EVO-049`, `MEJ-001` a `MEJ-012`, actuaciones de auditoría `ACT-01` a `ACT-10` e incidencias `INC-001` a `INC-033` cerradas) y en **operación continua** mediante sincronización diaria automatizada en GitHub Actions.
 - **Principales resultados obtenidos:**
   - *Pipeline* reproducible en Python (`scripts/`) con depuración no destructiva, validación física y generación atómica de 12 archivos JSON/GeoJSON minificados en `data/` (`1.755` días observados consolidados hasta `2026-11-23`).
-  - Aplicación web estática (SPA + PWA *offline* `v1.2.16`) con portada editorial, almanaques anuales (2022–2026) con comparativa *Year-to-Date* (a igual fecha acumulada) y ficha resumen «Anuario en una lámina» (1 página A4 / PNG), sección de acontecimientos y récords, cuaderno agroclimático y de festividades (`#cotidiano`), comparativas multianuales y normales OMM (`#comparativas`), explorador interactivo (`#explorador`), metodología (`#metodologia`) y glosario (`#glosario`).
-  - Exportación nativa a Excel (`.xlsx`), exportación de gráficos y láminas anuales a PNG con membrete CC BY 4.0, accesibilidad WCAG 2.2 AA y suite de 69 pruebas automatizadas (`tests/test_data_pipeline.py`).
+  - Aplicación web estática (SPA + PWA *offline* `v1.2.16`) con portada editorial, almanaques anuales (2022–2026) con cápsulas intradiarias de eclipses solares (2025 y 2026), comparativa *Year-to-Date* (a igual fecha acumulada) y ficha resumen «Anuario en una lámina» (1 página A4 / PNG), sección de acontecimientos y récords, cuaderno agroclimático y de festividades (`#cotidiano`), comparativas multianuales y normales OMM (`#comparativas`), explorador interactivo (`#explorador`), metodología (`#metodologia`) y glosario (`#glosario`).
+  - Exportación nativa a Excel (`.xlsx`), exportación de gráficos y láminas anuales a PNG con membrete CC BY 4.0, accesibilidad WCAG 2.2 AA y suite de 70 pruebas automatizadas (`tests/test_data_pipeline.py`).
 
 ---
 
@@ -38,7 +38,7 @@ meteoriotuerto-web/
 ├── docs/                          # Metodología científica (METODOLOGIA.md) y guía de despliegue (GUIA_DESPLIEGUE.md)
 ├── scripts/                       # Procesamiento, validación, frescura, tarjetas OG, glosario y sincronización
 ├── src/                           # Frontend estático (css/styles.css, js/app.js y js/vendor/xlsx.mini.min.js)
-├── tests/                         # Suite de 69 pruebas unitarias e invariantes (test_data_pipeline.py)
+├── tests/                         # Suite de 70 pruebas unitarias e invariantes (test_data_pipeline.py)
 ├── index.html                     # Documento principal de la aplicación
 ├── sw.js / site.webmanifest       # Service Worker y manifiesto PWA
 ├── robots.txt / sitemap.xml       # Directivas de rastreo e indexación SEO

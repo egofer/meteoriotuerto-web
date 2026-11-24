@@ -2015,6 +2015,7 @@ html[data-theme="dark"] .year-pill.active {
 .episode-type-frio .episode-val { background: var(--accent-cold-soft); color: var(--accent-cold); }
 .episode-type-viento .episode-val { background: var(--accent-wind-soft); color: var(--accent-wind); }
 .episode-type-amplitud .episode-val { background: var(--accent-solar-soft); color: var(--accent-solar); }
+.episode-type-eclipse .episode-val { background: var(--accent-solar-soft); color: var(--accent-solar); }
 
 .episode-title {
   font-weight: 700;
@@ -8198,6 +8199,72 @@ html[data-theme="dark"] .rank-badge-bronze {
     gap: 6px !important;
   }
 }
+
+/* ==========================================================================
+   Cápsula documental de eclipses solares e impacto atmosférico (2025 y 2026)
+   ========================================================================== */
+.eclipse-observation-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-left: 4px solid var(--accent-solar);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.eclipse-timings-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.eclipse-summary-p {
+  font-size: 0.92rem;
+  color: var(--txt-primary);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.eclipse-highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.eclipse-highlight-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.eclipse-highlight-lbl {
+  font-size: 0.70rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-solar);
+}
+
+.eclipse-highlight-val {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  color: var(--txt-primary);
+}
+
+.eclipse-highlight-sub {
+  font-size: 0.76rem;
+  color: var(--txt-secondary);
+}
+
+.eclipse-row-peak {
+  background: var(--accent-solar-soft);
+}
+
 
 
 

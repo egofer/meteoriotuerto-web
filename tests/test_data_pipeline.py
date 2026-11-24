@@ -1692,7 +1692,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
 
         # 1. Verificar que existen tablas y que el 100% tienen caption
         table_matches = re.findall(r'<table\b[^>]*>.*?</table>', app_js, re.DOTALL)
-        self.assertEqual(len(table_matches), 25, f"Se esperaban 25 tablas en app.js, encontradas {len(table_matches)}")
+        self.assertEqual(len(table_matches), 26, f"Se esperaban 26 tablas en app.js, encontradas {len(table_matches)}")
         for idx, tbl in enumerate(table_matches, 1):
             self.assertIn("<caption", tbl, f"La tabla {idx} carece de etiqueta <caption> en app.js")
             self.assertIn('class="table-caption"', tbl, f"La tabla {idx} carece de clase table-caption en <caption>")
@@ -2617,6 +2617,26 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("meteoriotuerto_lamina_anual_", app_js)
         self.assertIn("body.print-mode-broadsheet", css_txt)
         self.assertIn(".broadsheet-sheet", css_txt)
+
+    def test_solar_eclipse_observations_in_2025_and_2026(self):
+        """Verifica la integración documental e intradiaria (30 min) de los eclipses solares de 2025-03-29 y 2026-08-12."""
+        alm25 = json.loads((ROOT_DIR / "data" / "almanac_2025.json").read_text(encoding="utf-8"))
+        alm26 = json.loads((ROOT_DIR / "data" / "almanac_2026.json").read_text(encoding="utf-8"))
+        app_js = (ROOT_DIR / "src" / "js" / "app.js").read_text(encoding="utf-8")
+
+        for alm, expected_date, expected_slots in [
+            (alm25, "2025-03-29", 8),
+            (alm26, "2026-08-12", 7),
+        ]:
+            ep_dates = [e["date"] for e in alm["editorial"]["episodes"]]
+            self.assertIn(expected_date, ep_dates)
+            ec = alm.get("eclipse_observation")
+            self.assertIsNotNone(ec)
+            self.assertEqual(ec["date"], expected_date)
+            self.assertEqual(len(ec["intraday_30min"]), expected_slots)
+
+        self.assertIn("function renderAlmanacEclipseSectionHtml(alm)", app_js)
+        self.assertIn('id="sec-almanac-eclipse"', app_js)
 
 
 

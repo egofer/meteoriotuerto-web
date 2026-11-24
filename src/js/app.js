@@ -3603,6 +3603,93 @@
     downloadDataUrl(canvas.toDataURL('image/png'), `meteoriotuerto_lamina_anual_${alm.year}.png`);
   }
 
+  /* ------------------------------------------------------------------------
+   * Huella instrumental intradiaria de eclipses solares en Cantabria (2025 y 2026)
+   * ------------------------------------------------------------------------ */
+  function renderAlmanacEclipseSectionHtml(alm) {
+    const ec = alm.eclipse_observation;
+    if (!ec || !Array.isArray(ec.intraday_30min) || ec.intraday_30min.length === 0) {
+      return '';
+    }
+
+    const t = ec.timings || {};
+    const timingChips = [
+      t.first_contact ? `<span class="badge">1.er contacto: ${escapeHtml(t.first_contact)}</span>` : '',
+      t.totality_window ? `<span class="badge" style="background:var(--accent-solar-soft);color:var(--accent-solar)">Totalidad: ${escapeHtml(t.totality_window)}</span>` : '',
+      t.maximum ? `<span class="badge" style="background:var(--accent-heat-soft);color:var(--accent-heat)">Máximo: ${escapeHtml(t.maximum)}</span>` : '',
+      t.last_contact ? `<span class="badge">Fin: ${escapeHtml(t.last_contact)}</span>` : '',
+      t.magnitude ? `<span class="badge">Magnitud: ${escapeHtml(t.magnitude)}</span>` : '',
+    ].filter(Boolean).join(' ');
+
+    const highlightsHtml = (ec.highlights || []).map((h) => `
+      <div class="eclipse-highlight-box">
+        <span class="eclipse-highlight-lbl">${escapeHtml(h.label)}</span>
+        <strong class="eclipse-highlight-val">${escapeHtml(h.value)}</strong>
+        <small class="eclipse-highlight-sub">${escapeHtml(h.sub)}</small>
+      </div>
+    `).join('');
+
+    const rowsHtml = ec.intraday_30min.map((r) => {
+      const rowCls = r.is_peak ? 'class="eclipse-row-peak"' : '';
+      return `
+        <tr ${rowCls}>
+          <th scope="row" class="mono"><strong>${escapeHtml(r.time)}</strong></th>
+          <td>${escapeHtml(r.phase || '—')}${r.is_peak ? ' <span class="badge" style="background:var(--accent-solar-soft);color:var(--accent-solar)">Fase central</span>' : ''}</td>
+          <td class="num" style="color:var(--accent-solar)"><strong>${fmtNum(r.solar_wm2, 1)} W/m²</strong></td>
+          <td class="num">${r.uvi ?? 0}</td>
+          <td class="num"><strong>${fmtNum(r.temp_mean_c, 1)} °C</strong></td>
+          <td class="num">${fmtNum(r.temp_min_c, 1)} – ${fmtNum(r.temp_max_c, 1)} °C</td>
+          <td class="num">${fmtNum(r.humidity_pct, 0)} %</td>
+          <td class="num">${fmtNum(r.wind_speed_kmh, 1)} / ${fmtNum(r.wind_gust_kmh, 1)} km/h</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <section id="sec-almanac-eclipse" class="section-block eclipse-observation-section">
+        <div class="section-header">
+          <div>
+            <span class="editorial-kicker">EFEMÉRIDE ASTRONÓMICA Y RESPUESTA ATMOSFÉRICA · SERIE SEMIHORARIA (${escapeHtml(ec.timezone_label || 'Europe/Madrid')})</span>
+            <h3 class="section-title">🌒 ${escapeHtml(ec.title)} en Barrio de Arriba</h3>
+            <p class="section-subtitle">${escapeHtml(ec.eclipse_type)} · Fecha observada: ${fmtDateES(ec.date)}</p>
+          </div>
+        </div>
+
+        <div class="eclipse-observation-card">
+          <div class="eclipse-timings-bar">${timingChips}</div>
+          <p class="eclipse-summary-p">${escapeHtml(ec.physical_summary)}</p>
+          <div class="eclipse-highlights-grid">
+            ${highlightsHtml}
+          </div>
+          <div class="callout callout-info" style="margin:14px 0 18px 0">
+            <strong>Contexto físico y control de calidad:</strong> ${escapeHtml(ec.methodological_note)}
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <caption class="table-caption">Evolución semihoraria (30 min) registrada en Barrio de Arriba durante el ${escapeHtml(ec.title.toLowerCase())}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Hora (${escapeHtml(ec.timezone_label)})</th>
+                  <th scope="col">Fase del fenómeno</th>
+                  <th scope="col" class="num">Irradiancia</th>
+                  <th scope="col" class="num">Índice UV</th>
+                  <th scope="col" class="num">T. media</th>
+                  <th scope="col" class="num">Rango T. (30m)</th>
+                  <th scope="col" class="num">Humedad</th>
+                  <th scope="col" class="num">Viento / Racha</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
   async function renderAlmanaque(year) {
     const [idx, alm] = await Promise.all([
       ensureIndexLoaded(),
@@ -3917,6 +4004,8 @@
           ${episodesHtml}
         </div>
       </section>
+
+      ${renderAlmanacEclipseSectionHtml(alm)}
 
       <!-- Gráficos principales: Climograma y Rango térmico diario -->
       <section class="section-block">
