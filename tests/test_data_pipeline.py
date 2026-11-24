@@ -2638,6 +2638,68 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         self.assertIn("function renderAlmanacEclipseSectionHtml(alm)", app_js)
         self.assertIn('id="sec-almanac-eclipse"', app_js)
 
+        # Ejecución real en Node.js de los renderizadores de ACT-10 y EVO-049 para descartar ReferenceError/TypeError en tiempo de ejecución
+        node_bin = shutil.which("node")
+        if node_bin:
+            js_harness = r"""
+const fs = require('fs');
+const vm = require('vm');
+const appSrc = fs.readFileSync('src/js/app.js', 'utf8');
+const idx = JSON.parse(fs.readFileSync('data/index.json', 'utf8'));
+const alms = {};
+for (const y of [2022, 2023, 2024, 2025, 2026]) {
+  alms[y] = JSON.parse(fs.readFileSync(`data/almanac_${y}.json`, 'utf8'));
+}
+// Extraer el cuerpo de la IIFE e inyectar un hook de prueba antes del cierre final
+const bodyStart = appSrc.indexOf('(function () {') + '(function () {'.length;
+const bodyEnd = appSrc.lastIndexOf('})();');
+const inner = appSrc.slice(bodyStart, bodyEnd) + `
+;globalThis.__TEST_HOOKS__ = { computeYearToDateComparison, renderYearToDateComparisonHtml, renderAlmanacBroadsheetHtml, renderAlmanacEclipseSectionHtml, STATE };
+`;
+const noop = () => ({ addEventListener(){}, removeEventListener(){}, setAttribute(){}, removeAttribute(){}, classList:{ add(){}, remove(){}, toggle(){}, contains(){ return false; } }, querySelectorAll(){ return []; }, querySelector(){ return null; }, style:{} });
+const sandbox = {
+  console, Math, Date, Number, String, Boolean, Array, Object, RegExp, JSON, Promise, Map, Set, Infinity, NaN, parseInt, parseFloat, isNaN, isFinite, encodeURIComponent, decodeURIComponent,
+  setTimeout: () => 0, clearTimeout: () => {},
+  localStorage: { getItem: () => null, setItem: () => {} },
+  navigator: { onLine: true, serviceWorker: null },
+  location: { hash: '#portada', href: 'http://localhost/' },
+  window: null,
+  document: {
+    title: '',
+    documentElement: { getAttribute: () => 'light', setAttribute: () => {} },
+    body: noop(),
+    getElementById: () => null,
+    querySelector: () => null,
+    querySelectorAll: () => [],
+    addEventListener: () => {},
+    createElement: () => noop(),
+  },
+  fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve(idx) }),
+};
+sandbox.window = {
+  location: sandbox.location,
+  navigator: sandbox.navigator,
+  matchMedia: () => ({ matches: false, addEventListener: () => {} }),
+  addEventListener: () => {},
+  scrollTo: () => {},
+};
+sandbox.globalThis = sandbox;
+vm.runInNewContext(inner, sandbox);
+const H = sandbox.__TEST_HOOKS__;
+H.STATE.cache.index = idx;
+H.STATE.cache.almanacs = alms;
+const ytdHtml = H.renderYearToDateComparisonHtml(alms[2026], alms);
+if (!ytdHtml.includes('sec-ytd-comparison')) throw new Error('Fallo en renderYearToDateComparisonHtml(2026)');
+for (const y of [2025, 2026]) {
+  const bsHtml = H.renderAlmanacBroadsheetHtml(alms[y], idx);
+  if (!bsHtml.includes('sec-almanac-broadsheet')) throw new Error('Fallo en renderAlmanacBroadsheetHtml(' + y + ')');
+  const ecHtml = H.renderAlmanacEclipseSectionHtml(alms[y]);
+  if (!ecHtml.includes('sec-almanac-eclipse')) throw new Error('Fallo en renderAlmanacEclipseSectionHtml(' + y + ')');
+}
+"""
+            res = subprocess.run([node_bin, "-e", js_harness], cwd=str(ROOT_DIR), capture_output=True, text=True)
+            self.assertEqual(res.returncode, 0, f"Error en ejecución real de renderizadores JS: {res.stderr}")
+
 
 
 if __name__ == "__main__":
