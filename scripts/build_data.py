@@ -197,8 +197,8 @@ EDITORIAL_CHRONICLES: Dict[int, Dict[str, Any]] = {
         "character": "Extremadamente húmedo y de contrastes térmicos agudos",
         "headline": "Récord histórico de calor (42,1 °C), temporal Karlotta (97,2 km/h) y más de 2000 mm",
         "synoptic_summary": (
-            "El año 2024 combinó una circulación atlántica muy persistente —que dejó 2047,9 mm en 233 días de lluvia "
-            "apreciable (el 64,9 % de los días con registro)— con los dos extremos meteorológicos más violentos de toda la "
+            "El año 2024 combinó una circulación atlántica muy persistente, que dejó 2047,9 mm en 233 días de lluvia "
+            "apreciable (el 64,9 % de los días con registro), con los dos extremos meteorológicos más violentos de toda la "
             "serie histórica de la estación: la temperatura máxima absoluta (42,1 °C) y la racha máxima absoluta (97,2 km/h)."
         ),
         "thermal_notes": (
@@ -242,8 +242,8 @@ EDITORIAL_CHRONICLES: Dict[int, Dict[str, Any]] = {
             "alcanzando el máximo anual el 15 de agosto con 40,2 °C tras la noche más cálida del año (19,4 °C el 14 de agosto)."
         ),
         "rain_notes": (
-            "El otoño mostró un fuerte contraste entre un octubre anticiclónico —que resultó ser el mes más seco del año "
-            "con 77,2 mm— y un noviembre muy lluvioso que descargó 286,4 mm y concentró el día más lluvioso del año "
+            "El otoño mostró un fuerte contraste entre un octubre anticiclónico, que resultó ser el mes más seco del año "
+            "con 77,2 mm, y un noviembre muy lluvioso que descargó 286,4 mm y concentró el día más lluvioso del año "
             "(67,8 mm el 24 de noviembre). El 10 de junio una tormenta vespertina alcanzó una intensidad punta de 145,2 mm/h."
         ),
         "wind_notes": (
@@ -2317,7 +2317,7 @@ def compute_quinquennium_normals(
             "temp_min_abs": {"value": -3.1, "date": "2024-01-20", "label": "Mínima absoluta del quinquenio"},
             "rain_max_daily": {"value": 125.9, "date": "2023-01-16", "label": "Mayor precipitación diaria (Borrasca Fien)"},
             "wind_gust_max": {"value": 97.2, "date": "2024-02-08", "label": "Racha máxima absoluta (Vendaval Karlotta)"},
-            "max_daily_amplitude": {"value": 25.2, "date": "2026-07-06", "label": "Mayor oscilación térmica en 24h"},
+            "max_daily_amplitude": {"value": 25.2, "date": "2026-07-06", "label": "Mayor oscilación térmica en 24 h"},
             "rain_rate_max": {"value": 145.2, "date": "2025-06-10", "label": "Máxima intensidad de lluvia instantánea"}
         }
     }

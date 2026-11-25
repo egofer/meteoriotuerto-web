@@ -1064,7 +1064,7 @@ class TestMeteorologicalCalculations(unittest.TestCase):
         metodologia_code = app_js[app_js.find("async function renderMetodologia"):app_js.find("function renderGlossaryView")]
         self.assertIn("<iframe", metodologia_code)
         self.assertIn("station-location-map-wrap", metodologia_code)
-        self.assertIn("Retención orográfica Cantábrica", metodologia_code)
+        self.assertIn("Retención orográfica cantábrica", metodologia_code)
         self.assertIn("Efecto Foehn", metodologia_code)
 
         # 4. Comprobar reglas CSS para la pastilla y los accesos rápidos

@@ -1717,7 +1717,7 @@
                 </div>
               </div>
               <p class="episode-narrative">
-                La profunda ciclogénesis atlántica generó un severo gradiente bárico. En Riotuerto, el viento sur aceleró bruscamente encajonado hacia La Cavada, marcando la racha más impetuosa de la serie instrumental.
+                La profunda ciclogénesis atlántica generó un acusado gradiente bárico. En Riotuerto, el viento sur aceleró bruscamente encajonado hacia La Cavada, marcando la racha más impetuosa de la serie instrumental.
               </p>
             </div>
             <div class="episode-card-footer">
@@ -2011,7 +2011,7 @@
       : 'Rumbo: —';
 
     const baroTrendStr = live.pressure_trend_hpa !== null
-      ? `Tendencia: <strong>${live.pressure_trend_hpa >= 0 ? '+' : ''}${fmtNum(live.pressure_trend_hpa, 2)} hPa/3h</strong>`
+      ? `Tendencia: <strong>${live.pressure_trend_hpa >= 0 ? '+' : ''}${fmtNum(live.pressure_trend_hpa, 2)} hPa / 3 h</strong>`
       : 'Presión relativa a nivel del mar';
 
     const solarTimes = computeSolarTimes(liveDate);
@@ -2673,7 +2673,7 @@
         keyIndHtml = `
           <div class="seasonal-indicator-row"><span>Días de helada (&le;0 °C):</span> <span class="seasonal-indicator-val">${s.frost_days} días</span></div>
           <div class="seasonal-indicator-row"><span>Demanda calefacción:</span> <span class="seasonal-indicator-val">${fmtNum(s.hdd_15_5, 1)} HDD</span></div>
-          <div class="seasonal-indicator-row"><span>Lluvia máx. 24h:</span> <span class="seasonal-indicator-val">${fmtNum(s.max_daily_rain_mm, 1)} mm</span></div>
+          <div class="seasonal-indicator-row"><span>Lluvia máx. 24 h:</span> <span class="seasonal-indicator-val">${fmtNum(s.max_daily_rain_mm, 1)} mm</span></div>
         `;
       } else if (s.season_id === 'spring') {
         keyIndHtml = `
@@ -2691,7 +2691,7 @@
         keyIndHtml = `
           <div class="seasonal-indicator-row"><span>Días Foehn (surada):</span> <span class="seasonal-indicator-val" style="color:var(--accent-heat)">${s.foehn_days} días</span></div>
           <div class="seasonal-indicator-row"><span>Lluvia abundante (&ge;10 mm):</span> <span class="seasonal-indicator-val">${s.rain_days_10} días</span></div>
-          <div class="seasonal-indicator-row"><span>Lluvia máx. 24h:</span> <span class="seasonal-indicator-val">${fmtNum(s.max_daily_rain_mm, 1)} mm</span></div>
+          <div class="seasonal-indicator-row"><span>Lluvia máx. 24 h:</span> <span class="seasonal-indicator-val">${fmtNum(s.max_daily_rain_mm, 1)} mm</span></div>
         `;
       }
 
@@ -3134,7 +3134,7 @@
           <div class="kpi-card accent-rain">
             <div class="kpi-label">Lluvia acumulada a igual fecha</div>
             <div class="kpi-value">${fmtNum(curRow.rainTotal, 1)} <span class="kpi-unit">mm</span></div>
-            <div class="kpi-meta">Media ${refYearsLabel} a igual fecha: ${fmtNum(ref.rainTotal, 1)} mm (<strong>${rSign}${fmtNum(anomalies.rainAnomMm, 1)} mm · ${rPctSign}${fmtNum(anomalies.rainAnomPct, 1)}%</strong>)</div>
+            <div class="kpi-meta">Media ${refYearsLabel} a igual fecha: ${fmtNum(ref.rainTotal, 1)} mm (<strong>${rSign}${fmtNum(anomalies.rainAnomMm, 1)} mm · ${rPctSign}${fmtNum(anomalies.rainAnomPct, 1)} %</strong>)</div>
           </div>
           <div class="kpi-card accent-wind">
             <div class="kpi-label">Días de lluvia (≥0,2 mm) a igual fecha</div>
@@ -3256,7 +3256,7 @@
               <div>
                 <div class="broadsheet-kicker">METEORIOTUERTO · ${tomeLabel} · ARCHIVO CLIMATOLÓGICO DE BARRIO DE ARRIBA (RIOTUERTO, CANTABRIA)</div>
                 <h3 class="broadsheet-title">Lámina sinóptica anual ${alm.year} — ${escapeHtml(ed.character || '')}</h3>
-                <p class="broadsheet-sub">Coordenadas: 43.341° N, 3.670° W · Altitud: 115 m s. n. m. · Estación: ${escapeHtml(idx.station.hardware.station_model)} · Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)}%)</p>
+                <p class="broadsheet-sub">Coordenadas: 43.341° N, 3.670° W · Altitud: 115 m s. n. m. · Estación: ${escapeHtml(idx.station.hardware.station_model)} · Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)} %)</p>
               </div>
               <div class="broadsheet-year-badge">${alm.year}</div>
             </header>
@@ -3390,7 +3390,7 @@
     ctx.fillStyle = '#d8e6e0';
     ctx.font = '500 16px "JetBrains Mono", monospace';
     ctx.fillText(
-      `43.341° N, 3.670° W · 115 m s. n. m. · Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)}%) · ${alm.is_provisional ? 'Avance provisional' : 'Anuario consolidado'}`,
+      `43.341° N, 3.670° W · 115 m s. n. m. · Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)} %) · ${alm.is_provisional ? 'Avance provisional' : 'Anuario consolidado'}`,
       80,
       176
     );
@@ -3735,8 +3735,8 @@
       .reduce((sum, b) => sum + b.pct, 0);
 
     const thermalBarHtml = tBands.map((b) => {
-      const showPct = b.pct >= 5.5 ? `${fmtNum(b.pct, 1)}%` : '';
-      return `<div class="thermal-bar-segment" style="width:${b.pct}%;background-color:${b.color}" title="${escapeHtml(b.name)} (${b.range}): ${b.days} días (${fmtNum(b.pct, 1)}%)">${showPct}</div>`;
+      const showPct = b.pct >= 5.5 ? `${fmtNum(b.pct, 1)} %` : '';
+      return `<div class="thermal-bar-segment" style="width:${b.pct}%;background-color:${b.color}" title="${escapeHtml(b.name)} (${b.range}): ${b.days} días (${fmtNum(b.pct, 1)} %)">${showPct}</div>`;
     }).join('');
 
     const thermalCardsHtml = tBands.map((b) => `
@@ -3747,7 +3747,7 @@
           <span class="thermal-band-range">${escapeHtml(b.range)}</span>
           <div class="thermal-band-count">
             <strong>${b.days}</strong> <span class="unit">d</span>
-            <span class="thermal-band-pct">(${fmtNum(b.pct, 1)}%)</span>
+            <span class="thermal-band-pct">(${fmtNum(b.pct, 1)} %)</span>
           </div>
         </div>
       </div>
@@ -3850,7 +3850,7 @@
           <td class="num">${m.hdd_15_5 !== null && m.hdd_15_5 !== undefined ? fmtNum(m.hdd_15_5, 1) : '—'}</td>
           <td class="num">${m.cdd_21_0 !== null && m.cdd_21_0 !== undefined ? fmtNum(m.cdd_21_0, 1) : '—'}</td>
           <td class="num">${m.gdd_10_0 !== null && m.gdd_10_0 !== undefined ? fmtNum(m.gdd_10_0, 1) : '—'}</td>
-          <td class="num">${fmtNum(m.humidity_mean, 1)}%</td>
+          <td class="num">${fmtNum(m.humidity_mean, 1)} %</td>
         </tr>
       `;
     }).join('');
@@ -3891,7 +3891,7 @@
         </div>
         <h1 class="editorial-masthead-title">Almanaque meteorológico anual ${alm.year}</h1>
         <p class="editorial-masthead-meta">
-          Registro climatológico local de la estación MeteoRiotuerto · Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)}%) · ${alm.is_provisional ? 'Avance provisional en curso' : 'Tomo consolidado'}
+          Registro climatológico local de la estación MeteoRiotuerto · Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)} %) · ${alm.is_provisional ? 'Avance provisional en curso' : 'Tomo consolidado'}
         </p>
       </header>
 
@@ -3904,7 +3904,7 @@
         </div>
         <div class="print-stamp">
           <div><strong>Año ${alm.year}</strong> (${alm.is_provisional ? 'Provisional' : 'Consolidado'})</div>
-          <div>Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)}%)</div>
+          <div>Cobertura: ${cov.valid_days}/${cov.observed_span_days} días (${fmtNum(cov.coverage_pct, 1)} %)</div>
         </div>
       </header>
 
@@ -3975,7 +3975,7 @@
         <div class="kpi-card accent-rain">
           <div class="kpi-label">Precipitación total acumulada</div>
           <div class="kpi-value">${fmtNum(stP.total_mm, 1)} <span class="kpi-unit">mm</span></div>
-          <div class="kpi-meta">${stP.days_ge_02mm} días de lluvia (${fmtNum(stP.rain_days_pct, 1)}%) · Máx. 24h: ${fmtNum(stP.max_daily_mm, 1)} mm (${fmtDateShortMonth(stP.max_daily_date)})</div>
+          <div class="kpi-meta">${stP.days_ge_02mm} días de lluvia (${fmtNum(stP.rain_days_pct, 1)} %) · Máx. 24 h: ${fmtNum(stP.max_daily_mm, 1)} mm (${fmtDateShortMonth(stP.max_daily_date)})</div>
         </div>
         <div class="kpi-card accent-wind">
           <div class="kpi-label">Racha máxima de viento</div>
@@ -4406,7 +4406,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Precipitación total acumulada</td><td class="num"><strong>${fmtNum(stP.total_mm, 1)} mm</strong></td><td>${fmtNum(stP.rain_days_pct, 1)}% de los días con lluvia</td></tr>
+                <tr><td>Precipitación total acumulada</td><td class="num"><strong>${fmtNum(stP.total_mm, 1)} mm</strong></td><td>${fmtNum(stP.rain_days_pct, 1)} % de los días con lluvia</td></tr>
                 <tr><td>Días de lluvia apreciable (≥ 0,2 mm)</td><td class="num">${stP.days_ge_02mm} días</td><td>Días ≥ 1,0 mm: ${stP.days_ge_1mm} días</td></tr>
                 <tr><td>Días de lluvia abundante (≥ 10 mm)</td><td class="num">${stP.days_ge_10mm} días</td><td>Días muy fuertes (≥ 30 mm): ${stP.days_ge_30mm} días</td></tr>
                 <tr><td>Precipitación máxima en 24 horas</td><td class="num"><strong>${fmtNum(stP.max_daily_mm, 1)} mm</strong></td><td>${fmtDateES(stP.max_daily_date)}</td></tr>
@@ -4462,7 +4462,7 @@
                 <th scope="col" class="num">T. mín. abs. (°C)</th>
                 <th scope="col" class="num">Lluvia (mm)</th>
                 <th scope="col" class="num">Días ≥0,2 mm</th>
-                <th scope="col" class="num">Máx. 24h (mm)</th>
+                <th scope="col" class="num">Máx. 24 h (mm)</th>
                 <th scope="col" class="num">Racha máx. (km/h)</th>
                 <th scope="col" class="num">Días Foehn</th>
                 <th scope="col" class="num" title="Grados día de calefacción base 15,5 °C">HDD (15,5 °C)</th>
@@ -5551,7 +5551,7 @@
     const monthlyHeaders = [
       'Mes', 'Días válidos', 'Días mes', 'T. media (°C)', 'Media máx. (°C)', 'Media mín. (°C)',
       'T. máx. abs. (°C)', 'Fecha máx.', 'T. mín. abs. (°C)', 'Fecha mín.', 'Lluvia total (mm)',
-      'Días lluvia ≥0,2 mm', 'Días lluvia ≥10 mm', 'Lluvia máx. 24h (mm)', 'Fecha máx. lluvia',
+      'Días lluvia ≥0,2 mm', 'Días lluvia ≥10 mm', 'Lluvia máx. 24 h (mm)', 'Fecha máx. lluvia',
       'Viento medio (km/h)', 'Racha máx. (km/h)', 'Fecha racha', 'Días helada (≤0 °C)',
       'Días calor (≥30 °C)', 'Noches tropicales (≥20 °C)', 'Días Foehn / surada',
       'HDD Calefacción (15,5 °C)', 'CDD Refrigeración (21,0 °C)', 'GDD Agrícola (10,0 °C)',
@@ -5662,7 +5662,7 @@
     const monthlyHeaders = [
       'Mes', 'Días válidos', 'Días mes', 'T. media (°C)', 'Media máx. (°C)', 'Media mín. (°C)',
       'T. máx. abs. (°C)', 'Fecha máx.', 'T. mín. abs. (°C)', 'Fecha mín.', 'Lluvia total (mm)',
-      'Días lluvia ≥0,2 mm', 'Días lluvia ≥10 mm', 'Lluvia máx. 24h (mm)', 'Fecha máx. lluvia',
+      'Días lluvia ≥0,2 mm', 'Días lluvia ≥10 mm', 'Lluvia máx. 24 h (mm)', 'Fecha máx. lluvia',
       'Viento medio (km/h)', 'Racha máx. (km/h)', 'Fecha racha', 'Días helada',
       'Días calor ≥30 °C', 'Noches tropicales', 'Días Foehn', 'HDD (15,5 °C)',
       'CDD (21,0 °C)', 'GDD (10,0 °C)', 'Humedad (%)', 'Presión (hPa)'
@@ -5793,8 +5793,8 @@
         'Lluvia Normal (mm)',
         'Días Lluvia (≥0,2 mm)',
         'Días Lluvia (≥10 mm)',
-        'Máx. Lluvia 24h (mm)',
-        'Año Máx. Lluvia 24h',
+        'Máx. lluvia 24 h (mm)',
+        'Año Máx. lluvia 24 h',
         'Viento Medio (km/h)',
         'Racha Máx. Lustro (km/h)',
         'Año Racha Máx.',
@@ -6055,7 +6055,7 @@
     const topKeys = [
       { key: 'top_hottest_days', name: 'Top10_Calidos', title: 'Top 10 días más cálidos (T. máx. absoluta)', valLabel: 'T. máx. extrema (°C)' },
       { key: 'top_coldest_days', name: 'Top10_Frios', title: 'Top 10 madrugadas más frías (T. mín. absoluta)', valLabel: 'T. mín. extrema (°C)' },
-      { key: 'top_wettest_days', name: 'Top10_Lluviosos', title: 'Top 10 días más lluviosos (Precipitación en 24h)', valLabel: 'Lluvia 24h (mm)' },
+      { key: 'top_wettest_days', name: 'Top10_Lluviosos', title: 'Top 10 días más lluviosos (precipitación en 24 h)', valLabel: 'Lluvia 24 h (mm)' },
       { key: 'top_windiest_days', name: 'Top10_Viento', title: 'Top 10 mayores rachas de viento (km/h)', valLabel: 'Racha máx. (km/h)' },
       { key: 'top_amplitude_days', name: 'Top10_Amplitud', title: 'Top 10 mayores amplitudes térmicas diarias', valLabel: 'Amplitud (ΔT, °C)' },
       { key: 'top_coldest_max_days', name: 'Top10_Invernales_Frios', title: 'Top 10 días invernales más fríos (T. máx. más baja)', valLabel: 'T. máx. fría (°C)' },
@@ -6069,7 +6069,7 @@
     const sheets = {};
     ordered.forEach(({ key, name, valLabel }) => {
       const items = rec.rankings?.[key] || [];
-      const rankHeaders = ['Posición', 'Fecha', 'Año', valLabel, 'T. máx. (°C)', 'T. mín. (°C)', 'T. media (°C)', 'Lluvia 24h (mm)', 'Racha máx. (km/h)'];
+      const rankHeaders = ['Posición', 'Fecha', 'Año', valLabel, 'T. máx. (°C)', 'T. mín. (°C)', 'T. media (°C)', 'Lluvia 24 h (mm)', 'Racha máx. (km/h)'];
       const rankRows = [rankHeaders];
       items.forEach((it, idx) => {
         rankRows.push([
@@ -6086,7 +6086,7 @@
   function exportMonthlyRecordsToExcel(rec) {
     const moHeaders = [
       'Mes', 'Techo térmico (°C)', 'Fecha techo térmico', 'Suelo térmico (°C)', 'Fecha suelo térmico',
-      'Precipitación máx. 24h (mm)', 'Fecha máx. precipitación', 'Racha máx. viento (km/h)', 'Fecha racha máx.',
+      'Precipitación máx. 24 h (mm)', 'Fecha máx. precipitación', 'Racha máx. viento (km/h)', 'Fecha racha máx.',
       'Año más lluvioso', 'Lluvia total récord (mm)', 'Año más seco', 'Lluvia total año seco (mm)',
       'Año más cálido', 'T. media año cálido (°C)', 'Año más frío', 'T. media año frío (°C)'
     ];
@@ -6235,7 +6235,7 @@
       'Estado', 'T. media (°C)', 'Anomalía T. (°C)', 'Media máx. (°C)', 'Media mín. (°C)',
       'T. máx. abs. (°C)', 'Fecha máx.', 'T. mín. abs. (°C)', 'Fecha mín.',
       'Lluvia total (mm)', 'Anomalía lluvia (mm)', 'Anomalía lluvia (%)', 'Días lluvia (≥0,2 mm)',
-      'Días lluvia (≥10 mm)', 'Días lluvia (≥30 mm)', 'Lluvia máx. 24h (mm)', 'Fecha máx. lluvia',
+      'Días lluvia (≥10 mm)', 'Días lluvia (≥30 mm)', 'Lluvia máx. 24 h (mm)', 'Fecha máx. lluvia',
       'Viento medio (km/h)', 'Racha máx. (km/h)', 'Fecha racha máx.',
       'Días helada (≤0 °C)', 'Días cálidos (≥25 °C)', 'Días calor (≥30 °C)',
       'Noches tropicales (≥20 °C)', 'Días Foehn (surada)',
@@ -7520,7 +7520,7 @@
                 </div>
               </div>
               <p class="episode-narrative">
-                La profunda ciclogénesis atlántica generó un severo gradiente bárico. En Riotuerto, el viento sur aceleró bruscamente encajonado hacia La Cavada, marcando la racha más impetuosa de la serie instrumental.
+                La profunda ciclogénesis atlántica generó un acusado gradiente bárico. En Riotuerto, el viento sur aceleró bruscamente encajonado hacia La Cavada, marcando la racha más impetuosa de la serie instrumental.
               </p>
             </div>
             <div class="episode-card-footer">
@@ -7599,7 +7599,7 @@
             <select id="select-ranking-cat" class="form-select ranking-select-fallback" style="display:none" aria-label="Seleccionar categoría del ranking histórico">
               <option value="top_hottest_days">Días más cálidos (T. máx. absoluta)</option>
               <option value="top_coldest_days">Madrugadas más frías (T. mín. absoluta)</option>
-              <option value="top_wettest_days">Días más lluviosos (Precipitación en 24h)</option>
+              <option value="top_wettest_days">Días más lluviosos (precipitación en 24 h)</option>
               <option value="top_windiest_days">Mayores rachas de viento (km/h)</option>
               <option value="top_amplitude_days">Mayores amplitudes térmicas diarias</option>
               <option value="top_coldest_max_days">Días invernales más fríos (T. máx. más baja)</option>
@@ -7631,7 +7631,7 @@
                 <th scope="col" class="num">T. máx. (°C)</th>
                 <th scope="col" class="num">T. mín. (°C)</th>
                 <th scope="col" class="num">T. media (°C)</th>
-                <th scope="col" class="num">Lluvia 24h (mm)</th>
+                <th scope="col" class="num">Lluvia 24 h (mm)</th>
                 <th scope="col" class="num">Racha máx. (km/h)</th>
               </tr>
             </thead>
@@ -7682,7 +7682,7 @@
                 <th scope="col">Mes</th>
                 <th scope="col" class="num">Techo térmico</th>
                 <th scope="col" class="num">Suelo térmico</th>
-                <th scope="col" class="num">Máxima lluvia 24h</th>
+                <th scope="col" class="num">Máxima lluvia 24 h</th>
                 <th scope="col" class="num">Racha máxima</th>
                 <th scope="col" class="num">Edición más lluviosa</th>
                 <th scope="col" class="num">Edición más seca</th>
@@ -8734,7 +8734,7 @@
                 <span class="q-rec-date">1 mar 2023 (Inversión térmica)</span>
               </div>
               <div class="q-record-item">
-                <span class="q-rec-title">Precipitación 24h</span>
+                <span class="q-rec-title">Precipitación 24 h</span>
                 <span class="q-rec-val" style="color:var(--accent-rain)">125,9 mm</span>
                 <span class="q-rec-date">16 ene 2023 (Borrasca Fien)</span>
               </div>
@@ -8744,7 +8744,7 @@
                 <span class="q-rec-date">8 feb 2024 (Vendaval Karlotta)</span>
               </div>
               <div class="q-record-item">
-                <span class="q-rec-title">Oscilación térmica 24h</span>
+                <span class="q-rec-title">Oscilación térmica 24 h</span>
                 <span class="q-rec-val" style="color:var(--accent-heat)">27,2 °C</span>
                 <span class="q-rec-date">11 ago 2024 (Amplitud récord)</span>
               </div>
@@ -10314,7 +10314,7 @@
                   afterLabel: (ctx) => {
                     const r = rows[ctx.dataIndex];
                     if (!r) return '';
-                    return `Días lluvia: ${r.rain_days_02} | Máx 24h: ${fmtNum(r.max_daily_rain_mm, 1)} mm\nAnom: ${fmtSignNum(r.rain_anomaly_mm, 1, 'mm')} (${fmtSignNum(r.rain_anomaly_pct, 1, '%')})`;
+                    return `Días lluvia: ${r.rain_days_02} | Máx. 24 h: ${fmtNum(r.max_daily_rain_mm, 1)} mm\nAnom: ${fmtSignNum(r.rain_anomaly_mm, 1, 'mm')} (${fmtSignNum(r.rain_anomaly_pct, 1, '%')})`;
                   }
                 }
               }
@@ -10508,7 +10508,7 @@
       territorialImpact: 'Explica por qué Riotuerto registra pluviometrías anuales extraordinarias (entre 1.600 y más de 2.100 mm), superando con creces los acumulados de la franja costera de Santander. Proporciona una productividad forrajera excepcional para los pastizales cántabros y alimenta el caudal ininterrumpido del río Covadal y los acuíferos kársticos, aunque incrementa el riesgo de encharcamiento en vegas llanas en temporales de invierno.',
       records: [
         { label: 'Precipitación anual récord', val: '2.140,4 mm', sub: 'Año histórico 2023 (2.047,9 mm en 2024)' },
-        { label: 'Máxima lluvia en 24h', val: '125,9 mm', sub: '16 de enero de 2023 (borrasca Fien)' },
+        { label: 'Máxima lluvia en 24 h', val: '125,9 mm', sub: '16 de enero de 2023 (borrasca Fien)' },
         { label: 'Días de lluvia apreciable', val: '219 días', sub: 'Promedio anual ≥0,2 mm (2022–2025)' },
         { label: 'Humedad relativa media', val: '84,3 %', sub: 'Régimen oceánico hiperhúmedo' },
       ],
@@ -10873,7 +10873,7 @@
             cantábrica y a 5 km del puerto de Alisas, presenta un microclima de valle muy definido condicionado por el relieve:
           </p>
           <ul class="location-highlights" style="margin-bottom:14px">
-            <li><strong><abbr class="glossary-term" data-term="lluvia_orografica">Retención orográfica Cantábrica</abbr>:</strong> las masas de aire húmedo del noroeste procedentes del mar Cantábrico quedan retenidas contra la barrera montañosa, generando una elevada pluviosidad (habitualmente de 1.600 a más de 2.100 mm anuales).</li>
+            <li><strong><abbr class="glossary-term" data-term="lluvia_orografica">Retención orográfica cantábrica</abbr>:</strong> las masas de aire húmedo del noroeste procedentes del mar Cantábrico quedan retenidas contra la barrera montañosa, generando una elevada pluviosidad (habitualmente de 1.600 a más de 2.100 mm anuales).</li>
             <li><strong><abbr class="glossary-term" data-term="efecto_foehn">Efecto Foehn</abbr> (<abbr class="glossary-term" data-term="surada">«suradas»</abbr>):</strong> cuando el viento sopla del sur desciende recalentado desde la divisoria de la cordillera, disparando bruscamente las temperaturas y hundiendo la humedad relativa.</li>
             <li><strong><abbr class="glossary-term" data-term="inversion_termica">Inversión térmica nocturna</abbr>:</strong> en noches calmas y despejadas el aire frío drena hacia el fondo del valle, provocando heladas locales mientras las laderas permanecen más templadas.</li>
             <li><strong>Distancias clave:</strong> a 5 km de Alisas (674 m), a 7 km de Liérganes, a 16 km del aeropuerto de Santander y a 23 km de la ciudad de Santander.</li>
@@ -12262,7 +12262,7 @@
                 <div class="fest-stat-val" style="color:#dc2626">${fmtNum(activeStat.maxTmaxRecord?.tmax, 1)} °C <span style="font-size:0.75rem; color:var(--txt-muted);">(${activeStat.maxTmaxRecord?.year})</span></div>
               </div>
               <div class="fest-stat-box">
-                <div class="fest-stat-label">Lluvia máxima 24h</div>
+                <div class="fest-stat-label">Lluvia máxima 24 h</div>
                 <div class="fest-stat-val" style="color:#2563eb">${fmtNum(activeStat.maxRainRecord?.rain, 1)} mm <span style="font-size:0.75rem; color:var(--txt-muted);">(${activeStat.maxRainRecord?.year})</span></div>
               </div>
             </div>
@@ -12279,7 +12279,7 @@
                     <th scope="col" class="num">T. máx.</th>
                     <th scope="col" class="num">T. mín.</th>
                     <th scope="col" class="num">Amplitud (ΔT)</th>
-                    <th scope="col" class="num">Lluvia (24h)</th>
+                    <th scope="col" class="num">Lluvia (24 h)</th>
                     <th scope="col" class="num">Racha máx.</th>
                     <th scope="col" class="num">Humedad media</th>
                     <th scope="col">Calificación sinóptica</th>
