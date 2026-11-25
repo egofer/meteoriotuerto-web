@@ -2322,7 +2322,7 @@ def compute_quinquennium_normals(
         }
     }
 
-    m5_months = [m["month_name"].lower() for m in monthly_normals if m["sample_years_count"] == 5]
+    m5_months = [m["name"].lower() for m in monthly_normals if m["sample_years_count"] == 5]
     last_m5 = m5_months[-1] if m5_months else "octubre"
 
     return {
